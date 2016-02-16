@@ -1,14 +1,13 @@
-// Update: Hey Folks - I've got a full Gulpfile with everything else over at https://github.com/wesbos/React-For-Beginners-Starter-Files
-
 var source = require('vinyl-source-stream');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var browserify = require('browserify');
-var reactify = require('reactify');
 var babelify = require('babelify');
 var watchify = require('watchify');
 var notify = require('gulp-notify');
-
+var sass = require('gulp-sass');
+var livereload = require('gulp-livereload');
+var nodemon = require('gulp-nodemon');
 
 function handleErrors() {
   var args = Array.prototype.slice.call(arguments);
@@ -19,42 +18,51 @@ function handleErrors() {
   this.emit('end'); // Keep gulp from hanging on this task
 }
 
-function buildScript(file, watch) {
-  
-  var props = {
-    entries: ['./client/' + file],
-    debug : true,
-    transform:  [reactify, babelify]
-  };
-
-  // watchify() if watch requested, otherwise run browserify() once 
-  var bundler = watch ? watchify(browserify(props)) : browserify(props);
-
-  function rebundle() {
-    var stream = bundler.bundle();
-    return stream
-      .on('error', handleErrors)
-      .pipe(source('bundle.js'))
-      .pipe(gulp.dest('./public/assets'));
-  }
-
-  // listen for an update and run rebundle
-  bundler.on('update', function() {
-    rebundle();
-    gutil.log('Rebundle...');
-  });
-
-  // run it once the first time buildScript is called
-  return rebundle();
-}
-
-
-// run once
-gulp.task('scripts', function() {
-  return buildScript('app.js', false);
+//convert jsx to js
+gulp.task('browserify', function() {
+  browserify({
+      entries: './client/app.js',
+      debug: true
+    })
+    .transform("babelify", {"presets": ["react", "es2015"]})
+    .bundle()
+    .on('error', handleErrors)
+    .pipe(source('bundle.js'))
+    .pipe(gulp.dest('./public/assets'));
 });
 
-// run 'scripts' task first, then watch for future changes
-gulp.task('default', ['scripts'], function() {
-  return buildScript('app.js', true);
+//watch js files
+gulp.task('browserify:watch', function () {
+  gulp.watch('./client/**/*.js', ['browserify']);
 });
+
+//convert scss to css
+gulp.task('sass', function () {
+  return gulp.src('./assets/scss/importer.scss')
+    .pipe(sass().on('error', handleErrors))
+    .pipe(gulp.dest('./public/assets'));
+});
+
+//watch scss files
+gulp.task('sass:watch', function () {
+  gulp.watch('./assets/scss/**/*.scss', ['sass']);
+});
+
+// Start server
+gulp.task('server', function() {
+  // listen for changes
+  livereload.listen();
+  // configure nodemon
+  nodemon({
+    // the script to run the app
+    script: './server/server.js',
+    ext: 'js'
+  }).on('restart', function(){
+    // when the app has restarted, run livereload.
+    gulp.src('./server/server.js')
+      .pipe(livereload())
+      .pipe(notify('Reloading page, please wait...'));
+  })
+})
+
+gulp.task('default', ['browserify:watch', 'sass:watch', 'server']);
