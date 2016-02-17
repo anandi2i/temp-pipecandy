@@ -1,6 +1,7 @@
 import React from 'react';
 import Router from 'react-router';
 import reactRoutes from '../../client/routes';
+import logger from '../log';
 
 module.exports = function routes(app) {
 
@@ -15,6 +16,9 @@ module.exports = function routes(app) {
   var Reviewer = app.models.Reviewer;
 
   app.get('/', function (req, res) {
+
+    logger.info('Welcome to Pipecandy home page');
+
     var router = createRoute(req.url);
     var status = { status: CoffeeShop.status()._d.v };
     router.run(function (Handler) {

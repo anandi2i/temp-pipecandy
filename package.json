@@ -39,7 +39,8 @@
     "serve-favicon": "^2.0.1",
     "underscore": "^1.8.3",
     "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.7.0"
+    "watchify": "^3.7.0",
+    "winston": "^2.1.1"
   },
   "devDependencies": {
     "babel-loader": "^6.2.2",
