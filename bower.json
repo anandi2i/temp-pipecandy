@@ -1,0 +1,22 @@
+{
+  "name": "pipecandy",
+  "authors": [
+    "Rajesh P R <rajesh.p.r@ideas2it.com>",
+    "Dinesh Ramasamy <dinesh.r@ideas2it.com>"
+  ],
+  "description": "pipecandy",
+  "main": "index.html",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "index.html",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "Materialize": "materialize#^0.97.5"
+  }
+}

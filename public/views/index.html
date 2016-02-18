@@ -3,15 +3,20 @@
 
 <head>
   <title>Sample App</title>
-  <!-- <link rel="stylesheet" type="text/css" href="/public/style.css" /> -->
+  <link rel="stylesheet" type="text/css" href="/bower.css" />
+  <link rel="stylesheet" type="text/css" href="/style.css" />
 </head>
 
 <body>
   <script>
-    var __BOOTSTRAP__ = {{{ bootstrap }}}; 
+	var __BOOTSTRAP__ = {{{ bootstrap }}};
+	var __USER__ = {{{user}}};
   </script>
-  <div id='root'>{{{markup}}}</div>
+  <div id='root'> {{{markup}}} </div>
   <script src="/bundle.js"></script>
+  <script src="/jquery.js"></script>
+  <script src="/materialize.js"></script>
+  <script src="/main.js"></script>
 </body>
 
 </html>

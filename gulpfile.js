@@ -8,6 +8,10 @@ var notify = require('gulp-notify');
 var sass = require('gulp-sass');
 var livereload = require('gulp-livereload');
 var nodemon = require('gulp-nodemon');
+var concat = require('gulp-concat');
+var uglify = require('gulp-uglify');
+var gulpFilter = require('gulp-filter')
+var mainBowerFiles = require('main-bower-files');
 
 function handleErrors() {
   var args = Array.prototype.slice.call(arguments);
@@ -40,12 +44,44 @@ gulp.task('browserify:watch', function () {
 gulp.task('sass', function () {
   return gulp.src('./assets/scss/importer.scss')
     .pipe(sass().on('error', handleErrors))
+    .pipe(concat('style.css'))
     .pipe(gulp.dest('./public/assets'));
 });
 
 //watch scss files
 gulp.task('sass:watch', function () {
   gulp.watch('./assets/scss/**/*.scss', ['sass']);
+});
+
+gulp.task('bower:js', function() {
+  gulp.src(mainBowerFiles())
+    .pipe(gulpFilter('*.js'))
+    .pipe(concat('bower.js'))
+    .pipe(uglify())
+    .pipe(gulp.dest('public/assets'));
+});
+
+gulp.task('bower:css', function() {
+  gulp.src(mainBowerFiles())
+    .pipe(gulpFilter('*.css'))
+    .pipe(concat('bower.css'))
+    .pipe(gulp.dest('public/assets'));
+});
+
+gulp.task('js', function() {
+  gulp.src(['./assets/js/**/*'])
+    .pipe(concat('main.js'))
+    .pipe(gulp.dest('public/assets'));
+});
+
+gulp.task('copy:fonts', function() {
+  gulp.src(['assets/fonts/**/*'], { base: 'assets' })
+    .pipe(gulp.dest('public/assets'));
+});
+
+gulp.task('copy:images', function() {
+  gulp.src(['assets/images/**/*'], { base: 'assets' })
+    .pipe(gulp.dest('public/assets'));
 });
 
 // Start server
@@ -65,4 +101,4 @@ gulp.task('server', function() {
   })
 })
 
-gulp.task('default', ['browserify:watch', 'sass:watch', 'server']);
+gulp.task('default', ['bower:js', 'bower:css', 'browserify', 'sass', 'js', 'copy:fonts', 'copy:images', 'browserify:watch', 'sass:watch', 'server']);

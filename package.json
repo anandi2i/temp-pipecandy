@@ -1,5 +1,5 @@
 {
-  "name": "loopback-isomorphic-react-flux",
+  "name": "PipeCandy",
   "version": "1.0.0",
   "main": "server/server.js",
   "scripts": {
@@ -16,14 +16,20 @@
     "babelify": "^7.2.0",
     "browserify": "^13.0.0",
     "compression": "^1.0.3",
+    "connect-ensure-login": "^0.1.1",
     "consolidate": "^0.13.1",
     "cors": "^2.5.2",
+    "express-flash": "0.0.2",
+    "express-session": "^1.13.0",
     "flux": "^2.0.1",
     "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-filter": "^3.0.1",
     "gulp-livereload": "^3.8.1",
     "gulp-nodemon": "^2.0.6",
     "gulp-notify": "^2.2.0",
     "gulp-sass": "^2.2.0",
+    "gulp-uglify": "^1.5.2",
     "gulp-util": "^3.0.7",
     "handlebars": "^4.0.5",
     "history": "^1.17.0",
@@ -31,8 +37,16 @@
     "loopback": "^2.22.0",
     "loopback-boot": "^2.6.5",
     "loopback-component-explorer": "^2.1.0",
+    "loopback-component-passport": "^2.0.0",
     "loopback-connector-postgresql": "^2.4.0",
     "loopback-datasource-juggler": "^2.39.0",
+    "main-bower-files": "^2.11.1",
+    "passport": "^0.3.2",
+    "passport-facebook": "^2.1.0",
+    "passport-google-oauth": "^1.0.0",
+    "passport-local": "^1.0.0",
+    "passport-oauth2": "^1.2.0",
+    "passport-twitter": "^1.0.4",
     "rc": "~0.5.0",
     "react": "^0.13.0",
     "react-router": "^0.13.0",
@@ -54,5 +68,16 @@
     "type": "",
     "url": ""
   },
-  "description": "loopback-isomorphic-react-flux"
+  "description": "loopback-isomorphic-react-flux",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Ideas2IT/pipecandy.git"
+  },
+  "contributors": [{
+    "name": "Rajesh P R",
+    "email": "rajesh.p.r@ideas2it.com"
+  },{
+    "name": "Dinesh Ramasamy",
+    "email": "dinesh.r@ideas2it.com"
+  }]
 }

@@ -7,7 +7,7 @@ var AppContainer = React.createClass({
   render: function () {
     return (
     	<div>
-	      	<RouteHandler {...this.props.bootstrap} />
+	      	<RouteHandler {...this.props.bootstrap} {...this.props.auth} />
       	</div>
     );
   }

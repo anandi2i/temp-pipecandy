@@ -4,7 +4,8 @@
       "loopback/common/models",
       "loopback/server/models",
       "../common/models",
-      "./models"
+      "./models",
+      "./node_modules/loopback-component-passport/lib/models"
     ],
     "mixins": [
       "loopback/common/mixins",
@@ -13,23 +14,32 @@
       "./mixins"
     ]
   },
-  "User": {
-    "dataSource": "db"
+  "user": {
+    "dataSource": "psqlDs",
+    "public": true
   },
-  "AccessToken": {
-    "dataSource": "db",
+  "accessToken": {
+    "dataSource": "psqlDs",
+    "public": false
+  },
+  "userCredential": {
+    "dataSource": "psqlDs",
+    "public": false
+  },
+  "userIdentity": {
+    "dataSource": "psqlDs",
     "public": false
   },
   "ACL": {
-    "dataSource": "db",
+    "dataSource": "psqlDs",
     "public": false
   },
   "RoleMapping": {
-    "dataSource": "db",
+    "dataSource": "psqlDs",
     "public": false
   },
   "Role": {
-    "dataSource": "db",
+    "dataSource": "psqlDs",
     "public": false
   },
   "CoffeeShop": {

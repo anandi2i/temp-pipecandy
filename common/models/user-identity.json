@@ -1,0 +1,26 @@
+{
+  "name": "userIdentity",
+  "plural": "userIdentities",
+  "base": "UserIdentity",
+  "properties": {
+    "profile": {
+      "type": "Object",
+      "postgresql": {
+        "columnName": "profile",
+        "dataType": "character varying",
+        "dataLength": 10000
+      }
+    }
+  },
+  "validations": [],
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "userId"
+    }
+  },
+  "acls": [],
+  "methods": []
+}
+

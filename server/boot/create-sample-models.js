@@ -2,7 +2,8 @@ module.exports = function(app) {
 
   const mydb = app.dataSources.psqlDs;
 
-  mydb.automigrate('CoffeeShop', function(err) {
+//uncomment to populate data
+/*  mydb.automigrate('CoffeeShop', function(err) {
     if (err) throw err;
  
     app.models.CoffeeShop.create([
@@ -28,6 +29,12 @@ module.exports = function(app) {
  
       console.log('Models created: \n', reviewers);
     });
-  });
+  });*/
+
+  //Uncomment the below code for db automigration
+  /*app.datasources.psqlDs.autoupdate(function(err) {
+    if (err) throw err;
+    console.log("autoupdate");
+  })*/
 
 };

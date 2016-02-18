@@ -4,13 +4,19 @@ var DefaultRoute = ReactRouter.DefaultRoute;
 var Route = ReactRouter.Route;
 
 var AppContainer = require('./components/AppContainer.react')
+var Index = require('./components/Index.react');
+var Login = require('./components/Login.react');
+var Signup = require('./components/Signup.react');
 var Home = require('./components/Home.react');
 var Reviewer = require('./components/Reviewer.react');
 
 var routes = (
   <Route handler={AppContainer}>
   	<Route path="reviewers" handler={Reviewer} />
-    <DefaultRoute handler={Home}/>
+  	<Route path="auth/account" handler={Home} />
+    <Route path="login" handler={Login}/>
+    <Route path="signup" handler={Signup}/>
+  	<DefaultRoute handler={Index}/>
   </Route>
 );
 

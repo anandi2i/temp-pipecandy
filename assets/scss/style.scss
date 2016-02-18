@@ -1,0 +1,133 @@
+@import './_color.scss';
+html{
+  font-family: 'Ubuntu', sans-serif;
+}
+body {
+  background: url("../images/tile.png");
+  background-repeat: repeat-x;
+}
+/***********************************
+  authentication page Classes
+************************************/
+.center-container {
+  display: table;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  height: calc(100% - 0px);
+  padding: 5px;
+  .center-div {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+}
+.auth-container {
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  .auth-logo {
+    width: 388px;
+  }
+  .auth-form {
+    margin-top: 52px;
+    .input-field {
+      width: 370px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .btn {
+      margin-bottom: 25px;
+    }
+    [type="checkbox"] + label {
+      line-height: 21px;
+    }
+    .auth-cnter-pnl {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .show-pass {
+      float: right;
+      margin-right: 15px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+  }
+}
+.auth-btn {
+  padding: 0;
+  width: 370px;
+  height: 50px;
+  line-height: 50px;
+  text-transform: uppercase;
+  i {
+    margin-right: 0;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+.linkedin-btn {
+  background-color: $linckedin-bg-clr;
+  i {
+    border-right: 1px solid $white;
+  }
+  &:hover {
+    background-color: $linckedin-bg-clr;
+  }
+}
+.google-btn {
+  background-color: $google-bg-clr;
+  border: 2px solid $light-border;
+  color: $dflt-txt-clr;
+  i {
+    border-right: 1px solid $light-border;
+    height: 48px;
+  }
+  &:hover {
+    background-color: $google-bg-clr;
+  }
+}
+.signin-btn {
+  background-color: $signin-bg-clr;
+  &:hover {
+    background-color: $signin-bg-clr;
+  }
+}
+.login-btn {
+  background-color: $dflt-btn-clr;
+  margin-top: 10px;
+  &:hover {
+    background-color: $dflt-btn-clr;
+  }
+}
+/*********************
+  Media Query Classes
+**********************/
+@media only screen and (max-width: 600px) {
+  .auth-container {
+    .auth-logo {
+      width: 250px;
+    }
+  }
+}
+@media only screen and (max-width: 400px) {
+  .auth-container {
+    width: 300px;
+    .auth-form {
+      margin-top: 52px;
+      .input-field {
+        width: 300px;
+      }
+      .auth-cnter-pnl {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+  }
+  .auth-btn {
+    width: 300px;
+  }
+}

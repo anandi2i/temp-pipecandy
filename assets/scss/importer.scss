@@ -7,8 +7,8 @@
  *
  */
 
-//@import './style.scss';
-
-body { 
-	font-size: inherit;
-}
+@import './_color.scss';
+@import './icon.scss';
+@import './font.scss';
+@import './materialize-override.scss';
+@import './style.scss';
