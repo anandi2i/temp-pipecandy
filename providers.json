@@ -24,6 +24,18 @@
     "scope": ["email"],
     "failureFlash": true
   },
+  "linkedin-login": {
+    "provider": "linkedin",
+    "module": "passport-linkedin-oauth2",
+    "callbackURL": "/auth/linkedin/callback",
+    "authPath": "/auth/linkedin",
+    "callbackPath": "/auth/linkedin/callback",
+    "successRedirect": "/auth/account",
+    "clientID": "75yo5w4sz90b2g",
+    "clientSecret": "hyEfnOwKdx6NToYI",
+    "scope": ["r_basicprofile"],
+    "state": true
+  },
   "google-login": {
     "provider": "google",
     "module": "passport-google-oauth",

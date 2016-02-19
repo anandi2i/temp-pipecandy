@@ -9,7 +9,7 @@ var Index = React.createClass({
             <div className="auth-container">
               <img className="auth-logo" src="./images/logo.png" />
               <div className="auth-form">
-                <a className="btn auth-btn linkedin-btn" href="#">
+                <a className="btn auth-btn linkedin-btn" href="/auth/linkedin">
                   <i className="material-icons md-27 left">face</i> Sign in with linkedin
                 </a>
                 <a className="btn auth-btn google-btn" href="/auth/google">
