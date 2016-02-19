@@ -67,6 +67,10 @@ body {
   }
   .auth-form {
     margin-top: 52px;
+    .warning-block {
+      width: 100%;
+      text-align: left;
+    }
     .input-field {
       width: 370px;
       margin-left: auto;
@@ -249,6 +253,7 @@ body {
     }
   }
 }
+
 /*********************
   Email List
 **********************/
@@ -320,6 +325,16 @@ body {
 }
 .p-1-btn {
   margin-right: 20px;
+}
+/*********************
+  Warning Class
+**********************/
+.warning-block {
+  color: $red-clr;
+  margin-top: 0px;
+  padding-top: 0px;
+  font-size: 12px;
+  display: inline-block;
 }
 /*********************
   Media Query Classes
