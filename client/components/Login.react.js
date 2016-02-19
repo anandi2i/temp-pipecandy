@@ -8,18 +8,18 @@ var Login = React.createClass({
           <div className="center-div">
             <div className="auth-container">
               <img className="auth-logo" src="./images/logo.png" />
-              <div className="auth-form">
+              <form className="auth-form" action='/login' method='post'>
                 <div className="input-field">
-                  <input id="email" type="email" className="validate" />
+                  <input id="email" type="email" name="email" className="validate" />
                   <label htmlFor="email">Email address</label>
                 </div>
                 <div className="input-field">
-                  <input id="password" type="password" className="validate" />
+                  <input id="password" type="password" name="password" className="validate" />
                   <label htmlFor="password">Password</label>
                 </div>
-                <a className="btn auth-btn login-btn" href="/register.html">
+                <button type="submit" className="btn auth-btn login-btn">
                   Login
-                </a>
+                </button>
                 <div className="auth-cnter-pnl">
                   <a href="#" className="left">Forgot password?</a>
                   <span className="right">
@@ -27,7 +27,7 @@ var Login = React.createClass({
                     <label htmlFor="filled-in-box">Remember me</label>
                   </span>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
