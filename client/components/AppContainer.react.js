@@ -6,9 +6,9 @@ var RouteHandler = ReactRouter.RouteHandler;
 var AppContainer = React.createClass({
   render: function () {
     return (
-    	<div>
-	      	<RouteHandler {...this.props.bootstrap} {...this.props.auth} />
-      	</div>
+      <div>
+        <RouteHandler {...this.props.bootstrap} {...this.props.auth} />
+      </div>
     );
   }
 });

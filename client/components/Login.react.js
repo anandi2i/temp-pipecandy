@@ -7,7 +7,7 @@ var Login = React.createClass({
         <div className="center-container">
           <div className="center-div">
             <div className="auth-container">
-              <img className="auth-logo" src="./images/logo.png" />
+              <img className="auth-logo" src="/images/logo.png" />
               <form className="auth-form" action='/login' method='post'>
                 <div className="input-field">
                   <input id="email" type="email" name="email" className="validate" />

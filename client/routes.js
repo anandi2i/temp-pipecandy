@@ -16,7 +16,7 @@ var routes = (
   	<Route path="auth/account" handler={Home} />
     <Route path="login" handler={Login}/>
     <Route path="signup" handler={Signup}/>
-  	<DefaultRoute handler={Index}/>
+  	<DefaultRoute handler={Home}/>
   </Route>
 );
 

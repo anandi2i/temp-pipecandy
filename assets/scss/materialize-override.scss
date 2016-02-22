@@ -1,4 +1,3 @@
-@import './_color.scss';
 .btn {
   box-shadow: none;
   border-radius: 3px;
@@ -62,4 +61,71 @@ textarea.materialize-textarea:focus:not([readonly]) + label {
 	&:not(:checked) + label:after {
 		border: 2px solid $placeholder-clr;
 	}
+}
+/***********************************
+          Color
+************************************/
+.blue {
+  background-color: $dflt-btn-clr !important;
+}
+.red {
+  background-color: $red-clr !important;
+}
+/***********************************
+          nav bar changes
+************************************/
+.navbar-fixed {
+  height: 74px;
+  nav {
+    top: 5px;
+  }
+}
+nav {
+  background-color: $white;
+  color: $a-tag-clr;
+  width: 100%;
+  height: 69px;
+  line-height: 69px;
+  box-shadow: none;
+  border-bottom: 1px solid #ebebeb;
+  ul {
+    li {
+      a {
+        color: $a-tag-clr;
+        padding: 0 40px;
+        &:hover {
+          background-color: $menu-hovr-clr;
+        }
+      }
+    }
+  }
+  .brand-logo {
+    img {
+      width: 142px;
+      height: 29px;
+    }
+  }
+}
+/*********************
+  Media Query Classes
+**********************/
+@media only screen and (min-width: 993px) {
+  .container {
+    width: 75%;
+  }
+}
+@media only screen and (max-width: 890px) {
+  .container {
+    width: 90%;
+  }
+}
+@media only screen and (min-width: 1200px) {
+  html {
+    font-size: 14px;
+  }
+}
+@media only screen and (min-width: 992px) {
+  html {
+    font-size: 14px;
+  }
 }

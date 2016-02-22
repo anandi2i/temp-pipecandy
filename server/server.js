@@ -39,8 +39,7 @@ try {
 }
 
 // Setup the view engine (html)
-app.engine('html', consolidate.handlebars);
-app.set('view engine', 'html');
+app.set('view engine', 'ejs');
 app.set('views', 'public/views');
 app.use(loopback.static('public/assets'));
 
@@ -101,5 +100,3 @@ for (var s in config) {
   c.session = c.session !== false;
   passportConfigurator.configureProvider(s, c);
 }
-
-

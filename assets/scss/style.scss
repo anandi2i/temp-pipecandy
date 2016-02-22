@@ -1,10 +1,20 @@
-@import './_color.scss';
-html{
+html {
   font-family: 'Ubuntu', sans-serif;
 }
 body {
   background: url("../images/tile.png");
   background-repeat: repeat-x;
+}
+.top-candy-bdr {
+  background: url("../images/tile.png");
+  background-repeat: repeat-x;
+  width: 100%;
+  height: 5px;
+  position: fixed;
+}
+.navbar-fixed nav {
+  width: 90%;
+  margin-left: 5%;
 }
 /***********************************
   authentication page Classes
@@ -60,9 +70,11 @@ body {
 .auth-btn {
   padding: 0;
   width: 370px;
-  height: 50px;
-  line-height: 50px;
-  text-transform: uppercase;
+  height: 60px;
+  line-height: 60px;
+  text-transform: none;
+  font-size: 18px;
+  font-weight: 400;
   i {
     margin-right: 0;
     padding-left: 15px;
@@ -73,6 +85,15 @@ body {
   background-color: $linckedin-bg-clr;
   i {
     border-right: 1px solid $white;
+    height: 60px;
+  }
+  .linkedin-icon {
+    background-image: url("../images/linkedin10.png");
+    background-repeat: no-repeat;
+    width: 27px;
+    height: 27px;
+    display: block;
+    margin-top: 18px;
   }
   &:hover {
     background-color: $linckedin-bg-clr;
@@ -84,7 +105,15 @@ body {
   color: $dflt-txt-clr;
   i {
     border-right: 1px solid $light-border;
-    height: 48px;
+    height: 58px;
+  }
+  .google-icon {
+    background-image: url("../images/google-icon.png");
+    background-repeat: no-repeat;
+    width: 27px;
+    height: 27px;
+    display: block;
+    margin-top: 15px;
   }
   &:hover {
     background-color: $google-bg-clr;
@@ -102,6 +131,100 @@ body {
   &:hover {
     background-color: $dflt-btn-clr;
   }
+}
+.lg-btn-dflt {
+  padding: 0;
+  width: 370px;
+  height: 60px;
+  line-height: 60px;
+  text-transform: none;
+  font-size: 18px;
+  font-weight: 400;
+  i {
+    margin-right: 0;
+    padding-left: 15px;
+    padding-right: 15px;
+    &.left {
+      border-right: 1px solid $white;
+    }
+  }
+}
+.gray-head {
+  font-weight: 700;
+  color: $gray-txt-clr;
+  text-transform: uppercase;
+}
+.blue-head {
+  font-weight: 700;
+  color: $blue-clr;
+  text-transform: uppercase;
+}
+/*********************
+  Home Page
+**********************/
+.tag-line {
+  padding: 80px 0;
+}
+.tag-head {
+  font-size: 30px;
+  font-weight: 700;
+  text-align: center;
+  color: $gray-txt-clr;
+}
+.campaign-status {
+  border: 1px solid $blue-border;
+  border-radius: 3px;
+  padding: 23px 33px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  ul {
+    margin-top: 0px;
+    li {
+      display: inline;
+      cursor: pointer;
+    }
+    .separator {
+      padding-left: 15px;
+      padding-right: 15px;
+      background-repeat: no-repeat;
+      background-position: 50% 50%;
+      background-image: url("../images/separator.png");
+    }
+  }
+  .campaign-status-info {
+    background-color: $light-bg-clr;
+    padding-left: 18px;
+    padding-right: 18px;
+    .col {
+      padding-top: 18px;
+      padding-bottom: 18px;
+      .info {
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .status {
+        color: $blue-clr;
+        font-size: 25px;
+        font-weight: 500;
+        text-align: center;
+      }
+    }
+    &.row {
+      margin-bottom: 0;
+    }
+  }
+}
+/*************************
+  Single event handling
+**************************/
+.m-t-47 {
+  margin-top: 47px;
+}
+.rtt-90-d {
+  @include rotate(90deg);
+}
+.blue-txt {
+  color: $blue-clr;
 }
 /*********************
   Media Query Classes
@@ -129,5 +252,23 @@ body {
   }
   .auth-btn {
     width: 300px;
+  }
+  .lg-btn-dflt {
+    width: 300px;
+  }
+}
+@media only screen and (max-width: 995px) {
+  .tab-hd-btn {
+    .col {
+      text-align: center;
+    }
+  }
+}
+@media only screen and (max-width: 1176px) {
+  .navbar-fixed {
+    nav {
+      width: 100%;
+      margin-left: 0;
+    }
   }
 }
