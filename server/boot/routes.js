@@ -2,6 +2,7 @@ import React from "react";
 import Router from "react-router";
 import reactRoutes from "../../client/routes";
 import logger from '../log';
+var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 
 module.exports = function routes(app) {
 
@@ -16,7 +17,7 @@ module.exports = function routes(app) {
   var Reviewer = app.models.Reviewer;
   var User = app.models.user;
 
-  app.get('/', function (req, res) {
+  app.get('/', ensureLoggedIn('/login'), function (req, res) {
 
     logger.info('Welcome to Pipecandy home page');
 
@@ -155,9 +156,11 @@ module.exports = function routes(app) {
       if (err) {
         logger.error("Problem in logout", err.message);
       }
-      res.clearCookie('access_token');
-      res.clearCookie('userId');
-      res.redirect('/');
+      req.session.destroy(function (err) {
+        res.clearCookie('access_token');
+        res.clearCookie('userId');
+        res.redirect('/');
+      });
     });
   });
 

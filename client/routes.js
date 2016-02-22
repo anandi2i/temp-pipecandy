@@ -15,10 +15,10 @@ var routes = (
   <Route handler={AppContainer}>
     <Route path="reviewers" handler={Reviewer} />
     <Route path="auth/account" handler={Home} />
-    <Route path="login" handler={Login}/>
-    <Route path="signup" handler={Signup}/>
-    <Route path="emaillist" handler={EmailList}/>
-    <DefaultRoute handler={Home}/>
+    <Route path="login" handler={Login} />
+    <Route path="signup" handler={Signup} />
+    <Route path="emaillist" handler={EmailList} />
+    <DefaultRoute handler={Home} />
   </Route>
 );
 

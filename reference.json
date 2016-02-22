@@ -1,0 +1,6 @@
+{
+  "session_store" : {
+    "reference_url" : "//http://afshinm.name/redis-as-session-store-for-expressjs-passportjs",
+    "npm" : "connect-redis"
+  }
+}

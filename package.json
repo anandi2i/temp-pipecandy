@@ -17,6 +17,7 @@
     "browserify": "^13.0.0",
     "compression": "^1.0.3",
     "connect-ensure-login": "^0.1.1",
+    "connect-redis": "^3.0.2",
     "cors": "^2.5.2",
     "express-flash": "0.0.2",
     "express-session": "^1.13.0",

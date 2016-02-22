@@ -1,6 +1,6 @@
 var loopback = require('loopback');
 var boot = require('loopback-boot');
-var consolidate = require('consolidate');
+var RedisStore = require('connect-redis')(loopback.session);
 
 require('babel/register');
 
@@ -81,6 +81,12 @@ app.middleware('auth', loopback.token({
 
 app.middleware('session:before', loopback.cookieParser(app.get('cookieSecret')));
 app.middleware('session', loopback.session({
+  store: new RedisStore(
+    {
+        host: '127.0.0.1',
+        port: 6379
+    }
+  ),
   secret: 'kitty',
   saveUninitialized: true,
   resave: true
