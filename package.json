@@ -17,7 +17,6 @@
     "browserify": "^13.0.0",
     "compression": "^1.0.3",
     "connect-ensure-login": "^0.1.1",
-    "consolidate": "^0.13.1",
     "cors": "^2.5.2",
     "express-flash": "0.0.2",
     "express-session": "^1.13.0",
@@ -31,7 +30,6 @@
     "gulp-sass": "^2.2.0",
     "gulp-uglify": "^1.5.2",
     "gulp-util": "^3.0.7",
-    "handlebars": "^4.0.5",
     "history": "^1.17.0",
     "keymirror": "^0.1.1",
     "loopback": "^2.22.0",
@@ -66,19 +64,18 @@
     "webpack-dev-server": "^1.14.1"
   },
   "repository": {
-    "type": "",
-    "url": ""
-  },
-  "description": "loopback-isomorphic-react-flux",
-  "repository": {
     "type": "git",
     "url": "git@github.com:Ideas2IT/pipecandy.git"
   },
-  "contributors": [{
-    "name": "Rajesh P R",
-    "email": "rajesh.p.r@ideas2it.com"
-  },{
-    "name": "Dinesh Ramasamy",
-    "email": "dinesh.r@ideas2it.com"
-  }]
+  "description": "loopback-isomorphic-react-flux",
+  "contributors": [
+    {
+      "name": "Rajesh P R",
+      "email": "rajesh.p.r@ideas2it.com"
+    },
+    {
+      "name": "Dinesh Ramasamy",
+      "email": "dinesh.r@ideas2it.com"
+    }
+  ]
 }

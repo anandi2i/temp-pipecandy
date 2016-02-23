@@ -1,6 +1,8 @@
 .btn {
   box-shadow: none;
   border-radius: 3px;
+  padding: 0 1.5rem;
+  text-transform: none;
 }
 a {
   color: $a-tag-clr;
@@ -52,15 +54,14 @@ textarea.materialize-textarea:focus:not([readonly]) + label {
   left: 0;
   color: $placeholder-clr;
 }
-
 [type="checkbox"].filled-in {
-	&:checked + label:after {
-		border: 2px solid $dflt-btn-clr;
-		background-color: $dflt-btn-clr;
-	}
-	&:not(:checked) + label:after {
-		border: 2px solid $placeholder-clr;
-	}
+  &:checked + label:after {
+    border: 2px solid $dflt-btn-clr;
+    background-color: $dflt-btn-clr;
+  }
+  &:not(:checked) + label:after {
+    border: 2px solid $placeholder-clr;
+  }
 }
 /***********************************
           Color
@@ -87,7 +88,7 @@ nav {
   height: 69px;
   line-height: 69px;
   box-shadow: none;
-  border-bottom: 1px solid #ebebeb;
+  border-bottom: 1px solid $light-border;
   ul {
     li {
       a {
@@ -105,6 +106,17 @@ nav {
       height: 29px;
     }
   }
+  .side-nav-btn{
+    color: $a-tag-clr;
+    padding-left: 10px;
+  }
+}
+/*********************
+  Head
+**********************/
+h3{
+  font-size: 18px;
+  font-weight: 300;
 }
 /*********************
   Media Query Classes

@@ -1,4 +1,4 @@
-var React = require('react');
+var React = require("react");
 
 var Home = React.createClass({
   render: function() {
@@ -12,8 +12,8 @@ var Home = React.createClass({
             <div className="row tab-hd-btn">
               <div className="col s12 m12 l6 right-align m-t-47">
                 <a className="btn lg-btn-dflt red" href="/">
-                  <i className="left material-icons">invert_colors</i> Create a Campaign
-                  <i className="right material-icons rtt-90-d">play_arrow</i>
+                  <i className="left mdi mdi-filter"></i> Create a Campaign
+                  <i className="right mdi mdi-chevron-down"></i>
                 </a>
               </div>
               <div className="col s12 m12 l6 left-align m-t-47">
@@ -34,27 +34,27 @@ var Home = React.createClass({
               <div className="campaign-status-info center row">
                 <div className="col s6 m4 l2">
                   <div className="info">Opened</div>
-                  <div className="status">67%</div>
+                  <div className="status">67</div>
                 </div>
                 <div className="col s6 m4 l2">
                   <div className="info">responded</div>
-                  <div className="status">06%</div>
+                  <div className="status">06</div>
                 </div>
                 <div className="col s6 m4 l2">
                   <div className="info">Clicked</div>
-                  <div className="status">12%</div>
+                  <div className="status">12</div>
                 </div>
                 <div className="col s6 m4 l2">
                   <div className="info">Bounced</div>
-                  <div className="status">12%</div>
+                  <div className="status">12</div>
                 </div>
                 <div className="col s6 m4 l2">
                   <div className="info">Unsubscribed</div>
-                  <div className="status">09%</div>
+                  <div className="status">09</div>
                 </div>
                 <div className="col s6 m4 l2">
                   <div className="info">Spam</div>
-                  <div className="status">09%</div>
+                  <div className="status">09</div>
                 </div>
               </div>
             </div>

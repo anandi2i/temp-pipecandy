@@ -161,6 +161,21 @@ module.exports = function routes(app) {
     });
   });
 
+  app.get("/emaillist", function (req, res) {
+    var router = createRoute(req.url);
+    router.run(function (Handler) {
+      var user = { user: req.user };
+      const html = React.renderToString(
+        <Handler auth = {user} />
+      );
+      res.render("index", {
+        markup: html,
+        user: JSON.stringify(user) || "{}",
+        bootstrap: "{}"
+      });
+    });
+  });
+
   app.get("/reviewers", function (req, res) {
     var router = createRoute(req.url);
     router.run(function (Handler) {
