@@ -31,7 +31,7 @@ var Signup = React.createClass({
                     onChange={this.onChange("firstName")}
                     onBlur={this.props.handleValidation("firstName")} />
                   <label htmlFor="firstName">First Name</label>
-                  {this.renderHelpText(this.props.getValidationMessages("firstName"))}
+                  {!this.props.isValid("firstName") ? this.renderHelpText(this.props.getValidationMessages("firstName")) : null}
                 </div>
                 <div className="input-field">
                   <input id="lastName" type="text"
@@ -40,7 +40,7 @@ var Signup = React.createClass({
                     onChange={this.onChange("lastName")}
                     onBlur={this.props.handleValidation("lastName")} />
                   <label htmlFor="lastName">Last Name</label>
-                  {this.renderHelpText(this.props.getValidationMessages("lastName"))}
+                  {!this.props.isValid("lastName") ? this.renderHelpText(this.props.getValidationMessages("lastName")) : null}
                 </div>
                 <div className="input-field">
                   <input id="email" type="text"
@@ -49,7 +49,7 @@ var Signup = React.createClass({
                     onChange={this.onChange("email")}
                     onBlur={this.props.handleValidation("email")} />
                   <label htmlFor="email">Email</label>
-                  {this.renderHelpText(this.props.getValidationMessages("email"))}
+                  {!this.props.isValid("email") ? this.renderHelpText(this.props.getValidationMessages("email")) : null}
                 </div>
                 <div className="input-field">
                   <input id="password" type="password"
@@ -58,7 +58,7 @@ var Signup = React.createClass({
                     onChange={this.onChange("password")}
                     onBlur={this.props.handleValidation("password")} />
                   <label htmlFor="password">Password</label>
-                  {this.renderHelpText(this.props.getValidationMessages("password"))}
+                  {!this.props.isValid("password") ? this.renderHelpText(this.props.getValidationMessages("password")) : null}
                 </div>
                 <p className="show-pass">
                   <input type="checkbox" className="filled-in" id="filled-in-box" defaultChecked="checked" />

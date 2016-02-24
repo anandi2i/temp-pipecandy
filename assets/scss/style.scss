@@ -70,6 +70,7 @@ body {
     .warning-block {
       width: 100%;
       text-align: left;
+      margin-top: -10px;
     }
     .input-field {
       width: 370px;
@@ -334,7 +335,7 @@ body {
   margin-top: 0px;
   padding-top: 0px;
   font-size: 12px;
-  display: inline-block;
+  display: block;
 }
 /*********************
   Media Query Classes
