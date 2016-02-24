@@ -8,6 +8,10 @@
     },
     "lastName": {
       "type": "string"
+    },
+    "avatar": {
+      "type": "string",
+      "default" : "/images/photo.png"
     }
   },
   "relations": {
@@ -27,7 +31,6 @@
       "foreignKey": "userId"
     }
   },
-  "validations": [],
   "acls": [],
-  "methods": []
+  "methods": {}
 }

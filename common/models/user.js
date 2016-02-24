@@ -1,7 +1,8 @@
 import path from "path";
+import fs from "fs";
+import _ from "underscore";
 import logger from "../../server/log";
 import publicEmailProviders from "../../server/utils/public-email-providers";
-import _ from "underscore";
 
 module.exports = function(user) {
   const milliSec = 1000;
@@ -73,41 +74,72 @@ module.exports = function(user) {
   });
 
   user.beforeRemote("prototype.*", function(context, result, next) {
+    //TODO code cleanup
     let req = context.req;
+    let userID = req.params.id;
+    let isCroppedImg = req.body.croppedImg.includes("data:image/png;base64,");
+    let isPassword = false;
     if (req.body.oldPassword && req.body.newPassword) {
-      user.findById(req.params.id, function(err, getUser) {
-        getUser.hasPassword(req.body.oldPassword, function(err, isMatch) {
-          if (err) {
-            logger.error("error in update password");
-            let error = new Error();
-            error.message = "Error in update password";
-            error.name = "ErrorInUpdatePass";
-            next(error);
-          } else if (isMatch) {
-            getUser.updateAttribute("password", req.body.newPassword,
-              function(err, resl) {
-                if (err) {
-                  logger.error("error in update password");
-                  let error = new Error();
-                  error.message = "Error in update password";
-                  error.name = "ErrorInUpdatePass";
-                  next(error);
-                }
-                logger.info("userId %d password changed successfully",
-                  req.body.id);
-                return next();
-            });
-          } else {
-            logger.error("The password is invalid for userId %d", req.body.id);
-            let error = new Error();
-            error.message = "Enter valid password";
-            error.name = "InvalidPassChange";
-            next(error);
+      isPassword = true;
+    }
+    if (isCroppedImg || isPassword){
+      user.findById(userID, function(err, getUser) {
+        if(isCroppedImg){
+          let dir = "./server/storage/" + userID;
+          if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
           }
-        });
+          let base64Data = req.body.croppedImg
+            .replace(/^data:image\/png;base64,/, "");
+          let avatarPath = dir + "/photo.png";
+          fs.writeFile(avatarPath, base64Data, "base64", function(err) {
+            let savePath = "/api/containers/" + userID + "/download/photo.png";
+            getUser.updateAttribute("avatar", savePath, function(err, resl) {
+              if (err) {
+                logger.error("error in update user avatar userId %d", userID);
+                let error = new Error();
+                error.message = "Error in update avatar";
+                error.name = "ErrorInUpdateAvatar";
+                next(error);
+              }
+              logger.info("userId %d avatar changed successfully", userID);
+            });
+          });
+        }
+        if(isPassword){
+          getUser.hasPassword(req.body.oldPassword, function(err, isMatch) {
+            if (err) {
+              logger.error("error in update password");
+              let error = new Error();
+              error.message = "Error in update password";
+              error.name = "ErrorInUpdatePass";
+              next(error);
+            } else if (isMatch) {
+              getUser.updateAttribute("password", req.body.newPassword,
+                function(err, resl) {
+                  if (err) {
+                    logger.error("error in update password");
+                    let error = new Error();
+                    error.message = "Error in update password";
+                    error.name = "ErrorInUpdatePass";
+                    next(error);
+                  }
+                  logger.info("userId %d password changed successfully",
+                    req.body.id);
+                  next();
+              });
+            } else {
+              logger.error("The password is invalid for userId %d",
+                req.body.id);
+              let error = new Error();
+              error.message = "Enter valid password";
+              error.name = "InvalidPassChange";
+              next(error);
+            }
+          });
+        }
       });
     }
     return next();
   });
-
 };

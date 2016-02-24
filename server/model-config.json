@@ -55,5 +55,13 @@
   },
   "Email": {
     "dataSource": "Email"
+  },
+  "container": {
+    "dataSource": "storage",
+    "public": true
+  },
+  "file": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

@@ -316,6 +316,44 @@ body {
   }
 }
 /*********************
+  User Profile
+**********************/
+.user-profile{
+  #toast-container{
+    .toast{
+      float: right;
+    }
+  }
+}
+.avatar-container {
+  text-align: center;
+}
+.avatar-pic {
+  width: 200px;
+  height: 200px;
+  background-size: cover;
+  margin-left: auto;
+  margin-right: auto;
+  .avatar-edit{
+    display: none;
+  }
+  &:hover{
+    .avatar-edit{
+      background-color: $gray-transparent-clr;
+      border: 5px solid $blue-clr;
+      height: 200px;
+      vertical-align: middle;
+      text-align: center;
+      display: table-cell;
+      width: 200px;
+      color: $white;
+    }
+  }
+}
+#selectAvatar{
+  display:none;
+}
+/*********************
   Email List
 **********************/
 @mixin email-list-container {
@@ -395,6 +433,9 @@ body {
 }
 .m-t-20 {
   margin-top: 20px;
+}
+.m-0 {
+  margin: 0 !important;
 }
 .rtt-90-d {
   @include rotate(90deg);

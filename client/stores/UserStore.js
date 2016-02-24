@@ -3,7 +3,7 @@ import {EventEmitter} from "events";
 import Constants from "../constants/Constants";
 import _ from "underscore";
 import UserApi from "../API/UserApi";
-import ErrorMessages from "../utils/ErrorMessages";
+import {ErrorMessages, SuccessMessages} from "../utils/UserAlerts";
 import appHistory from "../RouteContainer";
 
 let _user = {};
@@ -80,6 +80,9 @@ AppDispatcher.register(function(payload) {
     case Constants.USER_UPDATE:
       UserApi.userUpdate(action.data).then((response) => {
         _user = response.data;
+        //TODO need to change success msg
+        _error = SuccessMessages.successUpdate;
+        UserStore.emitChange();
       }, (err) => {
         if(err.data.error){
           _error = ErrorMessages[err.data.error.name];

@@ -1,4 +1,4 @@
-const ErrorMessages = {
+export const ErrorMessages = {
   "LOGIN_FAILED": "It looks like you've got it wrong. " +
     "Could you try again, please?",
   "ValidationError": "Oh, no! Somebody had registered already " +
@@ -7,4 +7,7 @@ const ErrorMessages = {
   "InvalidPassChange": "Please enter valid password",
   "ErrorInUpdatePass": "Error in update password"
 };
-export default ErrorMessages;
+
+export const SuccessMessages = {
+  "successUpdate": "Update successfully",
+};
