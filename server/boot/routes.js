@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOMServer from "react-dom/server";
 import Router from "react-router";
 import reactRoutes from "../../client/routes";
 import logger from '../log';
@@ -22,16 +23,18 @@ module.exports = function routes(app) {
     logger.info('Welcome to Pipecandy home page');
 
     var router = createRoute(req.url);
-    var status = { status: CoffeeShop.status()._d.v };
-    router.run(function (Handler) {
-      var user = { user: req.user };
-      const html = React.renderToString(
-        <Handler bootstrap={status} auth = {user} />
-      );
-      res.render("index", {
-        markup: html,
-        bootstrap: JSON.stringify(status) || "{}",
-        user: JSON.stringify(user) || "{}",
+    CoffeeShop.status(function(err, data) {
+      var status = {status: data};
+      router.run(function (Handler) {
+        var user = { user: req.user };
+        const html = ReactDOMServer.renderToString(
+          <Handler bootstrap={status} auth = {user} />
+        );
+        res.render("index", {
+          markup: html,
+          bootstrap: JSON.stringify(status) || "{}",
+          user: JSON.stringify(user) || "{}",
+        });
       });
     });
   });
@@ -40,7 +43,7 @@ module.exports = function routes(app) {
     var router = createRoute(req.url);
     router.run(function (Handler) {
       var user = { user: req.user };
-      const html = React.renderToString(
+      const html = ReactDOMServer.renderToString(
         <Handler auth = {user} />
       );
       res.render("index", {
@@ -81,7 +84,7 @@ module.exports = function routes(app) {
     var router = createRoute(req.url);
     router.run(function (Handler) {
       var user = { user: req.user };
-      const html = React.renderToString(
+      const html = ReactDOMServer.renderToString(
         <Handler auth = {user} />
       );
       res.render("index", {
@@ -136,7 +139,7 @@ module.exports = function routes(app) {
     var router = createRoute(req.url);
     router.run(function (Handler) {
       var user = { user: req.user };
-      const html = React.renderToString(
+      const html = ReactDOMServer.renderToString(
         <Handler auth = {user} />
       );
       res.render("index", {
@@ -168,7 +171,7 @@ module.exports = function routes(app) {
     var router = createRoute(req.url);
     router.run(function (Handler) {
       var user = { user: req.user };
-      const html = React.renderToString(
+      const html = ReactDOMServer.renderToString(
         <Handler auth = {user} />
       );
       res.render("index", {
@@ -185,7 +188,7 @@ module.exports = function routes(app) {
       Reviewer.find().then(function(model) {
         console.log("model",model);
         var reviewers = {reviewers: model};
-        const html = React.renderToString(
+        const html = ReactDOMServer.renderToString(
           <Handler bootstrap = {reviewers} />
         );
         res.render("index", {

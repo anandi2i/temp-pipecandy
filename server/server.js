@@ -2,7 +2,9 @@ var loopback = require('loopback');
 var boot = require('loopback-boot');
 var RedisStore = require('connect-redis')(loopback.session);
 
-require('babel/register');
+require('babel-core/register')({
+  "presets": ["react","es2015"]
+});
 
 var app = module.exports = loopback();
 
