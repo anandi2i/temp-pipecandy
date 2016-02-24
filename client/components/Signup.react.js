@@ -1,7 +1,7 @@
 import React from "react";
 import strategy from "joi-validation-strategy";
 import validation from "react-validation-mixin";
-import validatorUtil from "../utils/ComponentUtils.js";
+import validatorUtil from "../utils/ValidationMessages";
 
 var Signup = React.createClass({
   getInitialState: function() {
