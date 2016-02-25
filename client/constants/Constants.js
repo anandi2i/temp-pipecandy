@@ -1,6 +1,7 @@
-var keyMirror = require('react/lib/keyMirror');
+import keyMirror from "keymirror";
 
 // Define action constants
-module.exports = keyMirror({
-	COFFEE_SHOP_LIST: null
+export default keyMirror({
+  COFFEE_SHOP_LIST: null,
+  EMAIL_LIST: null
 });

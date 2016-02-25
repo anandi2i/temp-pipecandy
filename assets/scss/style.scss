@@ -322,9 +322,9 @@ body {
   }
 }
 .create-list-container {
-  text-align: center;
   h3 {
     margin-bottom: 53px;
+    text-align: center;
   }
   .list-container {
     @include email-list-container;
@@ -334,6 +334,24 @@ body {
     .r-btn-container {
       text-align: right;
       width: 100%;
+    }
+    .react-autosuggest__container {
+      position: relative;
+      .react-autosuggest__suggestions-container {
+        position: absolute;
+        top: 25px;
+        width: 100%;
+        background-color: $white;
+        z-index: 2;
+        box-shadow: $box-shadow;
+        .react-autosuggest__suggestion {
+          cursor: pointer;
+          padding: 10px 20px;
+          &.react-autosuggest__suggestion--focused {
+            background-color: $drp-dwn-bg;
+          }
+        }
+      }
     }
   }
   .hint-box {

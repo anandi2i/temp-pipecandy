@@ -28,7 +28,10 @@ gulp.task("browserify", function() {
       entries: "./client/app.js",
       debug: true
     })
-    .transform("babelify", {"presets": ["react", "es2015"]})
+    .transform("babelify", {
+      "plugins": ["transform-decorators-legacy"],
+      "presets": ["react", "es2015"]
+    })
     .bundle()
     .on("error", handleErrors)
     .pipe(source("bundle.js"))
