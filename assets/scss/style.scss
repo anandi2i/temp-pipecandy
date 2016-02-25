@@ -23,6 +23,45 @@ body {
           height: 68px;
         }
       }
+      &.alarm {
+        a {
+          height: 68px;
+        }
+        i {
+          font-size: 20px;
+          .alarm-info {
+            font-size: 8px;
+            margin-top: 20px;
+            margin-left: -7px;
+            position: absolute;
+            color: #FFF;
+            background: red;
+            border-radius: 5px;
+            height: 13px;
+            line-height: 10px;
+            min-width: 20px;
+            text-align: center;
+            display: inline-block;
+            font-weight: bold;
+            padding: 2px;
+          }
+        }
+      }
+      &.user-pic {
+        a {
+          padding-top: 12px;
+          height: 68px;
+          img {
+            border: 2px solid $blue-clr;
+            width: 40px;
+          }
+        }
+        i {
+          display: inline-block;
+          position: absolute;
+          margin-top: -8px;
+        }
+      }
     }
   }
 }
@@ -254,7 +293,6 @@ body {
     }
   }
 }
-
 /*********************
   Email List
 **********************/
@@ -332,8 +370,8 @@ body {
 **********************/
 .warning-block {
   color: $red-clr;
-  margin-top: 0px;
-  padding-top: 0px;
+  margin-top: 0;
+  padding-top: 0;
   font-size: 12px;
   display: block;
 }
