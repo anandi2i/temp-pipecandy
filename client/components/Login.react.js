@@ -13,7 +13,10 @@ var Login = React.createClass({
   getValidatorData: function() {
     return this.state;
   },
-  validatorTypes : validatorUtil,
+  validatorTypes : {
+    email: validatorUtil["email"],
+    password: validatorUtil["password"]
+  },
   render: function() {
     return (
       <div>

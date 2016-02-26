@@ -15,7 +15,12 @@ var Signup = React.createClass({
   getValidatorData: function() {
     return this.state;
   },
-  validatorTypes : validatorUtil,
+  validatorTypes : {
+    firstName: validatorUtil["firstName"],
+    email: validatorUtil["email"],
+    password: validatorUtil["password"],
+    lastName: validatorUtil["lastName"]
+  },
   render: function() {
     return (
       <div>
