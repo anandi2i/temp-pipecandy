@@ -2,7 +2,7 @@ import AppDispatcher from "../dispatcher/AppDispatcher";
 import {EventEmitter} from "events";
 import Constants from "../constants/Constants";
 import _ from "underscore";
-import {EmailListApi} from "../API/EmailListApi";
+import EmailListApi from "../API/EmailListApi";
 
 let _emailList = [];
 

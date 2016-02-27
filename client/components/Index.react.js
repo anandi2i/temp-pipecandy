@@ -17,11 +17,11 @@ var Index = React.createClass({
                   <i className="left"><span className="google-icon" /></i>
                   Sign in with Google
                 </a>
-                <a className="btn auth-btn signin-btn" href="/login">
+                <a className="btn auth-btn signin-btn" href="/#/login">
                   Sign with your email
                 </a>
               </div>
-              <a href="/signup">New user? Click here</a>
+              <a href="/#/signup">New user? Click here</a>
             </div>
           </div>
         </div>

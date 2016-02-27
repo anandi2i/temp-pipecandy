@@ -2,6 +2,8 @@ import React from "react";
 import strategy from "joi-validation-strategy";
 import validation from "react-validation-mixin";
 import validatorUtil from "../utils/ValidationMessages";
+import UserAction from "../actions/UserAction";
+import UserStore from "../stores/UserStore";
 
 var Login = React.createClass({
   getInitialState: function() {
@@ -24,7 +26,7 @@ var Login = React.createClass({
           <div className="center-div">
             <div className="auth-container">
               <img className="auth-logo" src="/images/logo.png" />
-              <form className="auth-form" id="loginForm" action='/login' method='post' onSubmit={this.onSubmit}>
+              <form className="auth-form" id="loginForm" onSubmit={this.onSubmit}>
                 <div className="input-field">
                   <input id="email" type="text"
                     className={this.props.isValid("email") ? "validate" : "invalid"}
@@ -76,7 +78,10 @@ var Login = React.createClass({
     event.preventDefault();
     const onValidate = (error) => {
       if (!error) {
-        $("#loginForm").submit();
+        UserApiAction.login({
+          email: this.state.email,
+          password: this.state.password
+        });
       }
     };
     this.props.validate(onValidate);
