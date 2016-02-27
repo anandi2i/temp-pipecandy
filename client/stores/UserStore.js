@@ -35,6 +35,13 @@ const UserStore = _.extend({}, EventEmitter.prototype, {
 AppDispatcher.register(function(payload) {
   const { action } = payload;
   switch (action.actionType) {
+    case Constants.REGISTER:
+      UserApi.register(action.data).then((response) => {
+        _user = response.data;
+        UserStore.emitChange();
+        router.transitionTo("/home");
+      });
+      break;
     case Constants.LOGIN:
       UserApi.login(action.data).then((response) => {
         _user = response.data;

@@ -2,6 +2,8 @@ import React from "react";
 import strategy from "joi-validation-strategy";
 import validation from "react-validation-mixin";
 import validatorUtil from "../utils/ValidationMessages";
+import UserAction from "../actions/UserAction";
+import UserStore from "../stores/UserStore";
 
 var Signup = React.createClass({
   getInitialState: function() {
@@ -28,7 +30,7 @@ var Signup = React.createClass({
           <div className="center-div">
             <div className="auth-container">
               <img className="auth-logo" src="./images/logo.png" />
-              <form className="auth-form" id="form-validation" action="/signup" method="post" onSubmit={this.onSubmit}>
+              <form className="auth-form" id="form-validation" onSubmit={this.onSubmit}>
                 <div className="input-field">
                   <input  id="firstName" type="text"
                     className={this.props.isValid("firstName") ? "validate" : "invalid"}
@@ -93,9 +95,10 @@ var Signup = React.createClass({
   },
   onSubmit(event) {
     event.preventDefault();
+    const formData = this.state;
     const onValidate = (error) => {
       if (!error) {
-        $("#form-validation").submit();
+        UserAction.register(formData);
       }
     };
     this.props.validate(onValidate);

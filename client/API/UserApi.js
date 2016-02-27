@@ -1,6 +1,10 @@
 import api from 'axios';
 
 const UserApi = {
+  register(data) {
+    return api.post("/api/users", data);
+  },
+
   login(data) {
     return api.post("/api/users/login", data);
   },
