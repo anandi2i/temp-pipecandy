@@ -1,6 +1,7 @@
 import React from "react";
 import strategy from "joi-validation-strategy";
 import validation from "react-validation-mixin";
+import passwordStrength from "zxcvbn";
 import validatorUtil from "../utils/ValidationMessages";
 import UserAction from "../actions/UserAction";
 
@@ -23,6 +24,7 @@ var Signup = React.createClass({
     lastName: validatorUtil.lastName
   },
   render: function() {
+    var pwdStrength = {"_0": 0, "_1": 1, "_2": 2, "_3": 3};
     return (
       <div>
         <div className="center-container">
@@ -83,6 +85,12 @@ var Signup = React.createClass({
                   }
                 </div>
                 <div className="input-field">
+                  <div className="password-box" role="button">
+                    <div className={passwordStrength(this.state.password).score > pwdStrength._3 ? "password-dot password-dot-selected" : "password-dot"}></div>
+                    <div className={passwordStrength(this.state.password).score > pwdStrength._2 ? "password-dot password-dot-selected" : "password-dot"}></div>
+                    <div className={passwordStrength(this.state.password).score > pwdStrength._1 ? "password-dot password-dot-selected" : "password-dot"}></div>
+                    <div className={passwordStrength(this.state.password).score > pwdStrength._0 ? "password-dot password-dot-selected" : "password-dot"}></div>
+                  </div>
                   <input id="password" type="password"
                     className={
                       this.props.isValid("password")

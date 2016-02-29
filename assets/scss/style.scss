@@ -111,6 +111,21 @@ body {
       text-align: left;
       margin-top: -10px;
     }
+    .password-box {
+      margin-bottom: -30px;
+      float: right;
+      display: inline;
+    }
+    .password-dot {
+      right: 1px;
+      height: 3px;
+      width: 4px;
+      margin: 2px;
+      background-color: $white;
+    }
+    .password-dot-selected {
+      background-color: $blue-clr;
+    }
     .input-field {
       width: 370px;
       margin-left: auto;
@@ -383,6 +398,7 @@ body {
 .p-1-btn {
   margin-right: 20px;
 }
+
 /*********************
   Warning Class
 **********************/

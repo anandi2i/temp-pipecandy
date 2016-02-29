@@ -1,6 +1,6 @@
 import Joi from "joi";
-var minPassLength = 3;
-var maxPassLength = 10;
+var minPassLength = 6;
+var maxPassLength = 100;
 var validatorObj = {
   firstName: Joi.string().alphanum().required().label("first name").options({
     language: {
