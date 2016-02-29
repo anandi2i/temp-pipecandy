@@ -1,15 +1,15 @@
-var loopback = require('loopback');
-var boot = require('loopback-boot');
-var RedisStore = require('connect-redis')(loopback.session);
+var loopback = require("loopback");
+var boot = require("loopback-boot");
+var RedisStore = require("connect-redis")(loopback.session);
 
-require('babel-core/register')({
-  "presets": ["react","es2015"]
+require("babel-core/register")({
+  "presets": ["react", "es2015"]
 });
 
 var app = module.exports = loopback();
 
 // Passport configurators..
-var loopbackPassport = require('loopback-component-passport');
+var loopbackPassport = require("loopback-component-passport");
 var PassportConfigurator = loopbackPassport.PassportConfigurator;
 var passportConfigurator = new PassportConfigurator(app);
 
@@ -19,41 +19,42 @@ var passportConfigurator = new PassportConfigurator(app);
  *   object accessible through `req.body`
  *
  */
-var bodyParser = require('body-parser');
+var bodyParser = require("body-parser");
 
 /**
  * Flash messages for passport
  *
  * Setting the failureFlash option to true instructs Passport to flash an
- * error message using the message given by the strategy's verify callback,
+ * error message using the message given by the strategy"s verify callback,
  * if any. This is often the best approach, because the verify callback
  * can make the most accurate determination of why authentication failed.
  */
-var flash = require('express-flash');
+var flash = require("express-flash");
 
 // attempt to build the providers/passport config
 var config = {};
+var success = 1;
 try {
-  config = require('../providers.json');
+  config = require("../providers.json");
 } catch (err) {
   console.trace(err);
-  process.exit(1); // fatal
+  process.exit(success); // fatal
 }
 
 // Setup the view engine (html)
-// app.set('view engine', 'ejs');
-// app.set('views', 'public/views');
-app.use(loopback.static('public/assets'));
+// app.set("view engine", "ejs");
+// app.set("views", "public/views");
+app.use(loopback.static("public/assets"));
 
 app.start = function() {
   // start the web server
   return app.listen(function() {
-    app.emit('started');
-    var baseUrl = app.get('url').replace(/\/$/, '');
-    console.log('Web server listening at: %s', baseUrl);
-    if (app.get('loopback-component-explorer')) {
-      var explorerPath = app.get('loopback-component-explorer').mountPath;
-      console.log('Browse your REST API at %s%s', baseUrl, explorerPath);
+    app.emit("started");
+    var baseUrl = app.get("url").replace(/\/$/, "");
+    console.log("Web server listening at: %s", baseUrl);
+    if (app.get("loopback-component-explorer")) {
+      var explorerPath = app.get("loopback-component-explorer").mountPath;
+      console.log("Browse your REST API at %s%s", baseUrl, explorerPath);
     }
   });
 };
@@ -70,26 +71,25 @@ boot(app, __dirname, function(err) {
 
 
 // to support JSON-encoded bodies
-app.middleware('parse', bodyParser.json());
+app.middleware("parse", bodyParser.json());
 // to support URL-encoded bodies
-app.middleware('parse', bodyParser.urlencoded({
+app.middleware("parse", bodyParser.urlencoded({
   extended: true
 }));
 
 // The access token is only available after boot
-app.middleware('auth', loopback.token({
+app.middleware("auth", loopback.token({
   model: app.models.accessToken
 }));
 
-app.middleware('session:before', loopback.cookieParser(app.get('cookieSecret')));
-app.middleware('session', loopback.session({
-  store: new RedisStore(
-    {
-        host: '127.0.0.1',
-        port: 6379
-    }
-  ),
-  secret: 'kitty',
+app.middleware("session:before",
+  loopback.cookieParser(app.get("cookieSecret")));
+app.middleware("session", loopback.session({
+  store: new RedisStore({
+    host: "127.0.0.1",
+    port: 6379
+  }),
+  secret: "kitty",
   saveUninitialized: true,
   resave: true
 }));

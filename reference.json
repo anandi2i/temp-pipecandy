@@ -1,6 +1,10 @@
 {
-  "session_store" : {
-    "reference_url" : "//http://afshinm.name/redis-as-session-store-for-expressjs-passportjs",
-    "npm" : "connect-redis"
+  "session_store": {
+    "reference_url": "//http://afshinm.name/redis-as-session-store-for-expressjs-passportjs",
+    "npm": "connect-redis"
+  },
+  "eslint": {
+    "reference_url": "http://eslint.org/docs/rules/",
+    "npm": "[eslint, eslint-config-defaults, babel-eslint, eslint-plugin-react]"
   }
 }

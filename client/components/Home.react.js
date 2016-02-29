@@ -1,13 +1,20 @@
 var React = require("react");
+import UserStore from "../stores/UserStore";
 
 var Home = React.createClass({
+  getInitialState: function() {
+    return {
+      userName: UserStore.getUser()
+    };
+  },
   render: function() {
     return (
       <div>
         <div className="container">
           <div className="tag-line">
             <div className="tag-head">
-              Hi Ashwin! What do you want to do today?
+              Hi {this.state.userName ? this.state.userName.name : "Ashwin"}!
+              What do you want to do today?
             </div>
             <div className="row tab-hd-btn">
               <div className="col s12 m12 l6 right-align m-t-47">

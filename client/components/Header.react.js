@@ -1,5 +1,4 @@
 import React from "react";
-import UserStore from "../stores/UserStore";
 import UserAction from "../actions/UserAction";
 import autobind from "autobind-decorator";
 
@@ -36,13 +35,13 @@ class Header extends React.Component {
                   </a>
                 </li>
                 <li className="user-pic">
-                  <a className="dropdown-button" data-activates='userDropDown' href="#">
+                  <a className="dropdown-button" data-activates="userDropDown" href="#">
                     <img src="/images/user.png" width="30px" alt="" className="circle" />
                     <i className="mdi mdi-chevron-down"></i>
                   </a>
                 </li>
               </ul>
-              <ul id='userDropDown' className='dropdown-content'>
+              <ul id="userDropDown" className="dropdown-content">
                 <li><a href="#!">one</a></li>
                 <li><a href="#!">two</a></li>
                 <li><a href="#!">three</a></li>

@@ -33,7 +33,7 @@ const UserStore = _.extend({}, EventEmitter.prototype, {
 
 // Register callback with AppDispatcher
 AppDispatcher.register(function(payload) {
-  const { action } = payload;
+  const {action} = payload;
   switch (action.actionType) {
     case Constants.REGISTER:
       UserApi.register(action.data).then((response) => {

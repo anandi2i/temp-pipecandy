@@ -7,20 +7,20 @@ const UserAction = {
     AppDispatcher.handleAction({
       actionType: Constants.REGISTER,
       data: user
-    })
+    });
   },
 
   login(user) {
     AppDispatcher.handleAction({
       actionType: Constants.LOGIN,
       data: user
-    })
+    });
   },
 
   logout() {
     AppDispatcher.handleAction({
       actionType: Constants.LOGOUT
-    })
+    });
   }
 };
 

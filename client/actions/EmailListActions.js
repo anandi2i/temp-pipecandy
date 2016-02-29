@@ -6,7 +6,7 @@ const EmailListActions = {
   getAllEmailList: function() {
     AppDispatcher.handleAction({
       actionType: Constants.EMAIL_LIST
-    })
+    });
   }
 };
 

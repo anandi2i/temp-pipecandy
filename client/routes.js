@@ -1,7 +1,6 @@
 import React from "react";
 import {Route, DefaultRoute} from "react-router";
-
-import AppContainer from "./components/AppContainer.react"
+import AppContainer from "./components/AppContainer.react";
 import Index from "./components/Index.react";
 import Login from "./components/Login.react";
 import Signup from "./components/Signup.react";

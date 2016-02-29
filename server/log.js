@@ -1,6 +1,6 @@
-var winston = require('winston');
-var fs = require('fs');
-var dir = 'log';
+var winston = require("winston");
+var fs = require("fs");
+var dir = "log";
 
 if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
@@ -9,14 +9,14 @@ if (!fs.existsSync(dir)){
 var logger = new (winston.Logger)({
   transports: [
     new (winston.transports.File)({
-      name: 'info-file',
-      filename: 'log/info.log',
-      level: 'info'
+      name: "info-file",
+      filename: "log/info.log",
+      level: "info"
     }),
     new (winston.transports.File)({
-      name: 'error-file',
-      filename: 'log/error.log',
-      level: 'error'
+      name: "error-file",
+      filename: "log/error.log",
+      level: "error"
     })
   ]
 });

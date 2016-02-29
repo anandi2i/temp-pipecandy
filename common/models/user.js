@@ -1,42 +1,43 @@
 module.exports = function(user){
-  user.afterRemote('login', function(context, accessToken, next) {
+  const milliSec = 1000;
+  user.afterRemote("login", function(context, accessToken, next) {
     let res = context.res;
     let req = context.req;
-    if (accessToken != null) {
-      if (accessToken.id != null) {
-        res.cookie('access_token', accessToken.id, {
+    if (accessToken !== null) {
+      if (accessToken.id !== null) {
+        res.cookie("access_token", accessToken.id, {
           signed: req.signedCookies ? true : false,
-          maxAge: 1000 * accessToken.ttl
+          maxAge: milliSec * accessToken.ttl
         });
-        res.cookie('userId', accessToken.userId.toString(), {
+        res.cookie("userId", accessToken.userId.toString(), {
           signed: req.signedCookies ? true : false,
-          maxAge: 1000 * accessToken.ttl
+          maxAge: milliSec * accessToken.ttl
         });
       }
     }
     return next();
   });
 
-  user.afterRemote('create', function(context, userData, next) {
+  user.afterRemote("create", function(context, userData, next) {
     let res = context.res;
     let req = context.req;
     user.login({
       email: req.body.email,
       password: req.body.password
-    }, 'user' , function (err, accessToken) {
+    }, "user", function (err, accessToken) {
       if (err) {
-        logger.error('Problem in creating access token', err.message);
-        return res.redirect('back');
+        logger.error("Problem in creating access token", err.message);
+        return res.redirect("back");
       }
-      if (accessToken != null) {
-        if (accessToken.id != null) {
-          res.cookie('access_token', accessToken.id, {
+      if (accessToken !== null) {
+        if (accessToken.id !== null) {
+          res.cookie("access_token", accessToken.id, {
             signed: req.signedCookies ? true : false,
-            maxAge: 1000 * accessToken.ttl
+            maxAge: milliSec * accessToken.ttl
           });
-          res.cookie('userId', accessToken.userId.toString(), {
+          res.cookie("userId", accessToken.userId.toString(), {
             signed: req.signedCookies ? true : false,
-            maxAge: 1000 * accessToken.ttl
+            maxAge: milliSec * accessToken.ttl
           });
         }
       }
@@ -44,11 +45,10 @@ module.exports = function(user){
     });
   });
 
-  user.afterRemote('logout', function(context, result, next) {
+  user.afterRemote("logout", function(context, result, next) {
     let res = context.res;
-    let req = context.req;
-    res.clearCookie('access_token');
-    res.clearCookie('userId');
+    res.clearCookie("access_token");
+    res.clearCookie("userId");
     return next();
   });
 

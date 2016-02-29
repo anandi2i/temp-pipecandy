@@ -1,12 +1,11 @@
 import React from "react";
 import Autosuggest from "react-autosuggest";
+import autobind from "autobind-decorator";
 import EmailListActions from "../actions/EmailListActions";
 import EmailListStore from "../stores/EmailListStore";
-import autobind from "autobind-decorator";
 
-// https://developer.mozilla.org/en/docs/Web/JavaScript/Guide/Regular_Expressions#Using_Special_Characters
 function escapeRegexCharacters(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g,/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, /[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function getSuggestions(value, allEmailList) {
@@ -27,7 +26,7 @@ function getEmailListFromStore() {
 class EmailList extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
+    this.state={
       value: "",
       suggestions: getSuggestions(""),
       emailList: getEmailListFromStore()
@@ -51,14 +50,14 @@ class EmailList extends React.Component {
   }
 
   @autobind
-  onChange(event, { newValue, method }) {
+  onChange(event, {newValue, method}) {
     this.setState({
       value: newValue
     });
   }
 
   @autobind
-  onSuggestionsUpdateRequested({ value }) {
+  onSuggestionsUpdateReq({value}) {
     this.setState({
       suggestions: getSuggestions(value, this.state.emailList)
     });
@@ -67,7 +66,7 @@ class EmailList extends React.Component {
   @autobind
   renderSuggestion(suggestion) {
     return (
-      <span>{suggestion.name}</span>
+      <span>{ suggestion.name}</span>
     );
   }
 
@@ -77,8 +76,8 @@ class EmailList extends React.Component {
   }
 
   render() {
-    const { value, suggestions } = this.state;
-    const inputProps = {
+    const {value, suggestions} = this.state;
+    const inputProps={
       placeholder: "Ex: List of CIOs I met at the Presidential Dinner",
       id: "list",
       value,
@@ -94,22 +93,30 @@ class EmailList extends React.Component {
             </div>
           </div>
           <div className="create-list-container">
-            <h3>Name your new list (or) select an existing list by typing the list name to update it</h3>
+            <h3>
+              Name your new list (or) select an existing list by typing the
+              list name to update it
+            </h3>
             <div className="row list-container">
               <div className="input-field">
                 <Autosuggest suggestions={suggestions}
-                  onSuggestionsUpdateRequested={this.onSuggestionsUpdateRequested}
+                  onSuggestionsUpdateRequested={this.onSuggestionsUpdateReq}
                   getSuggestionValue={this.getSuggestionValue}
                   renderSuggestion={this.renderSuggestion}
                   inputProps={inputProps} />
               </div>
               <div className="row r-btn-container">
-                <input type="button" className="btn red p-1-btn" value="Upload csv File" />
-                <input type="button" className="btn blue" value="Add subscribers one by one" />
+                <input type="button" className="btn red p-1-btn"
+                  value="Upload csv File" />
+                <input type="button" className="btn blue"
+                  value="Add subscribers one by one" />
               </div>
             </div>
             <div className="hint-box m-t-50">
-              A .csv file is just like an MS Excel file. If you have your list in MS Excel or a similar format, open it and save it as a .csv file. Please make all the changes you need to make before converting to .csv format (because .csv format does not save any
+              A .csv file is just like an MS Excel file. If you have your list
+              in MS Excel or a similar format, open it and save it as a .csv
+              file. Please make all the changes you need to make before
+              converting to .csv format (because .csv format does not save any
               changes you might make!)
             </div>
           </div>
