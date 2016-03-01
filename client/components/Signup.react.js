@@ -24,7 +24,8 @@ var Signup = React.createClass({
     lastName: validatorUtil.lastName
   },
   render: function() {
-    var pwdStrength = {"_0": 0, "_1": 1, "_2": 2, "_3": 3};
+    const pwdStrength = {"_0": 0, "_1": 1, "_2": 2, "_3": 3};
+    let getScore = passwordStrength(this.state.password).score;
     return (
       <div>
         <div className="center-container">
@@ -85,11 +86,12 @@ var Signup = React.createClass({
                   }
                 </div>
                 <div className="input-field">
-                  <div className="password-box" role="button">
-                    <div className={passwordStrength(this.state.password).score > pwdStrength._3 ? "password-dot password-dot-selected" : "password-dot"}></div>
-                    <div className={passwordStrength(this.state.password).score > pwdStrength._2 ? "password-dot password-dot-selected" : "password-dot"}></div>
-                    <div className={passwordStrength(this.state.password).score > pwdStrength._1 ? "password-dot password-dot-selected" : "password-dot"}></div>
-                    <div className={passwordStrength(this.state.password).score > pwdStrength._0 ? "password-dot password-dot-selected" : "password-dot"}></div>
+                  <div className="password-box tooltipped" data-position="bottom"
+                    data-tooltip="Password strength" >
+                    <div className={getScore > pwdStrength._3 ? "active" : null}></div>
+                    <div className={getScore > pwdStrength._2 ? "active" : null}></div>
+                    <div className={getScore > pwdStrength._1 ? "active" : null}></div>
+                    <div className={getScore > pwdStrength._0 ? "active" : null}></div>
                   </div>
                   <input id="password" type="password"
                     className={

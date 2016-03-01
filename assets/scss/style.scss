@@ -112,19 +112,20 @@ body {
       margin-top: -10px;
     }
     .password-box {
-      margin-bottom: -30px;
+      position: absolute;
+      margin-top: 10px !important;
       float: right;
-      display: inline;
-    }
-    .password-dot {
-      right: 1px;
-      height: 3px;
-      width: 4px;
-      margin: 2px;
-      background-color: $white;
-    }
-    .password-dot-selected {
-      background-color: $blue-clr;
+      margin-left: calc(100% - 4px);
+      div {
+        height: 4px;
+        width: 4px;
+        margin: 2px;
+        border-radius: 2px;
+        background-color: $white;
+        &.active {
+          background-color: $blue-clr;
+        }
+      }
     }
     .input-field {
       width: 370px;
@@ -398,7 +399,6 @@ body {
 .p-1-btn {
   margin-right: 20px;
 }
-
 /*********************
   Warning Class
 **********************/
