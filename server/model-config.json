@@ -16,7 +16,10 @@
   },
   "user": {
     "dataSource": "psqlDs",
-    "public": true
+    "public": true,
+    "options": {
+      "emailVerificationRequired": true
+    }
   },
   "accessToken": {
     "dataSource": "psqlDs",
@@ -49,5 +52,8 @@
   "Reviewer": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "Email": {
+    "dataSource": "Email"
   }
 }

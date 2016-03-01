@@ -39,7 +39,7 @@ AppDispatcher.register(function(payload) {
       UserApi.register(action.data).then((response) => {
         _user = response.data;
         UserStore.emitChange();
-        router.transitionTo("/home");
+        router.transitionTo("/response");
       });
       break;
     case Constants.LOGIN:

@@ -13,7 +13,7 @@ $( document ).ready(function() {
     $("#mainNav ul li a").removeClass("active");
     $(this).addClass("active");
   });
-  $(".tooltipped").however(function() {
+  $(".tooltipped").on("however", function() {
     $(".tooltipped").tooltip();
   });
 });

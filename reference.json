@@ -6,5 +6,9 @@
   "eslint": {
     "reference_url": "http://eslint.org/docs/rules/",
     "npm": "[eslint, eslint-config-defaults, babel-eslint, eslint-plugin-react]"
+  },
+  "smtp_gmail_config" : {
+    "url_1": "https://www.google.com/settings/security/lesssecureapps",
+    "url_2": "https://accounts.google.com/b/0/DisplayUnlockCaptcha"
   }
 }

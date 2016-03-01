@@ -7,6 +7,8 @@ import Signup from "./components/Signup.react";
 import Home from "./components/Home.react";
 import Reviewer from "./components/Reviewer.react";
 import EmailList from "./components/EmailList.react";
+import Response from "./components/Response.react";
+import EmailVerification from "./components/EmailVerification.react";
 
 const routes = (
   <Route handler={AppContainer}>
@@ -15,6 +17,8 @@ const routes = (
     <Route path="login" handler={Login} />
     <Route path="signup" handler={Signup} />
     <Route path="emaillist" handler={EmailList} />
+    <Route path="response" handler={Response} />
+    <Route path="email-verified" handler={EmailVerification} />
     <DefaultRoute handler={Index} />
   </Route>
 );

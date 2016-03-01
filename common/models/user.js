@@ -1,3 +1,6 @@
+import path from "path";
+import logger from "../../server/log";
+
 module.exports = function(user){
   const milliSec = 1000;
   user.afterRemote("login", function(context, accessToken, next) {
@@ -18,30 +21,23 @@ module.exports = function(user){
     return next();
   });
 
-  user.afterRemote("create", function(context, userData, next) {
-    let res = context.res;
-    let req = context.req;
-    user.login({
-      email: req.body.email,
-      password: req.body.password
-    }, "user", function (err, accessToken) {
+  user.afterRemote("create", function(context, user, next) {
+    var options = {
+      type: "email",
+      to: user.email,
+      from: "pipecandi@gmail.com",
+      subject: "Thanks for registering with Pipecandy.",
+      template: path.resolve(__dirname, "../../server/views/verify.ejs"),
+      redirect: "/verified",
+      user: user
+    };
+
+    user.verify(options, function(err, response, next) {
       if (err) {
-        logger.error("Problem in creating access token", err.message);
-        return res.redirect("back");
+        logger.error("Error to sending email", user.email);
       }
-      if (accessToken !== null) {
-        if (accessToken.id !== null) {
-          res.cookie("access_token", accessToken.id, {
-            signed: req.signedCookies ? true : false,
-            maxAge: milliSec * accessToken.ttl
-          });
-          res.cookie("userId", accessToken.userId.toString(), {
-            signed: req.signedCookies ? true : false,
-            maxAge: milliSec * accessToken.ttl
-          });
-        }
-      }
-      return next();
+      logger.info("Verify email send to", response);
+      context.res.end('{"success" : "Signed up successfully", "status" : 200}');
     });
   });
 

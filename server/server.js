@@ -42,8 +42,8 @@ try {
 }
 
 // Setup the view engine (html)
-// app.set("view engine", "ejs");
-// app.set("views", "public/views");
+app.set("view engine", "ejs");
+app.set("views", "server/views");
 app.use(loopback.static("public/assets"));
 
 app.start = function() {

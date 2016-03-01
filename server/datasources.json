@@ -10,5 +10,22 @@
     "password": "pgpass",
     "name": "psqlDs",
     "connector": "postgresql"
+  },
+  "Email": {
+    "name": "mail",
+    "defaultForType": "mail",
+    "connector": "mail",
+    "transports": [
+      {
+        "type": "SMTP",
+        "host": "smtp.gmail.com",
+        "secure": true,
+        "port": 465,
+        "auth": {
+          "user": "pipecandi@gmail.com",
+          "pass": "pipecandy!@#"
+        }
+      }
+    ]
   }
 }

@@ -261,6 +261,12 @@ body {
   text-align: center;
   color: $gray-txt-clr;
 }
+.tag-sm-head {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  color: $gray-txt-clr;
+}
 .campaign-status {
   border: 1px solid $blue-border;
   border-radius: 3px;
@@ -386,6 +392,9 @@ body {
 }
 .m-t-50 {
   margin-top: 50px;
+}
+.m-t-20 {
+  margin-top: 20px;
 }
 .rtt-90-d {
   @include rotate(90deg);
