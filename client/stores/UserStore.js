@@ -40,6 +40,10 @@ AppDispatcher.register(function(payload) {
         _user = response.data;
         UserStore.emitChange();
         router.transitionTo("/response");
+      }, (err)=> {
+        //TODO: Needs to be changed upon getting UI
+        const timeToShow = 4000;
+        Materialize.toast(err.data.error.message, timeToShow);
       });
       break;
     case Constants.LOGIN:

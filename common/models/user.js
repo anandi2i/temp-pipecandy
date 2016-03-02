@@ -1,5 +1,7 @@
 import path from "path";
 import logger from "../../server/log";
+import publicEmailProviders from "../../server/utils/public-email-providers";
+import _ from "underscore";
 
 module.exports = function(user){
   const milliSec = 1000;
@@ -17,6 +19,18 @@ module.exports = function(user){
           maxAge: milliSec * accessToken.ttl
         });
       }
+    }
+    return next();
+  });
+
+  /**
+   * Check if the given email id exists under public email providers
+   * Executes before creating a user
+   */
+  user.beforeRemote("create", function(context, data, next) {
+    let domainName = context.req.body.email.split("@")[1];
+    if(_.contains(publicEmailProviders, domainName)) {
+      next(new Error("Not a valid corporate email address"));
     }
     return next();
   });
