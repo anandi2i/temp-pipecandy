@@ -3,6 +3,7 @@ import strategy from "joi-validation-strategy";
 import validation from "react-validation-mixin";
 import validatorUtil from "../utils/ValidationMessages";
 import UserAction from "../actions/UserAction";
+import UserStore from "../stores/UserStore";
 
 var Login = React.createClass({
   getInitialState: function() {
@@ -17,6 +18,12 @@ var Login = React.createClass({
   validatorTypes : {
     email: validatorUtil.email,
     password: validatorUtil.password
+  },
+  componentDidMount: function() {
+    UserStore.addChangeListener(this._onChange);
+  },
+  componentWillUnmount: function() {
+    UserStore.removeChangeListener(this._onChange);
   },
   render: function() {
     return (
@@ -59,6 +66,7 @@ var Login = React.createClass({
                       : null
                   }
                 </div>
+                <div id="toast-container"></div>
                 <button type="submit" className="btn auth-btn login-btn">
                   Login
                 </button>
@@ -102,6 +110,13 @@ var Login = React.createClass({
       }
     };
     this.props.validate(onValidate);
+  },
+  _onChange() {
+    let error = UserStore.getError();
+    const timeToShow = 4000;
+    if(error) {
+      Materialize.toast(error, timeToShow);
+    }
   }
 });
 

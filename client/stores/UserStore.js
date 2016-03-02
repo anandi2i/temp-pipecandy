@@ -4,8 +4,10 @@ import Constants from "../constants/Constants";
 import _ from "underscore";
 import UserApi from "../API/UserApi";
 import router from "../RouteContainer";
+import ErrorMessages from "../utils/ErrorMessages";
 
 let _user = {};
+let _error = "";
 
 // Extend User Store with EventEmitter to add eventing capabilities
 const UserStore = _.extend({}, EventEmitter.prototype, {
@@ -27,6 +29,10 @@ const UserStore = _.extend({}, EventEmitter.prototype, {
 
   getUser: function() {
     return _user;
+  },
+
+  getError: function() {
+    return _error;
   }
 
 });
@@ -38,12 +44,13 @@ AppDispatcher.register(function(payload) {
     case Constants.REGISTER:
       UserApi.register(action.data).then((response) => {
         _user = response.data;
+        _error = "";
         UserStore.emitChange();
         router.transitionTo("/response");
       }, (err)=> {
-        //TODO: Needs to be changed upon getting UI
-        const timeToShow = 4000;
-        Materialize.toast(err.data.error.message, timeToShow);
+        _user = {};
+        _error = ErrorMessages[err.data.error.name];
+        UserStore.emitChange();
       });
       break;
     case Constants.LOGIN:
@@ -51,6 +58,10 @@ AppDispatcher.register(function(payload) {
         _user = response.data.userData;
         UserStore.emitChange();
         router.transitionTo("/home");
+      }, (err)=> {
+        _user = {};
+        _error = ErrorMessages[err.data.error.code];
+        UserStore.emitChange();
       });
       break;
     case Constants.USER_DETAIL:

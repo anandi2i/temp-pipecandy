@@ -144,3 +144,24 @@ h3{
     font-size: 14px;
   }
 }
+@media only screen and (min-width: 0px) {
+  #toast-container{
+    left: 0;
+    bottom: 0;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    .toast {
+      display: block;
+      background-color: $white;
+      box-shadow: none;
+      color: $red-clr;
+      float: none;
+      padding: 0px 15px;
+      min-height: initial;
+      word-break: break-word;
+    }
+  }
+}

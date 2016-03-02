@@ -4,6 +4,7 @@ import validation from "react-validation-mixin";
 import passwordStrength from "zxcvbn";
 import validatorUtil from "../utils/ValidationMessages";
 import UserAction from "../actions/UserAction";
+import UserStore from "../stores/UserStore";
 
 var Signup = React.createClass({
   getInitialState: function() {
@@ -22,6 +23,12 @@ var Signup = React.createClass({
     email: validatorUtil.email,
     password: validatorUtil.password,
     lastName: validatorUtil.lastName
+  },
+  componentDidMount: function() {
+    UserStore.addChangeListener(this._onChange);
+  },
+  componentWillUnmount: function() {
+    UserStore.removeChangeListener(this._onChange);
   },
   render: function() {
     const pwdStrength = {"_0": 0, "_1": 1, "_2": 2, "_3": 3};
@@ -114,6 +121,7 @@ var Signup = React.createClass({
                     id="filled-in-box" defaultChecked="checked" />
                   <label htmlFor="filled-in-box">Show password</label>
                 </p>
+                <div id="toast-container"></div>
                 <button type="submit" className="btn auth-btn login-btn" >
                   sign up
                 </button>
@@ -147,6 +155,13 @@ var Signup = React.createClass({
       }
     };
     this.props.validate(onValidate);
+  },
+  _onChange() {
+    let error = UserStore.getError();
+    const timeToShow = 4000;
+    if(error) {
+      Materialize.toast(error, timeToShow);
+    }
   }
 });
 

@@ -34,7 +34,10 @@ module.exports = function(user){
   user.beforeRemote("create", function(context, data, next) {
     let domainName = context.req.body.email.split("@")[1];
     if(_.contains(publicEmailProviders, domainName)) {
-      next(new Error("Not a valid corporate email address"));
+      let error = new Error();
+      error.message = "Not a valid corporate email address";
+      error.name = "InvalidCorporateEmail";
+      next(error);
     }
     return next();
   });
