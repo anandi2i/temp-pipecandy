@@ -48,18 +48,24 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.LOGIN:
       UserApi.login(action.data).then((response) => {
-        _user = response.data;
+        _user = response.data.userData;
         UserStore.emitChange();
         router.transitionTo("/home");
       });
       break;
-      case Constants.LOGOUT:
-        UserApi.logout().then((response) => {
-          _user = "";
-          UserStore.emitChange();
-          router.transitionTo("/");
-        });
-        break;
+    case Constants.USER_DETAIL:
+      UserApi.getUserDetail().then((response) => {
+        _user = response.data;
+        UserStore.emitChange();
+      });
+      break;
+    case Constants.LOGOUT:
+      UserApi.logout().then((response) => {
+        _user = "";
+        UserStore.emitChange();
+        router.transitionTo("/");
+      });
+      break;
     default:
       return true;
   }

@@ -17,6 +17,12 @@ const UserAction = {
     });
   },
 
+  getUserDetail() {
+    AppDispatcher.handleAction({
+      actionType: Constants.USER_DETAIL
+    });
+  },
+
   logout() {
     AppDispatcher.handleAction({
       actionType: Constants.LOGOUT

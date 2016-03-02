@@ -15,12 +15,16 @@ module.exports = function(user){
           maxAge: milliSec * accessToken.ttl
         });
         res.cookie("userId", accessToken.userId.toString(), {
-          signed: req.signedCookies ? true : false,
+          signed: req.signedCookies ? false : false,
           maxAge: milliSec * accessToken.ttl
         });
       }
     }
-    return next();
+    //console.log(res.cookie("userId").userId);
+    user.findById( accessToken.userId, function (err, instance) {
+      accessToken.userData = instance;
+      return next();
+    });
   });
 
   /**

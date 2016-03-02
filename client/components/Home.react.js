@@ -7,13 +7,26 @@ var Home = React.createClass({
       userName: UserStore.getUser()
     };
   },
+  componentDidMount: function() {
+    UserStore.addChangeListener(this.onChange);
+  },
+  onChange: function() {
+    this.setState({
+      userName: UserStore.getUser()
+    });
+  },
   render: function() {
     return (
       <div>
         <div className="container">
           <div className="tag-line">
             <div className="tag-head">
-              Hi {this.state.userName ? this.state.userName.name : "Ashwin"}!
+              Hi&nbsp;
+              {
+                this.state.userName
+                  ? this.state.userName.firstName
+                  : "Ashwin"
+              }!
               What do you want to do today?
             </div>
             <div className="row tab-hd-btn">
