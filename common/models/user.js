@@ -43,14 +43,17 @@ module.exports = function(user) {
   });
 
   user.afterRemote("create", function(context, user, next) {
+    const emailTemplate = "../../server/views/email-templates/verify.ejs";
     var options = {
       type: "email",
       to: user.email,
       from: "pipecandi@gmail.com",
       subject: "Thanks for registering with Pipecandy.",
-      template: path.resolve(__dirname, "../../server/views/verify.ejs"),
+      template: path.resolve(__dirname, emailTemplate),
       redirect: "/verified",
-      user: user
+      user: user,
+      fname: user.firstName,
+      text: "{href}"
     };
 
     user.verify(options, function(err, response, next) {

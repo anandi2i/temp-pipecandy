@@ -7,10 +7,7 @@ var EmailVerification = React.createClass({
         <div className="container">
           <div className="tag-line">
             <div className="tag-head">
-              Registration verified successfully
-            </div>
-            <div className="tag-sm-head m-t-20">
-              You are now ready to <a href="/#/login">Login</a>.
+              Hurray! We’ve verified your email address!
             </div>
           </div>
         </div>

@@ -7,14 +7,8 @@ var Response = React.createClass({
         <div className="container">
           <div className="tag-line">
             <div className="tag-head">
-              Signed up successfully
-            </div>
-            <div className="tag-sm-head m-t-20">
-              Please check your email and click on the verification link before
-              logging in.
-            </div>
-            <div className="center">
-              <a className="btn blue m-t-50" href="/#/login" >Go to Login</a>
+              Super. We’ve just sent an email. Click on the link in it and
+              confirm your email address. Could you please?
             </div>
           </div>
         </div>
