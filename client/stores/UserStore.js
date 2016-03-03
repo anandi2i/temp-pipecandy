@@ -77,6 +77,16 @@ AppDispatcher.register(function(payload) {
         router.transitionTo("/");
       });
       break;
+    case Constants.USER_UPDATE:
+      UserApi.userUpdate(action.data).then((response) => {
+        _user = response.data;
+      }, (err) => {
+        if(err.data.error){
+          _error = ErrorMessages[err.data.error.name];
+          UserStore.emitChange();
+        }
+      });
+      break;
     default:
       return true;
   }

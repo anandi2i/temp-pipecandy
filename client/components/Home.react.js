@@ -1,4 +1,4 @@
-var React = require("react");
+import React from "react";
 import UserStore from "../stores/UserStore";
 
 var Home = React.createClass({
@@ -25,7 +25,7 @@ var Home = React.createClass({
               {
                 this.state.userName
                   ? this.state.userName.firstName
-                  : "Ashwin"
+                  : "There"
               }!
               What do you want to do today?
             </div>

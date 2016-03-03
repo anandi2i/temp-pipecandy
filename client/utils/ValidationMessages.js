@@ -28,6 +28,14 @@ var validatorObj = {
       }
     }
   }),
+  newPassword: Joi.string().allow("").min(minPassLength).max(maxPassLength)
+    .label("Password").options({
+    language: {
+      any: {
+        empty: "!! Oops. Seems like you forgot to fill your password!",
+      }
+    }
+  }),
   lastName: Joi.string().alphanum().label("Last Name").options({
     language: {
       any: {

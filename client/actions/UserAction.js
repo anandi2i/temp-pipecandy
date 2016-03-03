@@ -27,6 +27,13 @@ const UserAction = {
     AppDispatcher.handleAction({
       actionType: Constants.LOGOUT
     });
+  },
+
+  userUpdate(user){
+    AppDispatcher.handleAction({
+      actionType: Constants.USER_UPDATE,
+      data: user
+    });
   }
 };
 

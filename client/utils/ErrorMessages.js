@@ -3,6 +3,8 @@ const ErrorMessages = {
     "Could you try again, please?",
   "ValidationError": "Oh, no! Somebody had registered already " +
     "with that email id. If that's you try 'Forgot Password'!",
-  "InvalidCorporateEmail": "Please provide valid corporate email"
+  "InvalidCorporateEmail": "Please provide valid corporate email",
+  "InvalidPassChange": "Please enter valid password",
+  "ErrorInUpdatePass": "Error in update password"
 };
 export default ErrorMessages;
