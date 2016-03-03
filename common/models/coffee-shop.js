@@ -1,4 +1,4 @@
-var utils = require("../../node_modules/loopback/lib/utils");
+import utils from "../../node_modules/loopback/lib/utils";
 module.exports = function(CoffeeShop) {
 
 CoffeeShop.status = function(cb) {

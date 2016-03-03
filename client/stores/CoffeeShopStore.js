@@ -1,8 +1,7 @@
-var AppDispatcher = require("../dispatcher/AppDispatcher");
-var EventEmitter = require("events").EventEmitter;
-var Constants = require("../constants/Constants");
-var _ = require("underscore");
-
+import AppDispatcher from "../dispatcher/AppDispatcher";
+import {EventEmitter} from "events";
+import Constants from "../constants/Constants";
+import _ from "underscore";
 import {CoffeeShopApi} from "../utils/API";
 
 var _coffeeShops = "";

@@ -1,6 +1,6 @@
-var WebpackDevServer = require("webpack-dev-server");
-var webpack = require("webpack");
-var config = require("./webpack.config.dev");
+import WebpackDevServer from "webpack-dev-server";
+import webpack from "webpack";
+import config from "./webpack.config.dev";
 var defaultPort = 3001;
 
 var server = new WebpackDevServer(webpack(config), {

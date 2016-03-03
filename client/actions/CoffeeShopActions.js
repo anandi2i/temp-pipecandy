@@ -1,5 +1,5 @@
-var AppDispatcher = require("../dispatcher/AppDispatcher");
-var Constants = require("../constants/Constants");
+import AppDispatcher from "../dispatcher/AppDispatcher";
+import Constants from "../constants/Constants";
 
 // Define action methods
 var CoffeeShopActions = {

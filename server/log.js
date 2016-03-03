@@ -1,5 +1,5 @@
-var winston = require("winston");
-var fs = require("fs");
+import winston from "winston";
+import fs from "fs";
 var dir = "log";
 
 if (!fs.existsSync(dir)){
