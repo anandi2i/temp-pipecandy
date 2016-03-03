@@ -4,6 +4,7 @@ import validation from "react-validation-mixin";
 import validatorUtil from "../utils/ValidationMessages";
 import UserAction from "../actions/UserAction";
 import UserStore from "../stores/UserStore";
+import {Link} from "react-router";
 
 var Login = React.createClass({
   getInitialState: function() {
@@ -71,7 +72,7 @@ var Login = React.createClass({
                   Login
                 </button>
                 <div className="auth-cnter-pnl">
-                  <a href="#" className="left">Forgot password?</a>
+                  <Link to="/#" className="left">Forgot password?</Link>
                   <span className="right">
                     <input type="checkbox" className="filled-in"
                       id="filled-in-box" defaultChecked="checked" />

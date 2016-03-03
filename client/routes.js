@@ -18,6 +18,7 @@ if(document.cookie) {
 
 const routes = (
   <Route path="/" component={AppContainer}>
+    <IndexRoute component={Index} />
     <Route path="reviewers" component={Reviewer} />
     <Route path="home" component={Home} />
     <Route path="login" component={Login} />
@@ -26,7 +27,6 @@ const routes = (
     <Route path="response" component={Response} />
     <Route path="email-verified" component={EmailVerification} />
     <Route path="profile" component={Profile} />
-    <IndexRoute component={Index} />
   </Route>
 );
 

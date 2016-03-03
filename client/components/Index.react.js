@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from "react-router";
 
 var Index = React.createClass({
   render: function() {
@@ -9,19 +10,19 @@ var Index = React.createClass({
             <div className="auth-container">
               <img className="auth-logo" src="/images/logo.png" />
               <div className="auth-form">
-                <a className="btn auth-btn linkedin-btn" href="/auth/linkedin">
+                <Link className="btn auth-btn linkedin-btn" to="/auth/linkedin">
                   <i className="left"><span className="linkedin-icon" /></i>
                   Sign in with linkedin
-                </a>
-                <a className="btn auth-btn google-btn" href="/auth/google">
+                </Link>
+                <Link className="btn auth-btn google-btn" to="/auth/google">
                   <i className="left"><span className="google-icon" /></i>
                   Sign in with Google
-                </a>
-                <a className="btn auth-btn signin-btn" href="/#/login">
+                </Link>
+                <Link className="btn auth-btn signin-btn" to="/login">
                   Sign with your email
-                </a>
+                </Link>
               </div>
-              <a href="/#/signup">New user? Click here</a>
+              <Link to="/signup">New user? Click here</Link>
             </div>
           </div>
         </div>

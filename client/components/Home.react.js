@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from "react-router";
 import UserStore from "../stores/UserStore";
 
 var Home = React.createClass({
@@ -31,15 +32,15 @@ var Home = React.createClass({
             </div>
             <div className="row tab-hd-btn">
               <div className="col s12 m12 l6 right-align m-t-47">
-                <a className="btn lg-btn-dflt red" href="/">
+                <Link className="btn lg-btn-dflt red" to="/">
                   <i className="left mdi mdi-filter"></i> Create a Campaign
                   <i className="right mdi mdi-chevron-down"></i>
-                </a>
+                </Link>
               </div>
               <div className="col s12 m12 l6 left-align m-t-47">
-                <a className="btn lg-btn-dflt blue" href="/">
+                <Link className="btn lg-btn-dflt blue" to="/">
                   Go to your Dashboard
-                </a>
+                </Link>
               </div>
             </div>
           </div>

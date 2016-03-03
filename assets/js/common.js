@@ -9,10 +9,6 @@ $( document ).ready(function() {
       $(".auth-container").css("margin-top", "50px");
     }
   }
-  $("#mainNav ul li a").click(function() {
-    $("#mainNav ul li a").removeClass("active");
-    $(this).addClass("active");
-  });
   $(".tooltipped").on("however", function() {
     $(".tooltipped").tooltip();
   });

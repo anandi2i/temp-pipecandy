@@ -3,6 +3,7 @@ import Autosuggest from "react-autosuggest";
 import autobind from "autobind-decorator";
 import EmailListActions from "../actions/EmailListActions";
 import EmailListStore from "../stores/EmailListStore";
+import {Link} from "react-router";
 
 function escapeRegexCharacters(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, /[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -89,7 +90,7 @@ class EmailList extends React.Component {
           <div className="row sub-nav">
             <div className="head">Let’s create a list</div>
             <div className="sub-head">
-              <a href="#">View lists</a>
+              <Link to="/#">View lists</Link>
             </div>
           </div>
           <div className="create-list-container">

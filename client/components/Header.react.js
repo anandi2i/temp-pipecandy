@@ -1,6 +1,7 @@
 import React from "react";
 import UserAction from "../actions/UserAction";
 import autobind from "autobind-decorator";
+import {Link} from "react-router";
 
 class Header extends React.Component {
   constructor(props) {
@@ -19,42 +20,42 @@ class Header extends React.Component {
           <div className="top-candy-bdr"></div>
           <nav id="mainNav">
             <div className="nav-wrapper">
-              <a href="/#/home" className="brand-logo">
+              <Link to="/home" className="brand-logo" activeClassName="active">
                 <img src="/images/logo.png" />
-              </a>
+              </Link>
               <ul className="right hide-on-med-and-down">
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="#">Campaigns</a></li>
-                <li><a href="/#/emaillist">Email Lists</a></li>
-                <li><a href="#">Pricing</a></li>
-                <li><a href="#">API</a></li>
-                <li><a onClick={this.logout} >Logout</a></li>
+                <li><Link to="/" activeClassName="active">Dashboard</Link></li>
+                <li><Link to="/" activeClassName="active">Campaigns</Link></li>
+                <li><Link to="/emaillist" activeClassName="active">Email Lists</Link></li>
+                <li><Link to="/" activeClassName="active">Pricing</Link></li>
+                <li><Link to="/" activeClassName="active">API</Link></li>
+                <li><Link onClick={this.logout} to="/" activeClassName="active">Logout</Link></li>
                 <li className="alarm">
-                  <a href="#">
+                  <Link to="/" activeClassName="active">
                     <i className="mdi mdi-bell-outline" ><div className="alarm-info">22</div></i>
-                  </a>
+                  </Link>
                 </li>
                 <li className="user-pic">
-                  <a className="dropdown-button" data-activates="userDropDown" href="#">
+                  <Link className="dropdown-button" data-activates="userDropDown" to="/profile">
                     <img src="/images/user.png" width="30px" alt="" className="circle" />
                     <i className="mdi mdi-chevron-down"></i>
-                  </a>
+                  </Link>
                 </li>
               </ul>
               <ul id="userDropDown" className="dropdown-content">
-                <li><a href="#!">one</a></li>
-                <li><a href="#!">two</a></li>
-                <li><a href="#!">three</a></li>
+                <li><Link to="/!">one</Link></li>
+                <li><Link to="/!">two</Link></li>
+                <li><Link to="/!">three</Link></li>
               </ul>
               <ul id="main-side-nav" className="side-nav">
-                <li><a href="#">Dashboard</a></li>
-                <li><a href="#">Campaigns</a></li>
-                <li><a href="/emaillist">Email Lists</a></li>
-                <li><a href="#">Pricing</a></li>
-                <li><a href="#">API</a></li>
-                <li className="alarm"><a href="#"><i className="mdi mdi-bell-outline" ><div className="alarm-info">22</div></i></a></li>
+                <li><Link to="/" activeClassName="active">Dashboard</Link></li>
+                <li><Link to="/" activeClassName="active">Campaigns</Link></li>
+                <li><Link to="/emaillist" activeClassName="active">Email Lists</Link></li>
+                <li><Link to="/" activeClassName="active">Pricing</Link></li>
+                <li><Link to="/" activeClassName="active">API</Link></li>
+                <li className="alarm"><Link to="/" activeClassName="active"><i className="mdi mdi-bell-outline" ><div className="alarm-info">22</div></i></Link></li>
               </ul>
-              <a href="#" data-activates="main-side-nav" className="side-nav-btn"><i className="mdi mdi-menu"></i></a>
+              <Link to="/" activeClassName="active" data-activates="main-side-nav" className="side-nav-btn"><i className="mdi mdi-menu"></i></Link>
             </div>
           </nav>
         </div>
