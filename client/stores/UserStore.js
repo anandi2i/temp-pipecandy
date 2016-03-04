@@ -3,8 +3,8 @@ import {EventEmitter} from "events";
 import Constants from "../constants/Constants";
 import _ from "underscore";
 import UserApi from "../API/UserApi";
-import router from "../RouteContainer";
 import ErrorMessages from "../utils/ErrorMessages";
+import appHistory from "../RouteContainer";
 
 let _user = {};
 let _error = "";
@@ -46,7 +46,7 @@ AppDispatcher.register(function(payload) {
         _user = response.data;
         _error = "";
         UserStore.emitChange();
-        router.transitionTo("/response");
+        appHistory.push("response");
       }, (err)=> {
         _user = {};
         _error = ErrorMessages[err.data.error.name];
@@ -57,7 +57,7 @@ AppDispatcher.register(function(payload) {
       UserApi.login(action.data).then((response) => {
         _user = response.data.userData;
         UserStore.emitChange();
-        router.transitionTo("/home");
+        appHistory.push("home");
       }, (err)=> {
         _user = {};
         _error = ErrorMessages[err.data.error.code];
@@ -74,7 +74,7 @@ AppDispatcher.register(function(payload) {
       UserApi.logout().then((response) => {
         _user = "";
         UserStore.emitChange();
-        router.transitionTo("/");
+        appHistory.push("home");
       });
       break;
     case Constants.USER_UPDATE:

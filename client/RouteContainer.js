@@ -1,5 +1,6 @@
-import Router from "react-router";
-import routes from "./routes";
+import {useRouterHistory} from "react-router";
+import {createHashHistory} from "history";
 
-const router = Router.create({routes});
-export default router;
+const appHistory = useRouterHistory(createHashHistory)({queryKey: false});
+
+export default appHistory;

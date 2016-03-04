@@ -1,5 +1,5 @@
 import React from "react";
-import {Route, DefaultRoute} from "react-router";
+import {Route, IndexRoute} from "react-router";
 import AppContainer from "./components/AppContainer.react";
 import Index from "./components/Index.react";
 import Login from "./components/Login.react";
@@ -17,16 +17,16 @@ if(document.cookie) {
 }
 
 const routes = (
-  <Route handler={AppContainer}>
-    <Route path="reviewers" handler={Reviewer} />
-    <Route path="home" handler={Home} />
-    <Route path="login" handler={Login} />
-    <Route path="signup" handler={Signup} />
-    <Route path="emaillist" handler={EmailList} />
-    <Route path="response" handler={Response} />
-    <Route path="email-verified" handler={EmailVerification} />
-    <Route path="profile" handler={Profile} />
-    <DefaultRoute handler={Index} />
+  <Route path="/" component={AppContainer}>
+    <Route path="reviewers" component={Reviewer} />
+    <Route path="home" component={Home} />
+    <Route path="login" component={Login} />
+    <Route path="signup" component={Signup} />
+    <Route path="emaillist" component={EmailList} />
+    <Route path="response" component={Response} />
+    <Route path="email-verified" component={EmailVerification} />
+    <Route path="profile" component={Profile} />
+    <IndexRoute component={Index} />
   </Route>
 );
 
