@@ -74,7 +74,7 @@ AppDispatcher.register(function(payload) {
       UserApi.logout().then((response) => {
         _user = "";
         UserStore.emitChange();
-        appHistory.push("home");
+        appHistory.push("/");
       });
       break;
     case Constants.USER_UPDATE:

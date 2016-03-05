@@ -1,7 +1,7 @@
 import React from "react";
 import {Route, IndexRoute} from "react-router";
 import AppContainer from "./components/AppContainer.react";
-import Index from "./components/Index.react";
+import IndexPage from "./components/IndexPage.react";
 import Login from "./components/Login.react";
 import Signup from "./components/Signup.react";
 import Home from "./components/Home.react";
@@ -16,18 +16,31 @@ if(document.cookie) {
   UserAction.getUserDetail();
 }
 
+function requireAuth(nextState, replaceState) {
+  const cookie = document.cookie;
+  const userId =
+    cookie.replace(/(?:(?:^|.*;\s*)userId\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  const accessToken =
+    cookie.replace(/(?:(?:^|.*;\s*)access_token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
+  if (!Boolean(userId) && !Boolean(accessToken.length))
+    replaceState({nextPathname: nextState.location.pathname}, "/login");
+}
+
 const routes = (
+<Route>
   <Route path="/" component={AppContainer}>
-    <IndexRoute component={Index} />
+    <IndexRoute component={IndexPage} />
     <Route path="reviewers" component={Reviewer} />
-    <Route path="home" component={Home} />
-    <Route path="login" component={Login} />
-    <Route path="signup" component={Signup} />
-    <Route path="emaillist" component={EmailList} />
+    <Route path="home" component={Home} onEnter={requireAuth}/>
+    <Route path="emaillist" component={EmailList} onEnter={requireAuth}/>
     <Route path="response" component={Response} />
     <Route path="email-verified" component={EmailVerification} />
-    <Route path="profile" component={Profile} />
+    <Route path="profile" component={Profile} onEnter={requireAuth}/>
   </Route>
+  <Route path="login" component={Login} />
+  <Route path="signup" component={Signup} />
+</Route>
 );
 
 module.exports = routes;
