@@ -60,7 +60,8 @@
     "no-catch-shadow": 2,
     "no-delete-var": 2,
     "no-unused-vars": [2, {
-      "args": "none"
+      "args": "none",
+      "varsIgnorePattern": "InJSX"
     }],
     "no-undefined": 2,
     "no-undef-init": 2,

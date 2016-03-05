@@ -4,6 +4,7 @@ import autobind from "autobind-decorator";
 import strategy from "joi-validation-strategy";
 import validation from "react-validation-mixin";
 import AvatarCropper from "react-avatar-cropper";
+import passwordStrength from "zxcvbn";
 import validatorUtil from "../../utils/ValidationMessages";
 import UserStore from "../../stores/UserStore";
 import UserAction from "../../actions/UserAction";
@@ -55,6 +56,7 @@ class Profile extends React.Component {
   }
 
   componentDidMount() {
+    enableToolTipInJSX();
     UserStore.addChangeListener(this._onChange);
   }
 
@@ -132,6 +134,9 @@ class Profile extends React.Component {
       backgroundImage: "url(" + this.state.croppedImg + ")"
     };
     let canvasSize = 300;
+    const pwdStrength = {"_0": 0, "_1": 1, "_2": 2, "_3": 3};
+    let getScore = this.state.newPassword
+      ? passwordStrength(this.state.newPassword).score : pwdStrength._0;
     return (
       <div>
         <div className="container">
@@ -221,6 +226,13 @@ class Profile extends React.Component {
                   }
                 </div>
                 <div className="input-field">
+                  <div className="password-box tooltipped" data-position="bottom"
+                    data-tooltip="Password strength" >
+                    <div className={getScore > pwdStrength._3 ? "active" : null}></div>
+                    <div className={getScore > pwdStrength._2 ? "active" : null}></div>
+                    <div className={getScore > pwdStrength._1 ? "active" : null}></div>
+                    <div className={getScore > pwdStrength._0 ? "active" : null}></div>
+                  </div>
                   <input id="newPass" type="password"
                     className={
                       this.props.isValid("newPassword")

@@ -9,7 +9,11 @@ $(document).ready(function() {
       $(".auth-container").css("margin-top", "50px");
     }
   }
-  $(".tooltipped").on("however", function() {
-    $(".tooltipped").tooltip();
-  });
 });
+
+/* Function should end with InJSX if it is called from JSX
+  To ignore no-unused-vars in eslint */
+
+function enableToolTipInJSX() {
+  $(".tooltipped").tooltip();
+}

@@ -81,6 +81,22 @@ body {
 /***********************************
   authentication page Classes
 ************************************/
+.password-box {
+  position: absolute;
+  margin-top: 10px !important;
+  float: right;
+  margin-left: calc(100% - 4px);
+  div {
+    height: 4px;
+    width: 4px;
+    margin: 2px;
+    border-radius: 2px;
+    background-color: $gray-transparent-lit;
+    &.active {
+      background-color: $blue-clr;
+    }
+  }
+}
 .center-container {
   display: table;
   position: absolute;
@@ -110,22 +126,6 @@ body {
       width: 100%;
       text-align: left;
       margin-top: -10px;
-    }
-    .password-box {
-      position: absolute;
-      margin-top: 10px !important;
-      float: right;
-      margin-left: calc(100% - 4px);
-      div {
-        height: 4px;
-        width: 4px;
-        margin: 2px;
-        border-radius: 2px;
-        background-color: $white;
-        &.active {
-          background-color: $blue-clr;
-        }
-      }
     }
     .input-field {
       width: 370px;
@@ -318,9 +318,9 @@ body {
 /*********************
   User Profile
 **********************/
-.user-profile{
-  #toast-container{
-    .toast{
+.user-profile {
+  #toast-container {
+    .toast {
       float: right;
     }
   }
@@ -334,11 +334,11 @@ body {
   background-size: cover;
   margin-left: auto;
   margin-right: auto;
-  .avatar-edit{
+  .avatar-edit {
     display: none;
   }
-  &:hover{
-    .avatar-edit{
+  &:hover {
+    .avatar-edit {
       background-color: $gray-transparent-clr;
       border: 5px solid $blue-clr;
       height: 200px;
@@ -350,8 +350,8 @@ body {
     }
   }
 }
-#selectAvatar{
-  display:none;
+#selectAvatar {
+  display: none;
 }
 /*********************
   Email List
