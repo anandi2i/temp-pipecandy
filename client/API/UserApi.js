@@ -9,10 +9,7 @@ const UserApi = {
     return api.post("/api/users/login", data);
   },
 
-  getUserDetail() {
-    const cookie = document.cookie;
-    const userId =
-      cookie.replace(/(?:(?:^|.*;\s*)userId\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  getUserDetail(userId) {
     return api.get("/api/users/"+ userId);
   },
 

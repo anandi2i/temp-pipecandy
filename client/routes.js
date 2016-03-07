@@ -10,21 +10,27 @@ import EmailList from "./components/EmailList.react";
 import Response from "./components/Response.react";
 import EmailVerification from "./components/EmailVerification.react";
 import Profile from "./components/user/UserProfile.react";
+import UserApi from "./API/UserApi";
 import UserAction from "./actions/UserAction";
+import UserStore from "./stores/UserStore";
 
-if(document.cookie) {
-  UserAction.getUserDetail();
-}
-
-function requireAuth(nextState, replaceState) {
+function requireAuth(nextState, replace) {
+  if(!($.isEmptyObject(UserStore.getUser()))) {
+    return;
+  }
   const cookie = document.cookie;
   const userId =
     cookie.replace(/(?:(?:^|.*;\s*)userId\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  const accessToken =
-    cookie.replace(/(?:(?:^|.*;\s*)access_token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-
-  if (!Boolean(userId) && !Boolean(accessToken.length))
-    replaceState({nextPathname: nextState.location.pathname}, "/login");
+  if(userId){
+    UserApi.getUserDetail(userId).then((response) => {
+      UserAction.setUserDetail(response.data);
+    }, (err) => {
+      replace("/login");
+    });
+  } else {
+    replace("/login");
+  }
+  return;
 }
 
 const routes = (

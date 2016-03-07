@@ -45,7 +45,6 @@ AppDispatcher.register(function(payload) {
       UserApi.register(action.data).then((response) => {
         _user = response.data;
         _error = "";
-        UserStore.emitChange();
         appHistory.push("response");
       }, (err)=> {
         _user = {};
@@ -56,7 +55,6 @@ AppDispatcher.register(function(payload) {
     case Constants.LOGIN:
       UserApi.login(action.data).then((response) => {
         _user = response.data.userData;
-        UserStore.emitChange();
         appHistory.push("home");
       }, (err)=> {
         _user = {};
@@ -64,17 +62,14 @@ AppDispatcher.register(function(payload) {
         UserStore.emitChange();
       });
       break;
-    case Constants.USER_DETAIL:
-      UserApi.getUserDetail().then((response) => {
-        _user = response.data;
-        UserStore.emitChange();
-      });
+    case Constants.SET_USER_DETAIL:
+      _user = action.data;
+      UserStore.emitChange();
       break;
     case Constants.LOGOUT:
       UserApi.logout().then((response) => {
         _user = "";
-        UserStore.emitChange();
-        appHistory.push("/");
+        appHistory.push("/login");
       });
       break;
     case Constants.USER_UPDATE:

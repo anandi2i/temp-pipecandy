@@ -17,9 +17,10 @@ const UserAction = {
     });
   },
 
-  getUserDetail() {
+  setUserDetail(user) {
     AppDispatcher.handleAction({
-      actionType: Constants.USER_DETAIL
+      actionType: Constants.SET_USER_DETAIL,
+      data: user
     });
   },
 
