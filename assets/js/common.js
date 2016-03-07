@@ -17,3 +17,14 @@ $(document).ready(function() {
 function enableToolTipInJSX() {
   $(".tooltipped").tooltip();
 }
+
+function enabledropDownBtnInJSX(){
+  $(".dropdown-button").dropdown({
+    inDuration: 300,
+    outDuration: 225,
+    hover: true,
+    gutter: 0,
+    belowOrigin: true,
+    alignment: "right"
+  });
+}

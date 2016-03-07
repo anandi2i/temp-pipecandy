@@ -1,8 +1,8 @@
 import React from "react";
+import {Link} from "react-router";
 import UserAction from "../actions/UserAction";
 import autobind from "autobind-decorator";
 import UserStore from "../stores/UserStore";
-import {Link} from "react-router";
 
 class Header extends React.Component {
   constructor(props) {
@@ -33,6 +33,12 @@ class Header extends React.Component {
     UserAction.logout();
   }
 
+//TODO Redo this logic
+  @autobind
+  enableDropDown(){
+    enabledropDownBtnInJSX();
+  }
+
   render () {
     return (
       <div>
@@ -47,13 +53,11 @@ class Header extends React.Component {
                 this.state.user.firstName
                   ? <ul className="right hide-on-med-and-down">
                       <li><Link to="/emaillist" activeClassName="active">Email Lists</Link></li>
-                      <li><Link to="/profile" activeClassName="active">Profile</Link></li>
-                      <li><Link onClick={this.logout} to="/login" activeClassName="active">Logout</Link></li>
                       <li className="user-pic">
-                        <Link className="dropdown-button" data-activates="userDropDown" to="/profile">
-                          <img src="/images/user.png" width="30px" alt="" className="circle" />
+                        <a className="dropdown-button" onClick={this.enableDropDown} data-activates="userDropDown">
+                          <img src={this.state.user.avatar} alt="" className="circle" />
                           <i className="mdi mdi-chevron-down"></i>
-                        </Link>
+                        </a>
                       </li>
                     </ul>
                   : <ul className="right hide-on-med-and-down">
@@ -62,9 +66,8 @@ class Header extends React.Component {
                     </ul>
               }
               <ul id="userDropDown" className="dropdown-content">
-                <li><Link to="/!">one</Link></li>
-                <li><Link to="/!">two</Link></li>
-                <li><Link to="/!">three</Link></li>
+                <li><Link to="/profile">Profile</Link></li>
+                <li><Link onClick={this.logout} to="/login" activeClassName="active">Logout</Link></li>
               </ul>
               <ul id="main-side-nav" className="side-nav">
                 <li><Link to="/emaillist" activeClassName="active">Email Lists</Link></li>

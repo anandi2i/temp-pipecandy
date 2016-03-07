@@ -42,7 +42,7 @@ class Profile extends React.Component {
   handleCrop(dataURI) {
     this.setState({
       cropperOpen: false,
-      img: null,
+      img: dataURI,
       croppedImg: dataURI
     });
   }
@@ -63,6 +63,7 @@ class Profile extends React.Component {
   @autobind
   _onChange() {
     let user = UserStore.getUser();
+    //TODO need to refresh image URL without page load to avoid set img state in croppedImg
     this.setState({
       "id": user.id,
       "firstName" : user.firstName,
@@ -70,7 +71,7 @@ class Profile extends React.Component {
       "email" : user.email,
       "cropperOpen": false,
       "img": null,
-      "croppedImg": user.avatar
+      "croppedImg": this.state.img || user.avatar
     });
     let error = UserStore.getError();
     this.displayError(error);

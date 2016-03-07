@@ -22,6 +22,11 @@ body {
           border-bottom: 3px solid #499cd0;
           height: 68px;
         }
+        &.dropdown-button {
+          &.active {
+            border-bottom: none;
+          }
+        }
       }
       &.alarm {
         a {
@@ -53,13 +58,21 @@ body {
           height: 68px;
           img {
             border: 2px solid $blue-clr;
-            width: 40px;
+            width: 30px;
           }
         }
         i {
           display: inline-block;
           position: absolute;
           margin-top: -8px;
+        }
+      }
+      .dropdown-content{
+        li{
+          a{
+            height: 50px;
+            color: $blue-clr;
+          }
         }
       }
     }
