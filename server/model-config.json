@@ -63,5 +63,21 @@
   "file": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "company": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "client": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "agency": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "prospect": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

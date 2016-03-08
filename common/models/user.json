@@ -11,9 +11,10 @@
     },
     "avatar": {
       "type": "string",
-      "default" : "/images/photo.png"
+      "default": "/images/photo.png"
     }
   },
+  "validations": [],
   "relations": {
     "accessTokens": {
       "type": "hasMany",

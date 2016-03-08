@@ -1,0 +1,20 @@
+{
+  "name": "agency",
+  "plural": "agencies",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "company": {
+      "type": "belongsTo",
+      "model": "company",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

@@ -12,7 +12,7 @@
     "connector": "postgresql"
   },
   "Email": {
-    "name": "mail",
+    "name": "Email",
     "defaultForType": "mail",
     "connector": "mail",
     "transports": [

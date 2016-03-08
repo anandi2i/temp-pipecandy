@@ -1,0 +1,35 @@
+{
+  "name": "company",
+  "plural": "companies",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "clients": {
+      "type": "hasOne",
+      "model": "client",
+      "foreignKey": ""
+    },
+    "agencies": {
+      "type": "hasOne",
+      "model": "agency",
+      "foreignKey": ""
+    },
+    "prospects": {
+      "type": "hasOne",
+      "model": "prospect",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
