@@ -6,7 +6,7 @@ import Login from "./components/Login.react";
 import Signup from "./components/Signup.react";
 import Home from "./components/Home.react";
 import Reviewer from "./components/Reviewer.react";
-import EmailList from "./components/EmailList.react";
+import EmailList from "./components/email-list/EmailList.react";
 import Response from "./components/Response.react";
 import EmailVerification from "./components/EmailVerification.react";
 import Profile from "./components/user/UserProfile.react";

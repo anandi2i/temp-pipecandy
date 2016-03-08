@@ -1,9 +1,9 @@
 import React from "react";
+import {Link} from "react-router";
 import Autosuggest from "react-autosuggest";
 import autobind from "autobind-decorator";
-import EmailListActions from "../actions/EmailListActions";
-import EmailListStore from "../stores/EmailListStore";
-import {Link} from "react-router";
+import EmailListActions from "../../actions/EmailListActions";
+import EmailListStore from "../../stores/EmailListStore";
 
 function escapeRegexCharacters(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, /[.*+?^${}()|[\]\\]/g, "\\$&");
