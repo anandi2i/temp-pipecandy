@@ -1,0 +1,41 @@
+{
+  "name": "person",
+  "plural": "people",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "salutation": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "fields": {
+      "type": "hasMany",
+      "model": "field",
+      "foreignKey": ""
+    },
+    "prospect": {
+      "type": "belongsTo",
+      "model": "prospect",
+      "foreignKey": ""
+    },
+    "list": {
+      "type": "belongsTo",
+      "model": "list",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

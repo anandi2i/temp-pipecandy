@@ -30,6 +30,21 @@
       "type": "hasMany",
       "model": "userCredential",
       "foreignKey": "userId"
+    },
+    "lists": {
+      "type": "hasMany",
+      "model": "list",
+      "foreignKey": "createdBy"
+    },
+    "client": {
+      "type": "belongsTo",
+      "model": "client",
+      "foreignKey": ""
+    },
+    "agency": {
+      "type": "belongsTo",
+      "model": "agency",
+      "foreignKey": ""
     }
   },
   "acls": [],

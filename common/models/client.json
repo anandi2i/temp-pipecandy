@@ -13,6 +13,16 @@
       "type": "belongsTo",
       "model": "company",
       "foreignKey": ""
+    },
+    "lists": {
+      "type": "hasMany",
+      "model": "list",
+      "foreignKey": "createdFor"
+    },
+    "users": {
+      "type": "hasMany",
+      "model": "user",
+      "foreignKey": ""
     }
   },
   "acls": [],

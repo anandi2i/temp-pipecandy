@@ -1,22 +1,26 @@
 {
-  "name": "agency",
-  "plural": "agencies",
+  "name": "field",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "value": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    }
+  },
   "validations": [],
   "relations": {
-    "company": {
+    "person": {
       "type": "belongsTo",
-      "model": "company",
-      "foreignKey": ""
-    },
-    "users": {
-      "type": "hasMany",
-      "model": "user",
+      "model": "person",
       "foreignKey": ""
     }
   },

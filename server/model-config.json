@@ -79,5 +79,17 @@
   "prospect": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "list": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "person": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "field": {
+    "dataSource": "psqlDs",
+    "public": false
   }
 }
