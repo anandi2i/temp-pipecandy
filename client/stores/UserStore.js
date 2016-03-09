@@ -1,7 +1,7 @@
+import _ from "underscore";
 import AppDispatcher from "../dispatcher/AppDispatcher";
 import {EventEmitter} from "events";
 import Constants from "../constants/Constants";
-import _ from "underscore";
 import UserApi from "../API/UserApi";
 import {ErrorMessages, SuccessMessages} from "../utils/UserAlerts";
 import appHistory from "../RouteContainer";
@@ -55,6 +55,7 @@ AppDispatcher.register(function(payload) {
     case Constants.LOGIN:
       UserApi.login(action.data).then((response) => {
         _user = response.data.userData;
+        _error = "";
         appHistory.push("home");
       }, (err)=> {
         _user = {};

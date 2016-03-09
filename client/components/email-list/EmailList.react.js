@@ -18,8 +18,8 @@ function getSuggestions(value, allEmailList) {
   return allEmailList.filter(emailList => regex.test(emailList.name));
 }
 
-function getEmailListFromStore() {
-  return EmailListStore.getEmailList();
+function getAllListFromStore() {
+  return EmailListStore.getAllList();
 }
 
 //http://react-autosuggest.js.org/
@@ -30,7 +30,7 @@ class EmailList extends React.Component {
     this.state={
       value: "",
       suggestions: getSuggestions(""),
-      emailList: getEmailListFromStore()
+      emailList: getAllListFromStore()
     };
   }
 
@@ -46,7 +46,7 @@ class EmailList extends React.Component {
   @autobind
   _onChange() {
     this.setState({
-      emailList: getEmailListFromStore()
+      emailList: getAllListFromStore()
     });
   }
 
@@ -67,13 +67,20 @@ class EmailList extends React.Component {
   @autobind
   renderSuggestion(suggestion) {
     return (
-      <span>{ suggestion.name}</span>
+      <span>{suggestion.name}</span>
     );
   }
 
   @autobind
   getSuggestionValue(suggestion) {
     return suggestion.name;
+  }
+
+@autobind
+  onSubmit(event) {
+    event.preventDefault();
+    const formData = {"name" : this.state.value};
+    EmailListActions.createNewList(formData);
   }
 
   render() {
@@ -99,6 +106,7 @@ class EmailList extends React.Component {
               list name to update it
             </h3>
             <div className="row list-container">
+              <form id="createEmailList" onSubmit={this.onSubmit}>
               <div className="input-field">
                 <Autosuggest suggestions={suggestions}
                   onSuggestionsUpdateRequested={this.onSuggestionsUpdateReq}
@@ -107,11 +115,10 @@ class EmailList extends React.Component {
                   inputProps={inputProps} />
               </div>
               <div className="row r-btn-container">
-                <input type="button" className="btn red p-1-btn"
-                  value="Upload csv File" />
-                <input type="button" className="btn blue"
-                  value="Add subscribers one by one" />
+                <input type="submit" className="btn blue"
+                  value="Save" />
               </div>
+            </form>
             </div>
             <div className="hint-box m-t-50">
               A .csv file is just like an MS Excel file. If you have your list

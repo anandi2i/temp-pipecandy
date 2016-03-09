@@ -11,8 +11,12 @@
       "type": "string",
       "required": true
     },
-    "lastName": {
+    "middleName ": {
       "type": "string"
+    },
+    "lastName": {
+      "type": "string",
+      "required": true
     },
     "salutation": {
       "type": "string"

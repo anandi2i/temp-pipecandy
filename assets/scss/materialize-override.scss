@@ -114,6 +114,21 @@ nav {
 .toast {
   background-color: $red-clr;
 }
+.modal{
+  box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.22), 0 5px 10px 0 rgba(0, 0, 0, 0.21);
+  background-color: $white;
+  .modal-footer{
+    background-color: $white;
+    padding: 0px;
+    .btn{
+      float: none;
+      margin-right: 20px;
+    }
+  }
+}
+.lean-overlay{
+  background: $white;
+}
 /*********************
   Head
 **********************/
@@ -124,6 +139,16 @@ h3{
 /*********************
   Media Query Classes
 **********************/
+@media only screen and (max-width: 460px) {
+  .modal{
+    .modal-footer{
+      height: auto;
+      .btn{
+        margin-right: 0;
+      }
+    }
+  }
+}
 @media only screen and (min-width: 993px) {
   .container {
     width: 75%;

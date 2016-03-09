@@ -3,9 +3,21 @@ import Constants from "../constants/Constants";
 
 // Define action methods
 const EmailListActions = {
-  getAllEmailList: function() {
+  getAllEmailList() {
     AppDispatcher.handleAction({
-      actionType: Constants.EMAIL_LIST
+      actionType: Constants.ALL_EMAIL_LIST
+    });
+  },
+  createNewList(list) {
+    AppDispatcher.handleAction({
+      actionType: Constants.CREATE_NEW_LIST,
+      data: list
+    });
+  },
+  getEmailListByID(id){
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_LIST_BY_ID,
+      data: id
     });
   }
 };

@@ -1,3 +1,6 @@
 module.exports = function(List) {
-//method
+  List.beforeRemote("create", function(context, data, next) {
+    context.req.body.createdBy = context.req.accessToken.userId;
+    return next();
+  });
 };

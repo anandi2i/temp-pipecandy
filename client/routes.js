@@ -5,8 +5,8 @@ import IndexPage from "./components/IndexPage.react";
 import Login from "./components/Login.react";
 import Signup from "./components/Signup.react";
 import Home from "./components/Home.react";
-import Reviewer from "./components/Reviewer.react";
 import EmailList from "./components/email-list/EmailList.react";
+import ListView from "./components/email-list/ListView.react";
 import Response from "./components/Response.react";
 import EmailVerification from "./components/EmailVerification.react";
 import Profile from "./components/user/UserProfile.react";
@@ -37,12 +37,12 @@ const routes = (
 <Route>
   <Route path="/" component={AppContainer}>
     <IndexRoute component={IndexPage} />
-    <Route path="reviewers" component={Reviewer} />
     <Route path="home" component={Home} onEnter={requireAuth}/>
     <Route path="emaillist" component={EmailList} onEnter={requireAuth}/>
     <Route path="response" component={Response} />
     <Route path="email-verified" component={EmailVerification} />
     <Route path="profile" component={Profile} onEnter={requireAuth}/>
+    <Route path="/email-list/:listId" component={ListView} onEnter={requireAuth}/>
   </Route>
   <Route path="login" component={Login} />
   <Route path="signup" component={Signup} />
