@@ -56,7 +56,7 @@ class Profile extends React.Component {
   }
 
   componentDidMount() {
-    enableToolTipInJSX();
+    enableToolTip();
     UserStore.addChangeListener(this._onChange);
   }
 
@@ -182,7 +182,7 @@ class Profile extends React.Component {
                     name="First Name"
                     onChange={this.onChange("firstName")}
                     onBlur={this.props.handleValidation("firstName")} />
-                  <label htmlFor="firstName">First Name</label>
+                  <label className="active" htmlFor="firstName">First Name</label>
                   {!this.props.isValid("firstName")
                     ? this.renderHelpText("firstName")
                     : null
@@ -200,7 +200,7 @@ class Profile extends React.Component {
                       name="Last Name"
                       onChange={this.onChange("lastName")}
                       onBlur={this.props.handleValidation("lastName")} />
-                  <label htmlFor="lastName">Last Name</label>
+                  <label className="active" htmlFor="lastName">Last Name</label>
                   {!this.props.isValid("lastName")
                     ? this.renderHelpText("lastName")
                     : null
@@ -210,7 +210,7 @@ class Profile extends React.Component {
                   <input disabled id="email" placeholder="Email"
                     type="email" value={this.state.email}
                     className="validate" name="email" />
-                  <label htmlFor="email">Email</label>
+                  <label className="active" htmlFor="email">Email</label>
                 </div>
                 <div className="input-field">
                   <input id="oldPass" type="password"

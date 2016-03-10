@@ -33,11 +33,6 @@
       "type": "belongsTo",
       "model": "prospect",
       "foreignKey": ""
-    },
-    "list": {
-      "type": "belongsTo",
-      "model": "list",
-      "foreignKey": ""
     }
   },
   "acls": [],

@@ -20,6 +20,10 @@ class Header extends React.Component {
     UserStore.removeChangeListener(this._onChange);
   }
 
+  componentDidUpdate(){
+    enabledropDownBtn();
+  }
+
   @autobind
   _onChange() {
     //console.log("hererere",UserStore.getUser());
@@ -31,12 +35,6 @@ class Header extends React.Component {
   @autobind
   logout(){
     UserAction.logout();
-  }
-
-//TODO Redo this logic
-  @autobind
-  enableDropDown(){
-    enabledropDownBtnInJSX();
   }
 
   render () {
@@ -52,9 +50,9 @@ class Header extends React.Component {
               {
                 this.state.user.firstName
                   ? <ul className="right hide-on-med-and-down">
-                      <li><Link to="/emaillist" activeClassName="active">Email Lists</Link></li>
+                      <li><Link to="/create-list" activeClassName="active">Email Lists</Link></li>
                       <li className="user-pic">
-                        <a className="dropdown-button" onClick={this.enableDropDown} data-activates="userDropDown">
+                        <a className="dropdown-button" data-activates="userDropDown">
                           <img src={this.state.user.avatar} alt="" className="circle" />
                           <i className="mdi mdi-chevron-down"></i>
                         </a>
@@ -69,13 +67,13 @@ class Header extends React.Component {
                 <li><Link to="/profile">Profile</Link></li>
                 <li><Link onClick={this.logout} to="/login" activeClassName="active">Logout</Link></li>
               </ul>
-              <ul id="main-side-nav" className="side-nav">
-                <li><Link to="/emaillist" activeClassName="active">Email Lists</Link></li>
-              </ul>
               <Link to="/" activeClassName="active" data-activates="main-side-nav" className="side-nav-btn"><i className="mdi mdi-menu"></i></Link>
             </div>
           </nav>
         </div>
+        <ul id="main-side-nav" className="side-nav">
+          <li><Link to="/emaillist" activeClassName="active">Email Lists</Link></li>
+        </ul>
       </div>
     );
   }

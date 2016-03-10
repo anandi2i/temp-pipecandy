@@ -1,3 +1,7 @@
+/* This file is ignored in eslint
+** make sure that your code indentation and quality
+*/
+
 $(document).ready(function() {
   if ($(".side-nav-btn").length) {
     $(".side-nav-btn").sideNav();
@@ -11,18 +15,16 @@ $(document).ready(function() {
   }
 });
 
-/* Function should end with InJSX if it is called from JSX
-  To ignore no-unused-vars in eslint */
-
-function enableToolTipInJSX() {
+function enableToolTip() {
   $(".tooltipped").tooltip();
 }
 
-function enabledropDownBtnInJSX(){
+function enabledropDownBtn(){
   $(".dropdown-button").dropdown({
     inDuration: 300,
     outDuration: 225,
-    hover: true,
+    constrain_width: false,
+    hover: false,
     gutter: 0,
     belowOrigin: true,
     alignment: "right"

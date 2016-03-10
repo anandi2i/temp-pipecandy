@@ -6,6 +6,7 @@ import Login from "./components/Login.react";
 import Signup from "./components/Signup.react";
 import Home from "./components/Home.react";
 import EmailList from "./components/email-list/EmailList.react";
+import ViewAllList from "./components/email-list/ViewAllList.react";
 import ListView from "./components/email-list/ListView.react";
 import Response from "./components/Response.react";
 import EmailVerification from "./components/EmailVerification.react";
@@ -38,7 +39,8 @@ const routes = (
   <Route path="/" component={AppContainer}>
     <IndexRoute component={IndexPage} />
     <Route path="home" component={Home} onEnter={requireAuth}/>
-    <Route path="emaillist" component={EmailList} onEnter={requireAuth}/>
+    <Route path="create-list" component={EmailList} onEnter={requireAuth}/>
+    <Route path="view-list" component={ViewAllList} onEnter={requireAuth}/>
     <Route path="response" component={Response} />
     <Route path="email-verified" component={EmailVerification} />
     <Route path="profile" component={Profile} onEnter={requireAuth}/>

@@ -77,6 +77,7 @@ textarea.materialize-textarea:focus:not([readonly]) + label {
 ************************************/
 .navbar-fixed {
   height: 74px;
+  z-index: 997;
   nav {
     top: 5px;
   }
@@ -106,33 +107,47 @@ nav {
       height: 29px;
     }
   }
-  .side-nav-btn{
+  .side-nav-btn {
     color: $a-tag-clr;
     padding-left: 10px;
   }
 }
+#sidenav-overlay {
+  background: rgba(230,230,230,0.5);
+}
 .toast {
   background-color: $red-clr;
 }
-.modal{
-  box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.22), 0 5px 10px 0 rgba(0, 0, 0, 0.21);
+.modal {
+  box-shadow: $modal-box-shadow;
   background-color: $white;
-  .modal-footer{
+  .modal-footer {
     background-color: $white;
-    padding: 0px;
-    .btn{
+    padding: 5px 0;
+    height: auto;
+    .btn {
       float: none;
       margin-right: 20px;
     }
   }
+  &.mini-modal{
+    width: 460px;
+  }
 }
-.lean-overlay{
-  background: $white;
+.lean-overlay {
+  background: $modal-bg;
+}
+/*********************
+  Dropdown Content
+**********************/
+.dropdown-content li > a, .dropdown-content li > span{
+  font-size: 14px;
+  color: $a-tag-clr;
 }
 /*********************
   Head
 **********************/
-h3{
+h3 {
   font-size: 18px;
   font-weight: 300;
 }
@@ -140,10 +155,16 @@ h3{
   Media Query Classes
 **********************/
 @media only screen and (max-width: 460px) {
-  .modal{
-    .modal-footer{
+  .modal {
+    &.mini-modal{
+      width: 90%;
+    }
+    .modal-content {
+      padding-bottom: 70px;
+    }
+    .modal-footer {
       height: auto;
-      .btn{
+      .btn {
         margin-right: 0;
       }
     }
@@ -170,7 +191,7 @@ h3{
   }
 }
 @media only screen and (min-width: 0px) {
-  #toast-container{
+  #toast-container {
     left: 0;
     bottom: 0;
     top: 0;
@@ -184,7 +205,7 @@ h3{
       box-shadow: none;
       color: $red-clr;
       float: none;
-      padding: 0px 15px;
+      padding: 0 15px;
       min-height: initial;
       word-break: break-word;
     }

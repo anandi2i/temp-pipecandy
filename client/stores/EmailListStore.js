@@ -5,7 +5,7 @@ import AppDispatcher from "../dispatcher/AppDispatcher";
 import EmailListApi from "../API/EmailListApi";
 import appHistory from "../RouteContainer";
 
-let _allEmailList = [];
+let _allEmailList = {};
 let _getEmailList = {};
 let _error = "";
 
@@ -46,12 +46,19 @@ AppDispatcher.register(function(payload) {
   let action = payload.action;
   switch (action.actionType) {
     case Constants.ALL_EMAIL_LIST:
-      _allEmailList = EmailListApi.find();
-      EmailListStore.emitChange();
+      EmailListApi.findAll().then((response) => {
+        _allEmailList = response.data;
+        _error = "";
+        EmailListStore.emitChange();
+      }, (err)=> {
+        _allEmailList = {};
+        _error = err;
+        EmailListStore.emitChange();
+      });
       break;
     case Constants.CREATE_NEW_LIST:
       EmailListApi.crateList(action.data).then((response) => {
-        _allEmailList = [];
+        _allEmailList = {};
         _error = "";
         appHistory.push("email-list/"+response.data.id);
       }, (err)=> {

@@ -29,11 +29,6 @@
       "type": "belongsTo",
       "model": "client",
       "foreignKey": "createdFor"
-    },
-    "people": {
-      "type": "hasMany",
-      "model": "person",
-      "foreignKey": ""
     }
   },
   "acls": [

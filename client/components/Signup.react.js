@@ -25,7 +25,7 @@ var Signup = React.createClass({
     lastName: validatorUtil.lastName
   },
   componentDidMount: function() {
-    enableToolTipInJSX();
+    enableToolTip();
     UserStore.addChangeListener(this._onChange);
   },
   componentWillUnmount: function() {

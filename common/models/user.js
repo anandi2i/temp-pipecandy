@@ -73,7 +73,8 @@ module.exports = function(user) {
     return next();
   });
 
-  user.beforeRemote("prototype.*", function(context, result, next) {
+  user.beforeRemote("prototype.updateAttributes",
+    function(context, result, next) {
     //TODO code cleanup
     let req = context.req;
     let userID = req.params.id;
