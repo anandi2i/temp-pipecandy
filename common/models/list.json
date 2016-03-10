@@ -34,6 +34,11 @@
       "type": "hasMany",
       "model": "run",
       "foreignKey": ""
+    },
+    "people": {
+      "type": "hasAndBelongsToMany",
+      "model": "person",
+      "foreignKey": ""
     }
   },
   "acls": [

@@ -11,7 +11,7 @@
       "type": "string",
       "required": true
     },
-    "middleName ": {
+    "middleName": {
       "type": "string"
     },
     "lastName": {
@@ -19,6 +19,9 @@
       "required": true
     },
     "salutation": {
+      "type": "string"
+    },
+    "email": {
       "type": "string"
     }
   },
@@ -32,6 +35,11 @@
     "prospect": {
       "type": "belongsTo",
       "model": "prospect",
+      "foreignKey": ""
+    },
+    "lists": {
+      "type": "hasAndBelongsToMany",
+      "model": "list",
       "foreignKey": ""
     }
   },

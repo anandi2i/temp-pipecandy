@@ -24,6 +24,7 @@
     "cors": "^2.5.2",
     "express-flash": "0.0.2",
     "express-session": "^1.13.0",
+    "fast-csv": "^1.0.0",
     "flux": "^2.0.1",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",

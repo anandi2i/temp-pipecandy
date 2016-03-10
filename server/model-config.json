@@ -49,10 +49,6 @@
     "dataSource": "psqlDs",
     "public": true
   },
-  "Reviewer": {
-    "dataSource": "psqlDs",
-    "public": true
-  },
   "Email": {
     "dataSource": "Email"
   },
