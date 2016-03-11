@@ -1,6 +1,7 @@
 import _ from "underscore";
-import AppDispatcher from "../dispatcher/AppDispatcher";
 import {EventEmitter} from "events";
+import cookie from "react-cookie";
+import AppDispatcher from "../dispatcher/AppDispatcher";
 import Constants from "../constants/Constants";
 import UserApi from "../API/UserApi";
 import {ErrorMessages, SuccessMessages} from "../utils/UserAlerts";
@@ -56,6 +57,7 @@ AppDispatcher.register(function(payload) {
       UserApi.login(action.data).then((response) => {
         _user = response.data.userData;
         _error = "";
+        cookie.save("userId", _user.id, {path: "/"});
         appHistory.push("home");
       }, (err)=> {
         _user = {};
@@ -70,6 +72,7 @@ AppDispatcher.register(function(payload) {
     case Constants.LOGOUT:
       UserApi.logout().then((response) => {
         _user = "";
+        cookie.remove("userId", {path: "/"});
         appHistory.push("/login");
       });
       break;

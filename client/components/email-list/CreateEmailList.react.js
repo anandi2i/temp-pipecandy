@@ -100,7 +100,7 @@ class EmailList extends React.Component {
               <Link to="/view-list">View lists</Link>
             </div>
           </div>
-          <div className="create-list-container">
+          <div className="create-container">
             <h3>
               Name your new list (or) select an existing list by typing the
               list name to update it
@@ -120,7 +120,7 @@ class EmailList extends React.Component {
               </div>
             </form>
             </div>
-            <div className="hint-box m-t-50">
+            <div className="hint-box m-t-47">
               A .csv file is just like an MS Excel file. If you have your list
               in MS Excel or a similar format, open it and save it as a .csv
               file. Please make all the changes you need to make before

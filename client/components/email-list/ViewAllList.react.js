@@ -5,19 +5,19 @@ import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 
 function getAllEmailList() {
-  return EmailListStore.getAllList();
+  EmailListActions.getAllEmailList();
 }
 
 class ListView extends React.Component {
   constructor(props) {
     super(props);
+    getAllEmailList();
     this.state={
-      allEmailLists: getAllEmailList(),
+      allEmailLists: [],
     };
   }
 
   componentDidMount() {
-    EmailListActions.getAllEmailList();
     EmailListStore.addChangeListener(this._onChange);
   }
 
@@ -43,6 +43,28 @@ class ListView extends React.Component {
               <Link to="/create-list">Back to Create List</Link>
             </div>
           </div>
+          <table className="striped">
+            <thead>
+              <tr>
+                <th data-field="id">Id</th>
+                <th data-field="name">Name</th>
+                <th data-field="edit">Edit</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                this.state.allEmailLists.map($.proxy(function (list, key) {
+                  return (
+                    <tr key={key}>
+                      <td>{list.id}</td>
+                      <td>{list.name}</td>
+                      <td><Link to={`/email-list/${list.id}`}>view</Link></td>
+                    </tr>
+                  );
+                }), this)
+              }
+          </tbody>
+          </table>
         </div>
       </div>
     );

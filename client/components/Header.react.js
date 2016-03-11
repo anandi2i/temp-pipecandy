@@ -26,7 +26,6 @@ class Header extends React.Component {
 
   @autobind
   _onChange() {
-    //console.log("hererere",UserStore.getUser());
     this.setState({
       user: UserStore.getUser()
     });
@@ -51,6 +50,7 @@ class Header extends React.Component {
                 this.state.user.firstName
                   ? <ul className="right hide-on-med-and-down">
                       <li><Link to="/create-list" activeClassName="active">Email Lists</Link></li>
+                      <li><Link to="/create-campaign" activeClassName="active">Campaigns</Link></li>
                       <li className="user-pic">
                         <a className="dropdown-button" data-activates="userDropDown">
                           <img src={this.state.user.avatar} alt="" className="circle" />

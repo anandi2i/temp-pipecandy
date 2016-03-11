@@ -67,9 +67,9 @@ body {
           margin-top: -8px;
         }
       }
-      .dropdown-content{
-        li{
-          a{
+      .dropdown-content {
+        li {
+          a {
             height: 50px;
             color: $blue-clr;
           }
@@ -228,9 +228,9 @@ body {
     background-color: $dflt-btn-clr;
   }
 }
-.sm-icon-btn{
+.sm-icon-btn {
   padding: 0 1rem;
-  i{
+  i {
     &.right {
       margin-left: 10px;
     }
@@ -380,12 +380,11 @@ body {
 /*********************
   Email List
 **********************/
-@mixin email-list-container {
+@mixin container-w-600 {
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
 }
-
 @mixin sub-nav-container {
   .head {
     float: left;
@@ -402,35 +401,36 @@ body {
     }
   }
 }
-
 .sub-nav {
-  margin-top: 43px;
-  margin-bottom: 48px;
+  margin-top: 28px;
+  margin-bottom: 45px;
   border-bottom: 1px solid $light-border;
   min-height: 50px;
   @include sub-nav-container;
 }
-
 .sub-head-container {
   margin-top: 43px;
   margin-bottom: 5px;
   min-height: 50px;
   @include sub-nav-container;
 }
-
-.create-list-container {
+.create-container {
   h3 {
-    margin-bottom: 53px;
+    margin-bottom: 28px;
     text-align: center;
   }
   .list-container {
-    @include email-list-container;
+    @include container-w-600;
+    h3 {
+      text-align: left;
+    }
     .row {
       margin: 0;
     }
     .r-btn-container {
       text-align: right;
       width: 100%;
+      margin-top: 15px;
     }
     .react-autosuggest__container {
       position: relative;
@@ -452,19 +452,19 @@ body {
     }
   }
   .hint-box {
-    @include email-list-container;
+    @include container-w-600;
   }
 }
 .r-btn-container {
   text-align: right;
   width: 100%;
 }
-.add-new-field{
+.add-new-field {
   text-transform: uppercase;
   color: $blue-clr;
   margin-top: 15px;
   cursor: pointer;
-  i{
+  i {
     margin-right: 5px;
     font-size: 15px;
   }
@@ -514,6 +514,73 @@ body {
   display: block;
 }
 /*********************
+  new tab
+**********************/
+.tab-container {
+  border-bottom: 1px solid $light-border;
+  width: 90%;
+  margin-left: 5%;
+  .new-tabs {
+    display: flex;
+    margin: auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    cursor: pointer;
+    .tabs {
+      display: inline;
+      text-align: center;
+      border: 1px solid $pinck-clr;
+      border-right: none;
+      height: 35px;
+      line-height: 35px;
+      color: $pinck-clr;
+      font-weight: 700;
+      font-size: 12px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      width: 100%;
+      overflow: hidden;
+      padding-left: 15px;
+      padding-right: 15px;
+      &.active {
+        background-color: $pinck-clr;
+        color: $white;
+      }
+      &.first-child {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+      }
+      &:last-child {
+        border-right: 1px solid $pinck-clr;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+      }
+    }
+    .position {
+      padding-left: 6px;
+      color: $pinck-clr;
+      width: 22px;
+      height: 22px;
+      border: 1px solid $pinck-clr;
+      border-radius: 50%;
+      z-index: 1;
+      position: absolute;
+      margin-top: 6px;
+      margin-left: -10px;
+      background-color: $white;
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 20px;
+      &.active {
+        background-color: $pinck-clr;
+        color: $white;
+        border: 2px solid $white;
+      }
+    }
+  }
+}
+/*********************
   Media Query Classes
 **********************/
 @media only screen and (max-width: 600px) {
@@ -524,7 +591,8 @@ body {
   }
 }
 @media only screen and (max-width: 500px) {
-  .sub-nav,.sub-head-container {
+  .sub-nav,
+  .sub-head-container {
     .head {
       float: none;
       text-align: center;
@@ -548,7 +616,7 @@ body {
   .btn {
     width: 90%;
   }
-  .create-list-container {
+  .create-container {
     .list-container {
       .r-btn-container {
         text-align: center;
@@ -593,6 +661,10 @@ body {
       width: 100%;
       margin-left: 0;
     }
+  }
+  .tab-container{
+    width: 100%;
+    margin-left: 0;
   }
 }
 @media only screen and (max-width: 992px) {

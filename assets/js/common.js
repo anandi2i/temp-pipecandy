@@ -15,6 +15,15 @@ $(document).ready(function() {
   }
 });
 
+function enableNewTabs() {
+  var newTab = $(".new-tabs");
+  newTab.find(".tabs").click(function(){
+    newTab.find(".position").removeClass("active");
+    newTab.find(".tabs").removeClass("active");
+    $(this).addClass("active").prev().addClass("active");
+  });
+}
+
 function enableToolTip() {
   $(".tooltipped").tooltip();
 }
