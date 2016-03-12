@@ -1,0 +1,35 @@
+{
+  "name": "campaign",
+  "plural": "campaigns",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "runs": {
+      "type": "hasMany",
+      "model": "run",
+      "foreignKey": ""
+    },
+    "client": {
+      "type": "belongsTo",
+      "model": "client",
+      "foreignKey": "createdFor"
+    },
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "createdBy"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

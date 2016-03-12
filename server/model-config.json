@@ -91,5 +91,13 @@
   "field": {
     "dataSource": "psqlDs",
     "public": false
+  },
+  "campaign": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "run": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

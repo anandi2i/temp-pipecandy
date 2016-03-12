@@ -1,0 +1,30 @@
+{
+  "name": "run",
+  "plural": "runs",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": ""
+    },
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "ranBy"
+    },
+    "list": {
+      "type": "belongsTo",
+      "model": "list",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

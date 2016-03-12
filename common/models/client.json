@@ -23,6 +23,11 @@
       "type": "hasMany",
       "model": "user",
       "foreignKey": ""
+    },
+    "campaigns": {
+      "type": "hasMany",
+      "model": "campaign",
+      "foreignKey": "createdFor"
     }
   },
   "acls": [],

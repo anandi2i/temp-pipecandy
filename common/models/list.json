@@ -29,6 +29,11 @@
       "type": "belongsTo",
       "model": "client",
       "foreignKey": "createdFor"
+    },
+    "runs": {
+      "type": "hasMany",
+      "model": "run",
+      "foreignKey": ""
     }
   },
   "acls": [

@@ -45,14 +45,24 @@
       "type": "belongsTo",
       "model": "agency",
       "foreignKey": ""
+    },
+    "campaigns": {
+      "type": "hasMany",
+      "model": "campaign",
+      "foreignKey": "createdBy"
+    },
+    "runs": {
+      "type": "hasMany",
+      "model": "run",
+      "foreignKey": "ranBy"
     }
   },
   "acls": [
     {
-     "principalType": "ROLE",
-     "principalId": "$owner",
-     "permission": "ALLOW",
-     "property": "__get__lists"
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__lists"
     }
   ],
   "methods": {}
