@@ -15,6 +15,13 @@ $(document).ready(function() {
   }
 });
 
+function enableSideNavDropDown() {
+  $(".side-nav-user-pic i").unbind("click").click(function(){
+    $(this).toggleClass("active");
+    $(".side-nav .side-nav-drop-down").slideToggle("slow");
+  });
+}
+
 function enableNewTabs() {
   var newTab = $(".new-tabs");
   newTab.find(".tabs").click(function(){

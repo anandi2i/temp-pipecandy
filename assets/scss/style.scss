@@ -81,6 +81,38 @@ body {
 .side-nav-btn {
   display: none;
 }
+.side-nav {
+  .side-nav-drop-down {
+    display: none;
+  }
+  .side-nav-user-pic {
+    width: 240px;
+    height: 100px;
+    margin: 0;
+    background-size: cover;
+    img {
+      width: 75px;
+      margin-top: 12px;
+      box-shadow: 0 0 1px $white, 0 0 3px $white;
+      margin-left: 5px;
+    }
+    i {
+      float: right;
+      margin-top: -39px;
+      font-size: 25px;
+      cursor: pointer;
+      margin-left: 5px;
+      text-shadow: 0 0 1px $white, 0 0 1px $white;
+      @include rotate(-90deg);
+      transition: transform 0.5s;
+      &.active{
+        margin-top: -38px;
+        @include rotate(0deg);
+        transition: transform 0.5s;
+      }
+    }
+  }
+}
 .hint-box {
   border: 1px solid $blue-clr;
   border-radius: 3px;
@@ -662,7 +694,7 @@ body {
       margin-left: 0;
     }
   }
-  .tab-container{
+  .tab-container {
     width: 100%;
     margin-left: 0;
   }

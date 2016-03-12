@@ -110,6 +110,23 @@ nav {
   .side-nav-btn {
     color: $a-tag-clr;
     padding-left: 10px;
+    width: 50px;
+  }
+}
+.side-nav {
+  li {
+    padding: 0;
+    border-bottom: 1px solid #F3F3F3;
+    a {
+      padding: 0;
+      height: 50px;
+      line-height: 50px;
+      padding-left: 13px;
+      &.active {
+        padding-left: 10px;
+        border-left: 3px solid $blue-clr;
+      }
+    }
   }
 }
 #sidenav-overlay {
@@ -130,7 +147,7 @@ nav {
       margin-right: 20px;
     }
   }
-  &.mini-modal{
+  &.mini-modal {
     width: 460px;
   }
 }
@@ -140,7 +157,8 @@ nav {
 /*********************
   Dropdown Content
 **********************/
-.dropdown-content li > a, .dropdown-content li > span{
+.dropdown-content li > a,
+.dropdown-content li > span {
   font-size: 14px;
   color: $a-tag-clr;
 }
@@ -156,7 +174,7 @@ h3 {
 **********************/
 @media only screen and (max-width: 460px) {
   .modal {
-    &.mini-modal{
+    &.mini-modal {
       width: 90%;
     }
     .modal-content {

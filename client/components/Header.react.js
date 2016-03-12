@@ -46,33 +46,26 @@ class Header extends React.Component {
               <Link to="/home" className="brand-logo" activeClassName="active">
                 <img src="/images/logo.png" />
               </Link>
-              {
-                this.state.user.firstName
-                  ? <ul className="right hide-on-med-and-down">
-                      <li><Link to="/create-list" activeClassName="active">Email Lists</Link></li>
-                      <li><Link to="/create-campaign" activeClassName="active">Campaigns</Link></li>
-                      <li className="user-pic">
-                        <a className="dropdown-button" data-activates="userDropDown">
-                          <img src={this.state.user.avatar} alt="" className="circle" />
-                          <i className="mdi mdi-chevron-down"></i>
-                        </a>
-                      </li>
-                    </ul>
-                  : <ul className="right hide-on-med-and-down">
-                      <li><Link to="/login" activeClassName="active">Login</Link></li>
-                      <li><Link to="/signup" activeClassName="active">Signup</Link></li>
-                    </ul>
-              }
+              <ul className="right hide-on-med-and-down">
+                <Menu user={this.state.user} />
+                {this.state.user ?
+                <li className="user-pic hide-on-med-and-down">
+                  <a className="dropdown-button" data-activates="userDropDown">
+                    <img src={this.state.user.avatar} alt="" className="circle" />
+                    <i className="mdi mdi-chevron-down"></i>
+                  </a>
+                </li> : ""}
+              </ul>
               <ul id="userDropDown" className="dropdown-content">
                 <li><Link to="/profile">Profile</Link></li>
                 <li><Link onClick={this.logout} to="/login" activeClassName="active">Logout</Link></li>
               </ul>
-              <Link to="/" activeClassName="active" data-activates="main-side-nav" className="side-nav-btn"><i className="mdi mdi-menu"></i></Link>
+              <a activeClassName="active" data-activates="main-side-nav" className="side-nav-btn"><i className="mdi mdi-menu"></i></a>
             </div>
           </nav>
         </div>
         <ul id="main-side-nav" className="side-nav">
-          <li><Link to="/emaillist" activeClassName="active">Email Lists</Link></li>
+          <Menu user={this.state.user} />
         </ul>
       </div>
     );
@@ -80,3 +73,47 @@ class Header extends React.Component {
 }
 
 export default Header;
+
+class Menu extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state={};
+  }
+
+  componentDidUpdate(){
+    enableSideNavDropDown();
+  }
+
+  render () {
+    let avatarStyle = {
+      backgroundImage: "url(" + this.props.user.avatar + ")"
+    };
+    return (
+      this.props.user.firstName
+        ?
+          <span>
+            {/* only for side nav - start here*/}
+            <li className="user-pic side-nav-user-pic hide-on-large-only" style={avatarStyle} >
+              <img src={this.props.user.avatar} alt="" className="circle" />
+              <i className="mdi mdi-chevron-down"></i>
+            </li>
+            <div className="side-nav-drop-down hide-on-large-only">
+              <li><Link to="/profile">Profile</Link></li>
+              <li><Link onClick={this.logout} to="/login" activeClassName="active">Logout</Link></li>
+            </div>
+            {/* side nav - end here */}
+            <li>
+              <Link to="/create-list" activeClassName="active">Email Lists</Link>
+            </li>
+            <li>
+              <Link to="/create-campaign" activeClassName="active">Campaigns</Link>
+            </li>
+          </span>
+        :
+          <span>
+            <li><Link to="/login" activeClassName="active">Login</Link></li>
+            <li><Link to="/signup" activeClassName="active">Signup</Link></li>
+          </span>
+    );
+  }
+}
