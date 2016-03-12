@@ -89,6 +89,26 @@ AppDispatcher.register(function(payload) {
         }
       });
       break;
+    case Constants.FORGOT_PASSSWORD:
+      UserApi.forgotPassword(action.data).then((response) => {
+        appHistory.push("/forgot-password-response");
+      }, (err) => {
+        if(err.data.error){
+          _error = ErrorMessages[err.data.error.code];
+          UserStore.emitChange();
+        }
+      });
+      break;
+    case Constants.RESET_PASSSWORD:
+      UserApi.resetPassword(action.data).then((response) => {
+        appHistory.push("/reset-password-response");
+      }, (err) => {
+        if(err.data.error){
+          _error = ErrorMessages[err.data.error.name];
+          UserStore.emitChange();
+        }
+      });
+      break;
     default:
       return true;
   }

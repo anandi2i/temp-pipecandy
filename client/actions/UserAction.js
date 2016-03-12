@@ -35,6 +35,20 @@ const UserAction = {
       actionType: Constants.USER_UPDATE,
       data: user
     });
+  },
+
+  forgotPassword(email){
+    AppDispatcher.handleAction({
+      actionType: Constants.FORGOT_PASSSWORD,
+      data: email
+    });
+  },
+
+  resetPassword(password){
+    AppDispatcher.handleAction({
+      actionType: Constants.RESET_PASSSWORD,
+      data: password
+    });
   }
 };
 

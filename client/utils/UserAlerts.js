@@ -5,7 +5,8 @@ export const ErrorMessages = {
     "with that email id. If that's you try 'Forgot Password'!",
   "InvalidCorporateEmail": "Please provide valid corporate email",
   "InvalidPassChange": "Please enter valid password",
-  "ErrorInUpdatePass": "Error in update password"
+  "ErrorInUpdatePass": "Error in update password",
+  "EMAIL_NOT_FOUND": "The requested email doesn't exist"
 };
 
 export const SuccessMessages = {

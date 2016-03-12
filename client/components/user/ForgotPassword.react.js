@@ -1,24 +1,21 @@
 import React from "react";
 import strategy from "joi-validation-strategy";
 import validation from "react-validation-mixin";
-import validatorUtil from "../utils/ValidationMessages";
-import UserAction from "../actions/UserAction";
-import UserStore from "../stores/UserStore";
-import {Link} from "react-router";
+import validatorUtil from "../../utils/ValidationMessages";
+import UserAction from "../../actions/UserAction";
+import UserStore from "../../stores/UserStore";
 
-var Login = React.createClass({
+var ForgotPassword = React.createClass({
   getInitialState: function() {
     return {
-      email: "",
-      password: ""
+      email: ""
     };
   },
   getValidatorData: function() {
     return this.state;
   },
   validatorTypes : {
-    email: validatorUtil.email,
-    password: validatorUtil.password
+    email: validatorUtil.email
   },
   componentDidMount: function() {
     UserStore.addChangeListener(this._onChange);
@@ -50,35 +47,10 @@ var Login = React.createClass({
                       : null
                   }
                 </div>
-                <div className="input-field">
-                  <input id="password" type="password"
-                    className={
-                      this.props.isValid("password")
-                        ? "validate"
-                        : "invalid"
-                      }
-                    name="password"
-                    onChange={this.onChange("password")}
-                    onBlur={this.props.handleValidation("password")} />
-                  <label htmlFor="password">Password</label>
-                  {
-                    !this.props.isValid("password")
-                      ? this.renderHelpText("password")
-                      : null
-                  }
-                </div>
                 <div id="toast-container"></div>
                 <button type="submit" className="btn auth-btn login-btn">
-                  Login
+                  Reset Password
                 </button>
-                <div className="auth-cnter-pnl">
-                  <Link to="/forgot-password" className="left">Forgot password?</Link>
-                  <span className="right">
-                    <input type="checkbox" className="filled-in"
-                      id="filled-in-box" defaultChecked="checked" />
-                    <label htmlFor="filled-in-box">Remember me</label>
-                  </span>
-                </div>
               </form>
             </div>
           </div>
@@ -104,9 +76,8 @@ var Login = React.createClass({
     event.preventDefault();
     const onValidate = (error) => {
       if (!error) {
-        UserAction.login({
-          email: this.state.email,
-          password: this.state.password
+        UserAction.forgotPassword({
+          email: this.state.email
         });
       }
     };
@@ -121,4 +92,4 @@ var Login = React.createClass({
   }
 });
 
-module.exports = validation(strategy)(Login);
+module.exports = validation(strategy)(ForgotPassword);

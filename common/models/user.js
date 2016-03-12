@@ -3,6 +3,7 @@ import fs from "fs";
 import _ from "underscore";
 import logger from "../../server/log";
 import publicEmailProviders from "../../server/utils/public-email-providers";
+import config from "../../server/config.json";
 
 module.exports = function(user) {
   const milliSec = 1000;
@@ -143,4 +144,67 @@ module.exports = function(user) {
     }
     return next();
   });
+
+  //send password reset link when password reset requested
+  user.on("resetPasswordRequest", function(info) {
+    var url = "http://" + config.host + ":" + config.port + "/#/reset-password";
+    var html = "Click <a href='" + url + "/" +
+      info.accessToken.id + "'>here</a> to reset your password";
+    user.app.models.Email.send({
+      to: info.email,
+      from: info.email,
+      subject: "Password reset",
+      html: html
+    }, function(err) {
+      if (err) return console.log("error sending password reset email");
+      console.log("sending password reset email to:", info.email);
+    });
+  });
+
+  user.beforeRemote("resetPasswordUsingToken", function(context, result, next) {
+    let req = context.req;
+    if(req.accessToken) {
+      req.body.userId = req.accessToken.userId;
+    } else {
+      let error = new Error();
+      error.message = "Unauthorized access";
+      error.name = "InvalidUser";
+      next(error);
+    }
+    next();
+  });
+
+  /**
+   * Reset user's password if short-lived token is present
+   *
+   * @param {object} options The plain text password & Access token
+   * @returns {Boolean}
+   */
+  user.resetPasswordUsingToken = function(options, cb) {
+    user.findById(options.userId, function(err, instance) {
+      if (err) {
+        return cb(err);
+      }
+      instance.updateAttribute("password", options.password,
+        function(err, user) {
+        if (err) {
+          return cb(err);
+        }
+        cb(null, true);
+        return cb.promise;
+      });
+    });
+  };
+
+  user.remoteMethod(
+    "resetPasswordUsingToken",
+    {
+      description: "Reset password for a user with short-lived access token.",
+      accepts: [
+        {arg: "options", type: "object", required: true, http: {source: "body"}}
+      ],
+      http: {verb: "post", path: "/reset-password"}
+    }
+  );
+
 };

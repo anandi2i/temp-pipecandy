@@ -63,6 +63,11 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__get__lists"
+    }, {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "resetPasswordUsingToken"
     }
   ],
   "methods": {}

@@ -1,15 +1,14 @@
 import React from "react";
 import strategy from "joi-validation-strategy";
 import validation from "react-validation-mixin";
-import validatorUtil from "../utils/ValidationMessages";
-import UserAction from "../actions/UserAction";
-import UserStore from "../stores/UserStore";
-import {Link} from "react-router";
+import validatorUtil from "../../utils/ValidationMessages";
+import UserAction from "../../actions/UserAction";
+import UserStore from "../../stores/UserStore";
 
-var Login = React.createClass({
+var ResetPassword = React.createClass({
   getInitialState: function() {
     return {
-      email: "",
+      accessToken: this.props.params.accessToken,
       password: ""
     };
   },
@@ -17,7 +16,6 @@ var Login = React.createClass({
     return this.state;
   },
   validatorTypes : {
-    email: validatorUtil.email,
     password: validatorUtil.password
   },
   componentDidMount: function() {
@@ -35,21 +33,6 @@ var Login = React.createClass({
               <img className="auth-logo" src="/images/logo.png" />
               <form className="auth-form" id="loginForm"
                 onSubmit={this.onSubmit}>
-                <div className="input-field">
-                  <input id="email" type="text"
-                    className={
-                      this.props.isValid("email") ? "validate" : "invalid"
-                    }
-                    name="email"
-                    onChange={this.onChange("email")}
-                    onBlur={this.props.handleValidation("email")} />
-                  <label htmlFor="email">Email</label>
-                  {
-                    !this.props.isValid("email")
-                      ? this.renderHelpText("email")
-                      : null
-                  }
-                </div>
                 <div className="input-field">
                   <input id="password" type="password"
                     className={
@@ -69,16 +52,8 @@ var Login = React.createClass({
                 </div>
                 <div id="toast-container"></div>
                 <button type="submit" className="btn auth-btn login-btn">
-                  Login
+                  Reset Password
                 </button>
-                <div className="auth-cnter-pnl">
-                  <Link to="/forgot-password" className="left">Forgot password?</Link>
-                  <span className="right">
-                    <input type="checkbox" className="filled-in"
-                      id="filled-in-box" defaultChecked="checked" />
-                    <label htmlFor="filled-in-box">Remember me</label>
-                  </span>
-                </div>
               </form>
             </div>
           </div>
@@ -104,8 +79,8 @@ var Login = React.createClass({
     event.preventDefault();
     const onValidate = (error) => {
       if (!error) {
-        UserAction.login({
-          email: this.state.email,
+        UserAction.resetPassword({
+          accessToken: this.state.accessToken,
           password: this.state.password
         });
       }
@@ -121,4 +96,4 @@ var Login = React.createClass({
   }
 });
 
-module.exports = validation(strategy)(Login);
+module.exports = validation(strategy)(ResetPassword);
