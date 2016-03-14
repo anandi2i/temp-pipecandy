@@ -613,6 +613,20 @@ body {
   }
 }
 /*********************
+  Modal header
+**********************/
+.modal {
+  .gray-head {
+    padding: 10px 20px;
+    display: inline-block;
+  }
+  .mdi-close {
+    float: right;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+}
+/*********************
   Media Query Classes
 **********************/
 @media only screen and (max-width: 600px) {
