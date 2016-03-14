@@ -47,7 +47,7 @@ class CreateCampaign extends React.Component {
           <div className="row sub-nav">
             <div className="head">Let’s create a new campaign</div>
             <div className="sub-head">
-              <Link to="/view-campaign">View campaign</Link>
+              <Link to="/campaign">View campaign</Link>
             </div>
           </div>
           <div className="create-container">

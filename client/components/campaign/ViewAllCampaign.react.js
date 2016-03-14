@@ -1,35 +1,35 @@
 import React from "react";
 import {Link} from "react-router";
 import autobind from "autobind-decorator";
-import EmailListActions from "../../actions/EmailListActions";
-import EmailListStore from "../../stores/EmailListStore";
+import CampaignActions from "../../actions/CampaignActions";
+import CampaignStore from "../../stores/CampaignStore";
 
-function getAllEmailList() {
-  EmailListActions.getAllEmailList();
+function getAllCampaigns() {
+  CampaignActions.getAllCampaigns();
 }
 
-class ListView extends React.Component {
+class CampaignListView extends React.Component {
   constructor(props) {
     super(props);
-    getAllEmailList();
+    getAllCampaigns();
     this.state={
-      allEmailLists: [],
+      allCampaignLists: [],
     };
   }
 
   componentDidMount() {
-    EmailListStore.addChangeListener(this._onChange);
+    CampaignStore.addChangeListener(this._onChange);
   }
 
   componentWillUnmount() {
-    EmailListStore.removeChangeListener(this._onChange);
+    CampaignStore.removeChangeListener(this._onChange);
   }
 
   @autobind
   _onChange() {
-    let emailLists = EmailListStore.getAllList();
+    let CampaignLists = CampaignStore.getAllCampaigns();
     this.setState({
-      allEmailLists: emailLists
+      allCampaignLists: CampaignLists
     });
   }
 
@@ -38,9 +38,9 @@ class ListView extends React.Component {
       <div>
         <div className="container">
           <div className="row sub-head-container m-lr-0">
-            <div className="head">All Email List</div>
+            <div className="head">All Campaign List</div>
             <div className="sub-head">
-              <Link to="/list/create">Back to Create List</Link>
+              <Link to="/campaign/create">Create Campaign</Link>
             </div>
           </div>
           <table className="striped">
@@ -53,12 +53,13 @@ class ListView extends React.Component {
             </thead>
             <tbody>
               {
-                this.state.allEmailLists.map($.proxy(function (list, key) {
+                this.state.allCampaignLists.map(
+                  $.proxy(function (campaign, key) {
                   return (
                     <tr key={key}>
-                      <td>{list.id}</td>
-                      <td>{list.name}</td>
-                      <td><Link to={`/list/${list.id}`}>view</Link></td>
+                      <td>{campaign.id}</td>
+                      <td>{campaign.name}</td>
+                      <td><Link to={`/campaign/${campaign.id}`}>view</Link></td>
                     </tr>
                   );
                 }), this)
@@ -71,4 +72,4 @@ class ListView extends React.Component {
   }
 }
 
-export default ListView;
+export default CampaignListView;

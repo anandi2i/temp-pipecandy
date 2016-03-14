@@ -6,7 +6,7 @@ const EmailListApi = {
     return api.get("/api/users/"+ cookie.load("userId") +"/lists");
   },
   crateList(data) {
-    return api.post("/api/lists", data);
+    return api.post("/api/users/"+ cookie.load("userId") +"/lists", data);
   },
   getList(id){
     return api.get("/api/lists/"+id);

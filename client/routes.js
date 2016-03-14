@@ -1,5 +1,5 @@
 import React from "react";
-import {Route, IndexRoute} from "react-router";
+import {Router, Route, IndexRoute} from "react-router";
 import cookie from "react-cookie";
 import AppContainer from "./components/AppContainer.react";
 import IndexPage from "./components/IndexPage.react";
@@ -9,6 +9,7 @@ import Home from "./components/Home.react";
 import UserApi from "./API/UserApi";
 import UserAction from "./actions/UserAction";
 import UserStore from "./stores/UserStore";
+import Index from "./components/Index.react";
 import Login from "./components/Login.react";
 import Signup from "./components/Signup.react";
 import Profile from "./components/user/UserProfile.react";
@@ -20,13 +21,14 @@ import PasswordResponse from "./components/user/PasswordResponse.react";
 import ResetPwdResponse from "./components/user/ResetPasswordResponse.react";
 
 //Email List
-import EmailList from "./components/email-list/CreateEmailList.react";
+import CreateEmailList from "./components/email-list/CreateEmailList.react";
 import ViewAllList from "./components/email-list/ViewAllList.react";
 import ViewSingleList from "./components/email-list/ViewSingleList.react";
 
 //Campaign
 import CreateCampaign from "./components/campaign/CreateCampaign.react";
 import RunCampaign from "./components/campaign/RunCampaign.react";
+import ViewALLCampaign from "./components/campaign/ViewAllCampaign.react";
 
 function requireAuth(nextState, replace) {
   if(!($.isEmptyObject(UserStore.getUser()))) {
@@ -46,26 +48,32 @@ function requireAuth(nextState, replace) {
 }
 
 const routes = (
-<Route>
-  <Route path="/" component={AppContainer}>
+<Router>
+  <Route path="/" component={AppContainer} onEnter={requireAuth}>
     <IndexRoute component={IndexPage} />
-    <Route path="home" component={Home} onEnter={requireAuth} />
-    <Route path="create-list" component={EmailList} onEnter={requireAuth} />
-    <Route path="view-list" component={ViewAllList} onEnter={requireAuth} />
-    <Route path="email-list/:listId" component={ViewSingleList} onEnter={requireAuth} />
-    <Route path="create-campaign" component={CreateCampaign} onEnter={requireAuth} />
-    <Route path="run-campaign" component={RunCampaign} onEnter={requireAuth} />
+    <Route path="home" component={Home} />
+    <Route path="list">
+      <IndexRoute component={ViewAllList} />
+      <Route path="create" component={CreateEmailList} />
+      <Route path=":listId" component={ViewSingleList} />
+    </Route>
+    <Route path="campaign">
+      <IndexRoute component={ViewALLCampaign} />
+      <Route path="create" component={CreateCampaign} />
+      <Route path="run" component={RunCampaign} />
+    </Route>
     <Route path="response" component={Response} />
     <Route path="email-verified" component={EmailVerification} />
-    <Route path="profile" component={Profile} onEnter={requireAuth} />
+    <Route path="profile" component={Profile} />
     <Route path="reset-password-response" component={ResetPwdResponse} />
   </Route>
+  <Route path="register" component={Index} />
   <Route path="login" component={Login} />
   <Route path="signup" component={Signup} />
   <Route path="forgot-password" component={ForgotPassword} />
   <Route path="reset-password/:accessToken" component={ResetPassword} />
   <Route path="forgot-password-response" component={PasswordResponse} />
-</Route>
+</Router>
 );
 
 module.exports = routes;

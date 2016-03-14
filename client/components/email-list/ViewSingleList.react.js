@@ -62,7 +62,7 @@ class ListView extends React.Component {
           <div className="row sub-head-container m-lr-0">
             <div className="head">{this.state.emailList.name}</div>
             <div className="sub-head">
-              <Link to="/view-list">Back to Email Lists</Link>
+              <Link to="/list">Back to Email Lists</Link>
             </div>
           </div>
           <div className="row r-btn-container m-lr-0">

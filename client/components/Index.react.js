@@ -10,14 +10,14 @@ var Index = React.createClass({
             <div className="auth-container">
               <img className="auth-logo" src="/images/logo.png" />
               <div className="auth-form">
-                <Link className="btn auth-btn linkedin-btn" to="/auth/linkedin">
+                <a className="btn auth-btn linkedin-btn" href="/auth/linkedin">
                   <i className="left"><span className="linkedin-icon" /></i>
                   Sign in with linkedin
-                </Link>
-                <Link className="btn auth-btn google-btn" to="/auth/google">
+                </a>
+                <a className="btn auth-btn google-btn" href="/auth/google">
                   <i className="left"><span className="google-icon" /></i>
                   Sign in with Google
-                </Link>
+                </a>
                 <Link className="btn auth-btn signin-btn" to="/login">
                   Sign with your email
                 </Link>

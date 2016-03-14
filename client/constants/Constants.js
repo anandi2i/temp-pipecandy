@@ -11,5 +11,7 @@ export default keyMirror({
   SET_USER_DETAIL: null,
   USER_UPDATE: null,
   FORGOT_PASSSWORD: null,
-  RESET_PASSSWORD: null
+  RESET_PASSSWORD: null,
+  CREATE_NEW_CAMPAIGN: null,
+  GET_ALL_CAMPAIGN: null
 });

@@ -60,7 +60,7 @@ AppDispatcher.register(function(payload) {
       EmailListApi.crateList(action.data).then((response) => {
         _allEmailList = {};
         _error = "";
-        appHistory.push("email-list/"+response.data.id);
+        appHistory.push("list/"+response.data.id);
       }, (err)=> {
         _error = err;
         EmailListStore.emitChange();
