@@ -13,5 +13,6 @@ export default keyMirror({
   FORGOT_PASSSWORD: null,
   RESET_PASSSWORD: null,
   CREATE_NEW_CAMPAIGN: null,
-  GET_ALL_CAMPAIGN: null
+  GET_ALL_CAMPAIGN: null,
+  FILE_UPLOAD: null
 });

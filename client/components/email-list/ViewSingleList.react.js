@@ -1,9 +1,10 @@
 import React from "react";
-import validation from "react-validation-mixin";
-import strategy from "joi-validation-strategy";
-import validatorUtil from "../../utils/ValidationMessages";
 import {Link} from "react-router";
 import autobind from "autobind-decorator";
+import validation from "react-validation-mixin";
+import strategy from "joi-validation-strategy";
+import _ from "underscore";
+import validatorUtil from "../../utils/ValidationMessages";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 
@@ -45,10 +46,17 @@ class ListView extends React.Component {
 
   @autobind
   _onChange() {
+    let error = EmailListStore.getError();
+    const timeToShow = 4000;
+    if(error) {
+      Materialize.toast(error, timeToShow);
+      return false;
+    }
     let emailList = EmailListStore.getEmailListByID();
     this.setState({
       emailList: emailList
     });
+    return true;
   }
 
   @autobind
@@ -110,6 +118,33 @@ class ListView extends React.Component {
     $("#addEmail").closeModal();
   }
 
+  @autobind
+  openDialog() {
+    $("#csvUpload").click();
+  }
+
+  @autobind
+  fileChange(e) {
+    let file = e.target.files[0];
+    let acceptType = ["text/csv"];
+    const timeToShow = 4000;
+    if(!file) {
+      return false;
+    }
+    if(_.contains(acceptType, file.type)) {
+      let fileObj = new FormData();
+      fileObj.append("file", file);
+      let data = {
+        fileObj: fileObj,
+        listId: this.props.params.listId
+      };
+      EmailListActions.uploadFile(data);
+    } else {
+      Materialize.toast("Please upload file of type csv/xls", timeToShow);
+    }
+    return true;
+  }
+
   render() {
     return (
       <div>
@@ -129,10 +164,13 @@ class ListView extends React.Component {
               <li><a className="modal-trigger" href="#addEmail">Add Subbscriber</a></li>
               <li><a href="#">Samle content</a></li>
             </ul>
-            <a className="btn btn-dflt blue sm-icon-btn" href="#">
+            <input id="csvUpload" type="file" className="hide" name="file"
+              accept=".csv" onChange={this.fileChange} />
+            <div className="btn btn-dflt blue sm-icon-btn" onClick={this.openDialog}>
               <i className="left mdi mdi-upload"></i> add from file
-            </a>
+            </div>
           </div>
+          <div id="toast-container" className="right-align"></div>
           <div id="addEmail" className="modal modal-fixed-header
             modal-fixed-footer mini-modal">
             <div className="modal-header">

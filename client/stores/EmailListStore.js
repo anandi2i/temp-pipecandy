@@ -75,7 +75,17 @@ AppDispatcher.register(function(payload) {
         _error = err;
         EmailListStore.emitChange();
       });
-    break;
+      break;
+    case Constants.FILE_UPLOAD:
+      EmailListApi.uploadFile(action.data).then((response) => {
+        //TODO: Change it to success message
+        _error = "The file has been uploaded successfully";
+        EmailListStore.emitChange();
+      }, (err)=> {
+        _error = err;
+        EmailListStore.emitChange();
+      });
+      break;
     default:
       return true;
   }

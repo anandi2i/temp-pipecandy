@@ -19,6 +19,12 @@ const EmailListActions = {
       actionType: Constants.GET_LIST_BY_ID,
       data: id
     });
+  },
+  uploadFile(data){
+    AppDispatcher.handleAction({
+      actionType: Constants.FILE_UPLOAD,
+      data: data
+    });
   }
 };
 
