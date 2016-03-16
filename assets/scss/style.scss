@@ -105,7 +105,7 @@ body {
       text-shadow: 0 0 1px $white, 0 0 1px $white;
       @include rotate(-90deg);
       transition: transform 0.5s;
-      &.active{
+      &.active {
         margin-top: -38px;
         @include rotate(0deg);
         transition: transform 0.5s;
@@ -441,7 +441,7 @@ body {
   @include sub-nav-container;
 }
 .sub-head-container {
-  margin-top: 43px;
+  margin-top: 30px;
   margin-bottom: 5px;
   min-height: 50px;
   @include sub-nav-container;
@@ -579,7 +579,7 @@ body {
         background-color: $pinck-clr;
         color: $white;
       }
-      &.first-child {
+      &:nth-child(2) {
         border-top-left-radius: 5px;
         border-bottom-left-radius: 5px;
       }
@@ -613,17 +613,92 @@ body {
   }
 }
 /*********************
+  Email Campaign
+**********************/
+.inner-tabs {
+  border-bottom: 1px solid $light-border;
+  nav {
+    height: 50px;
+    line-height: 50px;
+    border-bottom: none;
+    ul {
+      li {
+        a {
+          padding: 0 25px;
+          &.active {
+            border-bottom: 3px solid;
+            margin-bottom: -3px;
+          }
+        }
+      }
+    }
+    .btn {
+      margin-top: -2px;
+    }
+  }
+}
+.template-preview {
+  font-weight: 400;
+  border-radius: 3px;
+  box-shadow: none;
+  border: 1px solid $light-border;
+  .card-title {
+    border-bottom: 1px solid $light-border;
+    font-size: 15px;
+    padding: 10px;
+    font-weight: bold;
+    background-color: $lit-gray-bg;
+  }
+  .card-content{
+    font-size: 13px;
+  }
+  .card-action {
+    background-color: $lit-blue-bg;
+    color: $a-tag-clr;
+    text-align: center;
+    padding: 10px;
+    // border: 1px solid $a-tag-clr;
+    font-size: 14px;
+    text-transform: uppercase;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    cursor: pointer;
+  }
+  &:hover{
+    box-shadow: 0px 0px 1px 1px $blue-clr;
+  }
+}
+/*********************
   Modal header
 **********************/
 .modal {
-  .gray-head {
-    padding: 10px 20px;
-    display: inline-block;
+  .modal-header {
+    padding: 15px;
+    font-size: 18px;
+    font-weight: 400;
+    padding-bottom: 0;
+    .head {
+      display: inline-block;
+      color: $modal-head-color;
+    }
+  }
+  .modal-content{
+    .template-content{
+      padding: 20px;
+      background-color: $lit-gray-bg;
+    }
   }
   .mdi-close {
     float: right;
-    padding: 10px 20px;
+    padding: 0px 0px;
     cursor: pointer;
+    color: $gray-txt-clr;
+    @include rotate(0deg);
+    transition: transform 0.5s;
+    &:hover{
+      @include rotate(180deg);
+      transition: transform 0.5s;
+    }
   }
 }
 /*********************
@@ -646,10 +721,15 @@ body {
       margin-left: 0;
     }
     .sub-head {
+      width: 100%;
       float: left;
       a {
         display: block;
         padding-left: 0;
+      }
+      .btn {
+        width: 100%;
+        margin-top: 10px;
       }
     }
   }

@@ -136,7 +136,7 @@ class ListView extends React.Component {
           <div id="addEmail" className="modal modal-fixed-header
             modal-fixed-footer mini-modal">
             <div className="modal-header">
-              <div className="gray-head">Add Subbscriber</div>
+              <div className="head">Add Subbscriber</div>
               <i onClick={this.closeModal} className="mdi mdi-close"></i>
             </div>
             <div className="modal-content">
