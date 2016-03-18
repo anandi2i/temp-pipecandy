@@ -92,6 +92,13 @@ gulp.task("copy:images", function() {
     .pipe(gulp.dest("public/assets"));
 });
 
+gulp.task("copy:tinymce", function() {
+  gulp.src(["bower_components/tinymce/**/*"], {
+      base: "bower_components"
+    })
+    .pipe(gulp.dest("public/assets"));
+});
+
 // Start server
 gulp.task("server", function() {
   // listen for changes
@@ -117,6 +124,7 @@ gulp.task("default", [
   "js",
   "copy:fonts",
   "copy:images",
+  "copy:tinymce",
   "browserify:watch",
   "sass:watch",
   "server"

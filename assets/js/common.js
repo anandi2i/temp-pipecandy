@@ -37,3 +37,20 @@ function enabledropDownBtn(){
     alignment: "right"
   });
 }
+
+function initTinyMCE(id, toolBar){
+  tinymce.init({
+  selector: id,
+  inline: true,
+  height : 150,
+  menubar:false,
+  browser_spellcheck: true,
+  contextmenu: false,
+  fixed_toolbar_container: toolBar,
+  plugins: [
+    "advlist autolink lists link image charmap print preview anchor",
+    "insertdatetime media table contextmenu paste code"
+  ],
+  toolbar: "bold italic underline alignleft aligncenter alignright alignjustify link image"
+  });
+}

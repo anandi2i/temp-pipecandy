@@ -64,9 +64,7 @@ class SelectDefaultTemplate extends React.Component {
           <div className="card template-preview">
             <div className="card-title">Blank Template</div>
             <div className="card-content">
-              <p>I am a very simple card. I am good at containing small bits
-                of information. I am convenient because I require little
-                markup to use effectively.</p>
+              &nbsp;
             </div>
             <div className="card-action">
               <i className="mdi mdi-eye-off"></i> Preview
@@ -80,9 +78,8 @@ class SelectDefaultTemplate extends React.Component {
                 <div className="card template-preview">
                   <div className="card-title">Template- {key}</div>
                   <div className="card-content">
-                    <p>I am a very simple card. I am good at containing small
-                      bits of information. I am convenient because I require
-                      little markup to use effectively.</p>
+                    Hi,
+                      <br /><br />You had downloaded our report on the current app development economy and pricing standards. I hope the report was useful.<br /><br />As a marketplace that identifies and aggregates information about over 10000 web &amp; mobile development agencies, ContractIQ had this data all along. So, we went ahead and published the first benchmark of it's kind.<br /><br />How about a quick call sometime tomorrow morning, say 12 pm GMT?<br /><br /><br />
                   </div>
                   <div className="card-action modal-trigger" href="#previewTemplate">
                     <i className="mdi mdi-eye"></i> Preview
@@ -100,19 +97,8 @@ class SelectDefaultTemplate extends React.Component {
           </div>
           <div className="modal-content">
             <div className="template-content">
-              Hi "First Name"
-
-              Do you remember?
-
-              We met at the coffee booth right after the keynote at the
-              "eventname" conference. I wonder if we can pick up from where we
-              left.
-
-              Let me know and I’d love to take a few minutes of your time to
-              elaborate more about our product.
-
-              Warm regards,
-              John Smith
+              Hi,
+			    <br /><br />You had downloaded our report on the current app development economy and pricing standards. I hope the report was useful.<br /><br />As a marketplace that identifies and aggregates information about over 10000 web &amp; mobile development agencies, ContractIQ had this data all along. So, we went ahead and published the first benchmark of it's kind.<br /><br />How about a quick call sometime tomorrow morning, say 12 pm GMT?<br /><br /><br />
             </div>
           </div>
           <div className="modal-footer r-btn-container">
