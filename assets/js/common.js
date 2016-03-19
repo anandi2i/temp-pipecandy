@@ -26,6 +26,14 @@ function enableToolTip() {
   $(".tooltipped").tooltip();
 }
 
+function displayError(error) {
+  const timeToShow = 4000;
+  if(error) {
+    $(".toast").remove();
+    Materialize.toast("<img src='/images/warning-icon.png' />"+ error,timeToShow);
+  }
+}
+
 function enabledropDownBtn(){
   $(".dropdown-button").dropdown({
     inDuration: 300,

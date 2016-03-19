@@ -67,7 +67,6 @@ var Login = React.createClass({
                       : null
                   }
                 </div>
-                <div id="toast-container"></div>
                 <button type="submit" className="btn auth-btn login-btn">
                   Login
                 </button>
@@ -113,11 +112,7 @@ var Login = React.createClass({
     this.props.validate(onValidate);
   },
   _onChange() {
-    let error = UserStore.getError();
-    const timeToShow = 4000;
-    if(error) {
-      Materialize.toast(error, timeToShow);
-    }
+    displayError(UserStore.getError());
   }
 });
 

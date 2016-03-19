@@ -122,7 +122,6 @@ var Signup = React.createClass({
                     id="filled-in-box" defaultChecked="checked" />
                   <label htmlFor="filled-in-box">Show password</label>
                 </p>
-                <div id="toast-container"></div>
                 <button type="submit" className="btn auth-btn login-btn" >
                   sign up
                 </button>
@@ -158,11 +157,7 @@ var Signup = React.createClass({
     this.props.validate(onValidate);
   },
   _onChange() {
-    let error = UserStore.getError();
-    const timeToShow = 4000;
-    if(error) {
-      Materialize.toast(error, timeToShow);
-    }
+    displayError(UserStore.getError());
   }
 });
 

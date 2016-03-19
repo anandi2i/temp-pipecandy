@@ -73,18 +73,7 @@ class Profile extends React.Component {
       "img": null,
       "croppedImg": this.state.img || user.avatar
     });
-    let error = UserStore.getError();
-    if(error) {
-      this.displayError(error);
-    }
-  }
-
-  @autobind
-  displayError(error) {
-    const timeToShow = 4000;
-    if (error) {
-      Materialize.toast(error, timeToShow);
-    }
+    displayError(UserStore.getError());
   }
 
   @autobind
@@ -252,7 +241,6 @@ class Profile extends React.Component {
                 </div>
               </div>
             </div>
-            <div className="row right" id="toast-container"></div>
             <div className="row r-btn-container m-0">
               <input type="button" className="btn red p-1-btn" value="Cancel" />
               <input type="submit" className="btn blue" value="Save Changes" />

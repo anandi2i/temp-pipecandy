@@ -84,11 +84,7 @@ var ForgotPassword = React.createClass({
     this.props.validate(onValidate);
   },
   _onChange() {
-    let error = UserStore.getError();
-    const timeToShow = 4000;
-    if(error) {
-      Materialize.toast(error, timeToShow);
-    }
+    displayError(UserStore.getError());
   }
 });
 

@@ -47,9 +47,8 @@ class ListView extends React.Component {
   @autobind
   _onChange() {
     let error = EmailListStore.getError();
-    const timeToShow = 4000;
     if(error) {
-      Materialize.toast(error, timeToShow);
+      displayError(error);
       return false;
     }
     let emailList = EmailListStore.getEmailListByID();
@@ -170,7 +169,6 @@ class ListView extends React.Component {
               <i className="left mdi mdi-upload"></i> add from file
             </div>
           </div>
-          <div id="toast-container" className="right-align"></div>
           <div id="addEmail" className="modal modal-fixed-header
             modal-fixed-footer mini-modal">
             <div className="modal-header">

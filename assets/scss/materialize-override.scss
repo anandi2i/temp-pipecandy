@@ -133,7 +133,15 @@ nav {
   background: rgba(230,230,230,0.5);
 }
 .toast {
-  background-color: $red-clr;
+  img {
+    padding-right: 15px;
+  }
+  background-color: $white;
+  width: 350px;
+  word-break: keep-all;
+  color: $black-clr;
+  outline: none;
+  margin-right: 3px;
 }
 .modal {
   box-shadow: $modal-box-shadow;
@@ -217,22 +225,7 @@ h3 {
 }
 @media only screen and (min-width: 0px) {
   #toast-container {
-    left: 0;
-    bottom: 0;
-    top: 0;
-    right: 0;
-    width: 100%;
-    max-width: 100%;
-    position: relative;
-    .toast {
-      display: block;
-      background-color: $white;
-      box-shadow: none;
-      color: $red-clr;
-      float: none;
-      padding: 0 15px;
-      min-height: initial;
-      word-break: break-word;
-    }
+    top: 10px;
+    right: 10px;
   }
 }
