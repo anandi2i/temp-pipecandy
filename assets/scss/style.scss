@@ -232,7 +232,7 @@ body {
   border: 2px solid $light-border;
   color: $dflt-txt-clr;
   i {
-    border-right: 1px solid $light-border;
+    border-right: $border-1px;
     height: 58px;
   }
   .google-icon {
@@ -439,7 +439,7 @@ body {
 .sub-nav {
   margin-top: 28px;
   margin-bottom: 45px;
-  border-bottom: 1px solid $light-border;
+  border-bottom: $border-1px;
   min-height: 50px;
   @include sub-nav-container;
 }
@@ -552,7 +552,7 @@ body {
   new tab
 **********************/
 .tab-container {
-  border-bottom: 1px solid $light-border;
+  border-bottom: $border-1px;
   width: 90%;
   margin-left: 5%;
   .new-tabs {
@@ -619,7 +619,7 @@ body {
   Email Campaign
 **********************/
 .inner-tabs {
-  border-bottom: 1px solid $light-border;
+  border-bottom: $border-1px;
   nav {
     height: 50px;
     line-height: 50px;
@@ -640,26 +640,33 @@ body {
     }
   }
 }
+// Add ellipsis for email template html content rendering
 $font-size: 13px;
 $line-height: 1.4;
 $lines-to-show: 8;
 .template-preview {
+  min-height: 269px;
   font-weight: 400;
   border-radius: 3px;
   box-shadow: none;
-  border: 1px solid $light-border;
+  border: $border-1px;
   .card-title {
-    border-bottom: 1px solid $light-border;
+    border-bottom: $border-1px;
     font-size: 15px;
     padding: 10px;
     font-weight: bold;
     background-color: $lit-gray-bg;
+    height: 45px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+    white-space: nowrap;
   }
   .card-content {
     display: block;
     display: -webkit-box;
-    max-width: 400px;
-    height: $font-size*$line-height*$lines-to-show+20;
+    color: $dflt-txt-clr;
+    height: 165px;
     margin: 0 auto;
     font-size: $font-size;
     line-height: $line-height;
@@ -674,7 +681,6 @@ $lines-to-show: 8;
     color: $a-tag-clr;
     text-align: center;
     padding: 10px;
-    // border: 1px solid $a-tag-clr;
     font-size: 14px;
     text-transform: uppercase;
     border-bottom-left-radius: 3px;
@@ -684,7 +690,76 @@ $lines-to-show: 8;
   &:hover {
     box-shadow: 0 0 1px 1px $blue-clr;
   }
+  .campaign-template {
+    display: inline-block;
+    width: 70%;
+    float: left;
+  }
+  .campaign-followups {
+    display: inline-block;
+    width: 30%;
+    .followups {
+      display: inline-block;
+      height: 260px;
+      width: 20%;
+      background: $linear-gradient;
+      .head {
+        height: 45px;
+        width: 100%;
+        border-bottom: $border-1px;
+        border-left: $border-1px;
+      }
+      .body {
+        height: 180px;
+        width: 100%;
+        border-left: $border-1px;
+      }
+      .preview {
+        height: 42px;
+        width: 100%;
+        border-top: $border-1px;
+        border-left: $border-1px;
+        background: $linear-gradient-blue;
+      }
+    }
+    .count {
+      position: absolute;
+      text-align: center;
+      margin-top: 85px;
+      color: $dflt-txt-clr;
+      font-size: 12px;
+      font-weight: 700;
+      h2 {
+        font-size: 50px;
+        font-weight: 700;
+        margin: 0;
+      }
+    }
+  }
 }
+.campaign-template-info {
+  margin-bottom: 15px;
+  margin-top: 25px;
+  .title {
+    font-size: 16px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+    white-space: nowrap;
+  }
+  .details {
+    color: $dflt-txt-clr;
+    margin: 10px 0;
+    i {
+      font-size: 7px;
+      margin: 0 10px;
+    }
+  }
+}
+/******************************
+  Daft Email Templates
+*******************************/
 .draft-template {
   .left-part {
     width: 50px;
@@ -708,12 +783,12 @@ $lines-to-show: 8;
       }
     }
     .email-body {
-      border: 1px solid $light-border;
+      border: $border-1px;
       min-height: 300px;
     }
   }
   .separator {
-    border-bottom: 1px solid $light-border;
+    border-bottom: $border-1px;
     padding: 10px 0;
     &.row {
       margin-bottom: 0;

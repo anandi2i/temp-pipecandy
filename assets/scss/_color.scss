@@ -1,4 +1,5 @@
 $light-border: #ebebeb;
+$border-1px: 1px solid $light-border;
 $white : #FFF;
 $linckedin-bg-clr : #0077b5;
 $google-bg-clr : #FFF;
@@ -23,3 +24,5 @@ $pinck-clr: #fa80a5;
 $lit-blue-bg: #F2F7FD;
 $lit-gray-bg: #FAFAFA;
 $modal-head-color: #142a38;
+$linear-gradient: linear-gradient(to right, #FBFBFB, #ECECEC);
+$linear-gradient-blue: linear-gradient(to right, #FBFBFB, $lit-blue-bg);

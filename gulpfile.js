@@ -125,7 +125,6 @@ gulp.task("default", [
   "copy:fonts",
   "copy:images",
   "copy:tinymce",
-  "browserify:watch",
   "sass:watch",
   "server"
 ]);
