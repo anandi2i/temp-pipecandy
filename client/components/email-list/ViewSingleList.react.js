@@ -153,18 +153,19 @@ class ListView extends React.Component {
 
   @autobind
   openDialog() {
-    $("#csvUpload").click();
+    $("#fileUpload").click();
   }
 
   @autobind
   fileChange(e) {
     let file = e.target.files[0];
-    let acceptType = ["text/csv"];
+    let fileExt = _.last(file.name.split("."));
+    let acceptableFileTypes = ["csv", "xls", "xlsx"];
     const timeToShow = 4000;
     if(!file) {
       return false;
     }
-    if(_.contains(acceptType, file.type)) {
+    if(_.contains(acceptableFileTypes, fileExt)) {
       let fileObj = new FormData();
       fileObj.append("file", file);
       let data = {
@@ -197,8 +198,8 @@ class ListView extends React.Component {
               <li><a className="modal-trigger" href="#addEmail">Add Subbscriber</a></li>
               <li><a href="#">Samle content</a></li>
             </ul>
-            <input id="csvUpload" type="file" className="hide" name="file"
-              accept=".csv" onChange={this.fileChange} />
+            <input id="fileUpload" type="file" className="hide" name="file"
+              accept=".csv, .xls, .xlsx" onChange={this.fileChange} />
             <div className="btn btn-dflt blue sm-icon-btn" onClick={this.openDialog}>
               <i className="left mdi mdi-upload"></i> add from file
             </div>

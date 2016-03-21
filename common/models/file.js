@@ -2,6 +2,7 @@ import async from "async";
 import fs from "fs";
 import path from "path";
 import csv from "fast-csv";
+import xlsx from "node-xlsx";
 import _ from "underscore";
 import logger from "../../server/log";
 var CONTAINERS_URL = "/api/containers/";
@@ -14,7 +15,7 @@ module.exports = function(File) {
     options = {
       getFilename: function (file, req, res) {
         let fileExt = _.last(file.name.split("."));
-        let newFilename = new Date().getTime() + fileExt;
+        let newFilename = new Date().getTime() + "." + fileExt;
         return newFilename;
       }
     };
@@ -31,7 +32,9 @@ module.exports = function(File) {
         let fileInfo = fileObj.files.file[0];
         filePath = path.join("server/storage", fileInfo.container,
           fileInfo.name);
-        if (fileInfo.type === "text/csv") {
+        let fileExt = _.last(fileInfo.name.split("."));
+        let acceptableFileTypes = ["csv", "xls", "xlsx"];
+        if (_.contains(acceptableFileTypes, fileExt)) {
           File.create({
             name: fileInfo.name,
             type: fileInfo.type,
@@ -44,7 +47,7 @@ module.exports = function(File) {
                 " ", err.message);
               callback(err);
             }
-            callback(null, filePath);
+            callback(null, fileInfo.name);
           });
         } else {
           fs.unlinkSync(filePath);
@@ -57,7 +60,40 @@ module.exports = function(File) {
       });
     }
 
-    function readFileAndCreateCompanies(filePath, callback) {
+    function parseUploadedFile(fileName, callback) {
+      let fileExt = _.last(fileName.split("."));
+      fileExt === "csv" ? parseCSV(callback) : parseExcel(callback);
+    }
+
+    function parseExcel(callback) {
+      let people = [];
+      let companies = [];
+      let header = ["firstName", "middleName", "lastName", "email", "field1",
+        "value1", "field2", "value2", "field3", "value3", "field4", "value4",
+        "field5", "value5"];
+      let obj = xlsx.parse(filePath);
+      let headerIndex = 0;
+      _.each(obj, function(object) {
+        _.each(object.data, function(row, index) {
+          if(index !== headerIndex) {
+            let domain = row[3].split("@")[1];
+            if(!domain) {
+              let error = new Error();
+              error.message = "One or more rows doesn't have valid email Id";
+              error.name = "InvalidEmail";
+              logger.error("Not a valid email", error.message);
+              callback(error);
+            } else {
+              companies.push(domain);
+            }
+            people.push(_.object(header, row));
+          }
+        });
+      });
+      callback(null, companies, people);
+    }
+
+    function parseCSV(callback){
       let people = [];
       let companies = [];
       let stream = fs.createReadStream(filePath);
@@ -74,15 +110,19 @@ module.exports = function(File) {
         }
         people.push(data);
       }).on("end", () => {
-        companies = companies.map(company => ({"name": company}));
-        File.app.models.Company.create(companies, (err, companies) => {
-          if(err) {
-            logger.error("Error in creating companies for the list::", listid,
-              " ", err.message);
-          }
-          logger.info("Companies created successfully for the list::", listid);
-          callback(null, people);
-        });
+        callback(null, companies, people);
+      });
+    }
+
+    function createCompanies(companies, people, callback) {
+      companies = companies.map(company => ({"name": company}));
+      File.app.models.Company.create(companies, (err, companies) => {
+        if(err) {
+          logger.error("Error in creating companies for the list::", listid,
+            " ", err.message);
+        }
+        logger.info("Companies created successfully for the list::", listid);
+        callback(null, people);
       });
     }
 
@@ -106,7 +146,8 @@ module.exports = function(File) {
 
     async.waterfall([
       saveFile,
-      readFileAndCreateCompanies,
+      parseUploadedFile,
+      createCompanies,
       populatePeople
     ], cb);
   };

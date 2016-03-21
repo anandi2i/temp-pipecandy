@@ -46,6 +46,7 @@
     "loopback-connector-postgresql": "^2.4.0",
     "loopback-datasource-juggler": "^2.39.0",
     "main-bower-files": "^2.11.1",
+    "node-xlsx": "^0.6.0",
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.0",
     "passport-google-oauth": "^1.0.0",
