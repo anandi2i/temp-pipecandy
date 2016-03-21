@@ -12,7 +12,10 @@ const EmailListApi = {
     return api.get("/api/lists/"+id);
   },
   uploadFile(data) {
-    return api.post("api/file/upload?list=" + data.listId, data.fileObj);
+    return api.post("api/file/upload?listid=" + data.listId, data.fileObj);
+  },
+  saveSinglePerson(data) {
+    return api.post("api/lists/" + data.listId + "/people", data.person);
   }
 };
 

@@ -14,5 +14,6 @@ export default keyMirror({
   RESET_PASSSWORD: null,
   CREATE_NEW_CAMPAIGN: null,
   GET_ALL_CAMPAIGN: null,
-  FILE_UPLOAD: null
+  FILE_UPLOAD: null,
+  SAVE_SINGLE_PERSON: null
 });

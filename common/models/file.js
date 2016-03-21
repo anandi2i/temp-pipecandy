@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import csv from "fast-csv";
 import _ from "underscore";
+import logger from "../../server/log";
 var CONTAINERS_URL = "/api/containers/";
 
 module.exports = function(File) {
@@ -10,10 +11,10 @@ module.exports = function(File) {
   File.upload = function(ctx, options, listid, cb) {
     if (!options) options = {};
     ctx.req.params.container = "listUploads";
-
     options = {
-      getFilename: function (req, res) {
-        var newFilename = new Date().getTime()+".csv";
+      getFilename: function (file, req, res) {
+        let fileExt = _.last(file.name.split("."));
+        let newFilename = new Date().getTime() + fileExt;
         return newFilename;
       }
     };
@@ -23,6 +24,8 @@ module.exports = function(File) {
       File.app.models.container.upload(ctx.req, ctx.result, options,
         function(err, fileObj) {
         if (err) {
+          logger.error("Error in uploading file for the list::", listid, " ",
+            err.message);
           callback(err);
         }
         let fileInfo = fileObj.files.file[0];
@@ -37,6 +40,8 @@ module.exports = function(File) {
               fileInfo.name)
           }, function(err, obj) {
             if (err) {
+              logger.error("Error in saving file details for list::", listid,
+                " ", err.message);
               callback(err);
             }
             callback(null, filePath);
@@ -44,93 +49,65 @@ module.exports = function(File) {
         } else {
           fs.unlinkSync(filePath);
           let error = new Error();
-          error.message = "Please upload only csv/excel file";
+          error.message = "File should be in csv/excel format";
           error.name = "InvalidFile";
+          logger.error("Error in removing the invalid file", error.message);
           callback(error);
         }
       });
     }
 
-    function readFileAndGetEmails(filePath, callback) {
+    function readFileAndCreateCompanies(filePath, callback) {
       let people = [];
+      let companies = [];
       let stream = fs.createReadStream(filePath);
       csv.fromStream(stream, {headers : true}).on("data", (data) => {
-        data.domain = data.email.split("@")[1];
-        console.log("data.domain", data.domain);
-        if(!data.domain) {
+        let domain = data.email.split("@")[1];
+        if(!domain) {
           let error = new Error();
           error.message = "One or more rows doesn't have valid email Id";
           error.name = "InvalidEmail";
+          logger.error("Not a valid email", error.message);
           callback(error);
+        } else {
+          companies.push(domain);
         }
         people.push(data);
       }).on("end", () => {
-        let domains = _.pluck(people, "domain");
-        callback(null, people, domains);
-      });
-    }
-
-    function findCompanies(people, domains, callback) {
-      File.app.models.Company.find({
-         where: {name: {inq: domains}},
-         include: ["prospects"]
-      }, (err, companies) => {
-        if(err) callback(err);
-        let existingCompanies = _.pluck(companies, "name");
-        let newCompanies = _.difference(domains, existingCompanies);
-        newCompanies = newCompanies.map(company => ({"name": company}));
-        callback(null, people, domains, newCompanies);
-      });
-    }
-
-    function createCompanies(people, domains, newCompanies, callback) {
-      if(!newCompanies.length) callback(null, people, domains);
-      File.app.models.Company.create(newCompanies, (err, companies) => {
-        if(err) callback(err);
-        let companyIds = _.pluck(companies, "id");
-        companyIds = companyIds.map(companyId => ({"companyId": companyId}));
-        File.app.models.Prospect.create(companyIds, (err, prospects) => {
-          if(err) callback(err);
-          callback(null, people, domains);
+        companies = companies.map(company => ({"name": company}));
+        File.app.models.Company.create(companies, (err, companies) => {
+          if(err) {
+            logger.error("Error in creating companies for the list::", listid,
+              " ", err.message);
+          }
+          logger.info("Companies created successfully for the list::", listid);
+          callback(null, people);
         });
       });
     }
 
-    function constructPeople(people, domains, callback) {
-      let prospectData = {};
-      File.app.models.Company.find({
-         where: {name: {inq: domains}},
-         include: ["prospects"]
-      }, (err, companies) => {
-        if(err) callback(err);
-        companies.forEach(company => {
-          company = company.toJSON();
-          prospectData[company.name] = company.prospects.id;
-        });
-        _.each(people, person => {
-            person.prospectId = prospectData[person.domain];
-        });
-        callback(null, people);
-      });
-    }
-
-    function createPeople(people, callback){
+    function populatePeople(peopleData, callback) {
       File.app.models.List.findById(listid, (err, list) => {
-        if(err) callback(err);
-        list.people.create(people, (err, person) => {
-          if(err) callback(err);
-          callback(null, person);
+        if(err) {
+          logger.error("Error in finding list::", listid, " ", err.message);
+          callback(err);
+        }
+        list.people.create(peopleData, (err, peopleData) => {
+          if(err) {
+            logger.error("Error in creating people for the list::", listid, " ",
+              err.message);
+            callback(err);
+          }
+          logger.info("File uploaded successfully for the list::", listid);
+          callback(null, peopleData);
         });
       });
     }
 
     async.waterfall([
       saveFile,
-      readFileAndGetEmails,
-      findCompanies,
-      createCompanies,
-      constructPeople,
-      createPeople
+      readFileAndCreateCompanies,
+      populatePeople
     ], cb);
   };
 

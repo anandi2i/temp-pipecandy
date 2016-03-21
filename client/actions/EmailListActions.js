@@ -25,6 +25,12 @@ const EmailListActions = {
       actionType: Constants.FILE_UPLOAD,
       data: data
     });
+  },
+  saveSinglePerson(data){
+    AppDispatcher.handleAction({
+      actionType: Constants.SAVE_SINGLE_PERSON,
+      data: data
+    });
   }
 };
 

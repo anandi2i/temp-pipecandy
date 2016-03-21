@@ -15,15 +15,16 @@ function getEmailListByID() {
 class ListView extends React.Component {
   constructor(props) {
     super(props);
-    this.state={
+    this.initialStateValues = {
       emailList: getEmailListByID(),
       names: [],
-      additionalFieldLen : 4,
+      additionalFieldLen : 5,
       firstName: "",
       middleName: "",
       lastName: "",
       email: ""
     };
+    this.state = this.initialStateValues;
     this.validatorTypes = {
       firstName: validatorUtil.firstName,
       lastName: validatorUtil.lastName,
@@ -92,24 +93,57 @@ class ListView extends React.Component {
   }
 
   @autobind
-  onSubmit(event) {
-    event.preventDefault();
+  onSubmit() {
     const onValidate = error => {
-      $(".field-val-wrapper").each(function(index){
-        let fieldName = $(this).find(".field-name").val();
-        let fieldValue = $(this).find(".field-value").val();
-        if((fieldName && fieldValue) || (!fieldName && !fieldValue)) {
+      for(let i = 1; i <= this.state.additionalFieldLen; i++) {
+        let field = this.state["field" + i];
+        let value = this.state["value" + i];
+        if((field && value) || (!field && !value)) {
           $(this).find(".warning-block").addClass("hide");
         } else {
           $(this).find(".warning-block").removeClass("hide");
           error = true;
         }
-      });
+      }
       if (error) {
         //form has errors; do not submit
+      } else {
+        this.constructPersonDataAndSave();
       }
     };
     this.props.validate(onValidate);
+  }
+
+  @autobind
+  onSubmitAnother() {
+    this.onSubmit();
+    $("#addEmail").openModal();
+  }
+
+  @autobind
+  constructPersonDataAndSave() {
+    let person = {
+      firstName: this.state.firstName,
+      lastName: this.state.lastName,
+      middleName: this.state.middleName,
+      email: this.state.email
+    };
+    for(let i = 1; i <= this.state.additionalFieldLen; i++) {
+      let field = this.state["field" + i];
+      let value = this.state["value" + i];
+      if(field && value) {
+        person["field" + i] = field;
+        person["value" + i] = value;
+      }
+    }
+    let data = {
+      listId: this.props.params.listId,
+      person: person
+    };
+    EmailListActions.saveSinglePerson(data);
+    this.closeModal();
+    this.setState(this.initialStateValues);
+    this.props.clearValidations();
   }
 
   @autobind
@@ -233,17 +267,19 @@ class ListView extends React.Component {
                   this.state.names.map($.proxy(function (value, key) {
                     let minLen = 1;
                     let getLen = key + minLen;
-                    let keyId = "fieldKey" + getLen;
-                    let valueId = "fieldValue" + getLen;
+                    let keyId = "field" + getLen;
+                    let valueId = "value" + getLen;
                     return (
                       <div className="row m-lr-0 field-val-wrapper" key={getLen}>
                         <div className="input-field">
                           <input placeholder="Field Name" id={keyId} type="text"
+                            onChange={this.getFieldState(keyId)}
                             className="validate field-name" />
                           <label className="active" htmlFor={keyId}>{"Field Name " + getLen}</label>
                         </div>
                         <div className="input-field">
                           <input placeholder="Value" id={valueId} type="text"
+                            onChange={this.getFieldState(valueId)}
                             className="validate field-value" />
                           <label className="active" htmlFor={valueId}>{"Value " + getLen}</label>
                         </div>
@@ -253,14 +289,14 @@ class ListView extends React.Component {
                   }, this))
                 }
               </div>
-              <div className={this.state.names.length <= this.state.additionalFieldLen ? "show" : "hide"}>
+              <div className={this.state.names.length < this.state.additionalFieldLen ? "show" : "hide"}>
                 <div onClick={this.addMoreFields} className="add-new-field">
                   <i className="mdi mdi-plus-circle"></i> Add a new fields
                 </div>
               </div>
             </div>
             <div className="modal-footer r-btn-container">
-              <input type="button" className="btn red modal-action modal-close p-1-btn" value="Add Another" />
+              <input type="button" onClick={this.onSubmitAnother} className="btn red modal-action p-1-btn" value="Add Another" />
               <input type="button" onClick={this.onSubmit} className="btn blue modal-action" value="OK" />
             </div>
           </div>
