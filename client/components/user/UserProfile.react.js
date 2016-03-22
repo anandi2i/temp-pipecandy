@@ -74,6 +74,7 @@ class Profile extends React.Component {
       "croppedImg": this.state.img || user.avatar
     });
     displayError(UserStore.getError());
+    displaySuccess(UserStore.getSuccess());
   }
 
   @autobind

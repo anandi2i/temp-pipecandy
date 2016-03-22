@@ -9,6 +9,7 @@ import appHistory from "../RouteContainer";
 
 let _user = {};
 let _error = "";
+let _success = "";
 
 // Extend User Store with EventEmitter to add eventing capabilities
 const UserStore = _.extend({}, EventEmitter.prototype, {
@@ -34,6 +35,10 @@ const UserStore = _.extend({}, EventEmitter.prototype, {
 
   getError: function() {
     return _error;
+  },
+
+  getSuccess: function() {
+    return _success;
   }
 
 });
@@ -79,8 +84,7 @@ AppDispatcher.register(function(payload) {
     case Constants.USER_UPDATE:
       UserApi.userUpdate(action.data).then((response) => {
         _user = response.data;
-        //TODO need to change success msg
-        _error = SuccessMessages.successUpdate;
+        _success = SuccessMessages.successUpdate;
         UserStore.emitChange();
       }, (err) => {
         if(err.data.error){

@@ -134,10 +134,14 @@ nav {
 }
 .toast {
   img {
-    padding-right: 15px;
+    height: 42px;
+    top: 5px;
+    left: -15px;
+    float: left;
+    position: relative;
   }
   background-color: $white;
-  width: 350px;
+  max-width: 350px;
   word-break: keep-all;
   color: $black-clr;
   outline: none;
@@ -238,9 +242,19 @@ h3 {
     font-size: 14px;
   }
 }
+@media only screen and (max-width: 992px) and (min-width: 601px) {
+  #toast-container {
+    left: auto;
+  }
+}
+@media only screen and (max-width: 600px) {
+  #toast-container {
+    min-width: 60%;
+  }
+}
 @media only screen and (min-width: 0px) {
   #toast-container {
-    top: 10px;
+    top: 85%;
     right: 10px;
   }
 }

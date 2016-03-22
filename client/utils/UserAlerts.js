@@ -11,4 +11,6 @@ export const ErrorMessages = {
 
 export const SuccessMessages = {
   "successUpdate": "Update successfully",
+  "successUpload": "The file has been uploaded successfully",
+  "successSubscribe": "Subscriber details saved successfully"
 };

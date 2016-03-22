@@ -3,11 +3,13 @@ import _ from "underscore";
 import Constants from "../constants/Constants";
 import AppDispatcher from "../dispatcher/AppDispatcher";
 import EmailListApi from "../API/EmailListApi";
+import {SuccessMessages} from "../utils/UserAlerts";
 import appHistory from "../RouteContainer";
 
 let _allEmailList = {};
 let _getEmailList = {};
 let _error = "";
+let _success = "";
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const EmailListStore = _.extend({}, EventEmitter.prototype, {
@@ -64,6 +66,10 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
 
   getError() {
     return _error;
+  },
+
+  getSuccess() {
+    return _success;
   }
 
 });
@@ -106,8 +112,7 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.FILE_UPLOAD:
       EmailListApi.uploadFile(action.data).then((response) => {
-        //TODO: Change it to success message
-        _error = "The file has been uploaded successfully";
+        _success = SuccessMessages.successUpload;
         EmailListStore.emitChange();
       }, (err)=> {
         _error = err;
@@ -116,8 +121,7 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.SAVE_SINGLE_PERSON:
       EmailListApi.saveSinglePerson(action.data).then((response) => {
-        //TODO: Change it to success message
-        _error = "Subscriber details saved successfully";
+        _success = SuccessMessages.successSubscribe;
         EmailListStore.emitChange();
       }, (err)=> {
         console.log("err", err);
@@ -127,7 +131,6 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.UPDATE_SINGLE_PERSON:
       EmailListApi.updateSinglePerson(action.data).then((response) => {
-        //TODO: Change it to success message
         _error = "Subscriber details updated successfully";
         EmailListStore.emitChange();
       }, (err)=> {

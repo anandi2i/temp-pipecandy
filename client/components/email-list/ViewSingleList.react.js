@@ -55,6 +55,10 @@ class ListView extends React.Component {
       displayError(error);
       return false;
     }
+    let success = EmailListStore.getSuccess();
+    if(success) {
+      displaySuccess(success);
+    }
     let emailList = getEmailListByID();
     this.setState({
       emailList: emailList,

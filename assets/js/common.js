@@ -30,7 +30,33 @@ function displayError(error) {
   const timeToShow = 4000;
   if(error) {
     $(".toast").remove();
-    Materialize.toast("<img src='/images/warning-icon.png' />"+ error,timeToShow);
+    var warningContent =$("<div>", {})
+                          .append(
+                            $("<img>", {
+                              src: "/images/warning-icon.png"
+                            }))
+                          .append(
+                            $("<span>", {
+                              text: error
+                            }));
+    Materialize.toast(warningContent, timeToShow);
+  }
+}
+
+function displaySuccess(successInfo) {
+  const timeToShow = 4000;
+  if(successInfo) {
+    $(".toast").remove();
+    var successContent =$("<div>", {})
+                          .append(
+                            $("<img>", {
+                              src: "/images/success-icon.png"
+                            }))
+                          .append(
+                            $("<span>", {
+                              text: successInfo
+                            }));
+    Materialize.toast(successContent, timeToShow);
   }
 }
 
