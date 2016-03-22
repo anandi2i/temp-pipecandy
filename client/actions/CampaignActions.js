@@ -9,9 +9,14 @@ const CampaignActions = {
       data: campaign
     });
   },
-  getAllCampaigns(){
+  getAllCampaigns() {
     AppDispatcher.handleAction({
       actionType: Constants.GET_ALL_CAMPAIGN
+    });
+  },
+  getAllEmailTemplates() {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_ALL_EMAIL_TEMPLATES
     });
   }
 };

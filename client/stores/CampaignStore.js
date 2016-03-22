@@ -7,6 +7,7 @@ import appHistory from "../RouteContainer";
 
 let _error = "";
 let _getAllCampaigns = {};
+let _allEmailTemplates = [];
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignStore = _.extend({}, EventEmitter.prototype, {
@@ -26,12 +27,16 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("change", callback);
   },
 
+  getError() {
+    return _error;
+  },
+
   getAllCampaigns() {
     return _getAllCampaigns;
   },
 
-  getError() {
-    return _error;
+  getAllEmailTemplates() {
+    return _allEmailTemplates;
   }
 
 });
@@ -55,6 +60,17 @@ AppDispatcher.register(function(payload) {
         _error = "";
         CampaignStore.emitChange();
       }, (err)=> {
+        _error = err;
+        CampaignStore.emitChange();
+      });
+      break;
+    case Constants.GET_ALL_EMAIL_TEMPLATES:
+      CampaignApi.getAllEmailTemplates().then((response) => {
+        _allEmailTemplates = response.data;
+        _error = "";
+        CampaignStore.emitChange();
+      }, (err)=> {
+        _allEmailTemplates = [];
         _error = err;
         CampaignStore.emitChange();
       });

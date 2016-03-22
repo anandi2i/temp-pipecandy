@@ -95,5 +95,9 @@
   "run": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "emailTemplate": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

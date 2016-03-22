@@ -7,6 +7,9 @@ const CampaignApi = {
   },
   getAllCampaign() {
     return api.get("/api/users/"+ cookie.load("userId") +"/campaigns");
+  },
+  getAllEmailTemplates() {
+    return api.get("api/emailTemplates");
   }
 };
 
