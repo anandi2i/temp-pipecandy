@@ -538,6 +538,10 @@ body {
 .p-1-btn {
   margin-right: 20px;
 }
+.p-lr-0 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
 /*********************
   Warning Class
 **********************/
@@ -760,54 +764,127 @@ $lines-to-show: 8;
 /******************************
   Daft Email Templates
 *******************************/
-.draft-template {
-  .left-part {
-    width: 50px;
-    float: left;
-    margin-top: 6px;
-  }
-  .right-part {
-    width: calc(100% - 50px);
-    float: right;
-  }
-  .email-to {}
-  .email-subject {
-    .left-part {
-      margin-top: 10px;
+.draft-container {
+  border: $border-1px;
+  border-radius: 3px;
+  height: auto;
+  .head {
+    margin: 0;
+    padding: 15px 0;
+    height: 50px;
+    background: $lit-gray-bg;
+    border-bottom: $border-1px;
+    h3 {
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
-    input {
-      border: none;
-      margin-bottom: 0;
-      &:focus {
-        border: none;
+    .mdi {
+      font-size: 25px;
+      font-weight: 400;
+      cursor: pointer;
+      line-height: 18px;
+      float: right;
+      transition: transform 0.5s;
+      &.in-active {
+        @include rotate(-180deg);
+        transition: transform 0.5s;
       }
     }
-    .email-body {
-      border: $border-1px;
-      min-height: 300px;
+  }
+  .draft-template {
+    margin-top: 30px;
+    padding: 0 30px;
+    .left-part {
+      width: 50px;
+      float: left;
+      margin-top: 6px;
+    }
+    .right-part {
+      width: calc(100% - 50px);
+      float: right;
+    }
+    .separator {
+      border-bottom: $border-1px;
+      padding: 10px 0;
+      &.row {
+        margin-bottom: 0;
+      }
+    }
+    .chip {
+      margin-right: 5px;
+      background-color: #F7F7F7;
+      border-radius: 5px;
+      padding: 0 10px;
+      margin-bottom: 5px;
+      width: 255px;
+      .title {
+        width: 170px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        display: inline-block;
+      }
+      .count {
+        margin-left: 5px;
+        position: absolute;
+        &::after {
+          content: ")";
+        }
+        &::before {
+          content: "(";
+        }
+      }
+    }
+    .email-content {
+      .email-body {
+        min-height: 250px;
+        border: $border-1px;
+        padding: 0 10px;
+      }
+    }
+    .preview-content {}
+  }
+  .select-wrapper {
+    input {
+      &.select-dropdown {
+        border: $border-1px;
+        border-radius: 3px;
+        padding-left: 5px;
+        margin-bottom: 0;
+      }
     }
   }
-  .separator {
-    border-bottom: $border-1px;
-    padding: 10px 0;
-    &.row {
-      margin-bottom: 0;
+  .schedule-time {
+    .select-wrapper{
+      padding-top: 7px;
+      span{
+        &.caret{
+          margin-top: 5px;
+          color: $dflt-txt-clr;
+        }
+      }
     }
-  }
-  .chip {
-    margin-right: 5px;
-    background-color: #F7F7F7;
-    border-radius: 5px;
-    padding: 0 10px;
-    margin-bottom: 5px;
+    div:first-child {
+      padding-left: 0;
+    }
+    .input-field {
+      label {
+        color: $dflt-txt-clr;
+        top: -11px;
+      }
+    }
   }
 }
 .tiny-toolbar {
   width: 100%;
   background-color: #F7F7F7;
+  min-height: 36px;
   .mce-panel {
     background-color: transparent;
     border: none;
+    display: block !important;
     .mce-btn {
       background-color: transparent;
       &:hover {
@@ -818,6 +895,29 @@ $lines-to-show: 8;
       }
     }
   }
+  .dropdown-button {
+    color: #333;
+    text-transform: uppercase;
+    background-color: #EAEAEA;
+  }
+}
+.add-followups {
+  border: 1px solid $blue-border;
+  color: $blue-clr;
+  text-transform: uppercase;
+  text-align: center;
+  border-radius: 3px;
+  height: 50px;
+  line-height: 30px;
+  padding: 10px;
+  cursor: pointer;
+  background-color: $lit-blue-bg;
+}
+.border-input {
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding-left: 5px;
+  margin-bottom: 0;
 }
 /*********************
   Modal header
@@ -857,6 +957,37 @@ $lines-to-show: 8;
 /*********************
   Media Query Classes
 **********************/
+@media only screen and (max-width: 1176px) {
+  .navbar-fixed {
+    nav {
+      width: 100%;
+      margin-left: 0;
+    }
+  }
+  .tab-container {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+@media only screen and (max-width: 995px) {
+  .tab-hd-btn {
+    .col {
+      text-align: center;
+    }
+  }
+}
+@media only screen and (max-width: 992px) {
+  .side-nav-btn {
+    display: block;
+  }
+}
+@media only screen and (max-width: 680px) {
+  .tiny-toolbar {
+    .mce-panel {
+      display: none !important;
+    }
+  }
+}
 @media only screen and (max-width: 600px) {
   .auth-container {
     .auth-logo {
@@ -891,6 +1022,11 @@ $lines-to-show: 8;
   }
 }
 @media only screen and (max-width: 460px) {
+  .draft-container {
+    .draft-template {
+      padding: 0 5px;
+    }
+  }
   .p-1-btn {
     margin-bottom: 10px;
     margin-right: 0;
@@ -907,6 +1043,17 @@ $lines-to-show: 8;
   }
   .r-btn-container {
     text-align: center;
+  }
+  .tiny-toolbar {
+    .smart-tag-container {
+      &.right {
+        float: none !important;
+        text-align: center;
+        .btn {
+          width: 100%;
+        }
+      }
+    }
   }
 }
 @media only screen and (max-width: 400px) {
@@ -928,29 +1075,5 @@ $lines-to-show: 8;
   }
   .lg-btn-dflt {
     width: 300px;
-  }
-}
-@media only screen and (max-width: 995px) {
-  .tab-hd-btn {
-    .col {
-      text-align: center;
-    }
-  }
-}
-@media only screen and (max-width: 1176px) {
-  .navbar-fixed {
-    nav {
-      width: 100%;
-      margin-left: 0;
-    }
-  }
-  .tab-container {
-    width: 100%;
-    margin-left: 0;
-  }
-}
-@media only screen and (max-width: 992px) {
-  .side-nav-btn {
-    display: block;
   }
 }

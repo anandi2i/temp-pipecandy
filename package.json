@@ -62,6 +62,7 @@
     "react-cropper": "^0.6.0",
     "react-dom": "^0.14.7",
     "react-router": "^2.0.0",
+    "react-tinymce": "^0.4.0",
     "react-validation-mixin": "^5.3.4",
     "serve-favicon": "^2.0.1",
     "underscore": "^1.8.3",

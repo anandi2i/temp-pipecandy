@@ -46,7 +46,20 @@ function enabledropDownBtn(){
   });
 }
 
+function enabledropDownBtnByID(id){
+  $(id).dropdown({
+    inDuration: 300,
+    outDuration: 225,
+    constrain_width: true,
+    hover: false,
+    gutter: 0,
+    belowOrigin: true,
+    alignment: "right"
+  });
+}
+
 function initTinyMCE(id, toolBar){
+  var getFocusId = id.split("#")[1];
   tinymce.init({
   selector: id,
   inline: true,
@@ -54,11 +67,12 @@ function initTinyMCE(id, toolBar){
   menubar:false,
   browser_spellcheck: true,
   contextmenu: false,
+  auto_focus: getFocusId,
   fixed_toolbar_container: toolBar,
   plugins: [
     "advlist autolink lists link image charmap print preview anchor",
     "insertdatetime media table contextmenu paste code"
   ],
-  toolbar: "bold italic underline alignleft aligncenter alignright alignjustify link image"
+  toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link image"
   });
 }
