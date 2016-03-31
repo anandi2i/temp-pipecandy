@@ -542,6 +542,12 @@ body {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
+.p-l-0 {
+  padding-left: 0 !important;
+}
+.p-0 {
+  padding: 0 !important;
+}
 /*********************
   Warning Class
 **********************/
@@ -779,6 +785,8 @@ $lines-to-show: 8;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-size: 16px;
+      font-weight: 500;
     }
     .mdi {
       font-size: 25px;
@@ -841,7 +849,10 @@ $lines-to-show: 8;
       .email-body {
         min-height: 250px;
         border: $border-1px;
-        padding: 0 10px;
+        padding: 10px;
+        p {
+          margin: 0;
+        }
       }
     }
     .preview-content {}
@@ -857,10 +868,10 @@ $lines-to-show: 8;
     }
   }
   .schedule-time {
-    .select-wrapper{
+    .select-wrapper {
       padding-top: 7px;
-      span{
-        &.caret{
+      span {
+        &.caret {
           margin-top: 5px;
           color: $dflt-txt-clr;
         }
@@ -922,27 +933,90 @@ $lines-to-show: 8;
 /*********************
   Modal header
 **********************/
+.gray-bg {
+  background-color: $lit-gray-bg;
+}
+.email-body {
+  p {
+    margin: 0;
+  }
+}
 .modal {
   .modal-header {
     padding: 15px;
     font-size: 18px;
     font-weight: 400;
     padding-bottom: 0;
+    min-height: 40px;
     .head {
       display: inline-block;
       color: $modal-head-color;
+      background: transparent;
+      border: none;
+      padding: 0;
+      height: auto;
+    }
+  }
+  .multi-modal-content {
+    width: 100%;
+    height: calc(100% - 110px);
+    margin-top: 10px;
+    padding: 0 15px;
+    overflow-y: auto;
+    .modal-content {
+      padding: 0;
+      position: relative;
+      .preview-content {
+        padding: 15px;
+        margin-top: 10px;
+      }
+      .issue-slider {
+        text-align: center;
+        color: $dflt-txt-clr;
+        font-weight: 700;
+        text-transform: uppercase;
+        .pagination {
+          input {
+            width: 50px;
+            text-align: center;
+            margin: 0 10px;
+          }
+        }
+        .mdi {
+          font-size: 30px;
+          font-weight: 500;
+          margin-top: 6px;
+        }
+      }
     }
   }
   .modal-content {
     .template-content {
-      padding: 20px;
+      padding: 0;
       height: 100%;
-      background-color: $lit-gray-bg;
       overflow-y: auto;
+      .smart-tags-container {
+        padding: 3px;
+        cursor: pointer;
+        span {
+          border: $border-1px;
+          padding: 3px;
+          margin: 0 10px 0 0;
+          border-radius: 3px;
+          &:before {
+            content: "<";
+          }
+          &:after {
+            content: ">";
+          }
+        }
+      }
     }
   }
   .mdi-close {
-    float: right;
+    position: absolute;
+    margin-left: calc(100% - 20px);
+    top: 7px;
     padding: 0;
     cursor: pointer;
     color: $gray-txt-clr;

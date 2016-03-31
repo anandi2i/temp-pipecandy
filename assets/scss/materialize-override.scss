@@ -158,6 +158,11 @@ nav {
   &.mini-modal {
     width: 460px;
   }
+  &.lg-modal {
+    width: 80%;
+    max-height: 80%;
+    height: 80%;
+  }
   &.modal-fixed-header {
     &.modal-fixed-footer {
       .modal-content {

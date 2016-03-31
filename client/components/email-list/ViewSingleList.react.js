@@ -205,11 +205,11 @@ class ListView extends React.Component {
               <i className="left mdi mdi-upload"></i> add from file
             </div>
           </div>
-          <div id="addEmail" className="modal modal-fixed-header
-            modal-fixed-footer mini-modal">
+          <div id="addEmail"
+            className="modal modal-fixed-header modal-fixed-footer mini-modal">
+            <i onClick={this.closeModal} className="mdi mdi-close"></i>
             <div className="modal-header">
               <div className="head">Add Subbscriber</div>
-              <i onClick={this.closeModal} className="mdi mdi-close"></i>
             </div>
             <div className="modal-content">
               <div className="input-field">

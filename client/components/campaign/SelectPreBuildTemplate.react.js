@@ -78,12 +78,12 @@ class SelectPreBuildTemplate extends React.Component {
         {/* Email template preview modal popup starts here*/}
         { this.state.templates.length ?
           <div id="previewTemplate" className="modal modal-fixed-header modal-fixed-footer">
+            <i className="mdi mdi-close" onClick={this.closeModal}></i>
             <div className="modal-header">
               <div className="head">Add Subbscriber</div>
-              <i className="mdi mdi-close" onClick={this.closeModal}></i>
             </div>
             <div className="modal-content">
-              <div className="template-content">
+              <div className="template-content gray-bg">
                 <div dangerouslySetInnerHTML={{__html: this.state.templates[this.state.activeTemplate].content}} />
               </div>
             </div>

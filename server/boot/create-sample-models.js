@@ -1,8 +1,8 @@
 module.exports = function(app) {
 
   // const mydb = app.dataSources.psqlDs;
-
-  //uncomment to populate data
+  //
+  // // uncomment to populate data
   // mydb.automigrate("emailTemplate", function(err) {
   //   if (err) throw err;
   //   app.models.emailTemplate.create([
@@ -14,7 +14,7 @@ module.exports = function(app) {
   //     console.log("Models created: \n", emailTemplates);
   //   });
   // });
-
+  //
   // //Uncomment the below code for db automigration
   // app.datasources.psqlDs.autoupdate(function(err) {
   //   if (err) throw err;

@@ -1,6 +1,7 @@
 import React from "react";
 import autobind from "autobind-decorator";
 import AddFollowups from "./AddFollowups.react";
+import PreviewCampaignPopup from "./PreviewCampaignPopup.react";
 
 class ScheduleEmail extends React.Component {
   constructor(props) {
@@ -168,11 +169,14 @@ class ScheduleEmail extends React.Component {
               </div>
               {/* Preview button */}
               <div className="row r-btn-container preview-content m-lr-0">
-                <div className="btn btn-dflt blue sm-icon-btn">
+                <div className="btn btn-dflt blue sm-icon-btn modal-trigger" href="#previewCampaign">
                   <i className="left mdi mdi-eye"></i>
                   <span>Preview</span>
                 </div>
               </div>
+              {/* Popup starts here*/}
+              <PreviewCampaignPopup />
+              {/* Popup ends here*/}
           </div>
         </div>
         {
