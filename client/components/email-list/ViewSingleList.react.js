@@ -53,9 +53,10 @@ class ListView extends React.Component {
       displayError(error);
       return false;
     }
-    let emailList = EmailListStore.getEmailListByID();
+    let emailList = getEmailListByID();
     this.setState({
-      emailList: emailList
+      emailList: emailList,
+      listName: emailList[0].name
     });
     return true;
   }
@@ -185,7 +186,7 @@ class ListView extends React.Component {
       <div>
         <div className="container">
           <div className="row sub-head-container m-lr-0">
-            <div className="head">{this.state.emailList.name}</div>
+            <div className="head">{this.state.listName}</div>
             <div className="sub-head">
               <Link to="/list">Back to Email Lists</Link>
             </div>
@@ -303,7 +304,12 @@ class ListView extends React.Component {
             </div>
           </div>
         </div>
-        <SubscriberGrid {...this.props} />
+        {
+          this.state.emailList.length
+            ?
+              <SubscriberGrid {...this.state.emailList} />
+            : ""
+        }
       </div>
     );
   }

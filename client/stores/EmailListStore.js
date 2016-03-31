@@ -36,146 +36,20 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
   },
 
   getPeopleByList() {
-    let _emailList = [{
-      "name": "testing",
-      "type": null,
-      "query": null,
-      "id": 10,
-      "createdBy": 27,
-      "createdFor": null,
-      "people": [{
-        "firstName": "Dinesh",
-        "middleName": "fh",
-        "lastName": "Ramasamy",
-        "salutation": null,
-        "email": "dinesh.r@ideas2it.com",
-        "id": 187,
-        "prospectId": 2,
-        "fields": [{
-          "name": "k1",
-          "value": "v1",
-          "type": null,
-          "id": 416,
-          "personId": 187
-        }, {
-          "name": "k2",
-          "value": "v2",
-          "type": null,
-          "id": 417,
-          "personId": 187
-        }]
-      }, {
-        "firstName": "Dinesh",
-        "middleName": "fh",
-        "lastName": "Ramasamy",
-        "salutation": null,
-        "email": "dinesh.r@mnc.com",
-        "id": 188,
-        "prospectId": 1,
-        "fields": [{
-          "name": "key1",
-          "value": "val1",
-          "type": null,
-          "id": 418,
-          "personId": 188
-        }, {
-          "name": "key2",
-          "value": "val2",
-          "type": null,
-          "id": 419,
-          "personId": 188
-        }, {
-          "name": "key3",
-          "value": "val3",
-          "type": null,
-          "id": 420,
-          "personId": 188
-        }, {
-          "name": "key4",
-          "value": "val4",
-          "type": null,
-          "id": 421,
-          "personId": 188
-        }, {
-          "name": "key5",
-          "value": "val5",
-          "type": null,
-          "id": 422,
-          "personId": 188
-        }]
-      }, {
-        "firstName": "Rajesh",
-        "middleName": "drg",
-        "lastName": "Rasappan",
-        "salutation": null,
-        "email": "rajesh@fgh.com",
-        "id": 189,
-        "prospectId": 4,
-        "fields": []
-      }, {
-        "firstName": "Anand",
-        "middleName": "Nambi",
-        "lastName": "Gobinath",
-        "salutation": null,
-        "email": "anand@mnc.com",
-        "id": 190,
-        "prospectId": 1,
-        "fields": [{
-          "name": "1",
-          "value": "1",
-          "type": null,
-          "id": 423,
-          "personId": 190
-        }, {
-          "name": "2",
-          "value": "2",
-          "type": null,
-          "id": 424,
-          "personId": 190
-        }, {
-          "name": "3",
-          "value": "3",
-          "type": null,
-          "id": 425,
-          "personId": 190
-        }, {
-          "name": "4",
-          "value": "4",
-          "type": null,
-          "id": 426,
-          "personId": 190
-        }, {
-          "name": "5",
-          "value": "5",
-          "type": null,
-          "id": 427,
-          "personId": 190
-        }]
-      }, {
-        "firstName": "stsfring",
-        "middleName": "strwering",
-        "lastName": "strwsring",
-        "salutation": "strwrting",
-        "email": "sertring@gh.com",
-        "id": 191,
-        "prospectId": 5,
-        "fields": []
-      }]
-    }];
     let _peopleData = [];
-    _.each(_emailList, function(obj, index) {
+    _.each(_getEmailList, function(obj, index) {
       _.each(obj.people, function(obj, index) {
-        let _temp = { 
-          id: obj.id, 
-          firstName: obj.firstName || "", 
-          middleName: obj.middleName || "", 
-          lastName: obj.lastName || "", 
-          email: obj.email || "", 
-          addField1: "", 
-          addField2: "", 
-          addField3: "", 
-          addField4: "", 
-          addField5: "", 
+        let _temp = {
+          id: obj.id,
+          firstName: obj.firstName || "",
+          middleName: obj.middleName || "",
+          lastName: obj.lastName || "",
+          email: obj.email || "",
+          addField1: "",
+          addField2: "",
+          addField3: "",
+          addField4: "",
+          addField5: "",
           edit: ""};
         _.each(obj.fields, function(obj, index) {
           if (obj.name && obj.value) {
@@ -220,7 +94,8 @@ AppDispatcher.register(function(payload) {
       });
       break;
     case Constants.GET_LIST_BY_ID:
-      EmailListApi.getList(action.data).then((response) => {
+      let data = {"list":[action.data]};
+      EmailListApi.getList(data).then((response) => {
         _getEmailList = response.data;
         _error = "";
         EmailListStore.emitChange();

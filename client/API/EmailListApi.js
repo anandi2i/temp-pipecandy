@@ -8,8 +8,8 @@ const EmailListApi = {
   crateList(data) {
     return api.post("/api/users/"+ cookie.load("userId") +"/lists", data);
   },
-  getList(id) {
-    return api.get("/api/lists/"+id);
+  getList(data) {
+    return api.post("api/lists/listPeopleField", data);
   },
   uploadFile(data) {
     return api.post("api/file/upload?listid=" + data.listId, data.fileObj);

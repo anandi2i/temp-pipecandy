@@ -2,7 +2,6 @@ import React from "react";
 import {Link} from "react-router";
 import autobind from "autobind-decorator";
 import Griddle from "griddle-react";
-import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 
 function getPeopleByList() {
@@ -10,13 +9,11 @@ function getPeopleByList() {
 }
 
 class EditLinkComponent extends React.Component {
-
   render() {
     return (
       <Link to={`/email-list/${this.props.rowData.id}`}><i className="mdi mdi-pencil"></i></Link>
     );
   }
-
 }
 
 class GriddlePager extends React.Component {
@@ -35,7 +32,7 @@ class GriddlePager extends React.Component {
     let sumWithPage = 1;
     let startIndex = Math.max(this.props.currentPage - maxPerPage, index);
     let endIndex = Math.min(startIndex + maxPagerShow, this.props.maxPage);
-    if (this.props.maxPage >= maxPagerShow && 
+    if (this.props.maxPage >= maxPagerShow &&
       (endIndex - startIndex) <= minPagerShow ) {
       startIndex = endIndex - maxPagerShow;
     }
@@ -136,7 +133,7 @@ let columnMeta = [{
   }];
 
 class SubscriberGridView extends React.Component {
-  
+
   constructor(props) {
     super(props);
     this.state = {
@@ -144,31 +141,10 @@ class SubscriberGridView extends React.Component {
     };
   }
 
-  componentDidMount() {
-    EmailListActions.getEmailListByID(this.props.params.listId);
-    EmailListStore.addChangeListener(this._onChange);
-  }
-
-  componentWillUnmount() {
-    EmailListStore.removeChangeListener(this._onChange);
-  }
-
-  @autobind
-  _onChange() {
-    let error = EmailListStore.getError();
-    if(error) {
-      displayError(error);
-      return false;
-    }
-    this.setState({
-      people: getPeopleByList()
-    });
-  }
-
   @autobind
   handleRowClick(obj, eve) {
-    if (eve.target.className === "icon" || 
-        eve.target.nodeName === "I" && 
+    if (eve.target.className === "icon" ||
+        eve.target.nodeName === "I" &&
         eve.target.className === "mdi mdi-pencil") {
       eve.stopPropagation();
     }
@@ -178,30 +154,30 @@ class SubscriberGridView extends React.Component {
     return (
       <div className="row" id="subscriber_list">
         <div className="col s12">
-          <Griddle 
-            results={this.state.people} 
-            tableClassName="responsive-table" 
+          <Griddle
+            results={this.state.people}
+            tableClassName="responsive-table"
             useGriddleStyles={false}
-            columnMetadata={columnMeta} 
-            columns={["firstName", "middleName", "lastName", 
-              "email", "addField1", "addField2", "addField3", 
+            columnMetadata={columnMeta}
+            columns={["firstName", "middleName", "lastName",
+              "email", "addField1", "addField2", "addField3",
               "addField4", "addField5", "edit"]}
             onRowClick={this.handleRowClick}
             metadataColumns={["id"]}
-            isMultipleSelection={true} 
+            isMultipleSelection={true}
             uniqueIdentifier="id"
-            showPager={true} 
-            resultsPerPage="4"  
-            useCustomPagerComponent={true} 
-            customPagerComponent={GriddlePager} 
-            showFilter={true} 
-            filterPlaceholderText="SEARCH BY NAME OR EMAIL" 
+            showPager={true}
+            resultsPerPage="4"
+            useCustomPagerComponent={true}
+            customPagerComponent={GriddlePager}
+            showFilter={true}
+            filterPlaceholderText="SEARCH BY NAME OR EMAIL"
             sortDefaultComponent={
               <span className="mdi mdi-arrow-up"></span>
-            } 
+            }
             sortAscendingComponent={
               <span className="mdi mdi-arrow-up active"></span>
-            } 
+            }
             sortDescendingComponent={
               <span className="mdi mdi-arrow-down active"></span>
             } />
