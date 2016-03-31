@@ -7,6 +7,7 @@ import _ from "underscore";
 import validatorUtil from "../../utils/ValidationMessages";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
+import SubscriberGrid from "../grid/SubscriberGrid.react";
 
 function getEmailListByID() {
   return EmailListStore.getEmailListByID();
@@ -302,6 +303,7 @@ class ListView extends React.Component {
             </div>
           </div>
         </div>
+        <SubscriberGrid {...this.props} />
       </div>
     );
   }

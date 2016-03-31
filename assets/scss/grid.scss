@@ -1,0 +1,216 @@
+.griddle {
+  width: 90%;
+  margin-left: 5%;
+  .top-section {
+    width: 320px;
+    position: absolute;
+    margin-top: -60px;
+    left: 0;
+    margin-left: 12.5%;
+    .griddle-filter {
+      color: $a-tag-clr;
+      .filter-container {
+        &:before {
+          font: normal normal normal 24px/1 "Material Design Icons";
+          content: "\f43b";
+          color: inherit;
+          position: absolute;
+          padding: 10px 0px;
+        }
+        input[name="filter"] {
+          text-decoration: none;
+          display: inline-block;
+          padding-left: 30px;
+          color: inherit;
+          border-bottom: 1px solid transparent;
+          white-space: nowrap;
+          width: 230px;
+          transition: 0.5s ease;
+          word-spacing: 2px;
+          &:focus {
+            border-bottom: 1px solid $a-tag-clr;
+            width: 260px;
+            &::-webkit-input-placeholder { color: transparent; }
+            &:-moz-placeholder { color: transparent; }
+          }
+          &::-webkit-input-placeholder { color: $a-tag-clr; }
+          &:-moz-placeholder { color: $a-tag-clr; }
+        }
+      }
+    }
+  }
+  .griddle-container {
+    width: 100%;
+    .griddle-body {
+      min-height: 0.01%;
+      overflow-x: auto;
+      [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: relative;
+        left: 0;
+        visibility: visible;
+        margin-left: 20px;
+        margin-right: 20px;
+      }
+      table {
+        thead > tr > th, tbody > tr > td {
+          height: 65px;
+          border-bottom: $border-1px;
+          &.name, &.field {
+            min-width: 130px;
+            max-width: 180px;
+          }
+          &.email {
+            min-width: 180px;
+            max-width: 280px;
+          }
+          &.icon {
+            text-align: center;
+            min-width: 60px;
+            max-width: 70px;
+          }
+        }
+        thead > tr {
+          text-transform: uppercase;
+          color: $dflt-txt-clr;
+          > th {
+            border-top: $border-1px;
+            &:first-child {
+              border-right: $border-1px;
+            }
+            &:last-child {
+              border-left: $border-1px;
+            }
+          }
+        }
+        tbody > tr {
+          &.standard-row {
+            &:hover, &:active {
+              background-color: $grid-hovr-clr;
+            }
+          }
+          > td {
+            &.name {
+              text-transform: capitalize;
+            }
+            &:first-child {
+              border-right: $border-1px;
+            }
+            &:last-child {
+              border-left: $border-1px;
+            }
+          }
+        }
+      }
+      .footer-container {
+        position: absolute;
+        border: 0px none !important;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        margin-left: 12.5%;
+        left: 0;
+        font-size: 16px;
+        color: $dflt-txt-clr;
+        padding: 0px;
+        ul {
+          > li {
+            width: 50px;
+            cursor: pointer;
+            &.active {
+              background-color: transparent;
+            }
+            &.link {
+              color: $a-tag-clr;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+@media only screen and (max-width: 1176px) {
+  .griddle {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    .griddle-container {
+      .griddle-body {
+        .footer-container {
+          position: relative;
+          height: 50px;
+          margin-top: auto;
+          margin-bottom: auto;
+        }
+      }
+    }
+  }
+}
+@media only screen and (max-width: 992px) {
+  .griddle {
+    .top-section {
+      margin-left: 7.5%;
+    }
+    .griddle-container {
+      .griddle-body {
+        table {
+          > thead {
+            > tr {
+              > th {
+                &:first-child {
+                  border-right: 0 none;
+                }
+                &:last-child {
+                  border-left: 0 none;
+                }
+              }
+            }
+          }
+          > tbody {
+            > tr {
+              > td {
+                &:first-child {
+                  border-right: 0 none;
+                }
+                &:last-child {
+                  border-left: 0 none;
+                }
+              }
+            }
+          }
+          thead > tr > th, tbody > tr > td {
+            border-top: 0 none;
+            &.icon {
+              text-align: left;
+              max-width: none;
+            }
+          }
+          thead > tr > th.icon {
+            text-align: right;
+          }
+        }
+        .footer-container {
+          margin-left: 7.5%;
+        }
+      }
+    }
+  }
+}
+@media only screen and (max-width: 890px) {
+  .griddle {
+    .top-section {
+      margin-left: 5%;
+    }
+    .griddle-body {
+      .footer-container {
+        margin-left: 5%;
+      }
+    }
+  }
+}
+@media only screen and (max-width: 680px) {
+  .griddle {
+    .top-section {
+      position: relative;
+      margin-top: 0px; 
+    }
+  }
+}
