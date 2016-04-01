@@ -58,21 +58,27 @@ function enabledropDownBtnByID(id){
   });
 }
 
-function initTinyMCE(id, toolBar){
+function initTinyMCE(id, toolBar, dropdownId){
   var getFocusId = id.split("#")[1];
   tinymce.init({
-  selector: id,
-  inline: true,
-  height : 150,
-  menubar:false,
-  browser_spellcheck: true,
-  contextmenu: false,
-  auto_focus: getFocusId,
-  fixed_toolbar_container: toolBar,
-  plugins: [
-    "advlist autolink lists link image charmap print preview anchor",
-    "insertdatetime media table contextmenu paste code"
-  ],
-  toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link image"
+    selector: id,
+    inline: true,
+    height : 150,
+    menubar:false,
+    browser_spellcheck: true,
+    contextmenu: false,
+    auto_focus: getFocusId,
+    fixed_toolbar_container: toolBar,
+    plugins: [
+      "advlist autolink lists link image charmap print preview anchor",
+      "insertdatetime media table contextmenu paste code"
+    ],
+    setup : function(editor) {
+      $(dropdownId + " li").off("click").on("click", function(event) {
+        editor.insertContent("&nbsp;&lt;" + event.currentTarget.innerText +
+          "&gt;&nbsp;");
+      });
+    },
+    toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link image"
   });
 }

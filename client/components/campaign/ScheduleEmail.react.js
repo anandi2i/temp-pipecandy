@@ -1,4 +1,5 @@
 import React from "react";
+import update from "react-addons-update";
 import autobind from "autobind-decorator";
 import AddFollowups from "./AddFollowups.react";
 import PreviewCampaignPopup from "./PreviewCampaignPopup.react";
@@ -16,19 +17,13 @@ class ScheduleEmail extends React.Component {
   }
 
   @autobind
-  handleEditorChange(e) {
-    console.log(e.target.getContent());
-  }
-
-  @autobind
   toggleEditContainer(e) {
      this.setState({clicked: !this.state.clicked});
     $("#firsEmail").slideToggle("slow");
   }
 
   componentDidUpdate() {
-    initTinyMCE("#emailContent", "#mytoolbar");
-    initTinyMCE("#emailContent1", "#mytoolbar1");
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown");
     enabledropDownBtnByID("#insertSmartTags");
     $("select").material_select();
     $(".datepicker").pickadate({
@@ -42,11 +37,14 @@ class ScheduleEmail extends React.Component {
 
   @autobind
   addFollowups() {
-    let getLength = this.state.followups.length;
     let maxLength = 5;
-    if(getLength < maxLength){
-      this.state.followups.push(getLength);
-      this.forceUpdate();
+    if(this.state.followups.length < maxLength) {
+      this.setState((state) => ({
+        followups: state.followups.concat({
+          id: guid(),
+          content: "click here to edit",
+        })
+      }));
     }
   }
 
@@ -57,6 +55,28 @@ class ScheduleEmail extends React.Component {
         displayScheduleCampaign: !this.state.displayScheduleCampaign
       }
     );
+  }
+
+  //http://stackoverflow.com/questions/29527385/react-removing-element-from-array-in-component-state
+  deleteFollowUp(key, event) {
+    let howMany = 1;
+    this.setState({
+      followups: update(this.state.followups, {$splice: [[key, howMany]]})
+    });
+  }
+
+  @autobind
+  updateFollowUpContent() {
+    let followups = this.state.followups;
+    followups.forEach(function(followup) {
+      if($("#emailContent" + followup.id).length) {
+        followup.content = tinyMCE.get("emailContent" + followup.id)
+          .getContent();
+      }
+    });
+    this.setState((state) => ({
+      followups: followups
+    }));
   }
 
   render() {
@@ -140,32 +160,13 @@ class ScheduleEmail extends React.Component {
                       <span>Insert Smart Tags</span>
                     </div>
                       <ul id="dropdown" className="dropdown-content">
-                        <li><a href="#!">one</a></li>
-                        <li><a href="#!">two</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
-                        <li><a href="#!">three</a></li>
+                        <li><a href="javascript:;">one</a></li>
+                        <li><a href="javascript:;">two</a></li>
+                        <li><a href="javascript:;">three</a></li>
                       </ul>
                   </div>
                 </div>
-                <div id="emailContent" className="email-body" onChange={this.handleEditorChange}>Click here to edit!</div>
+                <div id="emailContent" className="email-body" >Click here to edit!</div>
               </div>
               {/* Preview button */}
               <div className="row r-btn-container preview-content m-lr-0">
@@ -180,12 +181,14 @@ class ScheduleEmail extends React.Component {
           </div>
         </div>
         {
-          this.state.followups.map($.proxy(function (value, key) {
+          this.state.followups.map(function (followUp, key) {
             return (
-              <AddFollowups followupId={this.state.followups.length}
-                key={key}/>
+              <AddFollowups followupId={followUp.id}
+                content={followUp.content}
+                deleteFollowUp={this.deleteFollowUp.bind(this, key)}
+                id={key} key={followUp.id}/>
             );
-          }, this))
+          }, this)
         }
         <div className="row add-followups m-lr-0"
           onClick={this.addFollowups}

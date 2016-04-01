@@ -2,5 +2,6 @@ node_modules
 bower_components
 public
 assets/js/common.js
+assets/js/utils.js
 assets/tinymce
 assets/js/materialize.clockpicker.js

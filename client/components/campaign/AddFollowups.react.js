@@ -5,31 +5,30 @@ class AddFollowups extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      followupId: this.props.followupId,
       clicked: true
     };
   }
+
   componentDidMount() {
-    let followupId = this.state.followupId;
+    let followupId = this.props.followupId;
     let emailContentId = "#emailContent" + followupId;
     let mytoolbar = "#mytoolbar" + followupId;
     let insertSmartTags = "#insertSmartTags" + followupId;
-    initTinyMCE(emailContentId, mytoolbar);
+    let smartTagDrpDwnId = "#dropdown" + followupId;
+    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId);
     enabledropDownBtnByID(insertSmartTags);
-  }
-  @autobind
-  handleEditorChange(e) {
-    console.log(e.target.getContent());
   }
 
   @autobind
   toggleEditContainer(e) {
     this.setState({clicked: !this.state.clicked});
-    $("#followUps" + this.state.followupId).slideToggle("slow");
+    $("#followUps" + this.props.followupId).slideToggle("slow");
   }
+
   render(){
-    let followupId = this.state.followupId;
-    let mailBoxCount = followupId;
+    let followupId = this.props.followupId;
+    let indexInc = 1;
+    let followUpCount = this.props.id + indexInc;
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
@@ -37,11 +36,14 @@ class AddFollowups extends React.Component {
       <div className="row draft-container m-lr-0">
         <div className="head">
           <div className="col s4 m4 l4">
-            <h3>{++mailBoxCount}. Follow up {followupId}</h3>
+            <h3>{followUpCount}. Follow up {followUpCount}</h3>
           </div>
           <div className="col s8 m8 l8">
             <i className={className}
               onClick={this.toggleEditContainer}>
+            </i>
+            <i className="mdi mdi-delete-forever"
+              onClick={this.props.deleteFollowUp}>
             </i>
           </div>
         </div>
@@ -74,13 +76,14 @@ class AddFollowups extends React.Component {
                     <span>Insert Smart Tags</span>
                   </div>
                     <ul id={"dropdown" + followupId} className="dropdown-content">
-                      <li><a href="#!">one</a></li>
-                      <li><a href="#!">two</a></li>
-                      <li><a href="#!">three</a></li>
+                      <li><a href="javascript:;">one</a></li>
+                      <li><a href="javascript:;">two</a></li>
+                      <li><a href="javascript:;">three</a></li>
                     </ul>
                 </div>
               </div>
-              <div id={"emailContent" + followupId} className="email-body" onChange={this.handleEditorChange}>Click here to edit!</div>
+              <div id={"emailContent" + followupId} className="email-body"
+                dangerouslySetInnerHTML={{__html: this.props.content}} />
             </div>
             {/* Preview button */}
             <div className="row r-btn-container preview-content m-lr-0">
