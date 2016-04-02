@@ -28,9 +28,9 @@ class GriddlePager extends React.Component {
   render() {
     let options = [];
     let index = 0;
-    let maxPerPage = 4;
-    let maxPagerShow = 11;
-    let minPagerShow = 10;
+    let maxPerPage = 2;
+    let maxPagerShow = 6;
+    let minPagerShow = 5;
     let sumWithPage = 1;
     let startIndex = Math.max(this.props.currentPage - maxPerPage, index);
     let endIndex = Math.min(startIndex + maxPagerShow, this.props.maxPage);
@@ -224,7 +224,7 @@ class SubscriberGridView extends React.Component {
   render() {
     return (
       <div className="row" id="subscriber_list">
-        <div className="col s12">
+        <div className="container">
           <Griddle
             results={this.state.people}
             tableClassName="responsive-table"
@@ -238,7 +238,7 @@ class SubscriberGridView extends React.Component {
             isMultipleSelection={true}
             uniqueIdentifier="id"
             showPager={true}
-            resultsPerPage="4"
+            resultsPerPage="10"
             useCustomPagerComponent={true}
             customPagerComponent={GriddlePager}
             showFilter={true}

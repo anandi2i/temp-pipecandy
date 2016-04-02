@@ -1,6 +1,4 @@
 .griddle {
-  width: 90%;
-  margin-left: 5%;
   .top-section {
     width: 320px;
     position: absolute;
@@ -113,10 +111,9 @@
         padding: 0px;
         ul {
           > li {
-            width: 50px;
             cursor: pointer;
             &.active {
-              background-color: transparent;
+              background-color: $grid-hovr-clr;
             }
             &.link {
               color: $a-tag-clr;
@@ -210,7 +207,7 @@
   .griddle {
     .top-section {
       position: relative;
-      margin-top: 0px; 
+      margin-top: 0px;
     }
   }
 }
