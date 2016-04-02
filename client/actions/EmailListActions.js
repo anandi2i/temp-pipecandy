@@ -31,6 +31,10 @@ const EmailListActions = {
       actionType: Constants.SAVE_SINGLE_PERSON,
       data: data
     });
+  },
+  updateSinglePerson(data){
+    //TODO need to update data
+    console.log("-----", data);
   }
 };
 
