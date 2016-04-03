@@ -5,10 +5,10 @@ const EmailListApi = {
   findAll() {
     return api.get("/api/users/"+ cookie.load("userId") +"/lists");
   },
-  crateList(data) {
+  createList(data) {
     return api.post("/api/users/"+ cookie.load("userId") +"/lists", data);
   },
-  getList(data) {
+  getSelectedList(data) {
     return api.post("api/lists/listPeopleField", data);
   },
   uploadFile(data) {

@@ -18,6 +18,12 @@ const CampaignActions = {
     AppDispatcher.handleAction({
       actionType: Constants.GET_ALL_EMAIL_TEMPLATES
     });
+  },
+  getSelectedEmailList(emailListIds) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_SELECTED_EMAIL_LIST,
+      data: emailListIds
+    });
   }
 };
 

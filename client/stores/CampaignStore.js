@@ -3,11 +3,13 @@ import _ from "underscore";
 import Constants from "../constants/Constants";
 import AppDispatcher from "../dispatcher/AppDispatcher";
 import CampaignApi from "../API/CampaignApi";
+import EmailListApi from "../API/EmailListApi";
 import appHistory from "../RouteContainer";
 
 let _error = "";
 let _getAllCampaigns = {};
 let _allEmailTemplates = [];
+let selectedEmailList = {};
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignStore = _.extend({}, EventEmitter.prototype, {
@@ -27,6 +29,21 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("change", callback);
   },
 
+  // Emit Change event
+  emitEmailListChange() {
+    this.emit("emailListChange");
+  },
+
+  // Add change listener
+  addEmailListChangeListener(callback) {
+    this.on("emailListChange", callback);
+  },
+
+  // Remove change listener
+  removeEmailListChangeListener(callback) {
+    this.removeListener("emailListChange", callback);
+  },
+
   getError() {
     return _error;
   },
@@ -37,6 +54,10 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
 
   getAllEmailTemplates() {
     return _allEmailTemplates;
+  },
+
+  getSelectedEmailList() {
+    return selectedEmailList;
   }
 
 });
@@ -46,7 +67,7 @@ AppDispatcher.register(function(payload) {
   let action = payload.action;
   switch (action.actionType) {
     case Constants.CREATE_NEW_CAMPAIGN:
-      CampaignApi.crateCampaign(action.data).then((response) => {
+      CampaignApi.createCampaign(action.data).then((response) => {
         _error = "";
         appHistory.push("campaign/run");
       }, (err)=> {
@@ -73,6 +94,33 @@ AppDispatcher.register(function(payload) {
         _allEmailTemplates = [];
         _error = err;
         CampaignStore.emitChange();
+      });
+      break;
+    case Constants.GET_SELECTED_EMAIL_LIST:
+      EmailListApi.getSelectedList(action.data).then((response) => {
+        let emailList = [];
+        let smartTags = [];
+        response.data.forEach(function(list, index) {
+          emailList.push({
+            name: list.name,
+            peopleCount: list.people.length
+          });
+          _.each(list.people, function(person) {
+            _.each(person.fields, function(field) {
+              if(field && field.name) smartTags.push(field.name);
+            });
+          });
+        });
+        selectedEmailList = {
+          emailList: emailList,
+          smartTags: smartTags
+        };
+        _error = "";
+        CampaignStore.emitEmailListChange();
+      }, (err) => {
+        selectedEmailList = {};
+        _error = err;
+        CampaignStore.emitEmailListChange();
       });
       break;
     default:

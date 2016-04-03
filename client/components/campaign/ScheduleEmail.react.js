@@ -3,6 +3,8 @@ import update from "react-addons-update";
 import autobind from "autobind-decorator";
 import AddFollowups from "./AddFollowups.react";
 import PreviewCampaignPopup from "./PreviewCampaignPopup.react";
+import CampaignStore from "../../stores/CampaignStore";
+import CampaignActions from "../../actions/CampaignActions";
 
 class ScheduleEmail extends React.Component {
   constructor(props) {
@@ -12,18 +14,18 @@ class ScheduleEmail extends React.Component {
       clicked: true,
       followups: [],
       followusMaxLen: 5,
-      displayScheduleCampaign: false
+      displayScheduleCampaign: false,
+      emailListIds: {
+        list: ["10", "6"] //hard-coded for now
+      },
+      emailList: [],
+      smartTags: []
     };
   }
 
-  @autobind
-  toggleEditContainer(e) {
-     this.setState({clicked: !this.state.clicked});
-    $("#firsEmail").slideToggle("slow");
-  }
-
-  componentDidUpdate() {
-    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown");
+  componentDidMount() {
+    CampaignStore.addEmailListChangeListener(this._onChange);
+    CampaignActions.getSelectedEmailList(this.state.emailListIds);
     enabledropDownBtnByID("#insertSmartTags");
     $("select").material_select();
     $(".datepicker").pickadate({
@@ -33,6 +35,31 @@ class ScheduleEmail extends React.Component {
     $(".timepicker").pickatime({
       twelvehour: true
     });
+  }
+
+  componentWillUnmount() {
+    CampaignStore.removeEmailListChangeListener(this._onChange);
+  }
+
+  @autobind
+  initTinyMCE() {
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown");
+  }
+
+  @autobind
+  _onChange() {
+    let selectedEmailList = CampaignStore.getSelectedEmailList();
+    this.setState({
+      emailList: selectedEmailList.emailList || [],
+      smartTags: selectedEmailList.smartTags || []
+    });
+    this.initTinyMCE();
+  }
+
+  @autobind
+  toggleEditContainer(e) {
+    this.setState({clicked: !this.state.clicked});
+    $("#firsEmail").slideToggle("slow");
   }
 
   @autobind
@@ -50,11 +77,9 @@ class ScheduleEmail extends React.Component {
 
   @autobind
   displayScheduleCampaign(){
-    this.setState(
-      {
-        displayScheduleCampaign: !this.state.displayScheduleCampaign
-      }
-    );
+    this.setState({
+      displayScheduleCampaign: !this.state.displayScheduleCampaign
+    });
   }
 
   //http://stackoverflow.com/questions/29527385/react-removing-element-from-array-in-component-state
@@ -131,21 +156,17 @@ class ScheduleEmail extends React.Component {
                   To
                 </div>
                 <div className="right-part">
-                  <div className="chip">
-                    <span className="title">SoCal Conference Attendees</span>
-                    <span className="count">1234</span>
-                    <i className="material-icons">close</i>
-                  </div>
-                  <div className="chip">
-                    <span className="title">SoCal Conference Attendees</span>
-                    <span className="count">999</span>
-                    <i className="material-icons">close</i>
-                  </div>
-                  <div className="chip">
-                    <span className="title">SoCal Conference Attendees</span>
-                    <span className="count">198</span>
-                    <i className="material-icons">close</i>
-                  </div>
+                  {
+                    this.state.emailList.map(function(list, key) {
+                      return (
+                        <div key={key} className="chip">
+                          <span className="title">{list.name}</span>
+                          <span className="count">{list.peopleCount}</span>
+                          <i className="material-icons">close</i>
+                        </div>
+                      );
+                    }, this)
+                  }
                 </div>
               </div>
               {/* email subject */}
@@ -160,9 +181,15 @@ class ScheduleEmail extends React.Component {
                       <span>Insert Smart Tags</span>
                     </div>
                       <ul id="dropdown" className="dropdown-content">
-                        <li><a href="javascript:;">one</a></li>
-                        <li><a href="javascript:;">two</a></li>
-                        <li><a href="javascript:;">three</a></li>
+                        {
+                          this.state.smartTags.map(function(tag, key) {
+                            return (
+                              <li key={key}>
+                                <a href="javascript:;">{tag}</a>
+                              </li>
+                            );
+                          })
+                        }
                       </ul>
                   </div>
                 </div>
@@ -185,6 +212,7 @@ class ScheduleEmail extends React.Component {
             return (
               <AddFollowups followupId={followUp.id}
                 content={followUp.content}
+                smartTags={this.state.smartTags}
                 deleteFollowUp={this.deleteFollowUp.bind(this, key)}
                 id={key} key={followUp.id}/>
             );

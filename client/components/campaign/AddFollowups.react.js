@@ -76,9 +76,15 @@ class AddFollowups extends React.Component {
                     <span>Insert Smart Tags</span>
                   </div>
                     <ul id={"dropdown" + followupId} className="dropdown-content">
-                      <li><a href="javascript:;">one</a></li>
-                      <li><a href="javascript:;">two</a></li>
-                      <li><a href="javascript:;">three</a></li>
+                      {
+                        this.props.smartTags.map(function(tag, key) {
+                          return (
+                            <li key={key}>
+                              <a href="javascript:;">{tag}</a>
+                            </li>
+                          );
+                        })
+                      }
                     </ul>
                 </div>
               </div>

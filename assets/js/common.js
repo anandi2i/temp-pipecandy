@@ -75,8 +75,10 @@ function initTinyMCE(id, toolBar, dropdownId){
     ],
     setup : function(editor) {
       $(dropdownId + " li").off("click").on("click", function(event) {
-        editor.insertContent("&nbsp;&lt;" + event.currentTarget.innerText +
-          "&gt;&nbsp;");
+        editor.insertContent("&nbsp;&lt;" +
+          event.currentTarget.innerText.trim() +
+          "&gt;&nbsp;"
+        );
       });
     },
     toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link image"

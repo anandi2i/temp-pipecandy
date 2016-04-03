@@ -2,7 +2,7 @@ import api from "axios";
 import cookie from "react-cookie";
 
 const CampaignApi = {
-  crateCampaign(data) {
+  createCampaign(data) {
     return api.post("/api/users/"+ cookie.load("userId") +"/campaigns", data);
   },
   getAllCampaign() {

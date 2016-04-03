@@ -84,7 +84,7 @@ AppDispatcher.register(function(payload) {
       });
       break;
     case Constants.CREATE_NEW_LIST:
-      EmailListApi.crateList(action.data).then((response) => {
+      EmailListApi.createList(action.data).then((response) => {
         _allEmailList = {};
         _error = "";
         appHistory.push("list/"+response.data.id);
@@ -95,7 +95,7 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.GET_LIST_BY_ID:
       let data = {"list":[action.data]};
-      EmailListApi.getList(data).then((response) => {
+      EmailListApi.getSelectedList(data).then((response) => {
         _getEmailList = response.data;
         _error = "";
         EmailListStore.emitChange();
