@@ -164,6 +164,7 @@ class SubscriberGridView extends React.Component {
     let addField4 = propsData.addField4.split(":");
     let addField5 = propsData.addField5.split(":");
     this.setState({
+      personId: propsData.id,
       firstName: propsData.firstName,
       middleName: propsData.middleName,
       lastName: propsData.lastName,
@@ -216,9 +217,11 @@ class SubscriberGridView extends React.Component {
     };
     let data = {
       listId: this.state.listId,
+      personId: this.state.personId,
       person: person
     };
     EmailListActions.updateSinglePerson(data);
+    this.closeModal();
   }
 
   render() {

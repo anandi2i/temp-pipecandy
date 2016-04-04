@@ -17,5 +17,6 @@ export default keyMirror({
   FILE_UPLOAD: null,
   SAVE_SINGLE_PERSON: null,
   GET_ALL_EMAIL_TEMPLATES: null,
-  GET_SELECTED_EMAIL_LIST: null
+  GET_SELECTED_EMAIL_LIST: null,
+  UPDATE_SINGLE_PERSON: null
 });

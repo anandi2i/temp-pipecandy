@@ -53,7 +53,7 @@ class ListView extends React.Component {
             </thead>
             <tbody>
               {
-                this.state.allEmailLists.map($.proxy(function (list, key) {
+                this.state.allEmailLists.map(function (list, key) {
                   return (
                     <tr key={key}>
                       <td>{list.id}</td>
@@ -61,7 +61,7 @@ class ListView extends React.Component {
                       <td><Link to={`/list/${list.id}`}>view</Link></td>
                     </tr>
                   );
-                }), this)
+                }, this)
               }
           </tbody>
           </table>

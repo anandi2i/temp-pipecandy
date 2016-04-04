@@ -125,6 +125,17 @@ AppDispatcher.register(function(payload) {
         EmailListStore.emitChange();
       });
       break;
+    case Constants.UPDATE_SINGLE_PERSON:
+      EmailListApi.updateSinglePerson(action.data).then((response) => {
+        //TODO: Change it to success message
+        _error = "Subscriber details updated successfully";
+        EmailListStore.emitChange();
+      }, (err)=> {
+        console.log("err", err);
+        _error = err;
+        EmailListStore.emitChange();
+      });
+      break;
     default:
       return true;
   }

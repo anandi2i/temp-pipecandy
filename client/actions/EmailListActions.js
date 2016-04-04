@@ -33,8 +33,10 @@ const EmailListActions = {
     });
   },
   updateSinglePerson(data){
-    //TODO need to update data
-    console.log("-----", data);
+    AppDispatcher.handleAction({
+      actionType: Constants.UPDATE_SINGLE_PERSON,
+      data: data
+    });
   }
 };
 

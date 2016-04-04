@@ -1,8 +1,11 @@
 module.exports = function(Person) {
   Person.observe("before save", function (ctx, next) {
+    //instance for entity creation
+    //data for entity updation
+    let instance = ctx.instance || ctx.data;
     let companyName;
-    if(ctx.instance.email) {
-      companyName = ctx.instance.email.split("@")[1];
+    if(instance.email) {
+      companyName = instance.email.split("@")[1];
     } else {
       let error = new Error();
       error.message = "Email id is not found";
@@ -21,7 +24,7 @@ module.exports = function(Person) {
       Person.app.models.Prospect.findOrCreate({
         "companyId": company.id
       }, (err, prospect) => {
-        ctx.instance.prospectId = prospect.id;
+        instance.prospectId = prospect.id;
         next();
       });
     });
@@ -41,9 +44,13 @@ module.exports = function(Person) {
         });
       }
     }
-    person.fields.create(personAddtionalData, (err, persons) => {
+    //Updating the addtional fields is difficult and so delete & recreate it
+    person.fields.destroyAll((err, data) => {
       if(err) next(err);
-      next();
+      person.fields.create(personAddtionalData, (err, persons) => {
+        if(err) next(err);
+        next();
+      });
     });
   });
 };

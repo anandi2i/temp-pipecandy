@@ -16,6 +16,10 @@ const EmailListApi = {
   },
   saveSinglePerson(data) {
     return api.post("api/lists/" + data.listId + "/people", data.person);
+  },
+  updateSinglePerson(data) {
+    return api.put("api/lists/" + data.listId + "/people/" + data.personId,
+      data.person);
   }
 };
 
