@@ -70,7 +70,7 @@ AppDispatcher.register(function(payload) {
       CampaignApi.createCampaign(action.data).then((response) => {
         _error = "";
         appHistory.push("campaign/run");
-      }, (err)=> {
+      }, (err) => {
         _error = err;
         CampaignStore.emitChange();
       });
@@ -80,7 +80,7 @@ AppDispatcher.register(function(payload) {
         _getAllCampaigns = response.data;
         _error = "";
         CampaignStore.emitChange();
-      }, (err)=> {
+      }, (err) => {
         _error = err;
         CampaignStore.emitChange();
       });
@@ -90,7 +90,7 @@ AppDispatcher.register(function(payload) {
         _allEmailTemplates = response.data;
         _error = "";
         CampaignStore.emitChange();
-      }, (err)=> {
+      }, (err) => {
         _allEmailTemplates = [];
         _error = err;
         CampaignStore.emitChange();
@@ -100,20 +100,31 @@ AppDispatcher.register(function(payload) {
       EmailListApi.getSelectedList(action.data).then((response) => {
         let emailList = [];
         let smartTags = [];
+        let commonSmartTags = [];
+        let unCommonSmartTags = [];
         response.data.forEach(function(list, index) {
           emailList.push({
             name: list.name,
             peopleCount: list.people.length
           });
           _.each(list.people, function(person) {
-            _.each(person.fields, function(field) {
-              if(field && field.name) smartTags.push(field.name);
-            });
+            let fieldName = [];
+            if(person.firstName) fieldName.push("firstName");
+            if(person.middleName) fieldName.push("middleName");
+            if(person.lastName) fieldName.push("lastName");
+            if(person.salutation) fieldName.push("salutation");
+            if(person.email) fieldName.push("email");
+            smartTags.push(fieldName.concat(_.pluck(person.fields, "name")));
           });
         });
+        //http://stackoverflow.com/questions/16229479/how-to-perform-union-or-intersection-on-an-array-of-arrays-with-underscore-js
+        commonSmartTags = _.intersection.apply(_, smartTags);
+        smartTags = _.union.apply(_, smartTags);
+        unCommonSmartTags = _.difference(smartTags, commonSmartTags);
         selectedEmailList = {
           emailList: emailList,
-          smartTags: smartTags
+          commonSmartTags: commonSmartTags,
+          unCommonSmartTags: unCommonSmartTags,
         };
         _error = "";
         CampaignStore.emitEmailListChange();

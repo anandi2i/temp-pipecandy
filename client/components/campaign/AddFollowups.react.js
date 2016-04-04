@@ -77,10 +77,19 @@ class AddFollowups extends React.Component {
                   </div>
                     <ul id={"dropdown" + followupId} className="dropdown-content">
                       {
-                        this.props.smartTags.map(function(tag, key) {
+                        this.props.commonSmartTags.map(function(tag, key) {
                           return (
                             <li key={key}>
-                              <a href="javascript:;">{tag}</a>
+                              <a className="common" href="javascript:;">{tag}</a>
+                            </li>
+                          );
+                        })
+                      }
+                      {
+                        this.props.unCommonSmartTags.map(function(tag, key) {
+                          return (
+                            <li key={key}>
+                              <a className="un-common" href="javascript:;">{tag}</a>
                             </li>
                           );
                         })

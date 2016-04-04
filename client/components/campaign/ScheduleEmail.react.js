@@ -16,10 +16,11 @@ class ScheduleEmail extends React.Component {
       followusMaxLen: 5,
       displayScheduleCampaign: false,
       emailListIds: {
-        list: ["10", "6"] //hard-coded for now
+        list: ["10"] //hard-coded for now
       },
       emailList: [],
-      smartTags: []
+      commonSmartTags: [],
+      unCommonSmartTags: []
     };
   }
 
@@ -51,7 +52,8 @@ class ScheduleEmail extends React.Component {
     let selectedEmailList = CampaignStore.getSelectedEmailList();
     this.setState({
       emailList: selectedEmailList.emailList || [],
-      smartTags: selectedEmailList.smartTags || []
+      commonSmartTags: selectedEmailList.commonSmartTags || [],
+      unCommonSmartTags: selectedEmailList.unCommonSmartTags || []
     });
     this.initTinyMCE();
   }
@@ -182,10 +184,19 @@ class ScheduleEmail extends React.Component {
                     </div>
                       <ul id="dropdown" className="dropdown-content">
                         {
-                          this.state.smartTags.map(function(tag, key) {
+                          this.state.commonSmartTags.map(function(tag, key) {
                             return (
                               <li key={key}>
-                                <a href="javascript:;">{tag}</a>
+                                <a className="common" href="javascript:;">{tag}</a>
+                              </li>
+                            );
+                          })
+                        }
+                        {
+                          this.state.unCommonSmartTags.map(function(tag, key) {
+                            return (
+                              <li key={key}>
+                                <a className="un-common" href="javascript:;">{tag}</a>
                               </li>
                             );
                           })
@@ -212,7 +223,8 @@ class ScheduleEmail extends React.Component {
             return (
               <AddFollowups followupId={followUp.id}
                 content={followUp.content}
-                smartTags={this.state.smartTags}
+                commonSmartTags={this.state.commonSmartTags}
+                unCommonSmartTags={this.state.unCommonSmartTags}
                 deleteFollowUp={this.deleteFollowUp.bind(this, key)}
                 id={key} key={followUp.id}/>
             );

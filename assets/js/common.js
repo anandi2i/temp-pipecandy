@@ -75,10 +75,17 @@ function initTinyMCE(id, toolBar, dropdownId){
     ],
     setup : function(editor) {
       $(dropdownId + " li").off("click").on("click", function(event) {
-        editor.insertContent("&nbsp;&lt;" +
-          event.currentTarget.innerText.trim() +
-          "&gt;&nbsp;"
-        );
+        if($(event.currentTarget).find("a").hasClass("common")) {
+          editor.insertContent("<span class='tag common'>&nbsp;&lt;" +
+            event.currentTarget.innerText.trim() +
+            "&gt;&nbsp;</span>"
+          );
+        } else {
+          editor.insertContent("<span class='tag un-common'>&nbsp;&lt;" +
+            event.currentTarget.innerText.trim() +
+            "&gt;&nbsp;</span>"
+          );
+        }
       });
     },
     toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link image"
