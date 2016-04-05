@@ -10,7 +10,8 @@ class SelectPreBuildTemplate extends React.Component {
     this.state={
       templates: [],
       innerTabIndex: 0,
-      activeTemplate: 0
+      activeTemplate: 0,
+      activeTemplateContent: ""
     };
   }
 
@@ -38,9 +39,16 @@ class SelectPreBuildTemplate extends React.Component {
   }
 
   selectTemplate(key, event) {
-    this.setState({
-      activeTemplate: key
-    });
+    this.setState((state) => ({
+      activeTemplate: key,
+      activeTemplateContent: state.templates[key].content
+    }));
+  }
+
+  @autobind
+  pickTemplate() {
+    this.props.setTemplateContent();
+    this.closeModal();
   }
 
   render() {
@@ -86,12 +94,13 @@ class SelectPreBuildTemplate extends React.Component {
             </div>
             <div className="modal-content">
               <div className="template-content gray-bg">
-                <div dangerouslySetInnerHTML={{__html: this.state.templates[this.state.activeTemplate].content}} />
+                <div dangerouslySetInnerHTML={{__html: this.state.activeTemplateContent}} />
               </div>
             </div>
             <div className="modal-footer r-btn-container">
               <input type="button" className="btn red modal-action modal-close p-1-btn" value="Cancel" />
-              <input type="button" className="btn blue modal-action" value="Pick This Template" />
+              <input type="button" className="btn blue modal-action" value="Pick This Template"
+                onClick={this.pickTemplate} />
             </div>
           </div>
         : null }

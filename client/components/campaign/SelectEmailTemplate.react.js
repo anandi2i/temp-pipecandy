@@ -70,7 +70,10 @@ class SelectEmailTemplate extends React.Component {
             </div>
           </nav>
         </div>
-        <SelectPreBuildTemplate active={this.state.activeTab} />
+        <SelectPreBuildTemplate 
+          setTemplateContent={this.props.setTemplateContent}
+          ref="selectPreBuildTemplate"
+          active={this.state.activeTab} />
         <SelectCampaignTemplate active={this.state.activeTab} />
       </div>
     );

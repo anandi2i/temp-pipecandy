@@ -248,7 +248,10 @@ class ScheduleEmail extends React.Component {
                       </ul>
                   </div>
                 </div>
-                <div id="emailContent" className="email-body" >Click here to edit!</div>
+                <div id="emailContent" className="email-body"
+                  dangerouslySetInnerHTML={{
+                    __html: this.props.selectedTemplate
+                  }} />
               </div>
               {/* Preview button */}
               <div className="row r-btn-container preview-content m-lr-0">

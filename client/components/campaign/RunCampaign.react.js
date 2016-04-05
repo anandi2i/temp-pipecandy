@@ -1,6 +1,6 @@
 import React from "react";
 // import {Link} from "react-router";
-// import autobind from "autobind-decorator";
+import autobind from "autobind-decorator";
 import SelectEmailTemplate from "./SelectEmailTemplate.react";
 import SelectEmailList from "./SelectEmailList.react";
 import ScheduleEmail from "./ScheduleEmail.react";
@@ -69,12 +69,13 @@ class TabsNav extends React.Component {
   }
 }
 
-class CreateCampaign extends React.Component {
+class RunCampaign extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      activeTab: 1
+      activeTab: 1,
+      selectedTemplate: ""
     };
   }
 
@@ -84,15 +85,28 @@ class CreateCampaign extends React.Component {
     });
   }
 
+  @autobind
+  setTemplateContent() {
+    this.setState({
+      selectedTemplate: this.refs.SelectEmailTemplate
+        .refs.selectPreBuildTemplate.state.activeTemplateContent
+    });
+  }
+
   render() {
     return (
       <div>
-        <TabsNav handleClick={this.handleClick.bind(this)} active={this.state.activeTab} />
-        <SelectEmailTemplate active={this.state.activeTab} />
+        <TabsNav handleClick={this.handleClick.bind(this)}
+          active={this.state.activeTab} />
         <SelectEmailList active={this.state.activeTab} />
-        <ScheduleEmail active={this.state.activeTab} />
+        <SelectEmailTemplate ref="SelectEmailTemplate"
+          setTemplateContent={this.setTemplateContent}
+          active={this.state.activeTab} />
+        <ScheduleEmail templateContent={this.state.selectedTemplate}
+          active={this.state.activeTab}
+          selectedTemplate={this.state.selectedTemplate} />
       </div>
     );
   }
 }
-export default CreateCampaign;
+export default RunCampaign;
