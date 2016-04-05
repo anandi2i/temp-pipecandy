@@ -34,13 +34,12 @@ class AddFollowups extends React.Component {
       : "mdi mdi-chevron-up in-active";
     return(
       <div className="row draft-container m-lr-0">
-        <div className="head">
+        <div className="head" onClick={this.toggleEditContainer}>
           <div className="col s4 m4 l4">
             <h3>{followUpCount}. Follow up {followUpCount}</h3>
           </div>
           <div className="col s8 m8 l8">
-            <i className={className}
-              onClick={this.toggleEditContainer}>
+            <i className={className}>
             </i>
             <i className="mdi mdi-delete-forever"
               onClick={this.props.deleteFollowUp}>

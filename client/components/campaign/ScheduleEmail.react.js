@@ -127,11 +127,10 @@ class ScheduleEmail extends React.Component {
         </div>
         {/* Draft Email starts here*/}
         <div className="row draft-container m-t-50 m-lr-0">
-          <div className="head">
+          <div className="head" onClick={this.toggleEditContainer}>
             <div className="col s4 m4 l4"><h3>1. First Email</h3></div>
             <div className="col s8 m8 l8">
-              <i className={className}
-                onClick={this.toggleEditContainer}>
+              <i className={className}>
               </i>
             </div>
           </div>

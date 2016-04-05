@@ -778,6 +778,7 @@ $lines-to-show: 8;
     margin: 0;
     padding: 15px 0;
     height: 50px;
+    cursor: pointer;
     background: $lit-gray-bg;
     border-bottom: $border-1px;
     h3 {
@@ -791,7 +792,6 @@ $lines-to-show: 8;
     .mdi {
       font-size: 25px;
       font-weight: 400;
-      cursor: pointer;
       line-height: 18px;
       float: right;
       transition: transform 0.5s;
