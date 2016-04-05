@@ -1,4 +1,7 @@
 import React from "react";
+import validation from "react-validation-mixin";
+import validatorUtil from "../../utils/ValidationMessages";
+import strategy from "joi-validation-strategy";
 import autobind from "autobind-decorator";
 import Griddle from "griddle-react";
 import EmailListStore from "../../stores/EmailListStore";
@@ -140,7 +143,13 @@ class SubscriberGridView extends React.Component {
     super(props);
     this.state = {
       people: getPeopleByList(),
-      listId: this.props[0].id
+      listId: this.props[0].id,
+      additionalFieldsLength: 5
+    };
+    this.validatorTypes = {
+      firstName: validatorUtil.firstName,
+      lastName: validatorUtil.lastName,
+      email: validatorUtil.email
     };
   }
 
@@ -198,6 +207,20 @@ class SubscriberGridView extends React.Component {
   }
 
   @autobind
+  getValidatorData() {
+    return this.state;
+  }
+
+  @autobind
+  renderHelpText(el) {
+    return (
+      <div className="warning-block">
+        {this.props.getValidationMessages(el)[0]}
+      </div>
+    );
+  }
+
+  @autobind
   onSubmit() {
     let person = {
       firstName: this.state.firstName,
@@ -220,8 +243,20 @@ class SubscriberGridView extends React.Component {
       personId: this.state.personId,
       person: person
     };
-    EmailListActions.updateSinglePerson(data);
-    this.closeModal();
+    const onValidate = error => {
+      for(let i = 1; i <= this.state.additionalFieldsLength; i++) {
+        let field = this.state["field" + i];
+        let value = this.state["value" + i];
+        if((field && !value) || (!field && value)) {
+          error = true;
+        }
+      }
+      if (!error) {
+        EmailListActions.updateSinglePerson(data);
+        this.closeModal();
+      }
+    };
+    this.props.validate(onValidate);
   }
 
   render() {
@@ -265,101 +300,159 @@ class SubscriberGridView extends React.Component {
           </div>
           <div className="modal-content">
             <div className="input-field">
-              <input placeholder="First Name" type="text"
+              <input placeholder="First Name" id="firstName" type="text"
                 onChange={this.getEditFieldState("firstName")}
+                onBlur={this.props.handleValidation("firstName")}
                 value={this.state.firstName}
                 className="validate" />
               <label htmlFor="firstName" className="active">First Name</label>
+              {
+                !this.props.isValid("firstName")
+                ? this.renderHelpText("firstName")
+                : null
+              }
             </div>
             <div className="input-field">
               <input placeholder="Middle Name" type="text"
                 onChange={this.getEditFieldState("middleName")}
                 value={this.state.middleName}
                 className="validate" />
-              <label htmlFor="lastName" className="active">Middle Name</label>
+              <label htmlFor="middleName" className="active">Middle Name</label>
             </div>
             <div className="input-field">
-              <input placeholder="Last Name" type="text"
+              <input placeholder="Last Name" id="lastName" type="text"
                 onChange={this.getEditFieldState("lastName")}
+                onBlur={this.props.handleValidation("lastName")}
                 value={this.state.lastName}
                 className="validate" />
               <label htmlFor="lastName" className="active">Last Name</label>
+              {
+                !this.props.isValid("lastName")
+                ? this.renderHelpText("lastName")
+                : null
+              }
             </div>
             <div className="input-field">
-              <input placeholder="email" type="text"
+              <input placeholder="email" id="email" type="text"
                 onChange={this.getEditFieldState("email")}
+                onBlur={this.props.handleValidation("email")}
                 value={this.state.email}
                 className="validate" />
-              <label htmlFor="lastName" className="active">email</label>
+              <label htmlFor="email" className="active">email</label>
+              {
+                !this.props.isValid("email")
+                ? this.renderHelpText("email")
+                : null
+              }
             </div>
             <div className="input-field">
               <input placeholder="Field Name" type="text"
                 onChange={this.getEditFieldState("field1")}
                 value={this.state.field1}
-                className="validate field-name" />
+                className={
+                  !this.state.field1 && this.state.value1
+                  ? "invalid"
+                  : "validate field-name"
+                }/>
               <label className="active" htmlFor="field1">Field Name 1</label>
             </div>
             <div className="input-field">
               <input placeholder="Value" type="text"
                 onChange={this.getEditFieldState("value1")}
                 value={this.state.value1}
-                className="validate field-name" />
+                className={
+                  this.state.field1 && !this.state.value1
+                  ? "invalid"
+                  : "validate field-name"
+                }/>
               <label className="active" htmlFor="value1">Value 1</label>
             </div>
             <div className="input-field">
               <input placeholder="Field Name" type="text"
                 onChange={this.getEditFieldState("field2")}
                 value={this.state.field2}
-                className="validate field-name" />
+                className={
+                  !this.state.field2 && this.state.value2
+                  ? "invalid"
+                  : "validate field-name"
+                }/>
               <label className="active" htmlFor="field2">Field Name 2</label>
             </div>
             <div className="input-field">
               <input placeholder="Value" type="text"
                 onChange={this.getEditFieldState("value2")}
                 value={this.state.value2}
-                className="validate field-name" />
+                className={
+                  this.state.field2 && !this.state.value2
+                  ? "invalid"
+                  : "validate field-name"
+                }/>
               <label className="active" htmlFor="value2">Value 2</label>
             </div>
             <div className="input-field">
               <input placeholder="Field Name" type="text"
                 onChange={this.getEditFieldState("field3")}
                 value={this.state.field3}
-                className="validate field-name" />
+                className={
+                  !this.state.field3 && this.state.value3
+                  ? "invalid"
+                  : "validate field-name"
+                }/>
               <label className="active" htmlFor="field3">Field Name 3</label>
             </div>
             <div className="input-field">
               <input placeholder="Value" type="text"
                 onChange={this.getEditFieldState("value3")}
                 value={this.state.value3}
-                className="validate field-name" />
+                className={
+                  this.state.field3 && !this.state.value3
+                  ? "invalid"
+                  : "validate field-name"
+                }/>
               <label className="active" htmlFor="value3">Value 3</label>
             </div>
             <div className="input-field">
               <input placeholder="Field Name" type="text"
                 onChange={this.getEditFieldState("field4")}
                 value={this.state.field4}
-                className="validate field-name" />
+                className={
+                  !this.state.field4 && this.state.value4
+                  ? "invalid"
+                  : "validate field-name"
+                }/>
               <label className="active" htmlFor="field4">Field Name 4</label>
             </div>
             <div className="input-field">
               <input placeholder="Value" type="text"
                 onChange={this.getEditFieldState("value4")}
                 value={this.state.value4}
-                className="validate field-name" />
+                className={
+                  this.state.field4 && !this.state.value4
+                  ? "invalid"
+                  : "validate field-name"
+                }/>
               <label className="active" htmlFor="value4">Value 4</label>
             </div>
             <div className="input-field">
               <input placeholder="Field Name" type="text"
                 onChange={this.getEditFieldState("field5")}
                 value={this.state.field5}
-                className="validate field-name" />
+                className={
+                  !this.state.field5 && this.state.value5
+                  ? "invalid"
+                  : "validate field-name"
+                }/>
               <label className="active" htmlFor="field5">Field Name 5</label>
             </div>
             <div className="input-field">
               <input placeholder="Value" type="text"
                 onChange={this.getEditFieldState("value5")}
                 value={this.state.value5}
-                className="validate field-name" />
+                className={
+                  this.state.field5 && !this.state.value5
+                  ? "invalid"
+                  : "validate field-name"
+                }/>
               <label className="active" htmlFor="value5">Value 5</label>
             </div>
           </div>
@@ -381,4 +474,4 @@ GriddlePager.defaultProps = {
   "currentPage": 0
 };
 
-export default SubscriberGridView;
+export default validation(strategy)(SubscriberGridView);
