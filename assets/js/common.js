@@ -76,14 +76,16 @@ function initTinyMCE(id, toolBar, dropdownId){
     setup : function(editor) {
       $(dropdownId + " li").off("click").on("click", function(event) {
         if($(event.currentTarget).find("a").hasClass("common")) {
-          editor.insertContent("<span class='tag common'>&nbsp;&lt;" +
+          editor.insertContent(
+            "&nbsp;<span class='tag common' contenteditable='false'>&lt;" +
             event.currentTarget.innerText.trim() +
-            "&gt;&nbsp;</span>"
+            "&gt;</span>&nbsp;"
           );
         } else {
-          editor.insertContent("<span class='tag un-common'>&nbsp;&lt;" +
+          editor.insertContent(
+            "&nbsp;<span class='tag un-common' contenteditable='false'>&lt;" +
             event.currentTarget.innerText.trim() +
-            "&gt;&nbsp;</span>"
+            "&gt;</span>&nbsp;"
           );
         }
       });
