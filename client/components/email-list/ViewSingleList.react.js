@@ -25,6 +25,9 @@ class ListView extends React.Component {
       lastName: "",
       email: ""
     };
+    this.state = {
+      addAnother: false
+    };
     this.state = this.initialStateValues;
     this.validatorTypes = {
       firstName: validatorUtil.firstName,
@@ -124,8 +127,10 @@ class ListView extends React.Component {
 
   @autobind
   onSubmitAnother() {
+    this.setState({
+      addAnother: true
+    });
     this.onSubmit();
-    $("#addEmail").openModal();
   }
 
   @autobind
@@ -149,9 +154,16 @@ class ListView extends React.Component {
       person: person
     };
     EmailListActions.saveSinglePerson(data);
-    this.closeModal();
     this.setState(this.initialStateValues);
     this.props.clearValidations();
+    $(".validate").removeClass("valid");
+    if(this.state.addAnother) {
+      this.setState({
+        addAnother: false
+      });
+    } else {
+      this.closeModal();
+    }
   }
 
   @autobind
