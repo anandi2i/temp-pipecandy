@@ -64,7 +64,7 @@ function initTinyMCE(id, toolBar, dropdownId){
     selector: id,
     inline: true,
     height : 150,
-    menubar:false,
+    menubar: false,
     browser_spellcheck: true,
     contextmenu: false,
     auto_focus: getFocusId,
@@ -91,5 +91,24 @@ function initTinyMCE(id, toolBar, dropdownId){
       });
     },
     toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link image"
+  });
+}
+
+function initTinyMCEPopUp(id, toolBar){
+  var getFocusId = id.split("#")[1];
+  tinymce.init({
+    selector: id,
+    inline: true,
+    height : 150,
+    menubar: false,
+    browser_spellcheck: true,
+    contextmenu: false,
+    auto_focus: getFocusId,
+    fixed_toolbar_container: toolBar,
+    plugins: [
+      "advlist autolink lists link image charmap print preview anchor",
+      "insertdatetime media table contextmenu paste code"
+    ],
+    toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link"
   });
 }

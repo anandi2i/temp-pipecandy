@@ -16,11 +16,13 @@ class ScheduleEmail extends React.Component {
       followusMaxLen: 5,
       displayScheduleCampaign: false,
       emailListIds: {
-        list: ["10"] //hard-coded for now
+        list: ["9"] //hard-coded for now
       },
       emailList: [],
       commonSmartTags: [],
-      unCommonSmartTags: []
+      unCommonSmartTags: [],
+      emailContent: "",
+      isPreviewMail: false
     };
   }
 
@@ -53,7 +55,8 @@ class ScheduleEmail extends React.Component {
     this.setState({
       emailList: selectedEmailList.emailList || [],
       commonSmartTags: selectedEmailList.commonSmartTags || [],
-      unCommonSmartTags: selectedEmailList.unCommonSmartTags || []
+      unCommonSmartTags: selectedEmailList.unCommonSmartTags || [],
+      getAllPeopleList: selectedEmailList.peopleList || []
     });
     this.initTinyMCE();
   }
@@ -104,6 +107,32 @@ class ScheduleEmail extends React.Component {
     this.setState((state) => ({
       followups: followups
     }));
+  }
+
+  @autobind
+  getMainEmailSubject(field){
+    return event => {
+      let state = {};
+      state[field] = event.target.value;
+      this.setState(state);
+    };
+  }
+
+  getMainEmailContent(field) {
+    if(tinyMCE.get(field)) {
+      this.setState({
+        emailContent: tinyMCE.get(field).getContent(),
+        isPreviewMail: true
+      });
+    }
+  }
+
+  closeModal() {
+    $("#previewCampaign").closeModal();
+    tinyMCE.execCommand("mceRemoveEditor", true, "previewMailContent");
+    this.setState({
+      isPreviewMail: false
+    });
   }
 
   render() {
@@ -172,7 +201,9 @@ class ScheduleEmail extends React.Component {
               </div>
               {/* email subject */}
               <div className="row email-subject m-lr-0">
-                <input type="text" className="border-input" placeholder="Campaign subject"></input>
+                <input type="text" className="border-input"
+                  placeholder="Campaign subject"
+                  onChange={this.getMainEmailSubject("subject")} />
               </div>
               <div className="row email-content m-lr-0">
                 <div className="tiny-toolbar" id="mytoolbar">
@@ -207,13 +238,22 @@ class ScheduleEmail extends React.Component {
               </div>
               {/* Preview button */}
               <div className="row r-btn-container preview-content m-lr-0">
-                <div className="btn btn-dflt blue sm-icon-btn modal-trigger" href="#previewCampaign">
+                <div onClick={this.getMainEmailContent.bind(this, "emailContent")} className="btn btn-dflt blue sm-icon-btn">
                   <i className="left mdi mdi-eye"></i>
                   <span>Preview</span>
                 </div>
               </div>
               {/* Popup starts here*/}
-              <PreviewCampaignPopup />
+              {this.state.isPreviewMail
+                ?
+                  <PreviewCampaignPopup
+                    emailSubject={this.state.subject}
+                    emailContent={this.state.emailContent}
+                    closeModal={this.closeModal.bind(this)}
+                    peopleList={this.state.getAllPeopleList} />
+                :
+                  ""
+              }
               {/* Popup ends here*/}
           </div>
         </div>

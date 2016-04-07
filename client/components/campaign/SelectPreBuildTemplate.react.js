@@ -32,7 +32,9 @@ class SelectPreBuildTemplate extends React.Component {
     this.setState({
       templates: CampaignStore.getAllEmailTemplates()
     });
-    $(".modal-trigger").leanModal();
+    $(".modal-trigger").leanModal({
+      dismissible: false
+    });
   }
 
   selectTemplate(key, event) {

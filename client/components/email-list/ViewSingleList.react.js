@@ -36,7 +36,9 @@ class ListView extends React.Component {
   componentDidMount() {
     EmailListActions.getEmailListByID(this.props.params.listId);
     EmailListStore.addChangeListener(this._onChange);
-    $(".modal-trigger").leanModal();
+    $(".modal-trigger").leanModal({
+      dismissible: false
+    });
     $(".modal-content").mCustomScrollbar({
       theme:"minimal-dark"
     });

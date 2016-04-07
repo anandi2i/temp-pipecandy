@@ -10,6 +10,7 @@ let _error = "";
 let _getAllCampaigns = {};
 let _allEmailTemplates = [];
 let selectedEmailList = {};
+let getAllPeopleList = {};
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignStore = _.extend({}, EventEmitter.prototype, {
@@ -102,6 +103,7 @@ AppDispatcher.register(function(payload) {
         let smartTags = [];
         let commonSmartTags = [];
         let unCommonSmartTags = [];
+        getAllPeopleList = response.data[0].people;
         response.data.forEach(function(list, index) {
           emailList.push({
             name: list.name,
@@ -125,6 +127,7 @@ AppDispatcher.register(function(payload) {
           emailList: emailList,
           commonSmartTags: commonSmartTags,
           unCommonSmartTags: unCommonSmartTags,
+          peopleList: getAllPeopleList
         };
         _error = "";
         CampaignStore.emitEmailListChange();

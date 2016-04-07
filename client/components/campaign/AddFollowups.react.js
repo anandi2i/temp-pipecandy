@@ -16,6 +16,10 @@ class AddFollowups extends React.Component {
     let insertSmartTags = "#insertSmartTags" + followupId;
     let smartTagDrpDwnId = "#dropdown" + followupId;
     initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId);
+    $("select").material_select();
+    $(".timepicker").pickatime({
+      twelvehour: true
+    });
     enabledropDownBtnByID(insertSmartTags);
   }
 
