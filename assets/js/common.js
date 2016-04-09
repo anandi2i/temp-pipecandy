@@ -97,7 +97,7 @@ function initTinyMCE(id, toolBar, dropdownId){
     fixed_toolbar_container: toolBar,
     plugins: [
       "advlist autolink lists link image charmap print preview anchor",
-      "insertdatetime media table contextmenu paste code"
+      "insertdatetime media table paste code"
     ],
     setup : function(editor) {
       $(dropdownId + " li").off("click").on("click", function(event) {
