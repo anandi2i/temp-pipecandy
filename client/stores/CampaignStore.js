@@ -59,6 +59,20 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
 
   getSelectedEmailList() {
     return selectedEmailList;
+  },
+
+  getIssuesPeopleList(issueTags) {
+    let peopleList = _.filter(getAllPeopleList, function(person, key){
+        var fieldName = [];
+        if(person.firstName) fieldName.push("firstName");
+        if(person.middleName) fieldName.push("middleName");
+        if(person.lastName) fieldName.push("lastName");
+        if(person.salutation) fieldName.push("salutation");
+        if(person.email) fieldName.push("email");
+        return !(issueTags.length === _.intersection(issueTags,
+          fieldName.concat(_.pluck(person.fields, "name"))).length);
+    });
+    return peopleList;
   }
 
 });

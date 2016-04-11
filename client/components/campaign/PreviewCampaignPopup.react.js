@@ -1,6 +1,7 @@
 import React from "react";
 import autobind from "autobind-decorator";
 import _ from "underscore";
+import update from "react-addons-update";
 
 class PreviewCampaignPopup extends React.Component {
   constructor(props) {
@@ -11,7 +12,9 @@ class PreviewCampaignPopup extends React.Component {
       peopleList: this.props.peopleList,
       selectedPerson: 0,
       displayPerson: 1,
-      initCount: 1
+      initCount: 1,
+      personIssues : this.props.personIssues,
+      issueCompletedPerson: []
     };
   }
 
@@ -20,11 +23,16 @@ class PreviewCampaignPopup extends React.Component {
       dismissible: false
     });
     if(!tinyMCE.get("previewMailContent")){
-      initTinyMCEPopUp("#previewMailContent", "#previewToolbar");
+      initTinyMCEPopUp("#previewMailContent", "#previewToolbar",
+        this.initTemplateLoade);
       $(".preview-modal-content").mCustomScrollbar({
         theme:"minimal-dark"
       });
     }
+  }
+
+  @autobind
+  initTemplateLoade(){
     if(this.props.emailContent){
       tinyMCE.get("previewMailContent").setContent(this.props.emailContent);
       // Starts with first person person[0]
@@ -46,7 +54,7 @@ class PreviewCampaignPopup extends React.Component {
     let displayPerson = this.state.displayPerson;
     let initCount = this.state.initCount;
     if(displayPerson >= initCount &&
-      displayPerson <= this.state.peopleList.length) {
+      displayPerson <= this.state.personIssues.length) {
         this.applySmartTags(displayPerson - initCount);
       } else {
         this.setState({
@@ -61,7 +69,7 @@ class PreviewCampaignPopup extends React.Component {
   slider(position){
     let id = this.state.selectedPerson;
 	  let initCount = this.state.initCount;
-    let peopleLength = this.state.peopleList.length;
+    let peopleLength = this.state.personIssues.length;
     if(position === "left" && id >= this.state.initCount){
       id -= initCount;
       this.setState({
@@ -80,30 +88,63 @@ class PreviewCampaignPopup extends React.Component {
 
   @autobind
   applySmartTags(personId){
-    let getPersonInfo = this.state.peopleList[personId];
+    let getPersonInfo = this.state.personIssues[personId];
     this.setState({
       selectedPerson: personId,
     });
     let emailContent = this.props.emailContent.replace(/"/g, "'");
-    _.map(getPersonInfo, function (value, key) {
+    _.each(getPersonInfo, $.proxy(function (value, key) {
       if(key === "fields"){
-        _.map(value, function (val, key) {
+        _.each(value, $.proxy(function (val, key) {
           let fieldsStr = "<span class='tag un-common' "+
-            "contenteditable='false'>&lt;"+val.name+"&gt;</span>";
+            "contenteditable='false' data-tag-name='"+
+            val.value+"'>&lt;"+val.name+"&gt;</span>";
           let re = new RegExp(fieldsStr, "g");
-          emailContent = emailContent.replace(re, val.value);
-        });
+          emailContent = emailContent
+            .replace(re, this.replaceSmartTagContent(val.value));
+        }), this);
       }
       let str = "<span class='tag common' "+
-        "contenteditable='false'>&lt;"+key+"&gt;</span>";
+        "contenteditable='false' data-tag-name='"+
+          key+"'>&lt;"+key+"&gt;</span>";
       let re = new RegExp(str, "g");
-      emailContent = emailContent.replace(re, value);
-    });
+      emailContent = emailContent
+        .replace(re, this.replaceSmartTagContent(value));
+    }), this);
     tinyMCE.get("previewMailContent").setContent(emailContent);
   }
 
+  @autobind
+  replaceSmartTagContent(val){
+    let tag = "<span class='tag common' "+
+      "contenteditable='false' data-tag-name='"+val+"'>"+val+"</span>";
+    return tag;
+  }
+
+  @autobind
+  saveSinglePerson(){
+    let initCount = this.state.initCount;
+    let index = this.state.displayPerson - initCount;
+    let getPersonInfo = this.state.personIssues[index];
+    let currentContent = tinyMCE.get("previewMailContent").getContent();
+    let getIssueTags = getIssueTagsInEditor(currentContent);
+    if(getIssueTags.length) {
+      console.log("Please remove all error tags to save changes");
+    } else {
+      getPersonInfo.template = currentContent;
+      this.setState((state) => ({
+        issueCompletedPerson: update(state.issueCompletedPerson,
+          {$push: [getPersonInfo]}),
+        personIssues: update(state.personIssues,
+          {$splice: [[index, initCount]]})
+      }));
+      tinyMCE.get("previewMailContent").setContent(this.props.emailContent);
+      this.applySmartTags(this.state.displayPerson);
+    }
+  }
+
   render() {
-    let peopelLength = this.state.peopleList.length;
+    let peopelLength = this.state.personIssues.length;
     let currentPerson = this.state.displayPerson;
     let leftStyle = {
       color: currentPerson > this.state.initCount ? "" : "#ebebeb"
@@ -117,7 +158,7 @@ class PreviewCampaignPopup extends React.Component {
         <div className="modal-header">
           <div className="head">
             Email preview
-            <span className="sub-head">( 1258 issues found )</span>
+            <span className="sub-head">( {this.state.personIssues.length} issues found )</span>
           </div>
         </div>
         <div className="preview-modal-content">
@@ -161,7 +202,9 @@ class PreviewCampaignPopup extends React.Component {
             onClick={this.props.closeModal}
             value="Cancel" />
           <input type="button"
-            className="btn blue modal-action" value="Save Changes" />
+            className="btn blue modal-action"
+            onClick={this.saveSinglePerson.bind(this)}
+            value="Save Changes" />
         </div>
       </div>
     );

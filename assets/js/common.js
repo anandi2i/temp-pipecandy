@@ -84,8 +84,20 @@ function enabledropDownBtnByID(id){
   });
 }
 
-function initTinyMCE(id, toolBar, dropdownId){
+function getIssueTagsInEditor(emailContent) {
+  var unCommonTags = /<span[^>]+?class="tag un-common".*?>&#{0,1}[a-z0-9]+;;*?([\s\S]*?)&#{0,1}[a-z0-9]+;*?<\/span>/g;
+  var match = unCommonTags.exec(emailContent);
+  var result = [];
+  while (match !== null) {
+      result.push(RegExp.$1);
+      match = unCommonTags.exec(emailContent);
+  }
+  return result;
+}
+
+function initTinyMCE(id, toolBar, dropdownId, cb){
   var getFocusId = id.split("#")[1];
+
   tinymce.init({
     selector: id,
     inline: true,
@@ -100,27 +112,30 @@ function initTinyMCE(id, toolBar, dropdownId){
       "insertdatetime media table paste code"
     ],
     setup : function(editor) {
+      editor.on("change", function(e){
+          cb(editor);
+      });
       $(dropdownId + " li").off("click").on("click", function(event) {
+        var currentText = event.currentTarget.innerText.trim();
+        var className;
         if($(event.currentTarget).find("a").hasClass("common")) {
-          editor.insertContent(
-            "&nbsp;<span class='tag common' contenteditable='false'>&lt;" +
-            event.currentTarget.innerText.trim() +
-            "&gt;</span>&nbsp;"
-          );
+          className = "common";
         } else {
-          editor.insertContent(
-            "&nbsp;<span class='tag un-common' contenteditable='false'>&lt;" +
-            event.currentTarget.innerText.trim() +
-            "&gt;</span>&nbsp;"
-          );
+          className = "un-common";
         }
+        editor.insertContent( constructSmartTags(className, currentText) );
       });
     },
     toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link image"
   });
 }
 
-function initTinyMCEPopUp(id, toolBar){
+function constructSmartTags(className, tagText){
+  return "<span data-tag-name='"+tagText+"' class='tag "+className+"' contenteditable='false'>&lt;" +
+    tagText + "&gt;</span>";
+}
+
+function initTinyMCEPopUp(id, toolBar, cb){
   var getFocusId = id.split("#")[1];
   tinymce.init({
     selector: id,
@@ -131,6 +146,9 @@ function initTinyMCEPopUp(id, toolBar){
     contextmenu: false,
     auto_focus: getFocusId,
     fixed_toolbar_container: toolBar,
+    init_instance_callback : function() {
+      cb();
+    },
     plugins: [
       "advlist autolink lists link image charmap print preview anchor",
       "insertdatetime media table contextmenu paste code"

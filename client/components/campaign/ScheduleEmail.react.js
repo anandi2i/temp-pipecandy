@@ -16,13 +16,15 @@ class ScheduleEmail extends React.Component {
       followusMaxLen: 5,
       displayScheduleCampaign: false,
       emailListIds: {
-        list: ["9"] //hard-coded for now
+        list: ["10"] //hard-coded for now
       },
       emailList: [],
       commonSmartTags: [],
       unCommonSmartTags: [],
       emailContent: "",
-      isPreviewMail: false
+      isPreviewMail: false,
+      errorCount: 0,
+      issueTags: []
     };
   }
 
@@ -46,7 +48,20 @@ class ScheduleEmail extends React.Component {
 
   @autobind
   initTinyMCE() {
-    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown");
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", this.tinyMceCb);
+  }
+
+  @autobind
+  tinyMceCb(editor){
+    let content = editor.getContent();
+    let issueTags = getIssueTagsInEditor(content);
+    let personIssues = CampaignStore.getIssuesPeopleList(issueTags);
+    this.setState({
+      emailContent: content,
+      errorCount: parseInt(issueTags.length, 10),
+      issueTags: issueTags,
+      personIssues: personIssues
+    });
   }
 
   @autobind
@@ -121,7 +136,6 @@ class ScheduleEmail extends React.Component {
   getMainEmailContent(field) {
     if(tinyMCE.get(field)) {
       this.setState({
-        emailContent: tinyMCE.get(field).getContent(),
         isPreviewMail: true
       });
     }
@@ -238,10 +252,17 @@ class ScheduleEmail extends React.Component {
               </div>
               {/* Preview button */}
               <div className="row r-btn-container preview-content m-lr-0">
-                <div onClick={this.getMainEmailContent.bind(this, "emailContent")} className="btn btn-dflt blue sm-icon-btn">
-                  <i className="left mdi mdi-eye"></i>
-                  <span>Preview</span>
-                </div>
+                {this.state.errorCount
+                  ?
+                    <div onClick={this.getMainEmailContent.bind(this, "emailContent")} className="btn btn-dflt error-btn">
+                      {this.state.errorCount} Issues Found
+                    </div>
+                  :
+                  <div onClick={this.getMainEmailContent.bind(this, "emailContent")} className="btn btn-dflt blue sm-icon-btn">
+                    <i className="left mdi mdi-eye"></i>
+                    <span>Preview</span>
+                  </div>
+                }
               </div>
               {/* Popup starts here*/}
               {this.state.isPreviewMail
@@ -250,7 +271,9 @@ class ScheduleEmail extends React.Component {
                     emailSubject={this.state.subject}
                     emailContent={this.state.emailContent}
                     closeModal={this.closeModal.bind(this)}
-                    peopleList={this.state.getAllPeopleList} />
+                    peopleList={this.state.getAllPeopleList}
+                    personIssues={this.state.personIssues}
+                  />
                 :
                   ""
               }
