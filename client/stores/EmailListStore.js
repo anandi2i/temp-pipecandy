@@ -8,11 +8,17 @@ import appHistory from "../RouteContainer";
 
 let _allEmailList = {};
 let _getEmailList = {};
+let _peopleData = [];
 let _error = "";
 let _success = "";
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const EmailListStore = _.extend({}, EventEmitter.prototype, {
+
+  // Emit Change event
+  emitPersonUpdate() {
+    this.emit("changeUpdates");
+  },
 
   // Emit Change event
   emitChange() {
@@ -29,6 +35,16 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("change", callback);
   },
 
+  // Add change listener for updates
+  addPersonChangeListener(callback) {
+    this.on("changeUpdates", callback);
+  },
+
+  // Remove change listener for updates
+  removePersonChangeListener(callback) {
+    this.removeListener("changeUpdates", callback);
+  },
+
   getAllList() {
     return _allEmailList;
   },
@@ -37,8 +53,11 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
     return _getEmailList;
   },
 
+  getPeopleByListUpdated() {
+    return _peopleData;
+  },
+
   getPeopleByList() {
-    let _peopleData = [];
     _.each(_getEmailList, function(obj, index) {
       _.each(obj.people, function(obj, index) {
         let _temp = {
@@ -132,7 +151,23 @@ AppDispatcher.register(function(payload) {
     case Constants.UPDATE_SINGLE_PERSON:
       EmailListApi.updateSinglePerson(action.data).then((response) => {
         _error = "Subscriber details updated successfully";
-        EmailListStore.emitChange();
+        let rowIndex = "";
+        let data = response.data;
+        rowIndex = _.findIndex(_peopleData, {id: data.id});
+        let _temp = _peopleData[rowIndex];
+        let i = 1;
+        _.each(_temp, function(value, key) {
+          if(key === "addField"+i) {
+            if(data["field"+i]) {
+              _temp["addField"+i] = data["field"+i] + ": " + data["value"+i];
+            }
+            i++;
+          } else {
+            _temp[key] = data[key];
+          }
+        });
+        _peopleData[rowIndex] = _temp;
+        EmailListStore.emitPersonUpdate();
       }, (err)=> {
         console.log("err", err);
         _error = err;

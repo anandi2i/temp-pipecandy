@@ -154,14 +154,25 @@ class SubscriberGridView extends React.Component {
   }
 
   componentDidMount() {
+    EmailListStore.addPersonChangeListener(this._onChange);
     $(".modal-content").mCustomScrollbar({
       theme:"minimal-dark"
     });
   }
 
+  componentWillUnmount() {
+    EmailListStore.removePersonChangeListener(this._onChange);
+  }
+
   @autobind
   closeModal() {
     $("#editSubbscriber").closeModal();
+  }
+
+  @autobind
+  _onChange() {
+    let peopleUpdate = EmailListStore.getPeopleByListUpdated();
+    this.setState({people: peopleUpdate});
   }
 
   @autobind
