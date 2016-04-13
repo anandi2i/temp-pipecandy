@@ -1053,6 +1053,67 @@ $lines-to-show: 8;
   }
 }
 /*********************
+  Default Spacing
+**********************/
+.half-spaced {
+  padding-top: 10px;
+}
+.spaced {
+  padding-top: 20px;
+}
+.full-spaced {
+  padding-top: 30px;
+}
+/*********************
+  Display Table
+**********************/
+.row-table {
+  display: table;
+  table-layout: fixed;
+  height: 100%;
+  width: 100%;
+}
+.row-table-cell {
+  display: table-cell;
+  float: none;
+  height: 100%;
+}
+.valign-top {
+  vertical-align: top;
+}
+.valign-middle {
+  vertical-align: middle;
+}
+.valign-bottom {
+  vertical-align: bottom;
+}
+/*********************
+  React Spinner
+**********************/
+.custom-spinner {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  margin-top: 11px;
+  margin-left: 9px;
+  .spinner-bar {
+    @include animation(spinner-spin 1.2s linear infinite);
+    border-radius: 5px;
+    background-color: $spin-clr;
+    position: absolute;
+    width: 20%;
+    height: 7.8%;
+  }
+}
+@include keyframes(spinner-spin) {
+  0% { 
+    opacity: 1; 
+  }
+  100% { 
+    opacity: 0.15; 
+  }
+}
+/*********************
   Media Query Classes
 **********************/
 @media only screen and (max-width: 1176px) {
