@@ -96,7 +96,7 @@
     "dataSource": "psqlDs",
     "public": true
   },
-  "emailTemplate": {
+  "defaultTemplate": {
     "dataSource": "psqlDs",
     "public": true
   }

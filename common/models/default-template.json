@@ -1,6 +1,6 @@
 {
-  "name": "emailTemplate",
-  "plural": "emailTemplates",
+  "name": "defaultTemplate",
+  "plural": "defaultTemplates",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
