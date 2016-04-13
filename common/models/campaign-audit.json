@@ -1,13 +1,12 @@
 {
-  "name": "defaultTemplate",
-  "plural": "defaultTemplates",
+  "name": "campaignAudit",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "name": {
+    "email": {
       "type": "string",
       "required": true
     },
@@ -17,6 +16,13 @@
       "postgresql": {
         "dataType": "text"
       }
+    },
+    "sentTime": {
+      "type": "date"
+    },
+    "fromEmail": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],

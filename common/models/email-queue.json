@@ -1,0 +1,47 @@
+{
+  "name": "emailQueue",
+  "plural": "emailsQueue",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "email": {
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "type": "string",
+      "required": true,
+      "postgresql": {
+        "dataType": "text"
+      }
+    }
+  },
+  "validations": [],
+  "relations": {
+    "campaignTemplate": {
+      "type": "belongsTo",
+      "model": "campaignTemplate",
+      "foreignKey": ""
+    },
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": ""
+    },
+    "list": {
+      "type": "belongsTo",
+      "model": "list",
+      "foreignKey": ""
+    },
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

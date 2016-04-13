@@ -1,0 +1,46 @@
+{
+  "name": "campaignTemplate",
+  "plural": "campaignTemplates",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "content": {
+      "type": "string",
+      "required": true,
+      "postgresql": {
+        "dataType": "text"
+      }
+    },
+    "isParent": {
+      "type": "boolean"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": ""
+    },
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": ""
+    },
+    "emailQueues": {
+      "type": "hasMany",
+      "model": "emailQueue",
+      "foreignKey": ""
+    },
+    "customizedTemplates": {
+      "type": "hasMany",
+      "model": "customizedTemplate",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

@@ -99,5 +99,29 @@
   "defaultTemplate": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "campaignTemplate": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "emailQueue": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "customizedTemplate": {
+    "dataSource": "psqlDs",
+    "public": false
+  },
+  "followUp": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "campaignAudit": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "userEmailConfig": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

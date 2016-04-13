@@ -55,6 +55,31 @@
       "type": "hasMany",
       "model": "run",
       "foreignKey": "ranBy"
+    },
+    "campaignTemplates": {
+      "type": "hasMany",
+      "model": "campaignTemplate",
+      "foreignKey": ""
+    },
+    "emailQueues": {
+      "type": "hasMany",
+      "model": "emailQueue",
+      "foreignKey": ""
+    },
+    "customizedTemplates": {
+      "type": "hasMany",
+      "model": "customizedTemplate",
+      "foreignKey": ""
+    },
+    "campaignAudits": {
+      "type": "hasMany",
+      "model": "campaignAudit",
+      "foreignKey": ""
+    },
+    "userEmailConfigs": {
+      "type": "hasOne",
+      "model": "userEmailConfig",
+      "foreignKey": ""
     }
   },
   "acls": [

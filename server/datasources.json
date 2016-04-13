@@ -5,7 +5,7 @@
   },
   "psqlDs": {
     "host": "localhost",
-    "database": "loopback",
+    "database": "pipecandy",
     "username": "pguser",
     "password": "pgpass",
     "name": "psqlDs",

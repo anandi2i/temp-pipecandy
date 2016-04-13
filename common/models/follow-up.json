@@ -1,0 +1,43 @@
+{
+  "name": "followUp",
+  "plural": "followUps",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "runAfter": {
+      "type": "number",
+      "required": true
+    },
+    "scheduledAt": {
+      "type": "date",
+      "required": true
+    },
+    "expression": {
+      "type": "string"
+    },
+    "stepNo": {
+      "type": "number"
+    },
+    "type": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": ""
+    },
+    "campaignAudits": {
+      "type": "hasMany",
+      "model": "campaignAudit",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

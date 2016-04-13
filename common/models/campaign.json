@@ -10,6 +10,13 @@
     "name": {
       "type": "string",
       "required": true
+    },
+    "scheduledAt": {
+      "type": "date",
+      "required": true
+    },
+    "stopFollowUp": {
+      "type": "boolean"
     }
   },
   "validations": [],
@@ -28,6 +35,36 @@
       "type": "belongsTo",
       "model": "user",
       "foreignKey": "createdBy"
+    },
+    "campaignTemplates": {
+      "type": "hasMany",
+      "model": "campaignTemplate",
+      "foreignKey": ""
+    },
+    "emailQueues": {
+      "type": "hasMany",
+      "model": "emailQueue",
+      "foreignKey": ""
+    },
+    "lists": {
+      "type": "hasAndBelongsToMany",
+      "model": "list",
+      "foreignKey": ""
+    },
+    "followUps": {
+      "type": "hasMany",
+      "model": "followUp",
+      "foreignKey": ""
+    },
+    "customizedTemplates": {
+      "type": "hasMany",
+      "model": "customizedTemplate",
+      "foreignKey": ""
+    },
+    "campaignAudits": {
+      "type": "hasMany",
+      "model": "campaignAudit",
+      "foreignKey": ""
     }
   },
   "acls": [

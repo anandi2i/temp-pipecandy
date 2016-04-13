@@ -1,0 +1,39 @@
+{
+  "name": "customizedTemplate",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "person": {
+      "type": "belongsTo",
+      "model": "person",
+      "foreignKey": ""
+    },
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": ""
+    },
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": ""
+    },
+    "campaignTemplate": {
+      "type": "belongsTo",
+      "model": "campaignTemplate",
+      "foreignKey": ""
+    },
+    "list": {
+      "type": "belongsTo",
+      "model": "list",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,44 @@
+{
+  "name": "userEmailConfig",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "email": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "smtpUrl": {
+      "type": "string"
+    },
+    "smtpPort": {
+      "type": "number"
+    },
+    "popUrl": {
+      "type": "string"
+    },
+    "popPort": {
+      "type": "string"
+    },
+    "starTtls": {
+      "type": "boolean"
+    },
+    "ttls": {
+      "type": "boolean"
+    },
+    "name": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -41,6 +41,16 @@
       "type": "hasAndBelongsToMany",
       "model": "list",
       "foreignKey": ""
+    },
+    "customizedTemplates": {
+      "type": "hasMany",
+      "model": "customizedTemplate",
+      "foreignKey": ""
+    },
+    "campaignAudits": {
+      "type": "hasMany",
+      "model": "campaignAudit",
+      "foreignKey": ""
     }
   },
   "acls": [],
