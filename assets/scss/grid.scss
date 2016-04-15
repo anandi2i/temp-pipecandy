@@ -1,38 +1,51 @@
-.griddle {
-  .top-section {
+#subscriber_list {
+  .griddle-filter {
     width: 320px;
     position: absolute;
     margin-top: -60px;
     left: 0;
     margin-left: 12.5%;
-    .griddle-filter {
-      color: $a-tag-clr;
-      .filter-container {
-        &:before {
-          font: normal normal normal 24px/1 "Material Design Icons";
-          content: "\f43b";
-          color: inherit;
-          position: absolute;
-          padding: 10px 0px;
-        }
-        input[name="filter"] {
-          text-decoration: none;
-          display: inline-block;
-          padding-left: 30px;
-          color: inherit;
-          border-bottom: 1px solid transparent;
-          white-space: nowrap;
-          width: 230px;
-          transition: 0.5s ease;
-          word-spacing: 2px;
-          &:focus {
-            border-bottom: 1px solid $a-tag-clr;
-            width: 260px;
-            &::-webkit-input-placeholder { color: transparent; }
-            &:-moz-placeholder { color: transparent; }
+  }
+}
+.griddle {
+  .row {
+    margin: auto;
+  }
+  .griddle-filter {
+    color: $a-tag-clr;
+    .filter-container {
+      &:before {
+        font: normal normal normal 24px/1 "Material Design Icons";
+        content: "\f349";
+        color: inherit;
+        position: absolute;
+        padding: 10px 0px;
+      }
+      input {
+        text-decoration: none;
+        display: inline-block;
+        padding-left: 30px;
+        color: inherit;
+        border-bottom: 1px solid transparent;
+        white-space: nowrap;
+        width: 230px;
+        transition: 0.5s ease;
+        word-spacing: 2px;
+        &:focus {
+          border-bottom: 1px solid $a-tag-clr;
+          width: 260px;
+          &::-webkit-input-placeholder { 
+            color: transparent; 
           }
-          &::-webkit-input-placeholder { color: $a-tag-clr; }
-          &:-moz-placeholder { color: $a-tag-clr; }
+          &:-moz-placeholder { 
+            color: transparent; 
+          }
+        }
+        &::-webkit-input-placeholder { 
+          color: $a-tag-clr; 
+        }
+        &:-moz-placeholder { 
+          color: $a-tag-clr; 
         }
       }
     }
@@ -83,7 +96,7 @@
         tbody > tr {
           &.standard-row {
             &:hover, &:active {
-              background-color: $grid-hovr-clr;
+              background-color: $grid-active-clr;
             }
           }
           > td {
@@ -113,7 +126,7 @@
           > li {
             cursor: pointer;
             &.active {
-              background-color: $grid-hovr-clr;
+              background-color: $grid-active-clr;
             }
             &.link {
               color: $a-tag-clr;
@@ -122,8 +135,60 @@
         }
       }
     }
+    .grid-checkbox-column {
+      width: 70px;
+      padding-top: 5px;
+    }
+    .email-list {
+      border-top: $border-1px;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      &.active {
+        background-color: $grid-active-clr;
+      }
+      .row {
+        margin: auto;
+      }
+      h1, h2 {
+        margin: 0px 0px 10px 0px;
+        line-height: 30px;
+        font-weight: 500;
+      }
+      h1 {
+        font-size: 20px;
+      }
+      h2 {
+        font-size: 18px;
+      }
+      .subscriber-count {
+        color: $gray-txt-clr;
+      }
+      .circle-dot {
+        color: $pinck-clr;
+        font-size: 7px;
+        margin: 0 10px;
+      }
+      .owner {
+        color: $blue-clr;
+      }
+      .block-2 {
+        border-left: $border-1px;
+      }
+    }
+    .griddle-pager {
+      font-size: 16px;
+      color: $dflt-txt-clr;
+      .pager-active {
+        padding: 0 20px;
+      }
+      .pager-btn {
+        cursor: pointer;
+        color: $blue-clr;
+        padding: 0 20px;
+      }
+    }
   }
-}
+}  
 @media only screen and (max-width: 1176px) {
   .griddle {
     width: 100%;

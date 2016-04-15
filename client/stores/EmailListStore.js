@@ -45,8 +45,30 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("changeUpdates", callback);
   },
 
+  //TODO need to get opens, clicks, spam and additions. Replace _.random by result.
   getAllList() {
-    return _allEmailList;
+    let _allEmailListFlattenData = [];
+    let initialRange = 0;
+    let subscriberCountEndRange = 10000;
+    let endRange = 50;
+    _.each(_allEmailList, function(obj, index) {
+      _allEmailListFlattenData.push({
+        id: obj.id,
+        name: obj.name || "",
+        query: obj.query || null,
+        type: obj.type || null,
+        createdFor: obj.createdFor || null,
+        owner: obj.owner || "",
+        subscriberCount: _.random(initialRange, subscriberCountEndRange),
+        lastSentAt: (new Date(_.now() + _.random(initialRange, endRange)))
+                    .toUTCString(),
+        opens: _.random(initialRange, endRange) + "%",
+        clicks: _.random(initialRange, endRange) + "%",
+        spam: _.random(initialRange, endRange) + "%",
+        additions: _.random(initialRange, endRange)
+      });
+    });
+    return _allEmailListFlattenData;
   },
 
   getEmailListByID() {

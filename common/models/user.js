@@ -207,4 +207,36 @@ module.exports = function(user) {
     }
   );
 
+  /**
+   * Get the list owner name and add it to the result of each list.
+   * Executes after getting the whole list.
+   */
+  user.afterRemote("prototype.__get__lists", function(ctx, results, next) {
+    let ctxResult = ctx.result;
+    let userIds = _.pluck(ctxResult, "createdBy");
+    user.find({
+      where: {id: {inq: userIds}}
+    }, (err, users) => {
+      if (err) {
+        logger.error("Error in getting owner names for list"
+          , userIds);
+        next(err);
+      }
+      let ownerObj = _.object(
+        _.pluck(users, "id"),
+        _.pluck(users, "firstName")
+      );
+      if (ownerObj.length) {
+        _.each(ctx.result, (result) => {
+          result.owner = ownerObj[result.createdBy];
+        });
+        next();
+      } else {
+        logger.error("Error in getting owner Obj for list"
+          , ownerObj);
+        next(err);
+      }
+    });
+  });
+
 };

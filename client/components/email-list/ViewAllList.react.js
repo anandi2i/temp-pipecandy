@@ -1,8 +1,10 @@
 import React from "react";
 import {Link} from "react-router";
 import autobind from "autobind-decorator";
+import Spinner from "../Spinner.react";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
+import EmailListGrid from "../grid/select-email-list/Grid.react";
 
 function getAllEmailList() {
   EmailListActions.getAllEmailList();
@@ -33,6 +35,12 @@ class ListView extends React.Component {
     });
   }
 
+  getGlobalData() {
+    return {
+      listLink: true
+    };
+  }
+
   render() {
     return (
       <div>
@@ -43,28 +51,13 @@ class ListView extends React.Component {
               <Link to="/list/create">Back to Create List</Link>
             </div>
           </div>
-          <table className="striped">
-            <thead>
-              <tr>
-                <th data-field="id">Id</th>
-                <th data-field="name">Name</th>
-                <th data-field="edit">Edit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                this.state.allEmailLists.map(function (list, key) {
-                  return (
-                    <tr key={key}>
-                      <td>{list.id}</td>
-                      <td>{list.name}</td>
-                      <td><Link to={`/list/${list.id}`}>view</Link></td>
-                    </tr>
-                  );
-                }, this)
-              }
-          </tbody>
-          </table>
+          {
+            this.state.allEmailLists.length
+              ?
+                <EmailListGrid results={this.state.allEmailLists} 
+                globalData={this.getGlobalData()}/>
+              : <div className="spaced"><Spinner /></div>
+          }
         </div>
       </div>
     );
