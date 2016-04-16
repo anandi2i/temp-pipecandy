@@ -1051,6 +1051,12 @@ $lines-to-show: 8;
       transition: transform 0.5s;
     }
   }
+  .modal-footer{
+    .apply-all{
+      margin-left: 20px;
+      margin-top: 10px;
+    }
+  }
 }
 /*********************
   Default Spacing

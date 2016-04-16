@@ -16,7 +16,7 @@ class ScheduleEmail extends React.Component {
       followusMaxLen: 5,
       displayScheduleCampaign: false,
       emailListIds: {
-        list: ["10"] //hard-coded for now
+        list: ["1"] //hard-coded for now
       },
       emailList: [],
       commonSmartTags: [],

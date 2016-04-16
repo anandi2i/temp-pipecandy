@@ -30,15 +30,15 @@ function displayError(error) {
   const timeToShow = 4000;
   if(error) {
     $(".toast").remove();
-    var warningContent =$("<div>", {})
-                          .append(
-                            $("<img>", {
-                              src: "/images/warning-icon.png"
-                            }))
-                          .append(
-                            $("<span>", {
-                              text: error
-                            }));
+    var warningContent = $("<div>", {})
+      .append(
+        $("<img>", {
+          src: "/images/warning-icon.png"
+        }))
+      .append(
+        $("<span>", {
+          text: error
+        }));
     Materialize.toast(warningContent, timeToShow);
   }
 }
@@ -47,15 +47,15 @@ function displaySuccess(successInfo) {
   const timeToShow = 4000;
   if(successInfo) {
     $(".toast").remove();
-    var successContent =$("<div>", {})
-                          .append(
-                            $("<img>", {
-                              src: "/images/success-icon.png"
-                            }))
-                          .append(
-                            $("<span>", {
-                              text: successInfo
-                            }));
+    var successContent = $("<div>", {})
+      .append(
+        $("<img>", {
+          src: "/images/success-icon.png"
+        }))
+      .append(
+        $("<span>", {
+          text: successInfo
+        }));
     Materialize.toast(successContent, timeToShow);
   }
 }
@@ -89,10 +89,23 @@ function getIssueTagsInEditor(emailContent) {
   var match = unCommonTags.exec(emailContent);
   var result = [];
   while (match !== null) {
-      result.push(RegExp.$1);
-      match = unCommonTags.exec(emailContent);
+    result.push(RegExp.$1);
+    match = unCommonTags.exec(emailContent);
   }
   return result;
+}
+
+// re-construct tag name to smart-tags
+function constructEmailTemplate(str){
+  var html = $.parseHTML(str);
+  var findCommonTags = $(html).find('span.common');
+  $.each(findCommonTags, function(key, val){
+    var getTag = $(val).data("tag");
+    $(val)[0].dataset.tagName  = getTag;
+    $(val).html(getTag);
+  });
+  var steDom = $('<div/>').html(html);
+  return $(steDom).html();
 }
 
 function initTinyMCE(id, toolBar, dropdownId, cb){
@@ -131,7 +144,7 @@ function initTinyMCE(id, toolBar, dropdownId, cb){
 }
 
 function constructSmartTags(className, tagText){
-  return "<span data-tag-name='"+tagText+"' class='tag "+className+"' contenteditable='false'>&lt;" +
+  return "<span data-tag='"+tagText+"' data-tag-name='"+tagText+"' class='tag "+className+"' contenteditable='false'>&lt;" +
     tagText + "&gt;</span>";
 }
 

@@ -66,6 +66,7 @@ class SelectEmailListGrid extends React.Component {
   }
 
   render() {
+    let resultsPerPage = 7;
     return (
       <Griddle
         results={this.props.results}
@@ -79,10 +80,10 @@ class SelectEmailListGrid extends React.Component {
         customRowComponent={CustomRowComponent}
 
         showPager={true}
-        resultsPerPage={7}
+        resultsPerPage={resultsPerPage}
         useCustomPagerComponent={true}
         customPagerComponent={CustomPagerComponent}
-        
+
         showFilter={true}
         filterPlaceholderText="SEARCH BY LIST NAME"
         useCustomFilterComponent={true}
