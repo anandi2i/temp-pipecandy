@@ -61,12 +61,12 @@ class PreviewCampaignPopup extends React.Component {
         this.setState({
           displayPerson: parseInt(initCount, 10)
         });
-        this.loadeFirstPerson();
+        this.loadFirstPerson();
       }
   }
 
   @autobind
-  loadeFirstPerson(){
+  loadFirstPerson(){
     let firstPerson = 0;
     this.applySmartTags(firstPerson);
   }
@@ -152,12 +152,12 @@ class PreviewCampaignPopup extends React.Component {
           {$splice: [[index, initCount]]})
       }), function(){
         if(this.state.personIssues.length - initCount){
-          this.senContent("previewMailContent");
+          this.setContent("previewMailContent");
         } else {
           this.setState((state) => ({
             displayPerson: initCount
           }), function(){
-            this.senContent("previewMailContent");
+            this.setContent("previewMailContent");
           });
         }
       });
@@ -165,7 +165,7 @@ class PreviewCampaignPopup extends React.Component {
   }
 
   @autobind
-  senContent(id){
+  setContent(id){
     tinyMCE.get(id).setContent(this.props.emailContent);
     this.applySmartTags(this.state.displayPerson);
   }
@@ -202,7 +202,7 @@ class PreviewCampaignPopup extends React.Component {
           {$push: myList}),
         displayPerson: initCount
       }), function(){
-        this.loadeFirstPerson();
+        this.loadFirstPerson();
       });
     }
   }
