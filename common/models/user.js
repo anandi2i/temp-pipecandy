@@ -86,6 +86,13 @@ module.exports = function(user) {
     }
     if (isCroppedImg || isPassword){
       user.findById(userID, function(err, getUser) {
+        if (err) {
+          logger.error("error in getting userId %d", userID);
+          let error = new Error();
+          error.message = "Error in getting user";
+          error.name = "ErrorInGettingUser";
+          next(error);
+        }
         if(isCroppedImg){
           let dir = "./server/storage/" + userID;
           if (!fs.existsSync(dir)){
@@ -105,6 +112,7 @@ module.exports = function(user) {
                 next(error);
               }
               logger.info("userId %d avatar changed successfully", userID);
+              next();
             });
           });
         }
@@ -141,8 +149,13 @@ module.exports = function(user) {
           });
         }
       });
+    } else {
+      logger.error("error in update attributes");
+      let error = new Error();
+      error.message = "Error in update attributes";
+      error.name = "ErrorInUpdatingAttributes";
+      next(error);
     }
-    return next();
   });
 
   //send password reset link when password reset requested

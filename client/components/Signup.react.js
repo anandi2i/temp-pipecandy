@@ -6,32 +6,115 @@ import validatorUtil from "../utils/ValidationMessages";
 import UserAction from "../actions/UserAction";
 import UserStore from "../stores/UserStore";
 
-var Signup = React.createClass({
-  getInitialState: function() {
-    return {
-      firstName: "",
-      email: "",
-      password: "",
-      lastName: ""
+/*
+ * Performs tasks related to signing up the user
+ * that include fetching the user's firstname,lastname
+ * and store it in the database
+ */
+class Signup extends React.Component {
+  /**
+   * @type {object}
+   * @property {string} firstName - first name of the user
+   * @property {string} lastName - last name of the user
+   * @property {string} email - email of the user
+   * @property {string} password - password of the user
+   */
+  constructor() {
+    super();
+    this.state = {
+        firstName: "",
+        email: "",
+        password: "",
+        lastName: ""
+      };
+    this.validatorTypes = {
+      firstName: validatorUtil.firstName,
+      email: validatorUtil.email,
+      password: validatorUtil.password,
+      lastName: validatorUtil.lastName
     };
-  },
-  getValidatorData: function() {
+  }
+
+  /**
+   * Validates the perticular state
+   *
+   * @return {object} that state being called
+   */
+  getValidatorData() {
     return this.state;
-  },
-  validatorTypes : {
-    firstName: validatorUtil.firstName,
-    email: validatorUtil.email,
-    password: validatorUtil.password,
-    lastName: validatorUtil.lastName
-  },
-  componentDidMount: function() {
+  }
+
+  /**
+   * Performs task of adding a listener that looks for errors occurrences
+   */
+  componentDidMount() {
     enableToolTip();
-    UserStore.addChangeListener(this._onChange);
-  },
-  componentWillUnmount: function() {
-    UserStore.removeChangeListener(this._onChange);
-  },
-  render: function() {
+    UserStore.addChangeListener(() => this._onChange);
+  }
+
+  /**
+   * Performs task of removing a listener that looks for error occurrences
+   */
+  componentWillUnmount() {
+    UserStore.removeChangeListener(() => this._onChange);
+  }
+
+  /**
+   * Receives the name of the validator to be checked and
+   * returns error message if any
+   *
+   * @param {string} element - name of the validator
+   * @return {HTML DIV} the error message if any for validator
+   */
+  renderHelpText(element) {
+    return (
+      <div className="warning-block">
+        {this.props.getValidationMessages(element)[0]}
+      </div>
+    );
+  }
+
+  /**
+   * Changes the state when control leaves the input field
+   *
+   * @param {object} event - the current event
+   * @param {string} field - name of the validator
+   */
+  onChange(event, field) {
+    let state = {};
+    state[field] = event.target.value;
+    this.setState(state);
+  }
+
+  /**
+   * Initiates the action that store the user information
+   *
+   * @param {object} event - the current event
+   * @emits {object} the user details to be store in the database
+   */
+  onSubmit(event) {
+    event.preventDefault();
+    const formData = this.state;
+    const onValidate = (error) => {
+      if (!error) {
+        UserAction.register(formData);
+      }
+    };
+    this.props.validate(onValidate);
+  }
+
+  /**
+   * Displays errors if any arise
+   */
+  _onChange() {
+    displayError(UserStore.getError());
+  }
+
+  /**
+   * render
+   * @return {ReactElement}
+   */
+  render() {
     const pwdStrength = {"_0": 0, "_1": 1, "_2": 2, "_3": 3};
     let getScore = passwordStrength(this.state.password).score;
     return (
@@ -41,7 +124,7 @@ var Signup = React.createClass({
             <div className="auth-container">
               <img className="auth-logo" src="./images/logo.png" />
               <form className="auth-form" id="form-validation"
-                onSubmit={this.onSubmit}>
+                onSubmit={(e) => this.onSubmit(e)}>
                 <div className="input-field">
                   <input id="firstName" type="text"
                     className={
@@ -50,12 +133,12 @@ var Signup = React.createClass({
                         : "invalid"
                     }
                     name="First Name"
-                    onChange={this.onChange("firstName")}
+                    onChange={(e) => this.onChange(e, "firstName")}
                     onBlur={this.props.handleValidation("firstName")} />
                   <label htmlFor="firstName">First Name</label>
                   {
                     !this.props.isValid("firstName")
-                      ? this.renderHelpText("firstName")
+                      ? () => this.renderHelpText("firstName")
                       : null
                   }
                 </div>
@@ -67,12 +150,12 @@ var Signup = React.createClass({
                         : "invalid"
                     }
                     name="Last Name"
-                    onChange={this.onChange("lastName")}
+                    onChange={(e) => this.onChange(e, "lastName")}
                     onBlur={this.props.handleValidation("lastName")} />
                   <label htmlFor="lastName">Last Name</label>
                   {
                     !this.props.isValid("lastName")
-                    ? this.renderHelpText("lastName")
+                    ? () => this.renderHelpText("lastName")
                     : null
                   }
                 </div>
@@ -84,12 +167,12 @@ var Signup = React.createClass({
                         : "invalid"
                     }
                     name="email"
-                    onChange={this.onChange("email")}
+                    onChange={(e) => this.onChange(e, "email")}
                     onBlur={this.props.handleValidation("email")} />
                   <label htmlFor="email">Email</label>
                   {
                     !this.props.isValid("email")
-                      ? this.renderHelpText("email")
+                      ? () => this.renderHelpText("email")
                       : null
                   }
                 </div>
@@ -108,12 +191,12 @@ var Signup = React.createClass({
                         : "invalid"
                     }
                     name="password"
-                    onChange={this.onChange("password")}
+                    onChange={(e) => this.onChange(e, "password")}
                     onBlur={this.props.handleValidation("password")} />
                   <label htmlFor="password">Password</label>
                   {
                     !this.props.isValid("password")
-                      ? this.renderHelpText("password")
+                      ? () => this.renderHelpText("password")
                       : null
                   }
                 </div>
@@ -131,34 +214,7 @@ var Signup = React.createClass({
         </div>
       </div>
     );
-  },
-  renderHelpText: function(el) {
-    return (
-      <div className="warning-block">
-        {this.props.getValidationMessages(el)[0]}
-      </div>
-    );
-  },
-  onChange: function(field) {
-    return event => {
-      let state = {};
-      state[field] = event.target.value;
-      this.setState(state);
-    };
-  },
-  onSubmit(event) {
-    event.preventDefault();
-    const formData = this.state;
-    const onValidate = (error) => {
-      if (!error) {
-        UserAction.register(formData);
-      }
-    };
-    this.props.validate(onValidate);
-  },
-  _onChange() {
-    displayError(UserStore.getError());
   }
-});
+}
 
-module.exports = validation(strategy)(Signup);
+export default validation(strategy)(Signup);

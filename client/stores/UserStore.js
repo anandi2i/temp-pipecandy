@@ -4,46 +4,66 @@ import cookie from "react-cookie";
 import AppDispatcher from "../dispatcher/AppDispatcher";
 import Constants from "../constants/Constants";
 import UserApi from "../API/UserApi";
-import {ErrorMessages, SuccessMessages} from "../utils/UserAlerts";
+import {SuccessMessages} from "../utils/UserAlerts";
+import {HandleError} from "../utils/ErrorMessageHandler";
 import appHistory from "../RouteContainer";
 
 let _user = {};
 let _error = "";
 let _success = "";
 
-// Extend User Store with EventEmitter to add eventing capabilities
+/**
+ * Has a list of success messages that the toast display
+ */
 const UserStore = _.extend({}, EventEmitter.prototype, {
 
-  // Emit Change event
-  emitChange: function() {
+  /**
+   * Emit Change event
+   */
+  emitChange() {
     this.emit("change");
   },
 
-  // Add change listener
-  addChangeListener: function(callback) {
+  /** Add change listener
+   * @param {function} callback
+   */
+  addChangeListener(callback) {
     this.on("change", callback);
   },
 
-  // Remove change listener
-  removeChangeListener: function(callback) {
+  /** Remove change listener
+   * @param {function} callback
+   */
+  removeChangeListener(callback) {
     this.removeListener("change", callback);
   },
 
-  getUser: function() {
+  /**
+   * Gets user data
+   * @return {object} user details
+   */
+  getUser() {
     return _user;
   },
 
-  getError: function() {
+  /**
+   * Gets error message if any
+   * @return {string} error message
+   */
+  getError() {
     return _error;
   },
 
-  getSuccess: function() {
+  /**
+   * Gets success message if any
+   * @return {string} success message
+   */
+  getSuccess() {
     return _success;
   }
 
 });
 
-// Register callback with AppDispatcher
 AppDispatcher.register(function(payload) {
   const {action} = payload;
   switch (action.actionType) {
@@ -54,7 +74,7 @@ AppDispatcher.register(function(payload) {
         appHistory.push("response");
       }, (err)=> {
         _user = {};
-        _error = ErrorMessages[err.data.error.name];
+        _error = HandleError.evaluateError(err);
         UserStore.emitChange();
       });
       break;
@@ -66,7 +86,7 @@ AppDispatcher.register(function(payload) {
         appHistory.push("home");
       }, (err)=> {
         _user = {};
-        _error = ErrorMessages[err.data.error.code];
+        _error = HandleError.evaluateError(err);
         UserStore.emitChange();
       });
       break;
@@ -86,31 +106,26 @@ AppDispatcher.register(function(payload) {
         _user = response.data;
         _success = SuccessMessages.successUpdate;
         UserStore.emitChange();
+        _success = "";
       }, (err) => {
-        if(err.data.error){
-          _error = ErrorMessages[err.data.error.name];
-          UserStore.emitChange();
-        }
+        _error = HandleError.evaluateError(err);
+        UserStore.emitChange();
       });
       break;
     case Constants.FORGOT_PASSSWORD:
       UserApi.forgotPassword(action.data).then((response) => {
         appHistory.push("/forgot-password-response");
       }, (err) => {
-        if(err.data.error){
-          _error = ErrorMessages[err.data.error.code];
-          UserStore.emitChange();
-        }
+        _error = HandleError.evaluateError(err);
+        UserStore.emitChange();
       });
       break;
     case Constants.RESET_PASSSWORD:
       UserApi.resetPassword(action.data).then((response) => {
         appHistory.push("/reset-password-response");
       }, (err) => {
-        if(err.data.error){
-          _error = ErrorMessages[err.data.error.name];
-          UserStore.emitChange();
-        }
+        _error = HandleError.evaluateError(err);
+        UserStore.emitChange();
       });
       break;
     default:
