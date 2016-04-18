@@ -60,7 +60,7 @@ const routes = (
     <Route path="campaign">
       <IndexRoute component={ViewALLCampaign} />
       <Route path="create" component={CreateCampaign} />
-      <Route path="run" component={RunCampaign} />
+      <Route path=":id/run" component={RunCampaign} />
     </Route>
     <Route path="response" component={Response} />
     <Route path="email-verified" component={EmailVerification} />

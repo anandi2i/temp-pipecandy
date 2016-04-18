@@ -4,7 +4,6 @@ import autobind from "autobind-decorator";
 import AddFollowups from "./AddFollowups.react";
 import PreviewCampaignPopup from "./PreviewCampaignPopup.react";
 import CampaignStore from "../../stores/CampaignStore";
-import CampaignActions from "../../actions/CampaignActions";
 
 class ScheduleEmail extends React.Component {
   constructor(props) {
@@ -15,9 +14,6 @@ class ScheduleEmail extends React.Component {
       followups: [],
       followusMaxLen: 5,
       displayScheduleCampaign: false,
-      emailListIds: {
-        list: ["1"] //hard-coded for now
-      },
       emailList: [],
       commonSmartTags: [],
       unCommonSmartTags: [],
@@ -31,15 +27,22 @@ class ScheduleEmail extends React.Component {
 
   componentDidMount() {
     CampaignStore.addEmailListChangeListener(this._onChange);
-    CampaignActions.getSelectedEmailList(this.state.emailListIds);
     enabledropDownBtnByID("#insertSmartTags");
     $("select").material_select();
     $(".datepicker").pickadate({
       selectMonths: true,
       selectYears: 15
     });
-    $(".timepicker").pickatime({
-      twelvehour: true
+    let timepicker = $(".timepicker").pickatime({
+      twelvehour: true,
+      afterDone: function() {
+        let val = timepicker.val();
+        let index = 0;
+        let till = -2;
+        let howManyFromLast = -2;
+        // To display time in 00:00 AM format
+        timepicker.val(val.slice(index, till) +" "+ val.slice(howManyFromLast));
+      }
     });
   }
 
@@ -80,7 +83,7 @@ class ScheduleEmail extends React.Component {
   @autobind
   toggleEditContainer(e) {
     this.setState({clicked: !this.state.clicked});
-    $("#firsEmail").slideToggle("slow");
+    $("#firstEmail").slideToggle("slow");
   }
 
   @autobind
@@ -97,7 +100,7 @@ class ScheduleEmail extends React.Component {
   }
 
   @autobind
-  displayScheduleCampaign(){
+  displayScheduleCampaign() {
     this.setState({
       displayScheduleCampaign: !this.state.displayScheduleCampaign
     });
@@ -126,7 +129,7 @@ class ScheduleEmail extends React.Component {
   }
 
   @autobind
-  getMainEmailSubject(field){
+  onChange(field) {
     return event => {
       let state = {};
       state[field] = event.target.value;
@@ -134,7 +137,7 @@ class ScheduleEmail extends React.Component {
     };
   }
 
-  getMainEmailContent(field) {
+  setMainEmailContent(field) {
     if(tinyMCE.get(field)) {
       this.setState({
         isPreviewMail: true
@@ -192,7 +195,7 @@ class ScheduleEmail extends React.Component {
               </i>
             </div>
           </div>
-          <div id="firsEmail" className="col s12 m12 l10 offset-l1 draft-template">
+          <div id="firstEmail" className="col s12 m12 l10 offset-l1 draft-template">
               {/* email to list */}
               <div className="row m-lr-0">
                 <div className="col s12 p-lr-0">
@@ -203,11 +206,15 @@ class ScheduleEmail extends React.Component {
               <div className="row m-lr-0 schedule-time" style={{display: displaySchedule}}>
                 <div className="col s12 m4 l3">
                   <label>Date</label>
-                  <input type="date" className="datepicker border-input" placeholder="DD Month, year" />
+                  <input type="date" className="datepicker border-input"
+                    placeholder="DD Month, year"
+                    onChange={this.onChange("scheduledDate")} />
                 </div>
                 <div className="col s12 m4 l3">
                   <label>Time</label>
-                  <input type="text" className="timepicker border-input" placeholder="00:00AM" />
+                  <input type="text" placeholder="00:00 AM"
+                    className="timepicker border-input"
+                    onChange={this.onChange("scheduledTime")} />
                 </div>
               </div>
               <div className="row email-to m-lr-0">
@@ -232,7 +239,7 @@ class ScheduleEmail extends React.Component {
               <div className="row email-subject m-lr-0">
                 <input type="text" className="border-input"
                   placeholder="Campaign subject"
-                  onChange={this.getMainEmailSubject("subject")} />
+                  onChange={this.onChange("subject")} />
               </div>
               <div className="row email-content m-lr-0">
                 <div className="tiny-toolbar" id="mytoolbar">
@@ -272,11 +279,11 @@ class ScheduleEmail extends React.Component {
               <div className="row r-btn-container preview-content m-lr-0">
                 {this.state.errorCount
                   ?
-                    <div onClick={this.getMainEmailContent.bind(this, "emailContent")} className="btn btn-dflt error-btn">
+                    <div onClick={this.setMainEmailContent.bind(this, "emailContent")} className="btn btn-dflt error-btn">
                       {this.state.errorCount} Issues Found
                     </div>
                   :
-                  <div onClick={this.getMainEmailContent.bind(this, "emailContent")} className="btn btn-dflt blue sm-icon-btn">
+                  <div onClick={this.setMainEmailContent.bind(this, "emailContent")} className="btn btn-dflt blue sm-icon-btn">
                     <i className="left mdi mdi-eye"></i>
                     <span>Preview</span>
                   </div>

@@ -1,11 +1,9 @@
 import React from "react";
-// import {Link} from "react-router";
 import autobind from "autobind-decorator";
 import SelectEmailTemplate from "./SelectEmailTemplate.react";
 import SelectEmailList from "./SelectEmailList.react";
 import ScheduleEmail from "./ScheduleEmail.react";
-// import CampaignActions from "../../actions/CampaignActions";
-// import CampaignStore from "../../stores/CampaignStore";
+import CampaignActions from "../../actions/CampaignActions";
 
 class TabsNav extends React.Component {
   constructor(props) {
@@ -75,11 +73,17 @@ class RunCampaign extends React.Component {
     super(props);
     this.state = {
       activeTab: 1,
-      selectedTemplate: ""
+      selectedTemplate: "",
+      selectedListIds: {}
     };
   }
 
   handleClick(index) {
+    let ScheduleEmailIndex = 3;
+    if (index === ScheduleEmailIndex) {
+      CampaignActions.getSelectedEmailList(this.refs.selectEmailList.refs
+        .emailListGrid.state.selectedRowIds);
+    }
     this.setState({
       activeTab: index
     });
@@ -98,11 +102,12 @@ class RunCampaign extends React.Component {
       <div>
         <TabsNav handleClick={this.handleClick.bind(this)}
           active={this.state.activeTab} />
-        <SelectEmailList active={this.state.activeTab} />
+        <SelectEmailList ref="selectEmailList" active={this.state.activeTab} />
         <SelectEmailTemplate ref="SelectEmailTemplate"
           setTemplateContent={this.setTemplateContent}
           active={this.state.activeTab} />
         <ScheduleEmail templateContent={this.state.selectedTemplate}
+          campaignId={this.props.params.id}
           active={this.state.activeTab}
           selectedTemplate={this.state.selectedTemplate} />
       </div>

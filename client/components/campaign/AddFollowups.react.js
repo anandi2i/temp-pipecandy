@@ -22,8 +22,16 @@ class AddFollowups extends React.Component {
     let smartTagDrpDwnId = `#dropdown${followupId}`;
     initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, this.tinyMceCb);
     $("select").material_select();
-    $(".timepicker").pickatime({
-      twelvehour: true
+    let timepicker = $(`#followUps${followupId} .timepicker`).pickatime({
+      twelvehour: true,
+      afterDone: function() {
+        let val = timepicker.val();
+        let index = 0;
+        let till = -2;
+        let howManyFromLast = -2;
+        // To display time in 00:00 AM format
+        timepicker.val(val.slice(index, till) +" "+ val.slice(howManyFromLast));
+      }
     });
     enabledropDownBtnByID(insertSmartTags);
   }
@@ -90,9 +98,9 @@ class AddFollowups extends React.Component {
             <div className="col s12 m4 l3">
               <div className="input-field">
                 <select>
-                  <option value="1">1 day</option>
-                  <option value="2">2 days</option>
-                  <option value="3">3 days</option>
+                  <option value="1, 'days'">1 day</option>
+                  <option value="2, 'days'">2 days</option>
+                  <option value="3, 'days'">3 days</option>
                 </select>
                 <label>Send if no response after</label>
               </div>

@@ -84,7 +84,7 @@ AppDispatcher.register(function(payload) {
     case Constants.CREATE_NEW_CAMPAIGN:
       CampaignApi.createCampaign(action.data).then((response) => {
         _error = "";
-        appHistory.push("campaign/run");
+        appHistory.push(`campaign/${response.data.id}/run`);
       }, (err) => {
         _error = err;
         CampaignStore.emitChange();
@@ -112,7 +112,10 @@ AppDispatcher.register(function(payload) {
       });
       break;
     case Constants.GET_SELECTED_EMAIL_LIST:
-      EmailListApi.getSelectedList(action.data).then((response) => {
+      let selectedList = {
+        list: action.data
+      };
+      EmailListApi.getSelectedList(selectedList).then((response) => {
         let emailList = [];
         let smartTags = [];
         let commonSmartTags = [];
@@ -120,6 +123,7 @@ AppDispatcher.register(function(payload) {
         getAllPeopleList = response.data[0].people;
         response.data.forEach(function(list, index) {
           emailList.push({
+            id: list.id,
             name: list.name,
             peopleCount: list.people.length
           });

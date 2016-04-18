@@ -42,7 +42,7 @@ class SelectEmailList extends React.Component {
         {
           this.state.allEmailLists.length
             ?
-              <EmailListGrid results={this.state.allEmailLists}/>
+              <EmailListGrid ref="emailListGrid" results={this.state.allEmailLists}/>
             : <div className="spaced"><Spinner /></div>
         }
       </div>
