@@ -557,6 +557,9 @@ body {
 .p-0 {
   padding: 0 !important;
 }
+.p-10 {
+  padding: 10px;
+}
 /*********************
   Warning Class
 **********************/
@@ -1112,11 +1115,11 @@ $lines-to-show: 8;
   }
 }
 @include keyframes(spinner-spin) {
-  0% { 
-    opacity: 1; 
+  0% {
+    opacity: 1;
   }
-  100% { 
-    opacity: 0.15; 
+  100% {
+    opacity: 0.15;
   }
 }
 /*********************

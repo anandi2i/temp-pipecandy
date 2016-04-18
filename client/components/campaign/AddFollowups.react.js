@@ -1,21 +1,26 @@
 import React from "react";
 import autobind from "autobind-decorator";
+import CampaignStore from "../../stores/CampaignStore";
+import PreviewCampaignPopup from "./PreviewCampaignPopup.react";
 
 class AddFollowups extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      clicked: true
+      clicked: true,
+      errorCount: 0,
+      followUpContainer: `emailContent${this.props.followupId}`,
+      personIssues: []
     };
   }
 
   componentDidMount() {
     let followupId = this.props.followupId;
-    let emailContentId = "#emailContent" + followupId;
-    let mytoolbar = "#mytoolbar" + followupId;
-    let insertSmartTags = "#insertSmartTags" + followupId;
-    let smartTagDrpDwnId = "#dropdown" + followupId;
-    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId);
+    let emailContentId = `#emailContent${followupId}`;
+    let mytoolbar = `#mytoolbar${followupId}`;
+    let insertSmartTags = `#insertSmartTags${followupId}`;
+    let smartTagDrpDwnId = `#dropdown${followupId}`;
+    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, this.tinyMceCb);
     $("select").material_select();
     $(".timepicker").pickatime({
       twelvehour: true
@@ -24,9 +29,39 @@ class AddFollowups extends React.Component {
   }
 
   @autobind
+  tinyMceCb(editor){
+    let content = editor.getContent();
+    let issueTags = getIssueTagsInEditor(content);
+    let personIssues = CampaignStore.getIssuesPeopleList(issueTags);
+    this.setState({
+      emailContent: content,
+      errorCount: parseInt(issueTags.length, 10),
+      issueTags: issueTags,
+      personIssues: personIssues
+    });
+  }
+
+  @autobind
   toggleEditContainer(e) {
     this.setState({clicked: !this.state.clicked});
     $("#followUps" + this.props.followupId).slideToggle("slow");
+  }
+
+  getMainEmailContent(field) {
+    if(tinyMCE.get(field)) {
+      this.setState({
+        isPreviewMail: true
+      });
+    }
+  }
+
+  closeModal() {
+    $("#previewCampaign").closeModal();
+    tinyMCE.execCommand("mceRemoveEditor", true, "previewMailContent");
+    this.setState({
+      isPreviewMail: false,
+      followUpDetails: this.refs.previewCampaignPopup.state
+    });
   }
 
   render(){
@@ -105,11 +140,33 @@ class AddFollowups extends React.Component {
             </div>
             {/* Preview button */}
             <div className="row r-btn-container preview-content m-lr-0">
-              <div className="btn btn-dflt blue sm-icon-btn">
-                <i className="left mdi mdi-eye"></i>
-                <span>Preview</span>
-              </div>
+              {this.state.errorCount
+                ?
+                  <div onClick={this.getMainEmailContent.bind(this, this.state.followUpContainer)} className="btn btn-dflt error-btn">
+                    {this.state.errorCount} Issues Found
+                  </div>
+                :
+                <div onClick={this.getMainEmailContent.bind(this, this.state.followUpContainer)} className="btn btn-dflt blue sm-icon-btn">
+                  <i className="left mdi mdi-eye"></i>
+                  <span>Preview</span>
+                </div>
+              }
             </div>
+            {/* Popup starts here*/}
+            {this.state.isPreviewMail
+              ?
+                <PreviewCampaignPopup
+                  emailSubject={this.state.subject}
+                  emailContent={this.state.emailContent}
+                  closeModal={this.closeModal.bind(this)}
+                  peopleList={this.state.getAllPeopleList}
+                  personIssues={this.state.personIssues}
+                  ref="previewCampaignPopup"
+                />
+              :
+                ""
+            }
+            {/* Popup ends here*/}
         </div>
       </div>
     );

@@ -93,7 +93,7 @@ class SelectPreBuildTemplate extends React.Component {
               <div className="head">Add Subbscriber</div>
             </div>
             <div className="modal-content">
-              <div className="template-content gray-bg">
+              <div className="template-content gray-bg p-10">
                 <div dangerouslySetInnerHTML={{__html: this.state.activeTemplateContent}} />
               </div>
             </div>

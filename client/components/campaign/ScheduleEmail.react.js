@@ -24,7 +24,8 @@ class ScheduleEmail extends React.Component {
       emailContent: "",
       isPreviewMail: false,
       errorCount: 0,
-      issueTags: []
+      issueTags: [],
+      personIssues: []
     };
   }
 
@@ -149,6 +150,20 @@ class ScheduleEmail extends React.Component {
     });
   }
 
+  @autobind
+  saveCampaignInfo() {
+    let followups = [];
+    this.state.followups.map(function(val, key){
+     followups.push(this.refs[`addFollowups${val.id}`]);
+    }, this);
+    this.setState((state) => ({
+      "followupsArr": followups
+    }), function(){
+      //TODO Need to construct data here
+      console.log(this.state.followupsArr);
+    });
+  }
+
   render() {
     let displayIndex =
       (this.props.active === this.state.index ? "block" : "none");
@@ -165,7 +180,7 @@ class ScheduleEmail extends React.Component {
         <div className="row sub-head-container m-lr-0">
           <div className="head">Let's Draft an Email</div>
           <div className="sub-head">
-            <a href="#!" className="btn blue">Save & continue</a>
+            <a className="btn blue" onClick={this.saveCampaignInfo}>Save & continue</a>
           </div>
         </div>
         {/* Draft Email starts here*/}
@@ -285,13 +300,15 @@ class ScheduleEmail extends React.Component {
         </div>
         {
           this.state.followups.map(function (followUp, key) {
+            let refName = "addFollowups" + followUp.id;
             return (
               <AddFollowups followupId={followUp.id}
                 content={followUp.content}
                 commonSmartTags={this.state.commonSmartTags}
                 unCommonSmartTags={this.state.unCommonSmartTags}
                 deleteFollowUp={this.deleteFollowUp.bind(this, key)}
-                id={key} key={followUp.id}/>
+                id={key} key={followUp.id}
+                ref={refName} />
             );
           }, this)
         }
