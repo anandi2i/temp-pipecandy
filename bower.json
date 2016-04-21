@@ -19,7 +19,7 @@
   "overrides": {
     "materialize-clockpicker" : {
       "main": [
-        "js/materialize.clockpicker.js"
+        "dist/js/materialize.clockpicker.js"
       ]
     }
   },

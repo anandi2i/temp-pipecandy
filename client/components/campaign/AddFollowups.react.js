@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import autobind from "autobind-decorator";
 import CampaignStore from "../../stores/CampaignStore";
 import PreviewCampaignPopup from "./PreviewCampaignPopup.react";
@@ -9,35 +10,25 @@ class AddFollowups extends React.Component {
     this.state = {
       clicked: true,
       errorCount: 0,
-      followUpContainer: `emailContent${this.props.followupId}`,
       personIssues: []
     };
   }
 
   componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
     let followupId = this.props.followupId;
     let emailContentId = `#emailContent${followupId}`;
     let mytoolbar = `#mytoolbar${followupId}`;
     let insertSmartTags = `#insertSmartTags${followupId}`;
     let smartTagDrpDwnId = `#dropdown${followupId}`;
     initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, this.tinyMceCb);
-    $("select").material_select();
-    let timepicker = $(`#followUps${followupId} .timepicker`).pickatime({
-      twelvehour: true,
-      afterDone: function() {
-        let val = timepicker.val();
-        let index = 0;
-        let till = -2;
-        let howManyFromLast = -2;
-        // To display time in 00:00 AM format
-        timepicker.val(val.slice(index, till) +" "+ val.slice(howManyFromLast));
-      }
-    });
+    this.el.find("select").material_select();
+    initTimePicker(this.el.find(".timepicker"));
     enabledropDownBtnByID(insertSmartTags);
   }
 
   @autobind
-  tinyMceCb(editor){
+  tinyMceCb(editor) {
     let content = editor.getContent();
     let issueTags = getIssueTagsInEditor(content);
     let personIssues = CampaignStore.getIssuesPeopleList(issueTags);
@@ -52,33 +43,23 @@ class AddFollowups extends React.Component {
   @autobind
   toggleEditContainer(e) {
     this.setState({clicked: !this.state.clicked});
-    $("#followUps" + this.props.followupId).slideToggle("slow");
+    this.el.find(".draft-template").slideToggle("slow");
   }
 
-  getMainEmailContent(field) {
-    if(tinyMCE.get(field)) {
-      this.setState({
-        isPreviewMail: true
-      });
-    }
+  openPreviewModal() {
+    this.refs.preview.openModal();
   }
 
-  closeModal() {
-    $("#previewCampaign").closeModal();
-    tinyMCE.execCommand("mceRemoveEditor", true, "previewMailContent");
-    this.setState({
-      isPreviewMail: false,
-      followUpDetails: this.refs.previewCampaignPopup.state
-    });
-  }
-
-  render(){
+  render() {
     let followupId = this.props.followupId;
     let indexInc = 1;
     let followUpCount = this.props.id + indexInc;
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
+    let previewClass = this.state.errorCount
+      ? "btn btn-dflt error-btn"
+      : "btn btn-dflt blue sm-icon-btn";
     return(
       <div className="row draft-container m-lr-0">
         <div className="head" onClick={this.toggleEditContainer}>
@@ -148,32 +129,27 @@ class AddFollowups extends React.Component {
             </div>
             {/* Preview button */}
             <div className="row r-btn-container preview-content m-lr-0">
-              {this.state.errorCount
-                ?
-                  <div onClick={this.getMainEmailContent.bind(this, this.state.followUpContainer)} className="btn btn-dflt error-btn">
-                    {this.state.errorCount} Issues Found
-                  </div>
-                :
-                <div onClick={this.getMainEmailContent.bind(this, this.state.followUpContainer)} className="btn btn-dflt blue sm-icon-btn">
-                  <i className="left mdi mdi-eye"></i>
-                  <span>Preview</span>
-                </div>
-              }
+              <div onClick={() => this.openPreviewModal()} className={previewClass}>
+                {
+                  this.state.errorCount
+                  ?
+                    `${this.state.errorCount} Issues Found`
+                  :
+                    <span>
+                      <i className="left mdi mdi-eye"></i>
+                      Preview
+                    </span>
+                }
+              </div>
             </div>
             {/* Popup starts here*/}
-            {this.state.isPreviewMail
-              ?
-                <PreviewCampaignPopup
-                  emailSubject={this.state.subject}
-                  emailContent={this.state.emailContent}
-                  closeModal={this.closeModal.bind(this)}
-                  peopleList={this.state.getAllPeopleList}
-                  personIssues={this.state.personIssues}
-                  ref="previewCampaignPopup"
-                />
-              :
-                ""
-            }
+              <PreviewCampaignPopup
+                emailSubject={this.state.subject}
+                emailContent={this.state.emailContent}
+                peopleList={this.state.getAllPeopleList}
+                personIssues={this.state.personIssues}
+                ref="preview"
+              />
             {/* Popup ends here*/}
         </div>
       </div>

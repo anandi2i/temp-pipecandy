@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import autobind from "autobind-decorator";
 import _ from "underscore";
 import update from "react-addons-update";
@@ -7,10 +8,11 @@ class PreviewCampaignPopup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      personIssues : this.props.personIssues,
+      id: guid(),
+      personIssues: this.props.personIssues,
       emailSubject: this.props.emailSubject,
       peopleList: this.props.peopleList,
-	    issueCompletedPerson: [],
+      issueCompletedPerson: [],
       missingTagLen: [],
       selectedPerson: 0,
       displayPerson: 1,
@@ -20,29 +22,46 @@ class PreviewCampaignPopup extends React.Component {
   }
 
   componentDidMount() {
-    $("#previewCampaign").openModal({
+    this.el = $(ReactDOM.findDOMNode(this));
+  }
+
+  openModal() {
+    let {id} = this.state;
+    let {personIssues, emailSubject, peopleList} = this.props;
+    this.setState({
+      personIssues: personIssues,
+      emailSubject: emailSubject,
+      peopleList: peopleList
+    });
+    this.el.openModal({
       dismissible: false
     });
-    if(!tinyMCE.get("previewMailContent")){
-      initTinyMCEPopUp("#previewMailContent", "#previewToolbar",
-        this.initTemplateLoade);
-      $(".preview-modal-content").mCustomScrollbar({
-        theme:"minimal-dark"
-      });
-    }
+    initTinyMCEPopUp(`#previewMailContent-${id}`, `#previewToolbar-${id}`,
+      this.initTemplateLoade);
+    this.el.find(".preview-modal-content").mCustomScrollbar({
+      theme:"minimal-dark"
+    });
+  }
+
+  closeModal() {
+    this.el.closeModal();
+    tinyMCE.execCommand("mceRemoveEditor", true,
+      `previewMailContent-${this.state.id}`);
   }
 
   @autobind
-  initTemplateLoade(){
-    if(this.props.emailContent){
-      tinyMCE.get("previewMailContent").setContent(this.props.emailContent);
+  initTemplateLoade() {
+    let {id, selectedPerson} = this.state;
+    let {emailContent} = this.props;
+    if(emailContent) {
+      tinyMCE.get(`previewMailContent-${id}`).setContent(emailContent);
       // Starts with first person person[0]
-      this.applySmartTags(this.state.selectedPerson);
+      this.applySmartTags(selectedPerson);
     }
   }
 
   @autobind
-  handleChange(field){
+  handleChange(field) {
     return event => {
       let state = {};
       state[field] = parseInt(event.target.value, 10) || "";
@@ -51,70 +70,63 @@ class PreviewCampaignPopup extends React.Component {
   }
 
   @autobind
-  handleBlur(){
-    let displayPerson = this.state.displayPerson;
-    let initCount = this.state.initCount;
-    if(displayPerson >= initCount &&
-      displayPerson <= this.state.personIssues.length) {
+  handleBlur() {
+    let {initCount, displayPerson, personIssues} = this.state;
+    if(displayPerson >= initCount && displayPerson <= personIssues.length) {
         this.applySmartTags(displayPerson - initCount);
-      } else {
-        this.setState({
-          displayPerson: parseInt(initCount, 10)
-        });
-        this.loadFirstPerson();
-      }
+    } else {
+      this.setState({
+        displayPerson: parseInt(initCount, 10)
+      });
+      this.loadFirstPerson();
+    }
   }
 
-  @autobind
-  loadFirstPerson(){
+  loadFirstPerson() {
     let firstPerson = 0;
     this.applySmartTags(firstPerson);
   }
 
-  @autobind
-  slider(position){
+  slider(position) {
     let id = this.state.selectedPerson;
-	  let initCount = this.state.initCount;
-    let peopleLength = this.state.personIssues.length;
-    if(position === "left" && id >= this.state.initCount){
+    let {initCount, displayPerson, personIssues} = this.state;
+    let peopleLength = personIssues.length;
+    if(position === "left" && id >= initCount) {
       id -= initCount;
       this.setState({
-        displayPerson: this.state.displayPerson - initCount
+        displayPerson: displayPerson - initCount
       });
       this.applySmartTags(id);
     }
-    if(position === "right" && id < --peopleLength){
+    if(position === "right" && id < --peopleLength) {
       id += initCount;
       this.setState({
-        displayPerson: this.state.displayPerson + initCount
+        displayPerson: displayPerson + initCount
       });
       this.applySmartTags(id);
     }
   }
 
-  @autobind
-  applySmartTags(personId){
+  applySmartTags(personId) {
     let getPersonInfo = this.state.personIssues[personId];
     this.setState({
-      selectedPerson: personId,
+      selectedPerson: personId
     });
     let emailContent = this.props.emailContent.replace(/"/g, "'");
     emailContent = this.applySmartTagsValue(emailContent, getPersonInfo);
-    tinyMCE.get("previewMailContent").setContent(emailContent);
+    tinyMCE.get(`previewMailContent-${this.state.id}`).setContent(emailContent);
   }
 
-  @autobind
-  replaceSmartTagContent(val, key){
+  replaceSmartTagContent(val, key) {
     let tag = "<span class='tag common' "+
       "contenteditable='false' data-tag='"+key+
       "' data-tag-name='"+val+"'>"+val+"</span>";
     return tag;
   }
 
-  @autobind
-  applySmartTagsValue(emailContent, getPersonInfo){
+  applySmartTagsValue(emailContent, getPersonInfo) {
     _.each(getPersonInfo, $.proxy(function (value, key) {
-      if(key === "fields"){
+      if(key === "fields") {
         _.each(value, $.proxy(function (val, key) {
           let fieldsStr = "<span class='tag un-common' "+
             "contenteditable='false' data-tag='"+val.name+"' data-tag-name='"+
@@ -134,12 +146,11 @@ class PreviewCampaignPopup extends React.Component {
     return emailContent;
   }
 
-  @autobind
-  saveSinglePerson(){
-    let initCount = this.state.initCount;
-    let index = this.state.displayPerson - initCount;
-    let getPersonInfo = this.state.personIssues[index];
-    let currentContent = tinyMCE.get("previewMailContent").getContent();
+  saveSinglePerson() {
+    let {id, initCount, personIssues, displayPerson} = this.state;
+    let index = displayPerson - initCount;
+    let getPersonInfo = personIssues[index];
+    let currentContent = tinyMCE.get(`previewMailContent-${id}`).getContent();
     let getIssueTags = getIssueTagsInEditor(currentContent);
     if(getIssueTags.length) {
       console.log("Please remove all error tags to save changes");
@@ -150,30 +161,28 @@ class PreviewCampaignPopup extends React.Component {
           {$push: [getPersonInfo]}),
         personIssues: update(state.personIssues,
           {$splice: [[index, initCount]]})
-      }), function(){
-        if(this.state.personIssues.length - initCount){
-          this.setContent("previewMailContent");
+      }), function() {
+        if(this.state.personIssues.length - initCount) {
+          this.setContent(`previewMailContent-${id}`);
         } else {
           this.setState((state) => ({
             displayPerson: initCount
-          }), function(){
-            this.setContent("previewMailContent");
+          }), function() {
+            this.setContent(`previewMailContent-${id}`);
           });
         }
       });
     }
   }
 
-  @autobind
-  setContent(id){
+  setContent(id) {
     tinyMCE.get(id).setContent(this.props.emailContent);
     this.applySmartTags(this.state.displayPerson);
   }
 
-  @autobind
-  applyAllPerson(){
-    let initCount = this.state.initCount;
-    let currentContent = tinyMCE.get("previewMailContent").getContent();
+  applyAllPerson() {
+    let {id, initCount} = this.state;
+    let currentContent = tinyMCE.get(`previewMailContent-${id}`).getContent();
     let getIssueTags = getIssueTagsInEditor(currentContent);
     let currentPerson = this.state.personIssues[this.state.displayPerson -
       initCount];
@@ -182,18 +191,18 @@ class PreviewCampaignPopup extends React.Component {
       let people = this.state.personIssues;
       let myList = [];
       let fixedPeopleId = [];
-      _.each(people, $.proxy(function(getPersonInfo, key){
+      _.each(people, $.proxy(function(getPersonInfo, key) {
         let findIssues = this.checkSmartTags(getPersonInfo);
         let isMatch = _.all(currentIssueTags.issuesTags,
-          function(v){ return _.include(findIssues.issuesTags, v); });
-        if(isMatch && getPersonInfo){
+          function(v) { return _.include(findIssues.issuesTags, v); });
+        if(isMatch && getPersonInfo) {
           getPersonInfo.template = findIssues.applySmartTags;
           myList.push(getPersonInfo);
           fixedPeopleId.push(getPersonInfo.id);
         }
       }), this);
 
-      _.each(fixedPeopleId, function(val, key){
+      _.each(fixedPeopleId, function(val, key) {
         people.splice(people.indexOf(val), initCount);
       });
 
@@ -201,14 +210,13 @@ class PreviewCampaignPopup extends React.Component {
         issueCompletedPerson: update(state.issueCompletedPerson,
           {$push: myList}),
         displayPerson: initCount
-      }), function(){
+      }), function() {
         this.loadFirstPerson();
       });
     }
   }
 
-  @autobind
-  checkSmartTags(getPersonInfo){
+  checkSmartTags(getPersonInfo) {
     let getEmailContent = this.props.emailContent;
     getEmailContent = getEmailContent.replace(/\"/g, "\'");
     let applyTags = this.applySmartTagsValue(getEmailContent, getPersonInfo);
@@ -220,13 +228,11 @@ class PreviewCampaignPopup extends React.Component {
     };
   }
 
-  @autobind
   saveIssues() {
     this.state.isApplyToall ? this.applyAllPerson() : this.saveSinglePerson();
   }
 
-  @autobind
-  applyToAll(){
+  applyToAll() {
     this.setState((state) => ({
       isApplyToall: !this.state.isApplyToall
     }));
@@ -243,7 +249,7 @@ class PreviewCampaignPopup extends React.Component {
     };
     return (
       <div id="previewCampaign" className="modal modal-fixed-header modal-fixed-footer lg-modal">
-        <i className="mdi mdi-close" onClick={this.props.closeModal}></i>
+        <i className="mdi mdi-close" onClick={() => this.closeModal()}></i>
         <div className="modal-header">
           <div className="head">
             Email preview
@@ -256,7 +262,7 @@ class PreviewCampaignPopup extends React.Component {
               <div className="template-content">
                 <div className="issue-slider">
                   <i className="mdi waves-effect mdi-chevron-left left blue-txt"
-                    onClick={this.slider.bind(this, "left")}
+                    onClick={() => this.slider("left")}
                     style={leftStyle}></i>
                   <span className="pagination">
                     Showing
@@ -266,7 +272,7 @@ class PreviewCampaignPopup extends React.Component {
                     of {peopelLength}
                   </span>
                   <i className="mdi waves-effect mdi-chevron-right right blue-txt"
-                    onClick={this.slider.bind(this, "right")}
+                    onClick={() => this.slider("right")}
                     style={rightStyle}></i>
                 </div>
                 <div className="input-field">
@@ -279,24 +285,27 @@ class PreviewCampaignPopup extends React.Component {
                     Subject
                   </label>
                 </div>
-                <div className="tiny-toolbar" id="previewToolbar"></div>
-                <div id="previewMailContent" className="email-body" ></div>
+                <div id={`previewToolbar-${this.state.id}`}
+                  className="tiny-toolbar"></div>
+                <div id={`previewMailContent-${this.state.id}`}
+                  className="email-body"></div>
               </div>
             </div>
           </div>
         </div>
         <div className="modal-footer r-btn-container">
           <span className="left apply-all">
-            <input type="checkbox" className="filled-in" id="applyToAll" onClick={this.applyToAll}/>
+            <input type="checkbox" className="filled-in" id="applyToAll"
+              onClick={() => this.applyToAll()}/>
             <label htmlFor="applyToAll">Apply to all</label>
           </span>
           <input type="button"
               className="btn red p-1-btn"
-              onClick={this.props.closeModal}
+              onClick={() => this.closeModal()}
               value="Cancel" />
             <input type="button"
               className="btn blue modal-action"
-              onClick={this.saveIssues.bind(this)}
+              onClick={() => this.saveIssues()}
               value="Save Changes" />
         </div>
       </div>

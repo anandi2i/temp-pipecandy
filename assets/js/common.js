@@ -1,6 +1,7 @@
 /* This file is ignored in eslint
 ** make sure that your code indentation and quality
 */
+"use strict";
 
 $(document).ready(function() {
   if ($(".side-nav-btn").length) {
@@ -167,5 +168,26 @@ function initTinyMCEPopUp(id, toolBar, cb) {
       "insertdatetime media table contextmenu paste code"
     ],
     toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link"
+  });
+}
+
+function initTimePicker(element) {
+  let timepicker = element.pickatime({
+    twelvehour: true,
+    afterDone: function() {
+      let val = timepicker.val();
+      let index = 0;
+      let till = -2;
+      let howManyFromLast = -2;
+      // To display time in 00:00 AM format
+      timepicker.val(val.slice(index, till) +" "+ val.slice(howManyFromLast));
+    }
+  });
+}
+
+function initDatePicker(element) {
+  element.pickadate({
+    selectMonths: true,
+    selectYears: 15
   });
 }

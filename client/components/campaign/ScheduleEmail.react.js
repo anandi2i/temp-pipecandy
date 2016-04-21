@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import update from "react-addons-update";
 import autobind from "autobind-decorator";
 import AddFollowups from "./AddFollowups.react";
@@ -18,7 +19,6 @@ class ScheduleEmail extends React.Component {
       commonSmartTags: [],
       unCommonSmartTags: [],
       emailContent: "",
-      isPreviewMail: false,
       errorCount: 0,
       issueTags: [],
       personIssues: []
@@ -26,31 +26,18 @@ class ScheduleEmail extends React.Component {
   }
 
   componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
     CampaignStore.addEmailListChangeListener(this._onChange);
     enabledropDownBtnByID("#insertSmartTags");
-    $("select").material_select();
-    $(".datepicker").pickadate({
-      selectMonths: true,
-      selectYears: 15
-    });
-    let timepicker = $(".timepicker").pickatime({
-      twelvehour: true,
-      afterDone: function() {
-        let val = timepicker.val();
-        let index = 0;
-        let till = -2;
-        let howManyFromLast = -2;
-        // To display time in 00:00 AM format
-        timepicker.val(val.slice(index, till) +" "+ val.slice(howManyFromLast));
-      }
-    });
+    this.el.find("select").material_select();
+    initDatePicker(this.el.find(".datepicker"));
+    initTimePicker(this.el.find(".timepicker"));
   }
 
   componentWillUnmount() {
     CampaignStore.removeEmailListChangeListener(this._onChange);
   }
 
-  @autobind
   initTinyMCE() {
     initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", this.tinyMceCb);
   }
@@ -80,13 +67,11 @@ class ScheduleEmail extends React.Component {
     this.initTinyMCE();
   }
 
-  @autobind
-  toggleEditContainer(e) {
+  toggleEditContainer() {
     this.setState({clicked: !this.state.clicked});
-    $("#firstEmail").slideToggle("slow");
+    this.el.find(".draft-template").slideToggle("slow");
   }
 
-  @autobind
   addFollowups() {
     let maxLength = 5;
     if(this.state.followups.length < maxLength) {
@@ -114,7 +99,7 @@ class ScheduleEmail extends React.Component {
     });
   }
 
-  @autobind
+  //TODO: has to be removed in future
   updateFollowUpContent() {
     let followups = this.state.followups;
     followups.forEach(function(followup) {
@@ -137,23 +122,10 @@ class ScheduleEmail extends React.Component {
     };
   }
 
-  setMainEmailContent(field) {
-    if(tinyMCE.get(field)) {
-      this.setState({
-        isPreviewMail: true
-      });
-    }
+  openPreviewModal() {
+    this.refs.preview.openModal();
   }
 
-  closeModal() {
-    $("#previewCampaign").closeModal();
-    tinyMCE.execCommand("mceRemoveEditor", true, "previewMailContent");
-    this.setState({
-      isPreviewMail: false
-    });
-  }
-
-  @autobind
   saveCampaignInfo() {
     let followups = [];
     this.state.followups.map(function(val, key){
@@ -175,20 +147,22 @@ class ScheduleEmail extends React.Component {
         ? "block" : "none");
     let displaySchedule = this.state.displayScheduleCampaign
       ? "block" : "none";
-    var className = this.state.clicked
+    let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
+    let previewClass = this.state.errorCount ?
+      "btn btn-dflt error-btn" : "btn btn-dflt blue sm-icon-btn";
     return (
       <div className="container" style={{display: displayIndex}}>
         <div className="row sub-head-container m-lr-0">
           <div className="head">Let's Draft an Email</div>
           <div className="sub-head">
-            <a className="btn blue" onClick={this.saveCampaignInfo}>Save & continue</a>
+            <a className="btn blue" onClick={() => this.saveCampaignInfo()}>Save & continue</a>
           </div>
         </div>
         {/* Draft Email starts here*/}
         <div className="row draft-container m-t-50 m-lr-0">
-          <div className="head" onClick={this.toggleEditContainer}>
+          <div className="head" onClick={() => this.toggleEditContainer()}>
             <div className="col s4 m4 l4"><h3>1. First Email</h3></div>
             <div className="col s8 m8 l8">
               <i className={className}>
@@ -277,37 +251,32 @@ class ScheduleEmail extends React.Component {
               </div>
               {/* Preview button */}
               <div className="row r-btn-container preview-content m-lr-0">
-                {this.state.errorCount
-                  ?
-                    <div onClick={this.setMainEmailContent.bind(this, "emailContent")} className="btn btn-dflt error-btn">
-                      {this.state.errorCount} Issues Found
-                    </div>
-                  :
-                  <div onClick={this.setMainEmailContent.bind(this, "emailContent")} className="btn btn-dflt blue sm-icon-btn">
-                    <i className="left mdi mdi-eye"></i>
-                    <span>Preview</span>
-                  </div>
-                }
+                <div onClick={() => this.openPreviewModal()} className={previewClass}>
+                  {
+                    this.state.errorCount
+                    ?
+                      `${this.state.errorCount} Issues Found`
+                    :
+                      <span>
+                        <i className="left mdi mdi-eye"></i>
+                        Preview
+                      </span>
+                  }
+                </div>
               </div>
               {/* Popup starts here*/}
-              {this.state.isPreviewMail
-                ?
-                  <PreviewCampaignPopup
-                    emailSubject={this.state.subject}
-                    emailContent={this.state.emailContent}
-                    closeModal={this.closeModal.bind(this)}
-                    peopleList={this.state.getAllPeopleList}
-                    personIssues={this.state.personIssues}
-                  />
-                :
-                  ""
-              }
+                <PreviewCampaignPopup
+                  emailSubject={this.state.subject}
+                  emailContent={this.state.emailContent}
+                  peopleList={this.state.getAllPeopleList}
+                  personIssues={this.state.personIssues}
+                  ref="preview"
+                />
               {/* Popup ends here*/}
           </div>
         </div>
         {
           this.state.followups.map(function (followUp, key) {
-            let refName = "addFollowups" + followUp.id;
             return (
               <AddFollowups followupId={followUp.id}
                 content={followUp.content}
@@ -315,12 +284,12 @@ class ScheduleEmail extends React.Component {
                 unCommonSmartTags={this.state.unCommonSmartTags}
                 deleteFollowUp={this.deleteFollowUp.bind(this, key)}
                 id={key} key={followUp.id}
-                ref={refName} />
+                ref={`addFollowups${followUp.id}`} />
             );
           }, this)
         }
         <div className="row add-followups m-lr-0"
-          onClick={this.addFollowups}
+          onClick={() => this.addFollowups()}
           style={{display: displayAddFollowup}}>
           <i className="mdi mdi-plus"></i> Add Follow up
         </div>
