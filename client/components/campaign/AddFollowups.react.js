@@ -46,8 +46,23 @@ class AddFollowups extends React.Component {
     this.el.find(".draft-template").slideToggle("slow");
   }
 
+  onChange(event, field) {
+    let state = {};
+    state[field] = event.target.value;
+    this.setState(state);
+  }
+
   openPreviewModal() {
     this.refs.preview.openModal();
+  }
+
+  @autobind
+  closeCallback(){
+    if(!this.refs.preview.state.personIssues.length){
+      this.setState((state) => ({
+        errorCount: 0
+      }));
+    }
   }
 
   render() {
@@ -57,9 +72,6 @@ class AddFollowups extends React.Component {
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
-    let previewClass = this.state.errorCount
-      ? "btn btn-dflt error-btn"
-      : "btn btn-dflt blue sm-icon-btn";
     return(
       <div className="row draft-container m-lr-0">
         <div className="head" onClick={this.toggleEditContainer}>
@@ -93,7 +105,9 @@ class AddFollowups extends React.Component {
           </div>
             {/* email subject */}
             <div className="row email-subject m-lr-0">
-              <input type="text" className="border-input" placeholder="Campaign subject"></input>
+              <input type="text" className="border-input"
+                placeholder="Campaign subject"
+                onChange={(e) => this.onChange(e, "subject")} />
             </div>
             <div className="row email-content m-lr-0">
               <div className="tiny-toolbar" id={"mytoolbar" + followupId}>
@@ -128,28 +142,26 @@ class AddFollowups extends React.Component {
                 dangerouslySetInnerHTML={{__html: this.props.content}} />
             </div>
             {/* Preview button */}
-            <div className="row r-btn-container preview-content m-lr-0">
-              <div onClick={() => this.openPreviewModal()} className={previewClass}>
-                {
-                  this.state.errorCount
-                  ?
-                    `${this.state.errorCount} Issues Found`
-                  :
-                    <span>
-                      <i className="left mdi mdi-eye"></i>
-                      Preview
-                    </span>
-                }
-              </div>
-            </div>
+            {
+              this.state.errorCount
+                ?
+                  <div className="row r-btn-container preview-content m-lr-0">
+                    <div onClick={() => this.openPreviewModal()} className="btn btn-dflt error-btn">
+                      {this.state.errorCount} Issues Found
+                    </div>
+                  </div>
+                :
+                  ""
+            }
             {/* Popup starts here*/}
-              <PreviewCampaignPopup
-                emailSubject={this.state.subject}
-                emailContent={this.state.emailContent}
-                peopleList={this.state.getAllPeopleList}
-                personIssues={this.state.personIssues}
-                ref="preview"
-              />
+            <PreviewCampaignPopup
+              emailSubject={this.state.subject}
+              emailContent={this.state.emailContent}
+              peopleList={this.state.getAllPeopleList}
+              personIssues={this.state.personIssues}
+              closeCallback={this.closeCallback}
+              ref="preview"
+            />
             {/* Popup ends here*/}
         </div>
       </div>

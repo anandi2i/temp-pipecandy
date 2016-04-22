@@ -84,7 +84,6 @@ class ScheduleEmail extends React.Component {
     }
   }
 
-  @autobind
   displayScheduleCampaign() {
     this.setState({
       displayScheduleCampaign: !this.state.displayScheduleCampaign
@@ -113,13 +112,10 @@ class ScheduleEmail extends React.Component {
     }));
   }
 
-  @autobind
-  onChange(field) {
-    return event => {
-      let state = {};
-      state[field] = event.target.value;
-      this.setState(state);
-    };
+  onChange(event, field) {
+    let state = {};
+    state[field] = event.target.value;
+    this.setState(state);
   }
 
   openPreviewModal() {
@@ -132,11 +128,22 @@ class ScheduleEmail extends React.Component {
      followups.push(this.refs[`addFollowups${val.id}`]);
     }, this);
     this.setState((state) => ({
-      "followupsArr": followups
+      mainEmailContent: this.refs.preview.state,
+      followupsEmailContent: followups
     }), function(){
+      console.log(this.state.mainEmailContent);
       //TODO Need to construct data here
-      console.log(this.state.followupsArr);
+      console.log(this.state.followupsEmailContent);
     });
+  }
+
+  @autobind
+  closeCallback(){
+    if(!this.refs.preview.state.personIssues.length){
+      this.setState((state) => ({
+        errorCount: 0
+      }));
+    }
   }
 
   render() {
@@ -150,8 +157,7 @@ class ScheduleEmail extends React.Component {
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
-    let previewClass = this.state.errorCount ?
-      "btn btn-dflt error-btn" : "btn btn-dflt blue sm-icon-btn";
+
     return (
       <div className="container" style={{display: displayIndex}}>
         <div className="row sub-head-container m-lr-0">
@@ -173,7 +179,9 @@ class ScheduleEmail extends React.Component {
               {/* email to list */}
               <div className="row m-lr-0">
                 <div className="col s12 p-lr-0">
-                  <input onChange={this.displayScheduleCampaign} type="checkbox" className="filled-in" id="filled-in-box" defaultChecked="" />
+                  <input type="checkbox" className="filled-in" id="filled-in-box"
+                    defaultChecked=""
+                    onChange={() => this.displayScheduleCampaign()} />
                   <label htmlFor="filled-in-box">Schedule campaign for later</label>
                 </div>
               </div>
@@ -182,13 +190,13 @@ class ScheduleEmail extends React.Component {
                   <label>Date</label>
                   <input type="date" className="datepicker border-input"
                     placeholder="DD Month, year"
-                    onChange={this.onChange("scheduledDate")} />
+                    onChange={(e) => this.onChange(e, "scheduledDate")} />
                 </div>
                 <div className="col s12 m4 l3">
                   <label>Time</label>
                   <input type="text" placeholder="00:00 AM"
                     className="timepicker border-input"
-                    onChange={this.onChange("scheduledTime")} />
+                    onChange={(e) => this.onChange(e, "scheduledTime")} />
                 </div>
               </div>
               <div className="row email-to m-lr-0">
@@ -213,7 +221,7 @@ class ScheduleEmail extends React.Component {
               <div className="row email-subject m-lr-0">
                 <input type="text" className="border-input"
                   placeholder="Campaign subject"
-                  onChange={this.onChange("subject")} />
+                  onChange={(e) => this.onChange(e, "subject")} />
               </div>
               <div className="row email-content m-lr-0">
                 <div className="tiny-toolbar" id="mytoolbar">
@@ -250,26 +258,24 @@ class ScheduleEmail extends React.Component {
                   }} />
               </div>
               {/* Preview button */}
-              <div className="row r-btn-container preview-content m-lr-0">
-                <div onClick={() => this.openPreviewModal()} className={previewClass}>
-                  {
-                    this.state.errorCount
-                    ?
-                      `${this.state.errorCount} Issues Found`
-                    :
-                      <span>
-                        <i className="left mdi mdi-eye"></i>
-                        Preview
-                      </span>
-                  }
-                </div>
-              </div>
+              {
+                this.state.errorCount
+                  ?
+                    <div className="row r-btn-container preview-content m-lr-0">
+                      <div onClick={() => this.openPreviewModal()} className="btn btn-dflt error-btn">
+                        {this.state.errorCount} Issues Found
+                      </div>
+                    </div>
+                  :
+                    ""
+              }
               {/* Popup starts here*/}
                 <PreviewCampaignPopup
                   emailSubject={this.state.subject}
                   emailContent={this.state.emailContent}
                   peopleList={this.state.getAllPeopleList}
                   personIssues={this.state.personIssues}
+                  closeCallback={this.closeCallback}
                   ref="preview"
                 />
               {/* Popup ends here*/}

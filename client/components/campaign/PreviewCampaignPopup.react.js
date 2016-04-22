@@ -17,7 +17,6 @@ class PreviewCampaignPopup extends React.Component {
       selectedPerson: 0,
       displayPerson: 1,
       initCount: 1,
-      isApplyToall: false
     };
   }
 
@@ -43,10 +42,12 @@ class PreviewCampaignPopup extends React.Component {
     });
   }
 
+  @autobind
   closeModal() {
     this.el.closeModal();
     tinyMCE.execCommand("mceRemoveEditor", true,
       `previewMailContent-${this.state.id}`);
+    this.props.closeCallback();
   }
 
   @autobind
@@ -60,13 +61,14 @@ class PreviewCampaignPopup extends React.Component {
     }
   }
 
-  @autobind
-  handleChange(field) {
-    return event => {
-      let state = {};
+  handleChange(event, field) {
+    let state = {};
+    if(field === "displayPerson"){
       state[field] = parseInt(event.target.value, 10) || "";
-      this.setState(state);
-    };
+    } else {
+      state[field] = event.target.value;
+    }
+    this.setState(state);
   }
 
   @autobind
@@ -146,6 +148,11 @@ class PreviewCampaignPopup extends React.Component {
     return emailContent;
   }
 
+  setContent(id) {
+    tinyMCE.get(id).setContent(this.props.emailContent);
+    this.applySmartTags(this.state.displayPerson);
+  }
+
   saveSinglePerson() {
     let {id, initCount, personIssues, displayPerson} = this.state;
     let index = displayPerson - initCount;
@@ -156,6 +163,7 @@ class PreviewCampaignPopup extends React.Component {
       console.log("Please remove all error tags to save changes");
     } else {
       getPersonInfo.template = currentContent;
+      getPersonInfo.emailSubject = this.state.emailSubject;
       this.setState((state) => ({
         issueCompletedPerson: update(state.issueCompletedPerson,
           {$push: [getPersonInfo]}),
@@ -175,11 +183,6 @@ class PreviewCampaignPopup extends React.Component {
     }
   }
 
-  setContent(id) {
-    tinyMCE.get(id).setContent(this.props.emailContent);
-    this.applySmartTags(this.state.displayPerson);
-  }
-
   applyAllPerson() {
     let {id, initCount} = this.state;
     let currentContent = tinyMCE.get(`previewMailContent-${id}`).getContent();
@@ -197,6 +200,7 @@ class PreviewCampaignPopup extends React.Component {
           function(v) { return _.include(findIssues.issuesTags, v); });
         if(isMatch && getPersonInfo) {
           getPersonInfo.template = findIssues.applySmartTags;
+          getPersonInfo.emailSubject = this.state.emailSubject;
           myList.push(getPersonInfo);
           fixedPeopleId.push(getPersonInfo.id);
         }
@@ -228,16 +232,6 @@ class PreviewCampaignPopup extends React.Component {
     };
   }
 
-  saveIssues() {
-    this.state.isApplyToall ? this.applyAllPerson() : this.saveSinglePerson();
-  }
-
-  applyToAll() {
-    this.setState((state) => ({
-      isApplyToall: !this.state.isApplyToall
-    }));
-  }
-
   render() {
     let peopelLength = this.state.personIssues.length;
     let currentPerson = this.state.displayPerson;
@@ -267,7 +261,7 @@ class PreviewCampaignPopup extends React.Component {
                   <span className="pagination">
                     Showing
                     <input type="text" value={this.state.displayPerson}
-                      onChange={this.handleChange("displayPerson")}
+                      onChange={(e) => this.handleChange(e, "displayPerson")}
                       onBlur={this.handleBlur} />
                     of {peopelLength}
                   </span>
@@ -280,7 +274,7 @@ class PreviewCampaignPopup extends React.Component {
                     className="field-name"
                     value={this.state.emailSubject}
                     id="emailSubject"
-                    onChange={this.handleChange("emailSubject")} />
+                    onChange={(e) => this.handleChange(e, "emailSubject")} />
                   <label className="active" htmlFor="subject">
                     Subject
                   </label>
@@ -294,19 +288,18 @@ class PreviewCampaignPopup extends React.Component {
           </div>
         </div>
         <div className="modal-footer r-btn-container">
-          <span className="left apply-all">
-            <input type="checkbox" className="filled-in" id="applyToAll"
-              onClick={() => this.applyToAll()}/>
-            <label htmlFor="applyToAll">Apply to all</label>
-          </span>
           <input type="button"
-              className="btn red p-1-btn"
-              onClick={() => this.closeModal()}
-              value="Cancel" />
-            <input type="button"
-              className="btn blue modal-action"
-              onClick={() => this.saveIssues()}
-              value="Save Changes" />
+            className="btn red p-1-btn"
+            onClick={() => this.closeModal()}
+            value="Cancel" />
+          <input type="button"
+            className="btn blue modal-action"
+            onClick={() => this.saveSinglePerson()}
+            value="Apply" />
+          <input type="button"
+            className="btn blue modal-action"
+            onClick={() => this.applyAllPerson()}
+            value="Apply To All" />
         </div>
       </div>
     );
