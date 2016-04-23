@@ -7,7 +7,7 @@ class SelectPreBuildTemplate extends React.Component {
   constructor(props) {
     super(props);
     CampaignActions.getAllEmailTemplates();
-    this.state={
+    this.state = {
       templates: [],
       innerTabIndex: 0,
       activeTemplate: 0,
@@ -43,47 +43,46 @@ class SelectPreBuildTemplate extends React.Component {
       activeTemplate: key,
       activeTemplateContent: state.templates[key].content
     }));
+    this.props.setTemplateContent();
   }
 
-  @autobind
-  pickTemplate() {
-    this.props.setTemplateContent();
-    this.closeModal();
+  isActive(value){
+    let isActive = (value === this.state.activeTemplate) ? "active" : "";
+    return `card template-preview ${isActive}`;
   }
 
   render() {
     let isDisplay =
       (this.props.active === this.state.innerTabIndex ? "block" : "none");
+    let blankTemplateKey = 0;
     return (
       <div className="row" style={{display: isDisplay}}>
-        <div className="col s12 m6 l4">
-          <div className="card template-preview">
-            <div className="card-title">Blank Template</div>
-            <div className="card-content">
-              &nbsp;
-            </div>
-            <div className="card-action">
-              <i className="mdi mdi-eye-off"></i> Preview
-            </div>
-          </div>
-        </div>
         {
-          this.state.templates.map($.proxy(function (template, key) {
+          this.state.templates.map(function (template, key) {
             return (
               <div className="col s12 m6 l4" key={key}>
-                <div className="card template-preview"
+                <div className={this.isActive(key)}
                   onClick={this.selectTemplate.bind(this, key)}>
                   <div className="card-title">{template.name}</div>
                   <div className="card-content">
                     <div dangerouslySetInnerHTML={{__html: template.content}} />
                   </div>
-                  <div className="card-action modal-trigger" href="#previewTemplate">
-                    <i className="mdi mdi-eye"></i> Preview
-                  </div>
+                  {
+                    (key === blankTemplateKey)
+                    ?
+                      <div className="card-action">
+                        <i className="mdi mdi-eye-off"></i> Preview
+                      </div>
+                    :
+                      <div className="card-action modal-trigger"
+                        href="#previewTemplate">
+                        <i className="mdi mdi-eye"></i> Preview
+                      </div>
+                  }
                 </div>
               </div>
             );
-          }, this))
+          }, this)
         }
         {/* Email template preview modal popup starts here*/}
         { this.state.templates.length ?
@@ -98,9 +97,10 @@ class SelectPreBuildTemplate extends React.Component {
               </div>
             </div>
             <div className="modal-footer r-btn-container">
-              <input type="button" className="btn red modal-action modal-close p-1-btn" value="Cancel" />
-              <input type="button" className="btn blue modal-action" value="Pick This Template"
-                onClick={this.pickTemplate} />
+              <input type="button" value="Cancel"
+                className="btn red modal-action modal-close p-1-btn" />
+              <input type="button" value="Pick This Template"
+                className="btn blue modal-action modal-close" />
             </div>
           </div>
         : null }
