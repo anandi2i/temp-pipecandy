@@ -815,6 +815,11 @@ $lines-to-show: 8;
         transition: transform 0.5s;
       }
     }
+    .editor-text {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
   }
   .draft-template {
     margin-top: 30px;

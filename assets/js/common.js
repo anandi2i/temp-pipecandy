@@ -109,7 +109,7 @@ function constructEmailTemplate(str) {
   return $(steDom).html();
 }
 
-function initTinyMCE(id, toolBar, dropdownId, cb) {
+function initTinyMCE(id, toolBar, dropdownId, changeCb, blurCb) {
   let getFocusId = id.split("#")[1];
 
   tinymce.init({
@@ -127,7 +127,10 @@ function initTinyMCE(id, toolBar, dropdownId, cb) {
     ],
     setup : function(editor) {
       editor.on("change", function(e) {
-        cb(editor);
+        changeCb(editor);
+      });
+      editor.on("blur", function(e) {
+        blurCb(editor);
       });
       $(dropdownId + " li").off("click").on("click", function(event) {
         let currentText = event.currentTarget.innerText.trim();

@@ -10,7 +10,8 @@ class AddFollowups extends React.Component {
     this.state = {
       clicked: true,
       errorCount: 0,
-      personIssues: []
+      personIssues: [],
+      emailText: ""
     };
   }
 
@@ -21,7 +22,8 @@ class AddFollowups extends React.Component {
     let mytoolbar = `#mytoolbar${followupId}`;
     let insertSmartTags = `#insertSmartTags${followupId}`;
     let smartTagDrpDwnId = `#dropdown${followupId}`;
-    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, this.tinyMceCb);
+    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId,
+      this.tinyMceCb, this.editorOnBlur);
     this.el.find("select").material_select();
     initTimePicker(this.el.find(".timepicker"));
     enabledropDownBtnByID(insertSmartTags);
@@ -37,6 +39,14 @@ class AddFollowups extends React.Component {
       errorCount: parseInt(issueTags.length, 10),
       issueTags: issueTags,
       personIssues: personIssues
+    });
+  }
+
+  @autobind
+  editorOnBlur(editor) {
+    let text = editor.getBody().textContent;
+    this.setState({
+      emailText: text
     });
   }
 
@@ -78,7 +88,11 @@ class AddFollowups extends React.Component {
           <div className="col s4 m4 l4">
             <h3>{followUpCount}. Follow up {followUpCount}</h3>
           </div>
-          <div className="col s8 m8 l8">
+          <div className="col s6 m6 l6 editor-text">
+            &nbsp;
+            {this.state.emailText}
+          </div>
+          <div className="col s2 m2 l2">
             <i className={className}>
             </i>
             <i className="mdi mdi-delete-forever"

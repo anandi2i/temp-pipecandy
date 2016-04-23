@@ -21,7 +21,8 @@ class ScheduleEmail extends React.Component {
       emailContent: "",
       errorCount: 0,
       issueTags: [],
-      personIssues: []
+      personIssues: [],
+      emailText: ""
     };
   }
 
@@ -39,7 +40,8 @@ class ScheduleEmail extends React.Component {
   }
 
   initTinyMCE() {
-    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", this.tinyMceCb);
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown",
+      this.tinyMceCb, this.editorOnBlur);
   }
 
   @autobind
@@ -52,6 +54,14 @@ class ScheduleEmail extends React.Component {
       errorCount: parseInt(issueTags.length, 10),
       issueTags: issueTags,
       personIssues: personIssues
+    });
+  }
+
+  @autobind
+  editorOnBlur(editor) {
+    let text = editor.getBody().textContent;
+    this.setState({
+      emailText: text
     });
   }
 
@@ -170,7 +180,11 @@ class ScheduleEmail extends React.Component {
         <div className="row draft-container m-t-50 m-lr-0">
           <div className="head" onClick={() => this.toggleEditContainer()}>
             <div className="col s4 m4 l4"><h3>1. First Email</h3></div>
-            <div className="col s8 m8 l8">
+            <div className="col s6 m6 l6 editor-text">
+              &nbsp;
+              {this.state.emailText}
+            </div>
+            <div className="col s2 m2 l2">
               <i className={className}>
               </i>
             </div>
