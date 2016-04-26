@@ -1,6 +1,5 @@
 import React from "react";
 import {Link} from "react-router";
-import autobind from "autobind-decorator";
 import CampaignActions from "../../actions/CampaignActions";
 
 class CreateCampaign extends React.Component {
@@ -11,14 +10,14 @@ class CreateCampaign extends React.Component {
     };
   }
 
-  @autobind
-  handleChange(event) {
-    this.setState({campaignName: event.target.value});
+  onChange(e, field) {
+    let state = {};
+    state[field] = e.target.value;
+    this.setState(state);
   }
 
-  @autobind
-  onSubmit(event) {
-    event.preventDefault();
+  onSubmit = (e) => {
+    e.preventDefault();
     const formData = {"name" : this.state.campaignName};
     CampaignActions.createNewCampaign(formData);
   }
@@ -43,7 +42,7 @@ class CreateCampaign extends React.Component {
                   <input placeholder="Ex: Webinar Invitation, Feature updates, User Onboarding etc."
                     id="campaignName" type="text"
                     value={this.state.campaignName}
-                    onChange={this.handleChange} />
+                    onChange={(e) => this.onChange(e, "campaignName")} />
                 </div>
                 <div className="row r-btn-container">
                   <input type="submit" className="btn blue"

@@ -1,5 +1,4 @@
 import React from "react";
-import autobind from "autobind-decorator";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
 
@@ -16,20 +15,14 @@ class SelectPreBuildTemplate extends React.Component {
   }
 
   componentDidMount() {
-    CampaignStore.addChangeListener(this._onChange);
+    CampaignStore.addChangeListener(this.onStoreChange);
   }
 
   componentWillUnmount() {
-    CampaignStore.removeChangeListener(this._onChange);
+    CampaignStore.removeChangeListener(this.onStoreChange);
   }
 
-  @autobind
-  closeModal() {
-    $("#previewTemplate").closeModal();
-  }
-
-  @autobind
-  _onChange() {
+  onStoreChange = () => {
     this.setState({
       templates: CampaignStore.getAllEmailTemplates()
     });
@@ -89,7 +82,7 @@ class SelectPreBuildTemplate extends React.Component {
         {/* Email template preview modal popup starts here*/}
         { this.state.templates.length ?
           <div id="previewTemplate" className="modal modal-fixed-header modal-fixed-footer">
-            <i className="mdi mdi-close" onClick={this.closeModal}></i>
+            <i className="mdi mdi-close modal-close"></i>
             <div className="modal-header">
               <div className="head">Add Subbscriber</div>
             </div>

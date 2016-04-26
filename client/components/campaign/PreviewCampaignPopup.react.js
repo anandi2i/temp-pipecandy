@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import autobind from "autobind-decorator";
 import _ from "underscore";
 import update from "react-addons-update";
 
@@ -36,22 +35,20 @@ class PreviewCampaignPopup extends React.Component {
       dismissible: false
     });
     initTinyMCEPopUp(`#previewMailContent-${id}`, `#previewToolbar-${id}`,
-      this.initTemplateLoade);
+      this.setEmailContent);
     this.el.find(".preview-modal-content").mCustomScrollbar({
       theme:"minimal-dark"
     });
   }
 
-  @autobind
-  closeModal() {
+  closeModal = () => {
     this.el.closeModal();
     tinyMCE.execCommand("mceRemoveEditor", true,
       `previewMailContent-${this.state.id}`);
     this.props.closeCallback();
   }
 
-  @autobind
-  initTemplateLoade() {
+  setEmailContent = () => {
     let {id, selectedPerson} = this.state;
     let {emailContent} = this.props;
     if(emailContent) {
@@ -61,21 +58,20 @@ class PreviewCampaignPopup extends React.Component {
     }
   }
 
-  handleChange(event, field) {
+  onChange(e, field) {
     let state = {};
     if(field === "displayPerson"){
-      state[field] = parseInt(event.target.value, 10) || "";
+      state[field] = parseInt(e.target.value, 10) || "";
     } else {
-      state[field] = event.target.value;
+      state[field] = e.target.value;
     }
     this.setState(state);
   }
 
-  @autobind
-  handleBlur() {
+  handleBlur = () => {
     let {initCount, displayPerson, personIssues} = this.state;
     if(displayPerson >= initCount && displayPerson <= personIssues.length) {
-        this.applySmartTags(displayPerson - initCount);
+      this.applySmartTags(displayPerson - initCount);
     } else {
       this.setState({
         displayPerson: parseInt(initCount, 10)
@@ -153,7 +149,7 @@ class PreviewCampaignPopup extends React.Component {
     this.applySmartTags(this.state.displayPerson);
   }
 
-  saveSinglePerson() {
+  saveSinglePerson = () => {
     let {id, initCount, personIssues, displayPerson} = this.state;
     let index = displayPerson - initCount;
     let getPersonInfo = personIssues[index];
@@ -183,7 +179,7 @@ class PreviewCampaignPopup extends React.Component {
     }
   }
 
-  applyAllPerson() {
+  applyAllPerson = () => {
     let {id, initCount} = this.state;
     let currentContent = tinyMCE.get(`previewMailContent-${id}`).getContent();
     let getIssueTags = getIssueTagsInEditor(currentContent);
@@ -243,7 +239,7 @@ class PreviewCampaignPopup extends React.Component {
     };
     return (
       <div id="previewCampaign" className="modal modal-fixed-header modal-fixed-footer lg-modal">
-        <i className="mdi mdi-close" onClick={() => this.closeModal()}></i>
+        <i className="mdi mdi-close" onClick={this.closeModal}></i>
         <div className="modal-header">
           <div className="head">
             Email preview
@@ -261,7 +257,7 @@ class PreviewCampaignPopup extends React.Component {
                   <span className="pagination">
                     Showing
                     <input type="text" value={this.state.displayPerson}
-                      onChange={(e) => this.handleChange(e, "displayPerson")}
+                      onChange={(e) => this.onChange(e, "displayPerson")}
                       onBlur={this.handleBlur} />
                     of {peopelLength}
                   </span>
@@ -274,7 +270,7 @@ class PreviewCampaignPopup extends React.Component {
                     className="field-name"
                     value={this.state.emailSubject}
                     id="emailSubject"
-                    onChange={(e) => this.handleChange(e, "emailSubject")} />
+                    onChange={(e) => this.onChange(e, "emailSubject")} />
                   <label className="active" htmlFor="subject">
                     Subject
                   </label>
@@ -290,15 +286,15 @@ class PreviewCampaignPopup extends React.Component {
         <div className="modal-footer r-btn-container">
           <input type="button"
             className="btn red p-1-btn"
-            onClick={() => this.closeModal()}
+            onClick={this.closeModal}
             value="Cancel" />
           <input type="button"
             className="btn blue modal-action"
-            onClick={() => this.saveSinglePerson()}
+            onClick={this.saveSinglePerson}
             value="Apply" />
           <input type="button"
             className="btn blue modal-action"
-            onClick={() => this.applyAllPerson()}
+            onClick={this.applyAllPerson}
             value="Apply To All" />
         </div>
       </div>

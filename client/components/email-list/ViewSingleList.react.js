@@ -1,6 +1,5 @@
 import React from "react";
 import {Link} from "react-router";
-import autobind from "autobind-decorator";
 import validation from "react-validation-mixin";
 import strategy from "joi-validation-strategy";
 import _ from "underscore";
@@ -38,7 +37,7 @@ class ListView extends React.Component {
 
   componentDidMount() {
     EmailListActions.getEmailListByID(this.props.params.listId);
-    EmailListStore.addChangeListener(this._onChange);
+    EmailListStore.addChangeListener(this.onStoreChange);
     $(".modal-trigger").leanModal({
       dismissible: false
     });
@@ -48,11 +47,10 @@ class ListView extends React.Component {
   }
 
   componentWillUnmount() {
-    EmailListStore.removeChangeListener(this._onChange);
+    EmailListStore.removeChangeListener(this.onStoreChange);
   }
 
-  @autobind
-  _onChange() {
+  onStoreChange = () => {
     let error = EmailListStore.getError();
     if(error) {
       displayError(error);
@@ -70,8 +68,7 @@ class ListView extends React.Component {
     return true;
   }
 
-  @autobind
-  addMoreFields() {
+  addMoreFields = () => {
     let getLength = this.state.names.length;
     let maxLength = 5;
     if(getLength < maxLength){
@@ -80,7 +77,6 @@ class ListView extends React.Component {
     }
   }
 
-  @autobind
   getFieldState(field) {
     return event => {
       let state = {};
@@ -89,12 +85,10 @@ class ListView extends React.Component {
     };
   }
 
-  @autobind
   getValidatorData() {
     return this.state;
   }
 
-  @autobind
   renderHelpText(el) {
     return (
       <div className="warning-block">
@@ -103,8 +97,7 @@ class ListView extends React.Component {
     );
   }
 
-  @autobind
-  onSubmit() {
+  onSubmit = () => {
     const onValidate = error => {
       for(let i = 1; i <= this.state.additionalFieldLen; i++) {
         let field = this.state["field" + i];
@@ -125,15 +118,13 @@ class ListView extends React.Component {
     this.props.validate(onValidate);
   }
 
-  @autobind
-  onSubmitAnother() {
+  onSubmitAnother = () => {
     this.setState({
       addAnother: true
     });
     this.onSubmit();
   }
 
-  @autobind
   constructPersonDataAndSave() {
     let person = {
       firstName: this.state.firstName,
@@ -162,22 +153,19 @@ class ListView extends React.Component {
         addAnother: false
       });
     } else {
-      this.closeModal();
+      this.closeModal;
     }
   }
 
-  @autobind
-  closeModal() {
+  closeModal = () => {
     $("#addEmail").closeModal();
   }
 
-  @autobind
-  openDialog() {
+  openDialog = () => {
     $("#fileUpload").click();
   }
 
-  @autobind
-  fileChange(e) {
+  fileChange = (e) => {
     let file = e.target.files[0];
     let fileExt = _.last(file.name.split("."));
     let acceptableFileTypes = ["csv", "xls", "xlsx"];
@@ -226,14 +214,14 @@ class ListView extends React.Component {
           </div>
           <div id="addEmail"
             className="modal modal-fixed-header modal-fixed-footer mini-modal">
-            <i onClick={this.closeModal} className="mdi mdi-close"></i>
+            <i className="mdi mdi-close modal-close"></i>
             <div className="modal-header">
               <div className="head">Add Subbscriber</div>
             </div>
             <div className="modal-content">
               <div className="input-field">
                 <input placeholder="First Name" id="firstName" type="text"
-                  onChange={this.getFieldState("firstName")}
+                  onChange={(e) => this.getFieldState(e, "firstName")}
                   onBlur={this.props.handleValidation("firstName")}
                   value={this.state.firstName}
                   className="validate" />
@@ -246,14 +234,14 @@ class ListView extends React.Component {
               </div>
               <div className="input-field">
                 <input placeholder="Middle Name" id="middleName" type="text"
-                  onChange={this.getFieldState("middleName")}
+                  onChange={(e) => this.getFieldState(e, "middleName")}
                   value={this.state.middleName}
                   className="validate" />
                 <label htmlFor="middleName">Middle Name</label>
               </div>
               <div className="input-field">
                 <input placeholder="Last Name" id="lastName" type="text"
-                  onChange={this.getFieldState("lastName")}
+                  onChange={(e) => this.getFieldState(e, "lastName")}
                   onBlur={this.props.handleValidation("lastName")}
                   value={this.state.lastName}
                   className="validate" />
@@ -267,7 +255,7 @@ class ListView extends React.Component {
               </div>
               <div className="input-field">
                 <input placeholder="Email" id="email" type="text"
-                  onChange={this.getFieldState("email")}
+                  onChange={(e) => this.getFieldState(e, "email")}
                   onBlur={this.props.handleValidation("email")}
                   value={this.state.email}
                   className="validate" />
@@ -294,13 +282,13 @@ class ListView extends React.Component {
                       <div className="row m-lr-0 field-val-wrapper" key={getLen}>
                         <div className="input-field">
                           <input placeholder="Field Name" id={keyId} type="text"
-                            onChange={this.getFieldState(keyId)}
+                            onChange={(e) => this.getFieldState(e, keyId)}
                             className="validate field-name" />
                           <label className="active" htmlFor={keyId}>{"Field Name " + getLen}</label>
                         </div>
                         <div className="input-field">
                           <input placeholder="Value" id={valueId} type="text"
-                            onChange={this.getFieldState(valueId)}
+                            onChange={(e) => this.getFieldState(e, valueId)}
                             className="validate field-value" />
                           <label className="active" htmlFor={valueId}>{"Value " + getLen}</label>
                         </div>

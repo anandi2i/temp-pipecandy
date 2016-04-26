@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDom from "react-dom";
-import autobind from "autobind-decorator";
 import strategy from "joi-validation-strategy";
 import validation from "react-validation-mixin";
 import AvatarCropper from "react-avatar-cropper";
@@ -30,38 +29,37 @@ class Profile extends React.Component {
       "croppedImg": user.avatar || ""
     };
   }
-  @autobind
-  handleFileChange(dataURI) {
+
+  handleFileChange = (dataURI) => {
     this.setState({
       img: dataURI,
       croppedImg: this.state.croppedImg,
       cropperOpen: true
     });
   }
-  @autobind
-  handleCrop(dataURI) {
+
+  handleCrop = (dataURI) => {
     this.setState({
       cropperOpen: false,
       img: dataURI,
       croppedImg: dataURI
     });
   }
-  @autobind
-  handleRequestHide() {
+
+  handleRequestHide = () => {
     this.setState({cropperOpen: false});
   }
 
   componentWillUnmount() {
-    UserStore.removeChangeListener(this._onChange);
+    UserStore.removeChangeListener(this.onStoreChange);
   }
 
   componentDidMount() {
     enableToolTip();
-    UserStore.addChangeListener(this._onChange);
+    UserStore.addChangeListener(this.onStoreChange);
   }
 
-  @autobind
-  _onChange() {
+  onStoreChange = () => {
     let user = UserStore.getUser();
     //TODO need to refresh image URL without page load to avoid set img state in croppedImg
     this.setState({
@@ -77,9 +75,8 @@ class Profile extends React.Component {
     displaySuccess(UserStore.getSuccess());
   }
 
-  @autobind
-  onSubmit(event) {
-    event.preventDefault();
+  onSubmit = (e) => {
+    e.preventDefault();
     const onValidate = (error) => {
       if (!error) {
         if ((this.state.newPassword && this.state.oldPassword) ||
@@ -94,21 +91,16 @@ class Profile extends React.Component {
     this.props.validate(onValidate);
   }
 
-  @autobind
-  onChange(field) {
-    return event => {
-      let state = {};
-      state[field] = event.target.value;
-      this.setState(state);
-    };
+  onChange(e, field) {
+    let state = {};
+    state[field] = e.target.value;
+    this.setState(state);
   }
 
-  @autobind
   getValidatorData() {
     return this.state;
   }
 
-  @autobind
   renderHelpText(el) {
     return (
       <div className="warning-block">
@@ -117,8 +109,7 @@ class Profile extends React.Component {
     );
   }
 
-  @autobind
-  triggerFile() {
+  triggerFile = () => {
     $("#selectAvatar").trigger("click");
   }
 
@@ -170,7 +161,7 @@ class Profile extends React.Component {
                     }
                     value={this.state.firstName}
                     name="First Name"
-                    onChange={this.onChange("firstName")}
+                    onChange={(e) => this.onChange(e, "firstName")}
                     onBlur={this.props.handleValidation("firstName")} />
                   <label className="active" htmlFor="firstName">First Name</label>
                   {!this.props.isValid("firstName")
@@ -188,7 +179,7 @@ class Profile extends React.Component {
                     }
                       value={this.state.lastName}
                       name="Last Name"
-                      onChange={this.onChange("lastName")}
+                      onChange={(e) => this.onChange(e, "lastName")}
                       onBlur={this.props.handleValidation("lastName")} />
                   <label className="active" htmlFor="lastName">Last Name</label>
                   {!this.props.isValid("lastName")
@@ -210,7 +201,7 @@ class Profile extends React.Component {
                       : "invalid"
                     }
                     name="old password"
-                    onChange={this.onChange("oldPassword")}
+                    onChange={(e) => this.onChange(e, "oldPassword")}
                     onBlur={this.props.handleValidation("oldPassword")} />
                   <label htmlFor="password">Old Password</label>
                   {!this.props.isValid("oldPassword")
@@ -232,7 +223,8 @@ class Profile extends React.Component {
                         ? "validate"
                         : "invalid"
                     }
-                    name="new password" onChange={this.onChange("newPassword")}
+                    name="new password"
+                    onChange={(e) => this.onChange(e, "newPassword")}
                     onBlur={this.props.handleValidation("newPassword")} />
                   <label htmlFor="password">New Password</label>
                   {!this.props.isValid("newPassword")

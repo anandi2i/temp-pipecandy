@@ -49,14 +49,14 @@ class Signup extends React.Component {
    */
   componentDidMount() {
     enableToolTip();
-    UserStore.addChangeListener(() => this._onChange);
+    UserStore.addChangeListener(this.onStoreChange);
   }
 
   /**
    * Performs task of removing a listener that looks for error occurrences
    */
   componentWillUnmount() {
-    UserStore.removeChangeListener(() => this._onChange);
+    UserStore.removeChangeListener(this.onStoreChange);
   }
 
   /**
@@ -106,7 +106,7 @@ class Signup extends React.Component {
   /**
    * Displays errors if any arise
    */
-  _onChange() {
+  onStoreChange = () => {
     displayError(UserStore.getError());
   }
 

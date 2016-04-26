@@ -8,6 +8,9 @@ var Home = React.createClass({
       userName: UserStore.getUser()
     };
   },
+  componentWillUnmount: function() {
+    UserStore.removeChangeListener(this.onChange);
+  },
   componentDidMount: function() {
     UserStore.addChangeListener(this.onChange);
   },

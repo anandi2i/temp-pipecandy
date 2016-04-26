@@ -1,7 +1,6 @@
 import React from "react";
 import {Link} from "react-router";
 import UserAction from "../actions/UserAction";
-import autobind from "autobind-decorator";
 import UserStore from "../stores/UserStore";
 
 class Header extends React.Component {
@@ -13,26 +12,24 @@ class Header extends React.Component {
   }
 
   componentDidMount() {
-    UserStore.addChangeListener(this._onChange);
+    UserStore.addChangeListener(this.onStoreChange);
   }
 
   componentWillUnmount() {
-    UserStore.removeChangeListener(this._onChange);
+    UserStore.removeChangeListener(this.onStoreChange);
   }
 
   componentDidUpdate(){
     enabledropDownBtn();
   }
 
-  @autobind
-  _onChange() {
+  onStoreChange = () => {
     this.setState({
       user: UserStore.getUser()
     });
   }
 
-  @autobind
-  logout(){
+  logout = () => {
     UserAction.logout();
   }
 

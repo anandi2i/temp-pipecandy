@@ -1,5 +1,4 @@
 import React from "react";
-import autobind from "autobind-decorator";
 import SelectEmailTemplate from "./SelectEmailTemplate.react";
 import SelectEmailList from "./SelectEmailList.react";
 import ScheduleEmail from "./ScheduleEmail.react";
@@ -89,8 +88,7 @@ class RunCampaign extends React.Component {
     });
   }
 
-  @autobind
-  setTemplateContent() {
+  setTemplateContent = () => {
     this.setState({
       selectedTemplate: this.refs.SelectEmailTemplate
         .refs.selectPreBuildTemplate.state.activeTemplateContent

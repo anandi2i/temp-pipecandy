@@ -1,10 +1,6 @@
 import React from "react";
-// import {Link} from "react-router";
-// import autobind from "autobind-decorator";
 import SelectPreBuildTemplate from "./SelectPreBuildTemplate.react";
 import SelectCampaignTemplate from "./SelectCampaignTemplate.react";
-// import CampaignActions from "../../actions/CampaignActions";
-// import CampaignStore from "../../stores/CampaignStore";
 
 class TabsNav extends React.Component {
   handleClick(index) {
@@ -70,7 +66,7 @@ class SelectEmailTemplate extends React.Component {
             </div>
           </nav>
         </div>
-        <SelectPreBuildTemplate 
+        <SelectPreBuildTemplate
           setTemplateContent={this.props.setTemplateContent}
           ref="selectPreBuildTemplate"
           active={this.state.activeTab} />

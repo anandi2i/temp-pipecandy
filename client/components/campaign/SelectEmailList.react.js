@@ -1,5 +1,4 @@
 import React from "react";
-import autobind from "autobind-decorator";
 import Spinner from "../Spinner.react";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
@@ -20,15 +19,14 @@ class SelectEmailList extends React.Component {
   }
 
   componentDidMount() {
-    EmailListStore.addChangeListener(this._onEmailListChange);
+    EmailListStore.addChangeListener(this.onEmailListChange);
   }
 
   componentWillUnmount() {
-    EmailListStore.removeChangeListener(this._onEmailListChange);
+    EmailListStore.removeChangeListener(this.onEmailListChange);
   }
 
-  @autobind
-  _onEmailListChange() {
+  onEmailListChange = () => {
     let emailLists = EmailListStore.getAllList();
     this.setState({
       allEmailLists: emailLists

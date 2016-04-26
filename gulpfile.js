@@ -25,7 +25,7 @@ gulp.task("browserify", function() {
       debug: true
     })
     .transform("babelify", {
-      "plugins": ["transform-decorators-legacy"],
+      "plugins": ["transform-class-properties"],
       "presets": ["react", "es2015"]
     })
     .bundle()

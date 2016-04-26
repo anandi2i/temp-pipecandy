@@ -1,6 +1,5 @@
 import React from "react";
 import {Link} from "react-router";
-import autobind from "autobind-decorator";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
 
@@ -18,15 +17,14 @@ class CampaignListView extends React.Component {
   }
 
   componentDidMount() {
-    CampaignStore.addChangeListener(this._onChange);
+    CampaignStore.addChangeListener(this.onStoreChange);
   }
 
   componentWillUnmount() {
-    CampaignStore.removeChangeListener(this._onChange);
+    CampaignStore.removeChangeListener(this.onStoreChange);
   }
 
-  @autobind
-  _onChange() {
+  onStoreChange = () => {
     let CampaignLists = CampaignStore.getAllCampaigns();
     this.setState({
       allCampaignLists: CampaignLists

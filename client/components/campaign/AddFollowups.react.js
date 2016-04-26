@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import autobind from "autobind-decorator";
 import CampaignStore from "../../stores/CampaignStore";
 import PreviewCampaignPopup from "./PreviewCampaignPopup.react";
 
@@ -22,15 +21,14 @@ class AddFollowups extends React.Component {
     let mytoolbar = `#mytoolbar${followupId}`;
     let insertSmartTags = `#insertSmartTags${followupId}`;
     let smartTagDrpDwnId = `#dropdown${followupId}`;
-    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId,
-      this.tinyMceCb, this.editorOnBlur);
+    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, this.tinyMceCb,
+      this.editorOnBlur);
     this.el.find("select").material_select();
     initTimePicker(this.el.find(".timepicker"));
     enabledropDownBtnByID(insertSmartTags);
   }
 
-  @autobind
-  tinyMceCb(editor) {
+  tinyMceCb = (editor) => {
     let content = editor.getContent();
     let issueTags = getIssueTagsInEditor(content);
     let personIssues = CampaignStore.getIssuesPeopleList(issueTags);
@@ -42,16 +40,14 @@ class AddFollowups extends React.Component {
     });
   }
 
-  @autobind
-  editorOnBlur(editor) {
+  editorOnBlur = (editor) => {
     let text = editor.getBody().textContent;
     this.setState({
       emailText: text
     });
   }
 
-  @autobind
-  toggleEditContainer(e) {
+  toggleEditContainer = (e) => {
     this.setState({clicked: !this.state.clicked});
     this.el.find(".draft-template").slideToggle("slow");
   }
@@ -62,12 +58,11 @@ class AddFollowups extends React.Component {
     this.setState(state);
   }
 
-  openPreviewModal() {
+  openPreviewModal = () => {
     this.refs.preview.openModal();
   }
 
-  @autobind
-  closeCallback(){
+  closeCallback = () => {
     if(!this.refs.preview.state.personIssues.length){
       this.setState((state) => ({
         errorCount: 0
@@ -160,7 +155,7 @@ class AddFollowups extends React.Component {
               this.state.errorCount
                 ?
                   <div className="row r-btn-container preview-content m-lr-0">
-                    <div onClick={() => this.openPreviewModal()} className="btn btn-dflt error-btn">
+                    <div onClick={this.openPreviewModal} className="btn btn-dflt error-btn">
                       {this.state.errorCount} Issues Found
                     </div>
                   </div>

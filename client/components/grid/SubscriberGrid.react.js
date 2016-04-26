@@ -2,7 +2,6 @@ import React from "react";
 import validation from "react-validation-mixin";
 import validatorUtil from "../../utils/ValidationMessages";
 import strategy from "joi-validation-strategy";
-import autobind from "autobind-decorator";
 import Griddle from "griddle-react";
 import EmailListStore from "../../stores/EmailListStore";
 import EmailListActions from "../../actions/EmailListActions";
@@ -23,8 +22,7 @@ class EditLinkComponent extends React.Component {
 
 class GriddlePager extends React.Component {
 
-  @autobind
-  pageChange(key, event) {
+  pageChange(event, key) {
     this.props.setPage(key);
   }
 
@@ -44,7 +42,7 @@ class GriddlePager extends React.Component {
     for(let i = startIndex; i < endIndex ; i++){
       let selected = this.props.currentPage === i ? "active" : "link";
       options.push(
-        <li key={i} className={selected} data-value={i} onClick={this.pageChange.bind(this, i)}>
+        <li key={i} className={selected} data-value={i} onClick={(e) => this.pageChange(e, i)}>
           {i + sumWithPage}
         </li>
       );
@@ -154,29 +152,26 @@ class SubscriberGridView extends React.Component {
   }
 
   componentDidMount() {
-    EmailListStore.addPersonChangeListener(this._onChange);
+    EmailListStore.addPersonChangeListener(this.onStoreChange);
     $(".modal-content").mCustomScrollbar({
       theme:"minimal-dark"
     });
   }
 
   componentWillUnmount() {
-    EmailListStore.removePersonChangeListener(this._onChange);
+    EmailListStore.removePersonChangeListener(this.onStoreChange);
   }
 
-  @autobind
-  closeModal() {
+  closeModal = () => {
     $("#editSubbscriber").closeModal();
   }
 
-  @autobind
-  _onChange() {
+  onStoreChange = () => {
     let peopleUpdate = EmailListStore.getPeopleByListUpdated();
     this.setState({people: peopleUpdate});
   }
 
-  @autobind
-  handleRowClick(obj, eve) {
+  handleRowClick = (obj, eve) => {
     let propsData = obj.props.data;
     let addField1 = propsData.addField1.split(":");
     let addField2 = propsData.addField2.split(":");
@@ -208,21 +203,16 @@ class SubscriberGridView extends React.Component {
     }
   }
 
-  @autobind
-  getEditFieldState(field) {
-    return event => {
-      let state = {};
-      state[field] = event.target.value;
-      this.setState(state);
-    };
+  onChange(e, field) {
+    let state = {};
+    state[field] = e.target.value;
+    this.setState(state);
   }
 
-  @autobind
   getValidatorData() {
     return this.state;
   }
 
-  @autobind
   renderHelpText(el) {
     return (
       <div className="warning-block">
@@ -231,8 +221,7 @@ class SubscriberGridView extends React.Component {
     );
   }
 
-  @autobind
-  onSubmit() {
+  onSubmit = () => {
     let person = {
       firstName: this.state.firstName,
       middleName: this.state.middleName,
@@ -302,17 +291,17 @@ class SubscriberGridView extends React.Component {
               <span className="mdi mdi-arrow-down active"></span>
             } />
         </div>
-		{/* Edit subscriber popup starts here */}
+    {/* Edit subscriber popup starts here */}
         <div id="editSubbscriber"
           className="modal modal-fixed-header modal-fixed-footer mini-modal">
-          <i onClick={this.closeModal} className="mdi mdi-close"></i>
+          <i className="mdi mdi-close modal-close"></i>
           <div className="modal-header">
             <div className="head">Edit Subbscriber</div>
           </div>
           <div className="modal-content">
             <div className="input-field">
               <input placeholder="First Name" id="firstName" type="text"
-                onChange={this.getEditFieldState("firstName")}
+                onChange={(e) => this.onChange(e, "firstName")}
                 onBlur={this.props.handleValidation("firstName")}
                 value={this.state.firstName}
                 className="validate" />
@@ -325,14 +314,14 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Middle Name" type="text"
-                onChange={this.getEditFieldState("middleName")}
+                onChange={(e) => this.onChange(e, "middleName")}
                 value={this.state.middleName}
                 className="validate" />
               <label htmlFor="middleName" className="active">Middle Name</label>
             </div>
             <div className="input-field">
               <input placeholder="Last Name" id="lastName" type="text"
-                onChange={this.getEditFieldState("lastName")}
+                onChange={(e) => this.onChange(e, "lastName")}
                 onBlur={this.props.handleValidation("lastName")}
                 value={this.state.lastName}
                 className="validate" />
@@ -345,7 +334,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="email" id="email" type="text"
-                onChange={this.getEditFieldState("email")}
+                onChange={(e) => this.onChange(e, "email")}
                 onBlur={this.props.handleValidation("email")}
                 value={this.state.email}
                 className="validate" />
@@ -358,7 +347,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Field Name" type="text"
-                onChange={this.getEditFieldState("field1")}
+                onChange={(e) => this.onChange(e, "field1")}
                 value={this.state.field1}
                 className={
                   !this.state.field1 && this.state.value1
@@ -369,7 +358,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Value" type="text"
-                onChange={this.getEditFieldState("value1")}
+                onChange={(e) => this.onChange(e, "value1")}
                 value={this.state.value1}
                 className={
                   this.state.field1 && !this.state.value1
@@ -380,7 +369,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Field Name" type="text"
-                onChange={this.getEditFieldState("field2")}
+                onChange={(e) => this.onChange(e, "field2")}
                 value={this.state.field2}
                 className={
                   !this.state.field2 && this.state.value2
@@ -391,7 +380,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Value" type="text"
-                onChange={this.getEditFieldState("value2")}
+                onChange={(e) => this.onChange(e, "value2")}
                 value={this.state.value2}
                 className={
                   this.state.field2 && !this.state.value2
@@ -402,7 +391,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Field Name" type="text"
-                onChange={this.getEditFieldState("field3")}
+                onChange={(e) => this.onChange(e, "field3")}
                 value={this.state.field3}
                 className={
                   !this.state.field3 && this.state.value3
@@ -413,7 +402,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Value" type="text"
-                onChange={this.getEditFieldState("value3")}
+                onChange={(e) => this.onChange(e, "value3")}
                 value={this.state.value3}
                 className={
                   this.state.field3 && !this.state.value3
@@ -424,7 +413,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Field Name" type="text"
-                onChange={this.getEditFieldState("field4")}
+                onChange={(e) => this.onChange(e, "field4")}
                 value={this.state.field4}
                 className={
                   !this.state.field4 && this.state.value4
@@ -435,7 +424,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Value" type="text"
-                onChange={this.getEditFieldState("value4")}
+                onChange={(e) => this.onChange(e, "value4")}
                 value={this.state.value4}
                 className={
                   this.state.field4 && !this.state.value4
@@ -446,7 +435,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Field Name" type="text"
-                onChange={this.getEditFieldState("field5")}
+                onChange={(e) => this.onChange(e, "field5")}
                 value={this.state.field5}
                 className={
                   !this.state.field5 && this.state.value5
@@ -457,7 +446,7 @@ class SubscriberGridView extends React.Component {
             </div>
             <div className="input-field">
               <input placeholder="Value" type="text"
-                onChange={this.getEditFieldState("value5")}
+                onChange={(e) => this.onChange(e, "value5")}
                 value={this.state.value5}
                 className={
                   this.state.field5 && !this.state.value5
@@ -468,10 +457,10 @@ class SubscriberGridView extends React.Component {
             </div>
           </div>
           <div className="modal-footer r-btn-container">
-            <input type="button" onClick={this.closeModal} className="btn red modal-action p-1-btn" value="Cancel" />
+            <input type="button"className="btn red modal-action modal-close p-1-btn" value="Cancel" />
             <input type="button" onClick={this.onSubmit} className="btn blue modal-action" value="Update" />
           </div>
-		  {/* Edit subscriber popup ends here */}
+      {/* Edit subscriber popup ends here */}
         </div>
       </div>
     );

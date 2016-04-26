@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import update from "react-addons-update";
-import autobind from "autobind-decorator";
 import AddFollowups from "./AddFollowups.react";
 import PreviewCampaignPopup from "./PreviewCampaignPopup.react";
 import CampaignStore from "../../stores/CampaignStore";
@@ -28,7 +27,7 @@ class ScheduleEmail extends React.Component {
 
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
-    CampaignStore.addEmailListChangeListener(this._onChange);
+    CampaignStore.addEmailListChangeListener(this.onStoreChange);
     enabledropDownBtnByID("#insertSmartTags");
     this.el.find("select").material_select();
     initDatePicker(this.el.find(".datepicker"));
@@ -36,16 +35,15 @@ class ScheduleEmail extends React.Component {
   }
 
   componentWillUnmount() {
-    CampaignStore.removeEmailListChangeListener(this._onChange);
+    CampaignStore.removeEmailListChangeListener(this.onStoreChange);
   }
 
   initTinyMCE() {
-    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown",
-      this.tinyMceCb, this.editorOnBlur);
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", this.tinyMceCb,
+      this.editorOnBlur);
   }
 
-  @autobind
-  tinyMceCb(editor){
+  tinyMceCb = (editor) => {
     let content = editor.getContent();
     let issueTags = getIssueTagsInEditor(content);
     let personIssues = CampaignStore.getIssuesPeopleList(issueTags);
@@ -57,16 +55,14 @@ class ScheduleEmail extends React.Component {
     });
   }
 
-  @autobind
-  editorOnBlur(editor) {
+  editorOnBlur = (editor) => {
     let text = editor.getBody().textContent;
     this.setState({
       emailText: text
     });
   }
 
-  @autobind
-  _onChange() {
+  onStoreChange = () => {
     let selectedEmailList = CampaignStore.getSelectedEmailList();
     this.setState({
       emailList: selectedEmailList.emailList || [],
@@ -77,12 +73,12 @@ class ScheduleEmail extends React.Component {
     this.initTinyMCE();
   }
 
-  toggleEditContainer() {
+  toggleEditContainer = () => {
     this.setState({clicked: !this.state.clicked});
     this.el.find(".draft-template").slideToggle("slow");
   }
 
-  addFollowups() {
+  addFollowups = () => {
     let maxLength = 5;
     if(this.state.followups.length < maxLength) {
       this.setState((state) => ({
@@ -94,7 +90,7 @@ class ScheduleEmail extends React.Component {
     }
   }
 
-  displayScheduleCampaign() {
+  displayScheduleCampaign = () => {
     this.setState({
       displayScheduleCampaign: !this.state.displayScheduleCampaign
     });
@@ -128,11 +124,11 @@ class ScheduleEmail extends React.Component {
     this.setState(state);
   }
 
-  openPreviewModal() {
+  openPreviewModal = () => {
     this.refs.preview.openModal();
   }
 
-  saveCampaignInfo() {
+  saveCampaignInfo = () => {
     let followups = [];
     this.state.followups.map(function(val, key){
      followups.push(this.refs[`addFollowups${val.id}`]);
@@ -147,9 +143,8 @@ class ScheduleEmail extends React.Component {
     });
   }
 
-  @autobind
-  closeCallback(){
-    if(!this.refs.preview.state.personIssues.length){
+  closeCallback = () => {
+    if(!this.refs.preview.state.personIssues.length) {
       this.setState((state) => ({
         errorCount: 0
       }));
@@ -173,12 +168,12 @@ class ScheduleEmail extends React.Component {
         <div className="row sub-head-container m-lr-0">
           <div className="head">Let's Draft an Email</div>
           <div className="sub-head">
-            <a className="btn blue" onClick={() => this.saveCampaignInfo()}>Save & continue</a>
+            <a className="btn blue" onClick={this.saveCampaignInfo}>Save & continue</a>
           </div>
         </div>
         {/* Draft Email starts here*/}
         <div className="row draft-container m-t-50 m-lr-0">
-          <div className="head" onClick={() => this.toggleEditContainer()}>
+          <div className="head" onClick={this.toggleEditContainer}>
             <div className="col s4 m4 l4"><h3>1. First Email</h3></div>
             <div className="col s6 m6 l6 editor-text">
               &nbsp;
@@ -195,7 +190,7 @@ class ScheduleEmail extends React.Component {
                 <div className="col s12 p-lr-0">
                   <input type="checkbox" className="filled-in" id="filled-in-box"
                     defaultChecked=""
-                    onChange={() => this.displayScheduleCampaign()} />
+                    onChange={this.displayScheduleCampaign} />
                   <label htmlFor="filled-in-box">Schedule campaign for later</label>
                 </div>
               </div>
@@ -276,7 +271,7 @@ class ScheduleEmail extends React.Component {
                 this.state.errorCount
                   ?
                     <div className="row r-btn-container preview-content m-lr-0">
-                      <div onClick={() => this.openPreviewModal()} className="btn btn-dflt error-btn">
+                      <div onClick={this.openPreviewModal} className="btn btn-dflt error-btn">
                         {this.state.errorCount} Issues Found
                       </div>
                     </div>
@@ -309,7 +304,7 @@ class ScheduleEmail extends React.Component {
           }, this)
         }
         <div className="row add-followups m-lr-0"
-          onClick={() => this.addFollowups()}
+          onClick={this.addFollowups}
           style={{display: displayAddFollowup}}>
           <i className="mdi mdi-plus"></i> Add Follow up
         </div>

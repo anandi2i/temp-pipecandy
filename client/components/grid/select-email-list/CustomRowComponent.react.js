@@ -1,13 +1,11 @@
 import React from "react";
 import {Link} from "react-router";
-import autobind from "autobind-decorator";
 
 class CustomGridRowComponent extends React.Component {
 
-  @autobind
-  handleCheckboxChange() {
-    this.props.globalData.toggleSelectRow(
-      this.props.data, 
+  handleCheckboxChange = () => {
+    this.props.globalData().toggleSelectRow(
+      this.props.data,
       this.refs.selected.checked
     );
   }
@@ -15,14 +13,14 @@ class CustomGridRowComponent extends React.Component {
   render() {
     let data = this.props.data;
     let checkboxId = guid();
-    let checkedStatus = this.props.globalData.getIsRowChecked(data);
+    let checkedStatus = this.props.globalData().getIsRowChecked(data);
     return (
       <div className="email-list">
         <div className="row">
           <div className="col m6 s12 block-1">
             <div className="row-table">
               <div className="row-table-cell valign-middle center grid-checkbox-column">
-                <input 
+                <input
                   type="checkbox"
                   id={checkboxId}
                   className="filled-in"
@@ -69,7 +67,7 @@ class CustomGridRowComponent extends React.Component {
           </div>
         </div>
       </div>
-    ); 
+    );
   }
 }
 

@@ -1,21 +1,19 @@
 import React from "react";
-import autobind from "autobind-decorator";
 
 class GridFilter extends React.Component {
-  
+
   constructor(props) {
     super(props);
   }
 
-  @autobind
-  handleChange(evt) {
-    this.props.changeFilter(evt.target.value);
+  handleChange = (e) => {
+    this.props.changeFilter(e.target.value);
   }
 
   render() {
     return (
       <div className="col m5 s12 filter-container">
-        <input 
+        <input
           id="grid_filter"
           type="search"
           name="search"

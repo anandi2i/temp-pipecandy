@@ -1,16 +1,14 @@
 import React from "react";
-import autobind from "autobind-decorator";
 
 class CustomGridPagination extends React.Component {
-  
+
   constructor(props) {
     super(props);
   }
 
-  @autobind
-  pageChange(event) {
+  pageChange = (e) => {
     // value starts from 0... maxPage-1
-    this.props.setPage(parseInt(event.target.getAttribute("data-value"), 5));
+    this.props.setPage(parseInt(e.target.getAttribute("data-value"), 5));
   }
 
   render() {
@@ -24,7 +22,7 @@ class CustomGridPagination extends React.Component {
     let noOfButtonShow = 6;
     let startIndex = Math.max(this.props.currentPage - startIndexPoint, temp);
     let endIndex = Math.min(startIndex + noOfButtonShow, this.props.maxPage);
-    if (this.props.maxPage >= noOfButtonShow && 
+    if (this.props.maxPage >= noOfButtonShow &&
         (endIndex - startIndex) <= endIndexPoint) {
       startIndex = endIndex - startIndexPoint;
     }
@@ -33,7 +31,7 @@ class CustomGridPagination extends React.Component {
     for (let i = startIndex; i < endIndex; i++) {
       let sel = this.props.currentPage === i ? "pager-active" : "pager-btn";
       lists.push(
-        <li key={`page${i}`} className={sel} data-value={i} 
+        <li key={`page${i}`} className={sel} data-value={i}
           onClick={this.pageChange}>{i + sum}</li>
       );
     }

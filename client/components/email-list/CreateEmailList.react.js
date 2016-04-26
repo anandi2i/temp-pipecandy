@@ -1,7 +1,6 @@
 import React from "react";
 import {Link} from "react-router";
 import Autosuggest from "react-autosuggest";
-import autobind from "autobind-decorator";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 
@@ -35,50 +34,44 @@ class EmailList extends React.Component {
   }
 
   componentDidMount() {
-    EmailListStore.addChangeListener(this._onChange);
+    EmailListStore.addChangeListener(this.onStoreChange);
     EmailListActions.getAllEmailList();
   }
 
   componentWillUnmount() {
-    EmailListStore.removeChangeListener(this._onChange);
+    EmailListStore.removeChangeListener(this.onStoreChange);
   }
 
-  @autobind
-  _onChange() {
+  onStoreChange = () => {
     this.setState({
       emailList: getAllListFromStore()
     });
   }
 
-  @autobind
-  onChange(event, {newValue, method}) {
+  onChange = (event, {newValue, method}) => {
     this.setState({
       value: newValue
     });
   }
 
-  @autobind
-  onSuggestionsUpdateReq({value}) {
+  onSuggestionsUpdateReq = ({value}) => {
     this.setState({
       suggestions: getSuggestions(value, this.state.emailList)
     });
   }
 
-  @autobind
-  renderSuggestion(suggestion) {
+  renderSuggestion = (suggestion) => {
     return (
       <span>{suggestion.name}</span>
     );
   }
 
-  @autobind
-  getSuggestionValue(suggestion) {
+  getSuggestionValue = (suggestion) => {
     return suggestion.name;
   }
 
-@autobind
-  onSubmit(event) {
-    event.preventDefault();
+  onSubmit = (e) => {
+    e.preventDefault();
     const formData = {"name" : this.state.value};
     EmailListActions.createNewList(formData);
   }

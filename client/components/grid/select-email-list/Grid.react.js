@@ -1,5 +1,4 @@
 import React from "react";
-import autobind from "autobind-decorator";
 import _ from "underscore";
 import Griddle from "griddle-react";
 import CustomRowComponent from "./CustomRowComponent.react";
@@ -16,8 +15,7 @@ class SelectEmailListGrid extends React.Component {
     };
   }
 
-  @autobind
-  getCustomGridFilterer(results, filter) {
+  getCustomGridFilterer = (results, filter) => {
     // customfilter only filter the list name
     // result.name means the listname
     let check = 0;
@@ -29,8 +27,7 @@ class SelectEmailListGrid extends React.Component {
     });
   }
 
-  @autobind
-  _toggleSelectRow(row, isChecked) {
+  toggleSelectRow = (row, isChecked) => {
     let selectedRowIds = this.state.selectedRowIds;
     if (isChecked) {
       let isFound = _.find(selectedRowIds, (id) => {
@@ -48,20 +45,18 @@ class SelectEmailListGrid extends React.Component {
     });
   }
 
-  @autobind
-  _getIsRowChecked(row) {
+  getIsRowChecked = (row) => {
     let check = -1;
     return this.state.selectedRowIds.indexOf(row.id) > check ? true : false;
   }
 
-  @autobind
-  getGlobalData() {
+  getGlobalData = () => {
     // Get the globalData from the prop
     let globalData = this.props.globalData;
     return {
       listLink: globalData !== null && globalData.listLink ? true : false,
-      toggleSelectRow: this._toggleSelectRow,
-      getIsRowChecked: this._getIsRowChecked,
+      toggleSelectRow: this.toggleSelectRow,
+      getIsRowChecked: this.getIsRowChecked,
     };
   }
 
@@ -90,7 +85,7 @@ class SelectEmailListGrid extends React.Component {
         customFilterComponent={CustomFilterComponent}
         useCustomFilterer={true}
         customFilterer={this.getCustomGridFilterer}
-        globalData={this.getGlobalData()} />
+        globalData={this.getGlobalData} />
     );
   }
 

@@ -1,6 +1,5 @@
 import React from "react";
 import {Link} from "react-router";
-import autobind from "autobind-decorator";
 import Spinner from "../Spinner.react";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
@@ -20,15 +19,14 @@ class ListView extends React.Component {
   }
 
   componentDidMount() {
-    EmailListStore.addChangeListener(this._onChange);
+    EmailListStore.addChangeListener(this.onStoreChange);
   }
 
   componentWillUnmount() {
-    EmailListStore.removeChangeListener(this._onChange);
+    EmailListStore.removeChangeListener(this.onStoreChange);
   }
 
-  @autobind
-  _onChange() {
+  onStoreChange = () => {
     let emailLists = EmailListStore.getAllList();
     this.setState({
       allEmailLists: emailLists
@@ -54,7 +52,7 @@ class ListView extends React.Component {
           {
             this.state.allEmailLists.length
               ?
-                <EmailListGrid results={this.state.allEmailLists} 
+                <EmailListGrid results={this.state.allEmailLists}
                 globalData={this.getGlobalData()}/>
               : <div className="spaced"><Spinner /></div>
           }
