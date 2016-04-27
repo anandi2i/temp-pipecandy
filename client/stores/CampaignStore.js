@@ -2,6 +2,7 @@ import {EventEmitter} from "events";
 import _ from "underscore";
 import Constants from "../constants/Constants";
 import AppDispatcher from "../dispatcher/AppDispatcher";
+import {HandleError} from "../utils/ErrorMessageHandler";
 import CampaignApi from "../API/CampaignApi";
 import EmailListApi from "../API/EmailListApi";
 import appHistory from "../RouteContainer";
@@ -121,7 +122,7 @@ AppDispatcher.register(function(payload) {
         _error = "";
         appHistory.push(`campaign/${response.data.id}/run`);
       }, (err) => {
-        _error = err;
+        _error = HandleError.evaluateError(err);
         CampaignStore.emitChange();
       });
       break;
@@ -131,7 +132,7 @@ AppDispatcher.register(function(payload) {
         _error = "";
         CampaignStore.emitChange();
       }, (err) => {
-        _error = err;
+        _error = HandleError.evaluateError(err);
         CampaignStore.emitChange();
       });
       break;
@@ -142,7 +143,7 @@ AppDispatcher.register(function(payload) {
         CampaignStore.emitChange();
       }, (err) => {
         _allEmailTemplates = [];
-        _error = err;
+        _error = HandleError.evaluateError(err);
         CampaignStore.emitChange();
       });
       break;
@@ -186,7 +187,7 @@ AppDispatcher.register(function(payload) {
         CampaignStore.emitEmailListChange();
       }, (err) => {
         selectedEmailList = {};
-        _error = err;
+        _error = HandleError.evaluateError(err);
         CampaignStore.emitEmailListChange();
       });
       break;

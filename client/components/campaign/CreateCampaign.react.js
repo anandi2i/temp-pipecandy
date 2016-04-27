@@ -1,6 +1,7 @@
 import React from "react";
 import {Link} from "react-router";
 import CampaignActions from "../../actions/CampaignActions";
+import CampaignStore from "../../stores/CampaignStore";
 
 class CreateCampaign extends React.Component {
   constructor(props) {
@@ -16,10 +17,26 @@ class CreateCampaign extends React.Component {
     this.setState(state);
   }
 
+  componentDidMount() {
+    CampaignStore.addChangeListener(this.onStoreChange);
+  }
+
+  componentWillUnmount() {
+    CampaignStore.removeChangeListener(this.onStoreChange);
+  }
+
+  handleChange = (event) => {
+    this.setState({campaignName: event.target.value});
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
     const formData = {"name" : this.state.campaignName};
     CampaignActions.createNewCampaign(formData);
+  }
+
+  onStoreChange = () => {
+    displayError(CampaignStore.getError());
   }
 
   render() {

@@ -29,6 +29,7 @@ class CampaignListView extends React.Component {
     this.setState({
       allCampaignLists: CampaignLists
     });
+    displayError(CampaignStore.getError());
   }
 
   render() {

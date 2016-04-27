@@ -3,6 +3,7 @@ import _ from "underscore";
 import Constants from "../constants/Constants";
 import AppDispatcher from "../dispatcher/AppDispatcher";
 import EmailListApi from "../API/EmailListApi";
+import {HandleError} from "../utils/ErrorMessageHandler";
 import {SuccessMessages} from "../utils/UserAlerts";
 import appHistory from "../RouteContainer";
 
@@ -126,7 +127,7 @@ AppDispatcher.register(function(payload) {
         EmailListStore.emitChange();
       }, (err)=> {
         _allEmailList = {};
-        _error = err;
+        _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
       });
       break;
@@ -136,7 +137,7 @@ AppDispatcher.register(function(payload) {
         _error = "";
         appHistory.push("list/"+response.data.id);
       }, (err)=> {
-        _error = err;
+        _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
       });
       break;
@@ -147,7 +148,7 @@ AppDispatcher.register(function(payload) {
         _error = "";
         EmailListStore.emitChange();
       }, (err)=> {
-        _error = err;
+        _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
       });
       break;
@@ -156,7 +157,7 @@ AppDispatcher.register(function(payload) {
         _success = SuccessMessages.successUpload;
         EmailListStore.emitChange();
       }, (err)=> {
-        _error = err;
+        _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
       });
       break;
@@ -165,14 +166,13 @@ AppDispatcher.register(function(payload) {
         _success = SuccessMessages.successSubscribe;
         EmailListStore.emitChange();
       }, (err)=> {
-        console.log("err", err);
-        _error = err;
+        _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
       });
       break;
     case Constants.UPDATE_SINGLE_PERSON:
       EmailListApi.updateSinglePerson(action.data).then((response) => {
-        _error = "Subscriber details updated successfully";
+        _success = "Subscriber details updated successfully";
         let rowIndex = "";
         let data = response.data;
         rowIndex = _.findIndex(_peopleData, {id: data.id});
@@ -191,8 +191,7 @@ AppDispatcher.register(function(payload) {
         _peopleData[rowIndex] = _temp;
         EmailListStore.emitPersonUpdate();
       }, (err)=> {
-        console.log("err", err);
-        _error = err;
+        _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
       });
       break;

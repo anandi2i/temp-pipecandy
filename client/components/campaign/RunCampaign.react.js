@@ -3,6 +3,7 @@ import SelectEmailTemplate from "./SelectEmailTemplate.react";
 import SelectEmailList from "./SelectEmailList.react";
 import ScheduleEmail from "./ScheduleEmail.react";
 import CampaignActions from "../../actions/CampaignActions";
+import CampaignStore from "../../stores/CampaignStore";
 
 class TabsNav extends React.Component {
   constructor(props) {
@@ -77,6 +78,14 @@ class RunCampaign extends React.Component {
     };
   }
 
+  componentDidMount() {
+    CampaignStore.addChangeListener(this.onStoreChange);
+  }
+
+  componentWillUnmount() {
+    CampaignStore.removeChangeListener(this.onStoreChange);
+  }
+
   handleClick(index) {
     let ScheduleEmailIndex = 3;
     if (index === ScheduleEmailIndex) {
@@ -93,6 +102,10 @@ class RunCampaign extends React.Component {
       selectedTemplate: this.refs.SelectEmailTemplate
         .refs.selectPreBuildTemplate.state.activeTemplateContent
     });
+  }
+
+  onStoreChange = () => {
+    displayError(CampaignStore.getError());
   }
 
   render() {

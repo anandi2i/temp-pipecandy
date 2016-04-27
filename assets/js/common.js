@@ -34,7 +34,8 @@ function displayError(error) {
     let warningContent = $("<div>", {})
       .append(
         $("<img>", {
-          src: "/images/warning-icon.png"
+          src: "/images/warning-icon.png",
+          alt: "Warning"
         }))
       .append(
         $("<span>", {

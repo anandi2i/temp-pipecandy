@@ -29,6 +29,7 @@ class SelectPreBuildTemplate extends React.Component {
     $(".modal-trigger").leanModal({
       dismissible: false
     });
+    displayError(CampaignStore.getError());
   }
 
   selectTemplate(key, event) {
