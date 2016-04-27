@@ -1,8 +1,8 @@
 {
   "restApiRoot": "/api",
   "host": "0.0.0.0",
-  "emailHost":"0.0.0.0",
-  "port": 3000,
+  "emailHost":"staging.pipecandy.com",
+  "port": 80,
   "remoting": {
     "context": {
       "enableHttpContext": false

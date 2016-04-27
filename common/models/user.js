@@ -55,7 +55,8 @@ module.exports = function(user) {
       redirect: "/verified",
       user: user,
       fname: user.firstName,
-      text: "{href}"
+      text: "{href}",
+      host: config.emailHost
     };
 
     user.verify(options, function(err, response, next) {
@@ -160,7 +161,7 @@ module.exports = function(user) {
 
   //send password reset link when password reset requested
   user.on("resetPasswordRequest", function(info) {
-    var url = "http://" + config.host + ":" + config.port + "/#/reset-password";
+    var url = "http://" + config.emailHost + ":" + config.port + "/#/reset-password";
     var html = "Click <a href='" + url + "/" +
       info.accessToken.id + "'>here</a> to reset your password";
     user.app.models.Email.send({
@@ -169,8 +170,15 @@ module.exports = function(user) {
       subject: "Password reset",
       html: html
     }, function(err) {
-      if (err) return console.log("error sending password reset email");
-      console.log("sending password reset email to:", info.email);
+      if (err) {
+        logger.error("error in sending password reset email for the user::",
+          info.email, " ::err::", err);
+        let error = new Error();
+        error.message = "Error in sending password reset email";
+        error.name = "ErrorInSendingEmailRest";
+        next(error);
+      }
+      logger.info("sending password reset email to:", info.email);
     });
   });
 
