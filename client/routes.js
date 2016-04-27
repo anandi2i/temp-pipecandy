@@ -39,10 +39,10 @@ function requireAuth(nextState, replace) {
     UserApi.getUserDetail(userId).then((response) => {
       UserAction.setUserDetail(response.data);
     }, (err) => {
-      replace("/login");
+      replace("/register");
     });
   } else {
-    replace("/login");
+    replace("/register");
   }
   return;
 }
