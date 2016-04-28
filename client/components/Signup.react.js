@@ -25,7 +25,8 @@ class Signup extends React.Component {
         firstName: "",
         email: "",
         password: "",
-        lastName: ""
+        lastName: "",
+        checked: false
       };
     this.validatorTypes = {
       firstName: validatorUtil.firstName,
@@ -84,6 +85,15 @@ class Signup extends React.Component {
     let state = {};
     state[field] = event.target.value;
     this.setState(state);
+  }
+
+  /**
+   * Changes the state when checkbox is clicked
+   *
+   * @param {object} event - the current event
+   */
+  handleClick(event) {
+    this.setState({checked: event.target.checked});
   }
 
   /**
@@ -184,7 +194,7 @@ class Signup extends React.Component {
                     <div className={getScore > pwdStrength._1 ? "active" : null}></div>
                     <div className={getScore > pwdStrength._0 ? "active" : null}></div>
                   </div>
-                  <input id="password" type="password"
+                  <input id="password" type={this.state.checked ? "text" : "password"}
                     className={
                       this.props.isValid("password")
                         ? "validate"
@@ -201,8 +211,11 @@ class Signup extends React.Component {
                   }
                 </div>
                 <p className="show-pass">
-                  <input type="checkbox" className="filled-in"
-                    id="filled-in-box" defaultChecked="checked" />
+                  <input type="checkbox"
+                    className="filled-in"
+                    id="filled-in-box"
+                    onClick={(e) => this.handleClick(e)}
+                    checked={this.state.checked} />
                   <label htmlFor="filled-in-box">Show password</label>
                 </p>
                 <button type="submit" className="btn auth-btn login-btn" >
