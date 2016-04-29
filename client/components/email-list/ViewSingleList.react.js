@@ -77,12 +77,10 @@ class ListView extends React.Component {
     }
   }
 
-  getFieldState(field) {
-    return event => {
-      let state = {};
-      state[field] = event.target.value;
-      this.setState(state);
-    };
+  getFieldState(event, field) {
+    let state = {};
+    state[field] = event.target.value;
+    this.setState(state);
   }
 
   getValidatorData() {
