@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import CampaignStore from "../../stores/CampaignStore";
-import PreviewCampaignPopup from "./PreviewCampaignPopup.react";
+import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
 
 class AddFollowups extends React.Component {
   constructor(props) {
@@ -10,7 +10,9 @@ class AddFollowups extends React.Component {
       clicked: true,
       errorCount: 0,
       personIssues: [],
-      emailText: ""
+      emailText: "",
+      subject: "",
+      emailContent: ""
     };
   }
 
@@ -59,11 +61,11 @@ class AddFollowups extends React.Component {
   }
 
   openPreviewModal = () => {
-    this.refs.preview.openModal();
+    this.refs.issues.openModal();
   }
 
   closeCallback = () => {
-    if(!this.refs.preview.state.personIssues.length){
+    if(!this.refs.issues.state.personIssues.length){
       this.setState((state) => ({
         errorCount: 0
       }));
@@ -163,13 +165,13 @@ class AddFollowups extends React.Component {
                   ""
             }
             {/* Popup starts here*/}
-            <PreviewCampaignPopup
+            <CampaignIssuesPreviewPopup
               emailSubject={this.state.subject}
               emailContent={this.state.emailContent}
-              peopleList={this.state.getAllPeopleList}
+              peopleList={this.props.peopleList}
               personIssues={this.state.personIssues}
               closeCallback={this.closeCallback}
-              ref="preview"
+              ref="issues"
             />
             {/* Popup ends here*/}
         </div>

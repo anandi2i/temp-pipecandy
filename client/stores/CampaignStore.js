@@ -73,6 +73,41 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
           fieldName.concat(_.pluck(person.fields, "name"))).length);
     });
     return peopleList;
+  },
+
+  // re-construct tag name to smart-tags
+  constructEmailTemplate(str) {
+    let html = $.parseHTML(str);
+    let findCommonTags = $(html).find("span.common");
+    _.each(findCommonTags, function(val, key){
+      let getTag = $(val).data("tag");
+      $(val)[0].dataset.tagName = getTag;
+      $(val).html("&lt;"+getTag+"&gt;");
+    });
+    let steDom = $("<div/>").html(html);
+    return $(steDom).html();
+  },
+
+  applySmartTagsValue(emailContent, getPersonInfo) {
+    emailContent = emailContent.replace(/"/g, "'");
+    $.each(getPersonInfo, function (key, value) {
+      if(key === "fields") {
+        _.each(value, function (val, key) {
+          let fieldsStr = "<span class='tag un-common' "+
+            "contenteditable='false' data-tag='"+val.name+"' data-tag-name='"+
+            val.name+"'>&lt;"+val.name+"&gt;</span>";
+          let re = new RegExp(fieldsStr, "g");
+          emailContent = emailContent
+            .replace(re, val.value);
+        });
+      }
+      let str = "<span class='tag common' "+
+        "contenteditable='false' data-tag='"+key+"' data-tag-name='"+
+          key+"'>&lt;"+key+"&gt;</span>";
+      let re = new RegExp(str, "g");
+      emailContent = emailContent.replace(re, value);
+    });
+    return emailContent;
   }
 
 });

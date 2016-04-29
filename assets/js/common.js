@@ -96,19 +96,6 @@ function getIssueTagsInEditor(emailContent) {
   return result;
 }
 
-// re-construct tag name to smart-tags
-function constructEmailTemplate(str) {
-  let html = $.parseHTML(str);
-  let findCommonTags = $(html).find('span.common');
-  $.each(findCommonTags, function(key, val){
-    let getTag = $(val).data("tag");
-    $(val)[0].dataset.tagName  = getTag;
-    $(val).html(getTag);
-  });
-  let steDom = $('<div/>').html(html);
-  return $(steDom).html();
-}
-
 function initTinyMCE(id, toolBar, dropdownId, changeCb, blurCb) {
   let getFocusId = id.split("#")[1];
 

@@ -2,7 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import update from "react-addons-update";
 import AddFollowups from "./AddFollowups.react";
-import PreviewCampaignPopup from "./PreviewCampaignPopup.react";
+import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
+import PreviewMailsPopup from "./PreviewMailsPopup.react";
 import CampaignStore from "../../stores/CampaignStore";
 
 class ScheduleEmail extends React.Component {
@@ -21,7 +22,9 @@ class ScheduleEmail extends React.Component {
       errorCount: 0,
       issueTags: [],
       personIssues: [],
-      emailText: ""
+      emailText: "",
+      mainEmailContent: {},
+      followupsEmailContent: []
     };
   }
 
@@ -124,8 +127,35 @@ class ScheduleEmail extends React.Component {
     this.setState(state);
   }
 
-  openPreviewModal = () => {
-    this.refs.preview.openModal();
+  openPreviewModal(preview) {
+    if(preview === "issues") {
+      this.refs.issues.openModal();
+    } else {
+      let followups = [];
+      let followupsError = true;
+      this.state.followups.map((val, key) => {
+        let content = this.refs[`addFollowups${val.id}`].refs.issues;
+        let emailSubject = content.props.emailSubject;
+        let emailContent = content.props.emailContent;
+        content.state.emailSubject = emailSubject;
+        content.state.emailContent = emailContent;
+        followups.push(content.state);
+        if(content.props.personIssues.length){
+          followupsError = false;
+        }
+      }, this);
+      this.setState((state) => ({
+        mainEmailContent: this.refs.issues.state,
+        followupsEmailContent: followups
+      }), () => {
+        if(!this.state.errorCount &&
+          !this.state.mainEmailContent.personIssues.length && followupsError){
+            this.refs.preview.openModal();
+        } else {
+          console.log("fix all smart tag values");
+        }
+      });
+    }
   }
 
   saveCampaignInfo = () => {
@@ -134,7 +164,7 @@ class ScheduleEmail extends React.Component {
      followups.push(this.refs[`addFollowups${val.id}`]);
     }, this);
     this.setState((state) => ({
-      mainEmailContent: this.refs.preview.state,
+      mainEmailContent: this.refs.issues.state,
       followupsEmailContent: followups
     }), function(){
       console.log(this.state.mainEmailContent);
@@ -144,7 +174,7 @@ class ScheduleEmail extends React.Component {
   }
 
   closeCallback = () => {
-    if(!this.refs.preview.state.personIssues.length) {
+    if(!this.refs.issues.state.personIssues.length){
       this.setState((state) => ({
         errorCount: 0
       }));
@@ -168,6 +198,7 @@ class ScheduleEmail extends React.Component {
         <div className="row sub-head-container m-lr-0">
           <div className="head">Let's Draft an Email</div>
           <div className="sub-head">
+            <a className="btn blue m-r-20" onClick={() => this.openPreviewModal("preview")}>Preview</a>
             <a className="btn blue" onClick={this.saveCampaignInfo}>Save & continue</a>
           </div>
         </div>
@@ -271,7 +302,7 @@ class ScheduleEmail extends React.Component {
                 this.state.errorCount
                   ?
                     <div className="row r-btn-container preview-content m-lr-0">
-                      <div onClick={this.openPreviewModal} className="btn btn-dflt error-btn">
+                      <div onClick={() => this.openPreviewModal("issues")} className="btn btn-dflt error-btn">
                         {this.state.errorCount} Issues Found
                       </div>
                     </div>
@@ -279,13 +310,13 @@ class ScheduleEmail extends React.Component {
                     ""
               }
               {/* Popup starts here*/}
-                <PreviewCampaignPopup
+                <CampaignIssuesPreviewPopup
                   emailSubject={this.state.subject}
                   emailContent={this.state.emailContent}
                   peopleList={this.state.getAllPeopleList}
                   personIssues={this.state.personIssues}
                   closeCallback={this.closeCallback}
-                  ref="preview"
+                  ref="issues"
                 />
               {/* Popup ends here*/}
           </div>
@@ -298,6 +329,7 @@ class ScheduleEmail extends React.Component {
                 commonSmartTags={this.state.commonSmartTags}
                 unCommonSmartTags={this.state.unCommonSmartTags}
                 deleteFollowUp={this.deleteFollowUp.bind(this, key)}
+                peopleList={this.state.getAllPeopleList}
                 id={key} key={followUp.id}
                 ref={`addFollowups${followUp.id}`} />
             );
@@ -308,6 +340,13 @@ class ScheduleEmail extends React.Component {
           style={{display: displayAddFollowup}}>
           <i className="mdi mdi-plus"></i> Add Follow up
         </div>
+        <PreviewMailsPopup
+          peopleList={this.state.getAllPeopleList}
+          mainEmailContent={this.state.mainEmailContent}
+          followupsEmailContent={this.state.followupsEmailContent}
+          emailSubject={this.state.subject}
+          emailContent={this.state.emailContent}
+          ref="preview"/>
       </div>
     );
   }

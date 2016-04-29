@@ -252,11 +252,17 @@ body {
   &:hover {
     background-color: $signin-bg-clr;
   }
+  &:focus {
+    background-color: $signin-bg-clr;
+  }
 }
 .login-btn {
   background-color: $dflt-btn-clr;
   margin-top: 10px;
   &:hover {
+    background-color: $dflt-btn-clr;
+  }
+  &:focus {
     background-color: $dflt-btn-clr;
   }
 }
@@ -664,7 +670,7 @@ body {
 }
 // Add ellipsis for email template html content rendering
 $font-size: 13px;
-$line-height: 1.4;
+$line-height: 1.45;
 $lines-to-show: 8;
 .template-preview {
   min-height: 269px;
@@ -779,6 +785,24 @@ $lines-to-show: 8;
     i {
       font-size: 7px;
       margin: 0 10px;
+    }
+  }
+}
+.preview-mail-container {
+  background-color: $lit-gray-bg;
+  padding: 10px;
+  margin-bottom: 10px;
+  .head {
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .content {
+    margin-left: 10px;
+    margin-bottom: 10px;
+  }
+  .mail-content {
+    p {
+      margin: 0;
     }
   }
 }
@@ -997,6 +1021,27 @@ $lines-to-show: 8;
         padding-left: 15px;
       }
     }
+    .preview-slider {
+      text-align: center;
+      color: $dflt-txt-clr;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      .pagination {
+        input {
+          width: 50px;
+          text-align: center;
+          margin: 0 10px;
+        }
+      }
+      .mdi {
+        font-size: 30px;
+        font-weight: 500;
+        margin-top: 6px;
+        border-radius: 50%;
+      }
+    }
   }
   .preview-modal-content {
     width: 100%;
@@ -1004,7 +1049,7 @@ $lines-to-show: 8;
     margin-top: 10px;
     padding: 0 15px;
     overflow-y: auto;
-    .email-body{
+    .email-body {
       min-height: 250px;
       border: $border-1px;
       padding: 10px;
@@ -1018,26 +1063,6 @@ $lines-to-show: 8;
       .preview-content {
         padding: 15px;
         margin-top: 10px;
-      }
-      .issue-slider {
-        text-align: center;
-        color: $dflt-txt-clr;
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: 10px;
-        .pagination {
-          input {
-            width: 50px;
-            text-align: center;
-            margin: 0 10px;
-          }
-        }
-        .mdi {
-          font-size: 30px;
-          font-weight: 500;
-          margin-top: 6px;
-          border-radius: 50%;
-        }
       }
     }
   }
@@ -1172,8 +1197,8 @@ $lines-to-show: 8;
   }
 }
 @media only screen and (max-width: 500px) {
-  .sub-nav,
-  .sub-head-container {
+  .sub-head-container,
+  .sub-nav {
     .head {
       float: none;
       text-align: center;
