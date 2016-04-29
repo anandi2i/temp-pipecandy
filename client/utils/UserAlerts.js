@@ -11,6 +11,7 @@ export const ErrorMessages = {
   "InvalidPassChange": "Please enter valid password",
   "ErrorInUpdatePass": "Error in update password",
   "ErrorInGettingUser": "Error in getting user",
+  "LOGIN_FAILED_EMAIL_NOT_VERIFIED": "Please verify your email address",
   "NetworkError": "The server seems to be down",
   "MiscellaneousError": "something went wrong. could you please try again",
   "EMAIL_NOT_FOUND": "The requested email doesn't exist"
