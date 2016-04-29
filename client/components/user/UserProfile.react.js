@@ -245,9 +245,9 @@ class Profile extends React.Component {
   }
 }
 
-let FileUpload = React.createClass({
+class FileUpload extends React.Component {
 
-  handleFile: function(e) {
+  handleFile = (e) => {
     let reader = new FileReader();
     let file = e.target.files[0];
     let minFileSize = 9999;
@@ -266,14 +266,14 @@ let FileUpload = React.createClass({
       this.props.handleFileChange(img.target.result);
     }.bind(this);
     reader.readAsDataURL(file);
-  },
+  }
 
-  render: function() {
+  render() {
     return (
       <input ref="in" type="file" accept="image/*"
         id="selectAvatar" onChange={this.handleFile} />
     );
   }
-});
+}
 
 export default validation(strategy)(Profile);

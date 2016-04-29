@@ -5,25 +5,60 @@ import validatorUtil from "../../utils/ValidationMessages";
 import UserAction from "../../actions/UserAction";
 import UserStore from "../../stores/UserStore";
 
-var ForgotPassword = React.createClass({
-  getInitialState: function() {
-    return {
+class ForgotPassword extends React.Component {
+  constructor() {
+    super();
+    this.state = {
       email: ""
     };
-  },
-  getValidatorData: function() {
+    this.validatorTypes = {
+      email: validatorUtil.email
+    };
+  }
+
+  getValidatorData() {
     return this.state;
-  },
-  validatorTypes : {
-    email: validatorUtil.email
-  },
-  componentDidMount: function() {
-    UserStore.addChangeListener(this._onChange);
-  },
-  componentWillUnmount: function() {
-    UserStore.removeChangeListener(this._onChange);
-  },
-  render: function() {
+  }
+
+  componentDidMount() {
+    UserStore.addChangeListener(this.onStoreChange);
+  }
+
+  componentWillUnmount() {
+    UserStore.removeChangeListener(this.onStoreChange);
+  }
+
+  renderHelpText(el) {
+    return (
+      <div className="warning-block">
+        {this.props.getValidationMessages(el)[0]}
+      </div>
+    );
+  }
+
+  onChange(e, field) {
+    let state = {};
+    state[field] = e.target.value;
+    this.setState(state);
+  }
+
+  onSubmit = (event) => {
+    event.preventDefault();
+    const onValidate = (error) => {
+      if (!error) {
+        UserAction.forgotPassword({
+          email: this.state.email
+        });
+      }
+    };
+    this.props.validate(onValidate);
+  }
+
+  onStoreChange() {
+    displayError(UserStore.getError());
+  }
+
+  render() {
     return (
       <div>
         <div className="center-container">
@@ -38,7 +73,7 @@ var ForgotPassword = React.createClass({
                       this.props.isValid("email") ? "validate" : "invalid"
                     }
                     name="email"
-                    onChange={this.onChange("email")}
+                    onChange={(e) => this.onChange(e, "email")}
                     onBlur={this.props.handleValidation("email")} />
                   <label htmlFor="email">Email</label>
                   {
@@ -57,35 +92,7 @@ var ForgotPassword = React.createClass({
         </div>
       </div>
     );
-  },
-  renderHelpText: function(el) {
-    return (
-      <div className="warning-block">
-        {this.props.getValidationMessages(el)[0]}
-      </div>
-    );
-  },
-  onChange: function(field) {
-    return event => {
-      let state = {};
-      state[field] = event.target.value;
-      this.setState(state);
-    };
-  },
-  onSubmit(event) {
-    event.preventDefault();
-    const onValidate = (error) => {
-      if (!error) {
-        UserAction.forgotPassword({
-          email: this.state.email
-        });
-      }
-    };
-    this.props.validate(onValidate);
-  },
-  _onChange() {
-    displayError(UserStore.getError());
   }
-});
+}
 
-module.exports = validation(strategy)(ForgotPassword);
+export default validation(strategy)(ForgotPassword);

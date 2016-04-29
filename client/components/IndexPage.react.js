@@ -1,12 +1,7 @@
 import React from "react";
 
-var IndexPage = React.createClass({
-  render: function() {
-    return (
-      <div>
-      </div>
-    );
-  }
-});
+const IndexPage = () =>
+  <div>
+  </div>;
 
-module.exports = IndexPage;
+export default IndexPage;

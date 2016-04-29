@@ -1,8 +1,8 @@
 import React from "react";
 import Header from "./Header.react";
 
-var AppContainer = React.createClass({
-  render: function () {
+class AppContainer extends React.Component {
+  render() {
     return (
       <div>
         <Header />
@@ -10,6 +10,6 @@ var AppContainer = React.createClass({
       </div>
     );
   }
-});
+}
 
-module.exports = AppContainer;
+export default AppContainer;

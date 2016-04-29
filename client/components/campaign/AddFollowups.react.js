@@ -60,9 +60,9 @@ class AddFollowups extends React.Component {
     });
   }
 
-  onChange(event, field) {
+  onChange(e, field) {
     let state = {};
-    state[field] = event.target.value;
+    state[field] = e.target.value;
     this.setState(state);
   }
 

@@ -48,7 +48,7 @@ class EmailList extends React.Component {
     });
   }
 
-  onChange = (event, {newValue, method}) => {
+  onChange = (e, {newValue, method}) => {
     this.setState({
       value: newValue
     });

@@ -81,9 +81,9 @@ class Signup extends React.Component {
    * @param {object} event - the current event
    * @param {string} field - name of the validator
    */
-  onChange(event, field) {
+  onChange(e, field) {
     let state = {};
-    state[field] = event.target.value;
+    state[field] = e.target.value;
     this.setState(state);
   }
 
@@ -102,7 +102,7 @@ class Signup extends React.Component {
    * @param {object} event - the current event
    * @emits {object} the user details to be store in the database
    */
-  onSubmit(event) {
+  onSubmit = (event) => {
     event.preventDefault();
     const formData = this.state;
     const onValidate = (error) => {
@@ -134,7 +134,7 @@ class Signup extends React.Component {
             <div className="auth-container">
               <img className="auth-logo" src="./images/logo.png" />
               <form className="auth-form" id="form-validation"
-                onSubmit={(e) => this.onSubmit(e)}>
+                onSubmit={this.onSubmit}>
                 <div className="input-field">
                   <input id="firstName" type="text"
                     className={
@@ -148,7 +148,7 @@ class Signup extends React.Component {
                   <label htmlFor="firstName">First Name</label>
                   {
                     !this.props.isValid("firstName")
-                      ? () => this.renderHelpText("firstName")
+                      ? this.renderHelpText("firstName")
                       : null
                   }
                 </div>
@@ -165,7 +165,7 @@ class Signup extends React.Component {
                   <label htmlFor="lastName">Last Name</label>
                   {
                     !this.props.isValid("lastName")
-                    ? () => this.renderHelpText("lastName")
+                    ? this.renderHelpText("lastName")
                     : null
                   }
                 </div>
@@ -182,7 +182,7 @@ class Signup extends React.Component {
                   <label htmlFor="email">Email</label>
                   {
                     !this.props.isValid("email")
-                      ? () => this.renderHelpText("email")
+                      ? this.renderHelpText("email")
                       : null
                   }
                 </div>
@@ -206,7 +206,7 @@ class Signup extends React.Component {
                   <label htmlFor="password">Password</label>
                   {
                     !this.props.isValid("password")
-                      ? () => this.renderHelpText("password")
+                      ? this.renderHelpText("password")
                       : null
                   }
                 </div>

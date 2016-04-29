@@ -6,27 +6,63 @@ import UserAction from "../actions/UserAction";
 import UserStore from "../stores/UserStore";
 import {Link} from "react-router";
 
-var Login = React.createClass({
-  getInitialState: function() {
-    return {
+class Login extends React.Component {
+  constructor() {
+    super();
+    this.state = {
       email: "",
       password: ""
     };
-  },
-  getValidatorData: function() {
+    this.validatorTypes = {
+      email: validatorUtil.email,
+      password: validatorUtil.password
+    };
+  }
+
+  getValidatorData() {
     return this.state;
-  },
-  validatorTypes : {
-    email: validatorUtil.email,
-    password: validatorUtil.password
-  },
-  componentDidMount: function() {
-    UserStore.addChangeListener(this._onChange);
-  },
-  componentWillUnmount: function() {
-    UserStore.removeChangeListener(this._onChange);
-  },
-  render: function() {
+  }
+
+  componentDidMount() {
+    UserStore.addChangeListener(this.onStoreChange);
+  }
+
+  componentWillUnmount() {
+    UserStore.removeChangeListener(this.onStoreChange);
+  }
+
+  renderHelpText(el) {
+    return (
+      <div className="warning-block">
+        {this.props.getValidationMessages(el)[0]}
+      </div>
+    );
+  }
+
+  onChange(e, field) {
+    let state = {};
+    state[field] = e.target.value;
+    this.setState(state);
+  }
+
+  onSubmit = (event) => {
+    event.preventDefault();
+    const onValidate = (error) => {
+      if (!error) {
+        UserAction.login({
+          email: this.state.email,
+          password: this.state.password
+        });
+      }
+    };
+    this.props.validate(onValidate);
+  }
+
+  onStoreChange() {
+    displayError(UserStore.getError());
+  }
+
+  render() {
     return (
       <div>
         <div className="center-container">
@@ -41,7 +77,7 @@ var Login = React.createClass({
                       this.props.isValid("email") ? "validate" : "invalid"
                     }
                     name="email"
-                    onChange={this.onChange("email")}
+                    onChange={(e) => this.onChange(e, "email")}
                     onBlur={this.props.handleValidation("email")} />
                   <label htmlFor="email">Email</label>
                   {
@@ -58,7 +94,7 @@ var Login = React.createClass({
                         : "invalid"
                       }
                     name="password"
-                    onChange={this.onChange("password")}
+                    onChange={(e) => this.onChange(e, "password")}
                     onBlur={this.props.handleValidation("password")} />
                   <label htmlFor="password">Password</label>
                   {
@@ -84,36 +120,7 @@ var Login = React.createClass({
         </div>
       </div>
     );
-  },
-  renderHelpText: function(el) {
-    return (
-      <div className="warning-block">
-        {this.props.getValidationMessages(el)[0]}
-      </div>
-    );
-  },
-  onChange: function(field) {
-    return event => {
-      let state = {};
-      state[field] = event.target.value;
-      this.setState(state);
-    };
-  },
-  onSubmit(event) {
-    event.preventDefault();
-    const onValidate = (error) => {
-      if (!error) {
-        UserAction.login({
-          email: this.state.email,
-          password: this.state.password
-        });
-      }
-    };
-    this.props.validate(onValidate);
-  },
-  _onChange() {
-    displayError(UserStore.getError());
   }
-});
+}
 
-module.exports = validation(strategy)(Login);
+export default validation(strategy)(Login);

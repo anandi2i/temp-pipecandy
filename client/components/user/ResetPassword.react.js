@@ -5,26 +5,62 @@ import validatorUtil from "../../utils/ValidationMessages";
 import UserAction from "../../actions/UserAction";
 import UserStore from "../../stores/UserStore";
 
-var ResetPassword = React.createClass({
-  getInitialState: function() {
-    return {
+class ResetPassword extends React.Component {
+  constructor() {
+    super();
+    this.state = {
       accessToken: this.props.params.accessToken,
       password: ""
     };
-  },
-  getValidatorData: function() {
+    this.validatorTypes = {
+      password: validatorUtil.password
+    };
+  }
+
+  getValidatorData() {
     return this.state;
-  },
-  validatorTypes : {
-    password: validatorUtil.password
-  },
-  componentDidMount: function() {
-    UserStore.addChangeListener(this._onChange);
-  },
-  componentWillUnmount: function() {
-    UserStore.removeChangeListener(this._onChange);
-  },
-  render: function() {
+  }
+
+  componentDidMount() {
+    UserStore.addChangeListener(this.onStoreChange);
+  }
+
+  componentWillUnmount() {
+    UserStore.removeChangeListener(this.onStoreChange);
+  }
+
+  renderHelpText(el) {
+    return (
+      <div className="warning-block">
+        {this.props.getValidationMessages(el)[0]}
+      </div>
+    );
+  }
+
+  onChange(e, field) {
+    let state = {};
+    state[field] = e.target.value;
+    this.setState(state);
+  }
+
+  onSubmit = (event) => {
+    event.preventDefault();
+    const onValidate = (error) => {
+      if (!error) {
+        UserAction.resetPassword({
+          accessToken: this.state.accessToken,
+          password: this.state.password
+        });
+      }
+    };
+    this.props.validate(onValidate);
+  }
+
+  onStoreChange() {
+    displayError(UserStore.getError());
+  }
+
+  render() {
     return (
       <div>
         <div className="center-container">
@@ -41,7 +77,7 @@ var ResetPassword = React.createClass({
                         : "invalid"
                       }
                     name="password"
-                    onChange={this.onChange("password")}
+                    onChange={(e) => this.onChange(e, "password")}
                     onBlur={this.props.handleValidation("password")} />
                   <label htmlFor="password">Password</label>
                   {
@@ -59,36 +95,7 @@ var ResetPassword = React.createClass({
         </div>
       </div>
     );
-  },
-  renderHelpText: function(el) {
-    return (
-      <div className="warning-block">
-        {this.props.getValidationMessages(el)[0]}
-      </div>
-    );
-  },
-  onChange: function(field) {
-    return event => {
-      let state = {};
-      state[field] = event.target.value;
-      this.setState(state);
-    };
-  },
-  onSubmit(event) {
-    event.preventDefault();
-    const onValidate = (error) => {
-      if (!error) {
-        UserAction.resetPassword({
-          accessToken: this.state.accessToken,
-          password: this.state.password
-        });
-      }
-    };
-    this.props.validate(onValidate);
-  },
-  _onChange() {
-    displayError(UserStore.getError());
   }
-});
+}
 
-module.exports = validation(strategy)(ResetPassword);
+export default validation(strategy)(ResetPassword);

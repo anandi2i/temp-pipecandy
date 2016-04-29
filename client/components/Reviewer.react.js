@@ -1,7 +1,7 @@
 import React from "react";
 
-var Reviewer = React.createClass({
-  render: function() {
+class Reviewer extends React.Component {
+  render() {
     return (
       <div>
         <div> Reviewers list </div>
@@ -17,6 +17,6 @@ var Reviewer = React.createClass({
       </div>
     );
   }
-});
+}
 
-module.exports = Reviewer;
+export default Reviewer;

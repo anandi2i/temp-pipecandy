@@ -2,24 +2,29 @@ import React from "react";
 import {Link} from "react-router";
 import UserStore from "../stores/UserStore";
 
-var Home = React.createClass({
-  getInitialState: function() {
-    return {
+class Home extends React.Component {
+  constructor() {
+    super();
+    this.state = {
       userName: UserStore.getUser()
     };
-  },
-  componentWillUnmount: function() {
-    UserStore.removeChangeListener(this.onChange);
-  },
-  componentDidMount: function() {
-    UserStore.addChangeListener(this.onChange);
-  },
-  onChange: function() {
+  }
+
+  componentWillUnmount() {
+    UserStore.removeChangeListener(this.onStoreChange);
+  }
+
+  componentDidMount() {
+    UserStore.addChangeListener(this.onStoreChange);
+  }
+
+  onStoreChange = () => {
     this.setState({
       userName: UserStore.getUser()
     });
-  },
-  render: function() {
+  }
+
+  render() {
     return (
       <div>
         <div className="container">
@@ -87,6 +92,6 @@ var Home = React.createClass({
       </div>
     );
   }
-});
+}
 
-module.exports = Home;
+export default Home;
