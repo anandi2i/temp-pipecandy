@@ -96,7 +96,7 @@ function getIssueTagsInEditor(emailContent) {
   return result;
 }
 
-function initTinyMCE(id, toolBar, dropdownId, changeCb, blurCb) {
+function initTinyMCE(id, toolBar, dropdownId, changeCb) {
   let getFocusId = id.split("#")[1];
 
   tinymce.init({
@@ -115,9 +115,6 @@ function initTinyMCE(id, toolBar, dropdownId, changeCb, blurCb) {
     setup : function(editor) {
       editor.on("change", function(e) {
         changeCb(editor);
-      });
-      editor.on("blur", function(e) {
-        blurCb(editor);
       });
       $(dropdownId + " li").off("click").on("click", function(event) {
         let currentText = event.currentTarget.innerText.trim();

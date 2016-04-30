@@ -24,7 +24,8 @@ class ScheduleEmail extends React.Component {
       personIssues: [],
       emailText: "",
       mainEmailContent: {},
-      followupsEmailContent: []
+      followupsEmailContent: [],
+      emailRawText: ""
     };
   }
 
@@ -42,8 +43,7 @@ class ScheduleEmail extends React.Component {
   }
 
   initTinyMCE() {
-    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", this.tinyMceCb,
-      this.editorOnBlur);
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", this.tinyMceCb);
   }
 
   tinyMceCb = (editor) => {
@@ -54,14 +54,8 @@ class ScheduleEmail extends React.Component {
       emailContent: content,
       errorCount: parseInt(issueTags.length, 10),
       issueTags: issueTags,
-      personIssues: personIssues
-    });
-  }
-
-  editorOnBlur = (editor) => {
-    let text = editor.getBody().textContent;
-    this.setState({
-      emailText: text
+      personIssues: personIssues,
+	    emailRawText: editor.getBody().textContent
     });
   }
 
@@ -77,8 +71,20 @@ class ScheduleEmail extends React.Component {
   }
 
   toggleEditContainer = () => {
-    this.setState({clicked: !this.state.clicked});
-    this.el.find(".draft-template").slideToggle("slow");
+    this.setState({
+      clicked: !this.state.clicked
+    }, () => {
+      this.el.find("#mainTemplate").slideToggle("slow");
+      if(!this.state.clicked) {
+        this.setState({
+          emailText: this.state.emailRawText
+        });
+      } else {
+        this.setState({
+          emailText: ""
+        });
+      }
+    });
   }
 
   addFollowups = () => {
@@ -215,7 +221,7 @@ class ScheduleEmail extends React.Component {
               </i>
             </div>
           </div>
-          <div id="firstEmail" className="col s12 m12 l10 offset-l1 draft-template">
+          <div id="mainTemplate" className="col s12 m12 l10 offset-l1 draft-template">
               {/* email to list */}
               <div className="row m-lr-0">
                 <div className="col s12 p-lr-0">

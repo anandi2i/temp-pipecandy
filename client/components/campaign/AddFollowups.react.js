@@ -12,7 +12,8 @@ class AddFollowups extends React.Component {
       personIssues: [],
       emailText: "",
       subject: "",
-      emailContent: ""
+      emailContent: "",
+      emailRawText: ""
     };
   }
 
@@ -23,8 +24,7 @@ class AddFollowups extends React.Component {
     let mytoolbar = `#mytoolbar${followupId}`;
     let insertSmartTags = `#insertSmartTags${followupId}`;
     let smartTagDrpDwnId = `#dropdown${followupId}`;
-    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, this.tinyMceCb,
-      this.editorOnBlur);
+    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, this.tinyMceCb);
     this.el.find("select").material_select();
     initTimePicker(this.el.find(".timepicker"));
     enabledropDownBtnByID(insertSmartTags);
@@ -38,20 +38,26 @@ class AddFollowups extends React.Component {
       emailContent: content,
       errorCount: parseInt(issueTags.length, 10),
       issueTags: issueTags,
-      personIssues: personIssues
-    });
-  }
-
-  editorOnBlur = (editor) => {
-    let text = editor.getBody().textContent;
-    this.setState({
-      emailText: text
+      personIssues: personIssues,
+      emailRawText: editor.getBody().textContent
     });
   }
 
   toggleEditContainer = (e) => {
-    this.setState({clicked: !this.state.clicked});
-    this.el.find(".draft-template").slideToggle("slow");
+    this.setState({
+      clicked: !this.state.clicked
+    }, () => {
+      this.el.find(".draft-template").slideToggle("slow");
+      if(!this.state.clicked) {
+        this.setState({
+          emailText: this.state.emailRawText
+        });
+      } else {
+        this.setState({
+          emailText: ""
+        });
+      }
+    });
   }
 
   onChange(event, field) {
