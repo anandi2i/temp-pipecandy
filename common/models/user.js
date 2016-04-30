@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs";
 import _ from "underscore";
+import loopback from "loopback";
 import logger from "../../server/log";
 import publicEmailProviders from "../../server/utils/public-email-providers";
 import config from "../../server/config.json";
@@ -259,5 +260,29 @@ module.exports = function(user) {
       }
     });
   });
+
+  /**
+   * Get the current authenticated user details
+   * @callback {Function} cb The callback function
+   * @returns {Object} The currently authenticated user object
+   */
+  user.current = function(cb) {
+    let ctx = loopback.getCurrentContext();
+    if (ctx) {
+      cb(null, ctx.get("currentUser"));
+    } else {
+      cb(null, null);
+    }
+    return cb.promise;
+  };
+
+  user.remoteMethod(
+    "current",
+    {
+      http: {path: "/current", verb: "get"},
+      description: "Returns the currently authenticated user",
+      returns: {arg: "current", type: "object", root: true}
+    }
+  );
 
 };

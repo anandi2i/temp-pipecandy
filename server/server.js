@@ -45,6 +45,28 @@ try {
 app.set("view engine", "ejs");
 app.set("views", "server/views");
 app.use(loopback.static("public/assets"));
+app.use(loopback.context());
+
+//Set the currently authenticated user data
+app.use(function (req, res, next) {
+  if (!req.accessToken) return next();
+  app.models.user.find({
+    where: {id: req.accessToken.userId},
+    include: "identities"
+  }, (err, user) => {
+    var currentUser = user[0];
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return next(new Error("No user with this access token was found."));
+    }
+    res.locals.currentUser = currentUser;
+    var loopbackContext = loopback.getCurrentContext();
+    if (loopbackContext) loopbackContext.set("currentUser", currentUser);
+    next();
+  });
+});
 
 app.start = function() {
   // start the web server

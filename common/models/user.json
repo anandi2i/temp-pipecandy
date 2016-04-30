@@ -112,6 +112,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "resetPasswordUsingToken"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "current"
     }
   ],
   "methods": {}

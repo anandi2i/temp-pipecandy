@@ -1,6 +1,5 @@
 import _ from "underscore";
 import {EventEmitter} from "events";
-import cookie from "react-cookie";
 import AppDispatcher from "../dispatcher/AppDispatcher";
 import Constants from "../constants/Constants";
 import UserApi from "../API/UserApi";
@@ -82,7 +81,6 @@ AppDispatcher.register(function(payload) {
       UserApi.login(action.data).then((response) => {
         _user = response.data.userData;
         _error = "";
-        cookie.save("userId", _user.id, {path: "/"});
         appHistory.push("home");
       }, (err)=> {
         _user = {};
@@ -92,12 +90,20 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.SET_USER_DETAIL:
       _user = action.data;
+      if(_user.identities && _user.identities && _user.identities[0].profile) {
+        if(!_user.firstName && _user.identities[0].profile.name) {
+          _user.firstName = _user.identities[0].profile.name.givenName || "";
+          _user.lastName = _user.identities[0].profile.name.familyName || "";
+        }
+        if(_user.identities[0].profile.emails) {
+          _user.email = _user.identities[0].profile.emails[0].value || "";
+        }
+      }
       UserStore.emitChange();
       break;
     case Constants.LOGOUT:
       UserApi.logout().then((response) => {
         _user = "";
-        cookie.remove("userId", {path: "/"});
         appHistory.push("/login");
       });
       break;

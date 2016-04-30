@@ -31,8 +31,8 @@ const UserApi = {
    * @param {object} userId - contains the user id
    * @return {object} promise
    */
-  getUserDetail(userId) {
-    return api.get(`/api/users/${userId}`);
+  getUserDetail() {
+    return api.get("/api/users/current");
   },
 
   /**

@@ -1,12 +1,12 @@
 import api from "axios";
-import cookie from "react-cookie";
+import UserStore from "../stores/UserStore";
 
 const EmailListApi = {
   findAll() {
-    return api.get("/api/users/"+ cookie.load("userId") +"/lists");
+    return api.get(`/api/users/${UserStore.getUser().id}/lists`);
   },
   createList(data) {
-    return api.post("/api/users/"+ cookie.load("userId") +"/lists", data);
+    return api.post(`/api/users/${UserStore.getUser().id}/lists`, data);
   },
   getSelectedList(data) {
     return api.post("api/lists/listPeopleField", data);

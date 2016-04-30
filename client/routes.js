@@ -1,6 +1,5 @@
 import React from "react";
 import {Router, Route, IndexRoute} from "react-router";
-import cookie from "react-cookie";
 import AppContainer from "./components/AppContainer.react";
 import IndexPage from "./components/IndexPage.react";
 import Home from "./components/Home.react";
@@ -34,9 +33,8 @@ function requireAuth(nextState, replace) {
   if(!($.isEmptyObject(UserStore.getUser()))) {
     return;
   }
-  const userId = cookie.load("userId");
-  if(userId){
-    UserApi.getUserDetail(userId).then((response) => {
+  if(getCookie("userId")) {
+    UserApi.getUserDetail().then((response) => {
       UserAction.setUserDetail(response.data);
     }, (err) => {
       replace("/register");
