@@ -40,7 +40,7 @@ class Home extends React.Component {
             </div>
             <div className="row tab-hd-btn">
               <div className="col s12 m12 l6 right-align m-t-47">
-                <Link className="btn lg-btn-dflt red" to="/">
+                <Link className="btn lg-btn-dflt red" to="/campaign/create">
                   <i className="left mdi mdi-filter"></i> Create a Campaign
                   <i className="right mdi mdi-chevron-down"></i>
                 </Link>

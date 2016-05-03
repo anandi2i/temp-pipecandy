@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node webpack.dev.server.js & ./node_modules/.bin/nodemon .",
     "pretest": "jshint .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "automigrate": "node server/migrations/automigrate.js",
+    "autoupdate": "node server/migrations/autoupdate.js"
   },
   "dependencies": {
     "async": "^1.5.2",

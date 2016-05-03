@@ -1,12 +1,11 @@
 import api from "axios";
-import UserStore from "../stores/UserStore";
 
 const CampaignApi = {
   createCampaign(data) {
-    return api.post(`/api/users/${UserStore.getUser().id}/campaigns`, data);
+    return api.post(`/api/users/${getCookie("userId")}/campaigns`, data);
   },
   getAllCampaign() {
-    return api.get(`/api/users/${UserStore.getUser().id}/campaigns`);
+    return api.get(`/api/users/${getCookie("userId")}/campaigns`);
   },
   getAllEmailTemplates() {
     return api.get("api/defaultTemplates");

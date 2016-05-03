@@ -30,7 +30,7 @@
     "callbackURL": "/auth/linkedin/callback",
     "authPath": "/auth/linkedin",
     "callbackPath": "/auth/linkedin/callback",
-    "successRedirect": "/#/home",
+    "successRedirect": "/auth/success",
     "failureRedirect": "/",
     "clientID": "75ec9tl0mysct6",
     "clientSecret": "nZ3SBuNDzMd072wx",
@@ -46,7 +46,7 @@
     "callbackURL": "/auth/google/callback",
     "authPath": "/auth/google",
     "callbackPath": "/auth/google/callback",
-    "successRedirect": "/#/home",
+    "successRedirect": "/auth/success",
     "failureRedirect": "/",
     "scope": ["email", "profile"],
     "failureFlash": true
