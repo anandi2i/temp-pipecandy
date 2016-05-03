@@ -128,3 +128,14 @@ gulp.task("default", [
   "sass:watch",
   "server"
 ]);
+
+gulp.task("build", [
+  "bower:js",
+  "bower:css",
+  "browserify",
+  "sass",
+  "js",
+  "copy:fonts",
+  "copy:images",
+  "copy:tinymce",
+]);
