@@ -51,9 +51,14 @@ class SelectEmailListGrid extends React.Component {
 
   getGlobalData = () => {
     // Get the globalData from the prop
-    let globalData = this.props.globalData();
+    let globalData,
+      listLink = false;
+    if(this.props.globalData !== null) {
+      globalData = this.props.globalData();
+      listLink = globalData.listLink;
+    }
     return {
-      listLink: globalData !== null && globalData.listLink ? true : false,
+      listLink: listLink,
       toggleSelectRow: this.toggleSelectRow,
       getIsRowChecked: this.getIsRowChecked,
     };
