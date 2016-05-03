@@ -85,6 +85,8 @@ class AddFollowups extends React.Component {
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
+    let checkErrorCount = this.state.errorCount
+      ? "email-body" : "email-body clear-err-count";
     return(
       <div className="row draft-container m-lr-0">
         <div className="head" onClick={this.toggleEditContainer}>
@@ -155,7 +157,7 @@ class AddFollowups extends React.Component {
                     </ul>
                 </div>
               </div>
-              <div id={"emailContent" + followupId} className="email-body"
+              <div id={"emailContent" + followupId} className={checkErrorCount}
                 dangerouslySetInnerHTML={{__html: this.props.content}} />
             </div>
             {/* Preview button */}

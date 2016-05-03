@@ -90,7 +90,7 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.SET_USER_DETAIL:
       _user = action.data;
-      if(_user.identities && _user.identities && _user.identities[0].profile) {
+      if(_user.identities[0] && _user.identities[0].profile) {
         if(!_user.firstName && _user.identities[0].profile.name) {
           _user.firstName = _user.identities[0].profile.name.givenName || "";
           _user.lastName = _user.identities[0].profile.name.familyName || "";

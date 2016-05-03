@@ -33,14 +33,16 @@ class CampaignIssuesPreviewPopup extends React.Component {
       peopleList: peopleList,
       emailContent: emailContent,
       issuesCompletedList: []
-    });
-    this.el.openModal({
-      dismissible: false
-    });
-    initTinyMCEPopUp(`#previewMailContent-${id}`, `#previewToolbar-${id}`,
-      this.setEmailContent);
-    this.el.find(".preview-modal-content").mCustomScrollbar({
-      theme:"minimal-dark"
+    }, () => {
+      this.el.openModal({
+        dismissible: false
+      });
+      initTinyMCEPopUp(`#previewMailContent-${id}`, `#previewToolbar-${id}`,
+        this.setEmailContent);
+      this.el.find(".preview-modal-content").mCustomScrollbar({
+        theme:"minimal-dark"
+      });
+      this.handleBlur();
     });
   }
 

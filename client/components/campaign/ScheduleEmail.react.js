@@ -198,6 +198,8 @@ class ScheduleEmail extends React.Component {
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
+    let checkErrorCount = this.state.errorCount
+      ? "email-body" : "email-body clear-err-count";
 
     return (
       <div className="container" style={{display: displayIndex}}>
@@ -298,7 +300,7 @@ class ScheduleEmail extends React.Component {
                       </ul>
                   </div>
                 </div>
-                <div id="emailContent" className="email-body"
+                <div id="emailContent" className={checkErrorCount}
                   dangerouslySetInnerHTML={{
                     __html: this.props.selectedTemplate
                   }} />

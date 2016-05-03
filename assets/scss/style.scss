@@ -901,6 +901,11 @@ $lines-to-show: 8;
         .un-common {
           color: $red-clr;
         }
+        &.clear-err-count{
+          .un-common {
+            text-decoration: line-through;
+          }
+        }
       }
     }
     .preview-content {}
