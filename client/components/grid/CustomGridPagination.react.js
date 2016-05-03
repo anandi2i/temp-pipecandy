@@ -27,22 +27,33 @@ class CustomGridPagination extends React.Component {
       startIndex = endIndex - startIndexPoint;
     }
 
-    let sum = 1;
-    for (let i = startIndex; i < endIndex; i++) {
-      let sel = this.props.currentPage === i ? "pager-active" : "pager-btn";
-      lists.push(
-        <li key={`page${i}`} className={sel} data-value={i}
-          onClick={this.pageChange}>{i + sum}</li>
-      );
+    let temp1 = 1;
+    if (this.props.maxPage !== temp1) {
+      for (let i = startIndex; i < endIndex; i++) {
+        let sel = this.props.currentPage === i ? "pager-active" : "pager-btn";
+        lists.push(
+          <li key={`page${i}`} className={sel} data-value={i}
+            onClick={this.pageChange}>{i + temp1}</li>
+        );
+      }
     }
+
     return (
-      <div className="row">
-        <div className="col s12">
-          <ul className="pagination griddle-pager">
-            <span>Page&nbsp;</span>
-            {lists}
-          </ul>
-        </div>
+      <div>
+        {
+          lists.length
+          ?
+            <div className="row">
+              <div className="col s12">
+                <ul className="pagination griddle-pager">
+                  <span>Page&nbsp;</span>
+                  {lists}
+                </ul>
+              </div>
+            </div>
+          :
+            ""
+        }
       </div>
     );
   }

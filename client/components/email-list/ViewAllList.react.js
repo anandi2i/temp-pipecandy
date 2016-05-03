@@ -4,6 +4,8 @@ import Spinner from "../Spinner.react";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 import EmailListGrid from "../grid/select-email-list/Grid.react";
+import NoDataComponent 
+  from "../grid/select-email-list/CustomNoDataComponent.react";
 
 function getAllEmailList() {
   EmailListActions.getAllEmailList();
@@ -12,14 +14,16 @@ function getAllEmailList() {
 class ListView extends React.Component {
   constructor(props) {
     super(props);
-    getAllEmailList();
     this.state={
       allEmailLists: [],
+      noDataBlock: false,
+      spinning: true
     };
   }
 
   componentDidMount() {
     EmailListStore.addChangeListener(this.onStoreChange);
+    getAllEmailList();
   }
 
   componentWillUnmount() {
@@ -29,11 +33,13 @@ class ListView extends React.Component {
   onStoreChange = () => {
     let emailLists = EmailListStore.getAllList();
     this.setState({
-      allEmailLists: emailLists
+      allEmailLists: emailLists,
+      noDataBlock: emailLists.length ? false : true,
+      spinning: false
     });
   }
 
-  getGlobalData() {
+  getGlobalData = () => {
     return {
       listLink: true
     };
@@ -49,12 +55,20 @@ class ListView extends React.Component {
               <Link to="/list/create">Back to Create List</Link>
             </div>
           </div>
-          {
+          <div className="spaced" style={{display: this.state.spinning ? "block" : "none"}}>
+            <Spinner />
+          </div>
+          { 
+            this.state.noDataBlock 
+            ? 
+              <NoDataComponent /> 
+            : 
             this.state.allEmailLists.length
-              ?
-                <EmailListGrid results={this.state.allEmailLists}
-                globalData={this.getGlobalData()}/>
-              : <div className="spaced"><Spinner /></div>
+            ?
+              <EmailListGrid results={this.state.allEmailLists}
+                globalData={this.getGlobalData} />
+            :
+              ""
           }
         </div>
       </div>

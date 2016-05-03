@@ -59,6 +59,7 @@
         position: relative;
         left: 0;
         visibility: visible;
+        opacity: 1;
         margin-left: 20px;
         margin-right: 20px;
       }
@@ -194,16 +195,6 @@
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    .griddle-container {
-      .griddle-body {
-        .footer-container {
-          position: relative;
-          height: 50px;
-          margin-top: auto;
-          margin-bottom: auto;
-        }
-      }
-    }
   }
 }
 @media only screen and (max-width: 992px) {
@@ -250,7 +241,11 @@
           }
         }
         .footer-container {
+          position: relative;
+          height: 50px;
+          margin-top: auto;
           margin-left: 7.5%;
+          margin-bottom: auto;
         }
       }
     }

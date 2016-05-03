@@ -2,7 +2,6 @@ import React from "react";
 import _ from "underscore";
 import Griddle from "griddle-react";
 import CustomRowComponent from "./CustomRowComponent.react";
-import CustomNoDataComponent from "./CustomNoDataComponent.react";
 import CustomPagerComponent from "../CustomGridPagination.react";
 import CustomFilterComponent from "../CustomGridFilter.react";
 
@@ -52,7 +51,7 @@ class SelectEmailListGrid extends React.Component {
 
   getGlobalData = () => {
     // Get the globalData from the prop
-    let globalData = this.props.globalData;
+    let globalData = this.props.globalData();
     return {
       listLink: globalData !== null && globalData.listLink ? true : false,
       toggleSelectRow: this.toggleSelectRow,
@@ -68,8 +67,6 @@ class SelectEmailListGrid extends React.Component {
         metadataColumns={["id"]}
         useGriddleStyles={false}
         selectedRowIds={this.state.selectedRowIds}
-
-        customNoDataComponent={CustomNoDataComponent}
 
         useCustomRowComponent={true}
         customRowComponent={CustomRowComponent}

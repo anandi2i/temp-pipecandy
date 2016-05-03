@@ -31,7 +31,7 @@ class CustomGridRowComponent extends React.Component {
               </div>
               <div className="row-table-cell valign-middle">
                 {
-                  this.props.globalData.listLink
+                  this.props.globalData().listLink
                     ? <h1><Link to={`/list/${data.id}`}>{data.name}</Link></h1>
                     : <h1>{data.name}</h1>
                 }
