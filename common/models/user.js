@@ -248,15 +248,15 @@ module.exports = function(user) {
         _.pluck(users, "id"),
         _.pluck(users, "firstName")
       );
-      if (ownerObj.length) {
+      if (_.isEmpty(ownerObj)) {
+        logger.error("Error in getting owner Obj for list"
+          , ownerObj);
+        next(err);
+      } else {
         _.each(ctx.result, (result) => {
           result.owner = ownerObj[result.createdBy];
         });
         next();
-      } else {
-        logger.error("Error in getting owner Obj for list"
-          , ownerObj);
-        next(err);
       }
     });
   });

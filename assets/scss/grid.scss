@@ -271,3 +271,16 @@
     }
   }
 }
+@media only screen and (max-width: 600px) {
+  .griddle {
+    .griddle-container {
+      .email-list {
+        .block-2 {
+          border-left: 0 none;
+          padding-top: 15px;
+          padding-bottom: 15px;
+        }
+      }
+    }
+  }
+}
