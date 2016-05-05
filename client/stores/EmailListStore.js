@@ -62,7 +62,7 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
         owner: obj.owner || "",
         subscriberCount: _.random(initialRange, subscriberCountEndRange),
         lastSentAt: (new Date(_.now() + _.random(initialRange, endRange)))
-                    .toUTCString(),
+          .toUTCString(),
         opens: _.random(initialRange, endRange) + "%",
         clicks: _.random(initialRange, endRange) + "%",
         spam: _.random(initialRange, endRange) + "%",
@@ -123,51 +123,55 @@ AppDispatcher.register(function(payload) {
     case Constants.ALL_EMAIL_LIST:
       EmailListApi.findAll().then((response) => {
         _allEmailList = response.data;
-        _error = "";
         EmailListStore.emitChange();
       }, (err)=> {
         _allEmailList = {};
         _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
+        _error = "";
       });
       break;
     case Constants.CREATE_NEW_LIST:
       EmailListApi.createList(action.data).then((response) => {
         _allEmailList = {};
-        _error = "";
         appHistory.push("list/"+response.data.id);
       }, (err)=> {
         _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
+        _error = "";
       });
       break;
     case Constants.GET_LIST_BY_ID:
       let data = {"list":[action.data]};
       EmailListApi.getSelectedList(data).then((response) => {
         _getEmailList = response.data;
-        _error = "";
         EmailListStore.emitChange();
       }, (err)=> {
         _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
+        _error = "";
       });
       break;
     case Constants.FILE_UPLOAD:
       EmailListApi.uploadFile(action.data).then((response) => {
         _success = SuccessMessages.successUpload;
         EmailListStore.emitChange();
+        _success = "";
       }, (err)=> {
         _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
+        _error = "";
       });
       break;
     case Constants.SAVE_SINGLE_PERSON:
       EmailListApi.saveSinglePerson(action.data).then((response) => {
         _success = SuccessMessages.successSubscribe;
         EmailListStore.emitChange();
+        _success = "";
       }, (err)=> {
         _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
+        _error = "";
       });
       break;
     case Constants.UPDATE_SINGLE_PERSON:
@@ -190,9 +194,11 @@ AppDispatcher.register(function(payload) {
         });
         _peopleData[rowIndex] = _temp;
         EmailListStore.emitPersonUpdate();
+        _success = "";
       }, (err)=> {
         _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
+        _error = "";
       });
       break;
     default:

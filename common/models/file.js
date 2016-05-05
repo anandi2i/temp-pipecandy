@@ -71,46 +71,98 @@ module.exports = function(File) {
       let header = ["firstName", "middleName", "lastName", "email", "field1",
         "value1", "field2", "value2", "field3", "value3", "field4", "value4",
         "field5", "value5"];
+      let err = false;
       let obj = xlsx.parse(filePath);
-      let headerIndex = 0;
       _.each(obj, function(object) {
-        _.each(object.data, function(row, index) {
-          if(index !== headerIndex) {
-            let domain = row[3].split("@")[1];
-            if(!domain) {
-              let error = new Error();
-              error.message = "One or more rows doesn't have valid email Id";
-              error.name = "InvalidEmail";
-              logger.error("Not a valid email", error.message);
-              callback(error);
-            } else {
-              companies.push(domain);
-            }
-            people.push(_.object(header, row));
+        let rowData = [];
+        if(object.data) {
+          if(_.isEqual(object.data[0], header)) {
+            rowData = _.rest(object.data);
+          } else {
+            let error = new Error();
+            error.message = "Please upload file in valid format";
+            error.name = "FileUploadInvalidHeader";
+            logger.error("File is not in valid format", error.message);
+            err = true;
+            callback(error);
           }
+        }
+        _.each(rowData, function(row) {
+          if(!row[0]) {
+            let error = new Error();
+            error.message = "One or more rows doesn't have first name";
+            error.name = "FileUploadFnameEmpty";
+            logger.error("First name is empty", error.message);
+            err = true;
+            callback(error);
+          }
+          let domain = row[3].split("@")[1];
+          if(!domain) {
+            let error = new Error();
+            error.message = "One or more rows doesn't have valid email Id";
+            error.name = "FileUploadInvalidEmail";
+            logger.error("Not a valid email", error.message);
+            err = true;
+            callback(error);
+          } else {
+            companies.push(domain);
+          }
+          people.push(_.object(header, row));
         });
       });
-      callback(null, companies, people);
+      if(!err) {
+        callback(null, companies, people);
+      }
     }
 
     function parseCSV(callback){
       let people = [];
       let companies = [];
       let stream = fs.createReadStream(filePath);
-      csv.fromStream(stream, {headers : true}).on("data", (data) => {
-        let domain = data.email.split("@")[1];
+      let header = ["firstName", "middleName", "lastName", "email", "field1",
+        "value1", "field2", "value2", "field3", "value3", "field4", "value4",
+        "field5", "value5"];
+      let headerCheck = true;
+      let err = false;
+      csv.fromStream(stream, {headers: true}).on("data", (data) => {
+        if(headerCheck) {
+          headerCheck = false;
+          if(!_.isEqual(_.keys(data), header)) {
+            let error = new Error();
+            error.message = "Please upload file in valid format";
+            error.name = "FileUploadInvalidHeader";
+            logger.error("File is not in valid format", error.message);
+            err = true;
+            callback(error);
+          }
+        }
+        if(!data.firstName) {
+          let error = new Error();
+          error.message = "One or more rows doesn't have first name";
+          error.name = "FileUploadFnameEmpty";
+          logger.error("First name is empty", error.message);
+          err = true;
+          callback(error);
+        }
+        let domain;
+        if(data.email) {
+          domain = data.email.split("@")[1];
+        }
         if(!domain) {
           let error = new Error();
           error.message = "One or more rows doesn't have valid email Id";
-          error.name = "InvalidEmail";
+          error.name = "FileUploadInvalidEmail";
           logger.error("Not a valid email", error.message);
+          err = true;
           callback(error);
         } else {
           companies.push(domain);
         }
         people.push(data);
       }).on("end", () => {
-        callback(null, companies, people);
+        if(!err) {
+          callback(null, companies, people);
+        }
       });
     }
 

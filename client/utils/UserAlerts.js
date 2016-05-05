@@ -14,7 +14,10 @@ export const ErrorMessages = {
   "LOGIN_FAILED_EMAIL_NOT_VERIFIED": "Please verify your email address",
   "NetworkError": "The server seems to be down",
   "MiscellaneousError": "something went wrong. could you please try again",
-  "EMAIL_NOT_FOUND": "The requested email doesn't exist"
+  "EMAIL_NOT_FOUND": "The requested email doesn't exist",
+  "FileUploadInvalidEmail": "One or more rows doesn't have valid email Id",
+  "FileUploadInvalidHeader": "File Header is not in valid format",
+  "FileUploadFnameEmpty": "One or more rows have empty first name"
 };
 
 /**
