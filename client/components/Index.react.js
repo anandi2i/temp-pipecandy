@@ -10,14 +10,14 @@ const Index = () =>
           <div className="auth-form">
             <a className="btn auth-btn linkedin-btn" href="/auth/linkedin">
               <i className="left"><span className="linkedin-icon" /></i>
-              Sign in with linkedin
+              Sign in with Linkedin
             </a>
             <a className="btn auth-btn google-btn" href="/auth/google">
               <i className="left"><span className="google-icon" /></i>
               Sign in with Google
             </a>
             <Link className="btn auth-btn signin-btn" to="/login">
-              Sign with your email
+              Sign in with your email
             </Link>
           </div>
           <Link to="/signup">New user? Click here</Link>

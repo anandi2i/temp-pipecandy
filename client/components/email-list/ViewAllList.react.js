@@ -50,9 +50,9 @@ class ListView extends React.Component {
       <div>
         <div className="container">
           <div className="row sub-head-container m-lr-0">
-            <div className="head">All Email List</div>
+            <div className="head">All Email Lists</div>
             <div className="sub-head">
-              <Link to="/list/create">Back to Create List</Link>
+              <Link to="/list/create">Back to Create Email List</Link>
             </div>
           </div>
           <div className="spaced" style={{display: this.state.spinning ? "block" : "none"}}>

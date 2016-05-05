@@ -46,7 +46,7 @@ class CreateCampaign extends React.Component {
           <div className="row sub-nav">
             <div className="head">Let’s create a new campaign</div>
             <div className="sub-head">
-              <Link to="/campaign">View all campaign</Link>
+              <Link to="/campaign">View all campaigns</Link>
             </div>
           </div>
           <div className="create-container">
@@ -66,13 +66,6 @@ class CreateCampaign extends React.Component {
                     value="Save" />
                 </div>
             </form>
-            </div>
-            <div className="hint-box m-t-47">
-              A .csv file is just like an MS Excel file. If you have your list
-              in MS Excel or a similar format, open it and save it as a .csv
-              file. Please make all the changes you need to make before
-              converting to .csv format (because .csv format does not save any
-              changes you might make!)
             </div>
           </div>
         </div>

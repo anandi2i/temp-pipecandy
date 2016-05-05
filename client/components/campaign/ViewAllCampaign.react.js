@@ -37,7 +37,7 @@ class CampaignListView extends React.Component {
       <div>
         <div className="container">
           <div className="row sub-head-container m-lr-0">
-            <div className="head">All Campaign List</div>
+            <div className="head">All Campaigns List</div>
             <div className="sub-head">
               <Link to="/campaign/create">Create Campaign</Link>
             </div>
@@ -45,7 +45,7 @@ class CampaignListView extends React.Component {
           <table className="striped">
             <thead>
               <tr>
-                <th data-field="id">Id</th>
+                <th data-field="id">Campaign Id</th>
                 <th data-field="name">Name</th>
                 <th data-field="edit">Edit</th>
               </tr>

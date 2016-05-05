@@ -201,7 +201,7 @@ class ListView extends React.Component {
               <i className="right mdi mdi-chevron-down"></i>
             </a>
             <ul id="addDropDown" className="dropdown-content">
-              <li><a className="modal-trigger" href="#addEmail">Add Subbscriber</a></li>
+              <li><a className="modal-trigger" href="#addEmail">Add Recipient</a></li>
               <li><a href="#">Samle content</a></li>
             </ul>
             <input id="fileUpload" type="file" className="hide" name="file"
@@ -214,7 +214,7 @@ class ListView extends React.Component {
             className="modal modal-fixed-header modal-fixed-footer mini-modal">
             <i className="mdi mdi-close modal-close"></i>
             <div className="modal-header">
-              <div className="head">Add Subbscriber</div>
+              <div className="head">Add Recipient</div>
             </div>
             <div className="modal-content">
               <div className="input-field">

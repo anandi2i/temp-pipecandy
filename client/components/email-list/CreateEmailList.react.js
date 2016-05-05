@@ -88,7 +88,7 @@ class EmailList extends React.Component {
       <div>
         <div className="container">
           <div className="row sub-nav">
-            <div className="head">Let’s create a list</div>
+            <div className="head">Let’s create an email list</div>
             <div className="sub-head">
               <Link to="/list">View lists</Link>
             </div>

@@ -85,7 +85,7 @@ class SelectPreBuildTemplate extends React.Component {
           <div id="previewTemplate" className="modal modal-fixed-header modal-fixed-footer">
             <i className="mdi mdi-close modal-close"></i>
             <div className="modal-header">
-              <div className="head">Add Subbscriber</div>
+              <div className="head">Add Recipient</div>
             </div>
             <div className="modal-content">
               <div className="template-content gray-bg p-10">

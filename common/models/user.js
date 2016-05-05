@@ -50,8 +50,8 @@ module.exports = function(user) {
     var options = {
       type: "email",
       to: user.email,
-      from: "pipecandi@gmail.com",
-      subject: "Thanks for registering with Pipecandy.",
+      from: "pipecandy@gmail.com",
+      subject: "Thanks for registering with Pipecandy!",
       template: path.resolve(__dirname, emailTemplate),
       redirect: "/verified",
       user: user,
