@@ -68,6 +68,7 @@ AppDispatcher.register(function(payload) {
   switch (action.actionType) {
     case Constants.REGISTER:
       UserApi.register(action.data).then((response) => {
+        response.data.avatar = "/images/photo.png";
         _user = response.data;
         _error = "";
         appHistory.push("response");
