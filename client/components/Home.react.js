@@ -46,7 +46,7 @@ class Home extends React.Component {
                 </Link>
               </div>
               <div className="col s12 m12 l6 left-align m-t-47">
-                <Link className="btn lg-btn-dflt blue" to="/">
+                <Link className="btn lg-btn-dflt blue" to="/dashboard">
                   Go to your Dashboard
                 </Link>
               </div>

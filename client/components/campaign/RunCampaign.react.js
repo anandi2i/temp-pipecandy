@@ -44,21 +44,21 @@ class TabsNav extends React.Component {
             {emailListIndex}
           </div>
           <div className={isEmailList ? activeTab : "tabs"}
-            onClick={this.handleClick.bind(this, emailListIndex)}>
+            onClick={() => this.handleClick(emailListIndex)}>
             {this.state.selectEmailList.name}
           </div>
           <div className={isTemplate ? activePointer : "position"}>
             {templateIndex}
           </div>
           <div className={isTemplate ? activeTab : "tabs"}
-            onClick={this.handleClick.bind(this, templateIndex)}>
+            onClick={() => this.handleClick(templateIndex)}>
             {this.state.selectTemplate.name}
           </div>
           <div className={isSchedule ? activePointer : "position"}>
             {scheduleIndex}
           </div>
           <div className={isSchedule ? activeTab : "tabs"}
-            onClick={this.handleClick.bind(this, scheduleIndex)}>
+            onClick={() => this.handleClick(scheduleIndex)}>
             {this.state.ScheduleEmail.name}
           </div>
         </div>
@@ -86,7 +86,7 @@ class RunCampaign extends React.Component {
     CampaignStore.removeChangeListener(this.onStoreChange);
   }
 
-  handleClick(index) {
+  handleClick = (index) => {
     let ScheduleEmailIndex = 3;
     if (index === ScheduleEmailIndex) {
       CampaignActions.getSelectedEmailList(this.refs.selectEmailList.refs
@@ -111,7 +111,7 @@ class RunCampaign extends React.Component {
   render() {
     return (
       <div>
-        <TabsNav handleClick={this.handleClick.bind(this)}
+        <TabsNav handleClick={this.handleClick}
           active={this.state.activeTab} />
         <SelectEmailList ref="selectEmailList" active={this.state.activeTab} />
         <SelectEmailTemplate ref="SelectEmailTemplate"

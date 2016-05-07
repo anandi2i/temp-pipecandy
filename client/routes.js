@@ -29,6 +29,9 @@ import CreateCampaign from "./components/campaign/CreateCampaign.react";
 import RunCampaign from "./components/campaign/RunCampaign.react";
 import ViewALLCampaign from "./components/campaign/ViewAllCampaign.react";
 
+//Dashboard
+import Dashboard from "./components/Dashboard.react";
+
 function requireAuth(nextState, replace) {
   if(!($.isEmptyObject(UserStore.getUser()))) {
     return;
@@ -60,6 +63,7 @@ const routes = (
       <Route path="create" component={CreateCampaign} />
       <Route path=":id/run" component={RunCampaign} />
     </Route>
+    <Route path="dashboard" component={Dashboard} />
     <Route path="response" component={Response} />
     <Route path="email-verified" component={EmailVerification} />
     <Route path="profile" component={Profile} />

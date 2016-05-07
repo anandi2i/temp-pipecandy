@@ -100,6 +100,9 @@ class Menu extends React.Component {
             </div>
             {/* side nav - end here */}
             <li>
+              <Link to="/dashboard" activeClassName="active">Dashboard</Link>
+            </li>
+            <li>
               <Link to="/list" activeClassName="active">Email Lists</Link>
             </li>
             <li>

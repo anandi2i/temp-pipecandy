@@ -59,7 +59,7 @@ class SelectEmailTemplate extends React.Component {
         <div className="row inner-tabs">
           <nav>
             <div className="nav-wrapper">
-              <TabsNav handleClick={this.handleClick.bind(this)} active={this.state.activeTab}/>
+              <TabsNav handleClick={this.handleClick} active={this.state.activeTab}/>
               <ul className="right">
               <a href="#!" className="btn blue">Save & continue</a>
               </ul>
