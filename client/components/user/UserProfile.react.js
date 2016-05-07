@@ -133,12 +133,12 @@ class Profile extends React.Component {
               <div className="col s12 l4 m5">
                 <div className="avatar-container">
                   <FileUpload handleFileChange={this.handleFileChange} />
-                  <div onClick={this.triggerFile} className="avatar-pic"
+                  <div className="avatar-pic"
                     style={avatarStyle}>
-                    <div className="avatar-edit">
-                      <span>Click to Pick Avatar</span>
-                    </div>
                   </div>
+                  <input type="button" className="btn blue"
+                    onClick={this.triggerFile}
+                    value="Click to Pick Avatar"/>
                 </div>
                 {this.state.cropperOpen &&
                   <AvatarCropper
