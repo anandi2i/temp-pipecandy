@@ -26,7 +26,8 @@ class Profile extends React.Component {
       "email" : user.email,
       "cropperOpen": false,
       "img": null,
-      "croppedImg": user.avatar || ""
+      "croppedImg": user.avatar || "",
+      "isSocialAuth": user.identities && user.identities.length ? true : false
     };
   }
 
@@ -69,7 +70,8 @@ class Profile extends React.Component {
       "email" : user.email,
       "cropperOpen": false,
       "img": null,
-      "croppedImg": this.state.img || user.avatar
+      "croppedImg": this.state.img || user.avatar,
+      "isSocialAuth": user.identities.length ? true : false
     });
     displayError(UserStore.getError());
     displaySuccess(UserStore.getSuccess());
@@ -193,45 +195,50 @@ class Profile extends React.Component {
                     className="validate" name="email" />
                   <label className="active" htmlFor="email">Email</label>
                 </div>
-                <div className="input-field">
-                  <input id="oldPass" type="password"
-                    className={
-                      this.props.isValid("oldPassword")
-                      ? "validate"
-                      : "invalid"
-                    }
-                    name="old password"
-                    onChange={(e) => this.onChange(e, "oldPassword")}
-                    onBlur={this.props.handleValidation("oldPassword")} />
-                  <label htmlFor="password">Old Password</label>
-                  {!this.props.isValid("oldPassword")
-                    ? this.renderHelpText("oldPassword")
-                    : null
-                  }
-                </div>
-                <div className="input-field">
-                  <div className="password-box tooltipped" data-position="bottom"
-                    data-tooltip="Password strength" >
-                    <div className={getScore > pwdStrength._3 ? "active" : null}></div>
-                    <div className={getScore > pwdStrength._2 ? "active" : null}></div>
-                    <div className={getScore > pwdStrength._1 ? "active" : null}></div>
-                    <div className={getScore > pwdStrength._0 ? "active" : null}></div>
-                  </div>
-                  <input id="newPass" type="password"
-                    className={
-                      this.props.isValid("newPassword")
-                        ? "validate"
-                        : "invalid"
-                    }
-                    name="new password"
-                    onChange={(e) => this.onChange(e, "newPassword")}
-                    onBlur={this.props.handleValidation("newPassword")} />
-                  <label htmlFor="password">New Password</label>
-                  {!this.props.isValid("newPassword")
-                    ? this.renderHelpText("newPassword")
-                    : null
-                  }
-                </div>
+                { !this.state.isSocialAuth
+                  ? <div>
+                      <div className="input-field">
+                        <input id="oldPass" type="password"
+                          className={
+                            this.props.isValid("oldPassword")
+                            ? "validate"
+                            : "invalid"
+                          }
+                          name="old password"
+                          onChange={(e) => this.onChange(e, "oldPassword")}
+                          onBlur={this.props.handleValidation("oldPassword")} />
+                        <label htmlFor="password">Old Password</label>
+                        {!this.props.isValid("oldPassword")
+                          ? this.renderHelpText("oldPassword")
+                          : null
+                        }
+                      </div>
+                      <div className="input-field">
+                        <div className="password-box tooltipped" data-position="bottom"
+                          data-tooltip="Password strength" >
+                          <div className={getScore > pwdStrength._3 ? "active" : null}></div>
+                          <div className={getScore > pwdStrength._2 ? "active" : null}></div>
+                          <div className={getScore > pwdStrength._1 ? "active" : null}></div>
+                          <div className={getScore > pwdStrength._0 ? "active" : null}></div>
+                        </div>
+                        <input id="newPass" type="password"
+                          className={
+                            this.props.isValid("newPassword")
+                              ? "validate"
+                              : "invalid"
+                          }
+                          name="new password"
+                          onChange={(e) => this.onChange(e, "newPassword")}
+                          onBlur={this.props.handleValidation("newPassword")} />
+                        <label htmlFor="password">New Password</label>
+                        {!this.props.isValid("newPassword")
+                          ? this.renderHelpText("newPassword")
+                          : null
+                        }
+                      </div>
+                    </div>
+                  : null
+                }
               </div>
             </div>
             <div className="row r-btn-container m-0">
