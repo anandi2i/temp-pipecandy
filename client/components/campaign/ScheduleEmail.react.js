@@ -167,14 +167,15 @@ class ScheduleEmail extends React.Component {
   saveCampaignInfo = () => {
     let followups = [];
     this.state.followups.map(function(val, key){
-     followups.push(this.refs[`addFollowups${val.id}`]);
+      //TODO Need to construct data here
+      followups.push(this.refs[`addFollowups${val.id}`].refs.issues.state);
     }, this);
     this.setState((state) => ({
       mainEmailContent: this.refs.issues.state,
       followupsEmailContent: followups
     }), function(){
-      console.log(this.state.mainEmailContent);
       //TODO Need to construct data here
+      console.log(this.state.mainEmailContent);
       console.log(this.state.followupsEmailContent);
     });
   }

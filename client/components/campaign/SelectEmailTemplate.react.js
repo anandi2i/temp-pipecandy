@@ -44,7 +44,7 @@ class SelectEmailTemplate extends React.Component {
     };
   }
 
-  handleClick(index) {
+  handleClick = (index) => {
     this.setState({
       activeTab: index
     });
