@@ -42,7 +42,6 @@ class CampaignIssuesPreviewPopup extends React.Component {
       this.el.find(".preview-modal-content").mCustomScrollbar({
         theme:"minimal-dark"
       });
-      this.handleBlur();
     });
   }
 
@@ -133,7 +132,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
         _.each(value, $.proxy(function (val, key) {
           let fieldsStr = "<span class='tag un-common' "+
             "contenteditable='false' data-tag='"+val.name+"' data-tag-name='"+
-            val.value+"'>&lt;"+val.name+"&gt;</span>";
+            val.name+"'>&lt;"+val.name+"&gt;</span>";
           let re = new RegExp(fieldsStr, "g");
           emailContent = emailContent
             .replace(re, this.replaceSmartTagContent(val.value, val.name));

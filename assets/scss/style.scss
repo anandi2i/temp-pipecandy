@@ -650,7 +650,7 @@ a {
       background-color: $white;
       font-weight: 700;
       font-size: 12px;
-      line-height: 20px;
+      line-height: 19px;
       &.active {
         background-color: $pinck-clr;
         color: $white;
@@ -1066,7 +1066,7 @@ $lines-to-show: 8;
   }
   .preview-modal-content {
     width: 100%;
-    height: calc(100% - 110px);
+    height: calc(100% - 140px);
     margin-top: 10px;
     padding: 0 15px;
     overflow-y: auto;
