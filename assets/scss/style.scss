@@ -8,6 +8,12 @@ body {
 a {
   cursor: pointer;
 }
+.main-head {
+  float: left;
+  font-size: 24px;
+  font-weight: 300;
+  width: 100%;
+}
 .top-candy-bdr {
   background: url("../images/tile.png");
   background-repeat: repeat-x;
@@ -1213,7 +1219,7 @@ $lines-to-show: 8;
   .status {
     font-size: 14px;
     border-bottom: 3px solid red;
-    margin-top: -14px;
+    margin-top: -17px;
     position: absolute;
     right: 0;
     min-width: 60px;
@@ -1238,40 +1244,39 @@ $lines-to-show: 8;
   }
 }
 .tag-name-menu {
-  &.top {
-    border-top: $border-1px;
-  }
   ul {
-    position: absolute;
     margin-top: 0;
+    border-bottom: $border-1px;
     li {
       font-weight: 500;
       display: inline-block;
-      height: 50px;
       line-height: 45px;
       padding: 0 10px;
       color: $gray-txt-clr;
       &:first-child {
+        padding-left: 0px;
         &:after {
-          content: ":";
+          content: " :";
         }
       }
       &.menu {
         color: $green-menu-color;
         cursor: pointer;
-        border-top: 3px solid $white;
+        border-bottom: 3px solid $white;
         &:hover {
           background-color: $menu-hovr-clr;
-          border-top: 3px solid $menu-hovr-clr;
+          border-bottom: 3px solid $menu-hovr-clr;
         }
         &.active {
-          border-top: 3px solid $green-menu-color;
+          border-bottom: 3px solid $green-menu-color;
         }
       }
     }
   }
 }
 .camp-chip-container {
+  border-bottom: $border-1px;
+  padding-bottom: 10px;
   .col {
     margin-bottom: 22px;
   }
@@ -1301,6 +1306,24 @@ $lines-to-show: 8;
 @media only screen and (max-width: 992px) {
   .side-nav-btn {
     display: block;
+  }
+}
+@media only screen and (max-width: 700px) {
+  .hide-on-700{
+    display: none !important;
+  }
+  .tag-name-menu{
+    ul{
+      li{
+        &:first-child{
+          width: 100%;
+          text-align: center;
+          &:after{
+            content: ""
+          }
+        }
+      }
+    }
   }
 }
 @media only screen and (max-width: 680px) {

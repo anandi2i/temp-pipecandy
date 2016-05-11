@@ -13,9 +13,9 @@ class TagNameMenu extends React.Component {
       return (
         i === initCount
         ?
-          <li key={i}>Performance compared with</li>
+          <li key={i}>{item.name}</li>
         :
-          <li key={i} onClick={() => this.handleClick(i)} className={this.props.active === i ? "active menu" : "menu"}>
+          <li key={i} onClick={() => this.handleClick(i)} className={this.props.active === i ? `active ${item.class}` : `${item.class}`}>
             {item.name}
           </li>
       );

@@ -58,13 +58,42 @@ class Dashboard extends React.Component {
       }],
       tab: [
         {
-          name: "Performance compared with"
+          name: "Performance compared with",
+          class: "menu"
         },
         {
-          name: "Previous campaigns run on the list"
+          name: "Previous run",
+          class: "menu"
         },
         {
-          name: "Industry average"
+          name: "Industry average",
+          class: "menu"
+        }
+      ],
+      tab1: [
+        {
+          name: "Show status for",
+          class: "menu"
+        },
+        {
+          name: "Today",
+          class: "menu"
+        },
+        {
+          name: "Last Week",
+          class: "menu"
+        },
+        {
+          name: "Last Month",
+          class: "menu"
+        },
+        {
+          name: "Last 3 Month",
+          class: "menu hide-on-700"
+        },
+        {
+          name: "Specify Timeline",
+          class: "menu hide-on-700"
         }
       ],
       activeTab: 1,
@@ -97,6 +126,12 @@ class Dashboard extends React.Component {
               <Link to="/list">Previous Campaign Reports</Link>
             </div>
           </div>
+          {/* Top tag Menu */}
+          <div className="row tag-name-menu">
+            <TagNameMenu handleClick={this.handleClick}
+              active={this.state.activeTab}
+              tab={this.state.tab} />
+          </div>
           <div className="row camp-chip-container" style={{display: this.state.activeTab === this.state.index ? "block" : "none"}}>
             {
               this.state.count.map(function(list, key) {
@@ -128,12 +163,17 @@ class Dashboard extends React.Component {
             {/* TODO Add UI */}
             <h2>Sample Content </h2>
           </div>
-          {/* Top tag Menu */}
-          <div className="row tag-name-menu top">
+        </div>
+        <div className="container">
+          <div className="row main-head">
+            Othar status
+          </div>
+          <div className="row tag-name-menu">
             <TagNameMenu handleClick={this.handleClick}
               active={this.state.activeTab}
-              tab={this.state.tab} />
+              tab={this.state.tab1} />
           </div>
+          <h1>Test</h1>
         </div>
       </div>
     );
