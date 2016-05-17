@@ -81,8 +81,11 @@ module.exports = function(user) {
     //TODO code cleanup
     let req = context.req;
     let userID = req.params.id;
-    let isCroppedImg = req.body.croppedImg.includes("data:image/png;base64,");
+    let isCroppedImg = false;
     let isPassword = false;
+    if (req.body.croppedImg) {
+      isCroppedImg = req.body.croppedImg.includes("data:image/png;base64,");
+    }
     if (req.body.oldPassword && req.body.newPassword) {
       isPassword = true;
     }
@@ -152,11 +155,7 @@ module.exports = function(user) {
         }
       });
     } else {
-      logger.error("error in update attributes");
-      let error = new Error();
-      error.message = "Error in update attributes";
-      error.name = "ErrorInUpdatingAttributes";
-      next(error);
+      next();
     }
   });
 

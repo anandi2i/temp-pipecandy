@@ -12,6 +12,13 @@
     "avatar": {
       "type": "string",
       "default": "/images/photo.png"
+    },
+    "optText": {
+      "type": "string",
+      "default": "unsubscribe"
+    },
+    "address": {
+      "type": "string"
     }
   },
   "validations": [],

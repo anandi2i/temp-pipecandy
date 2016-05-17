@@ -76,6 +76,24 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     return peopleList;
   },
 
+  setOptText(optionalText) {
+    let optAddress = "", optText = "";
+    if(optionalText.isAddress){
+      optAddress = optionalText.address;
+    }
+    if(optionalText.isOptText){
+      optText = optionalText.optText;
+    }
+    let style = "width: 100%;border-top: 1px solid #c2c2c2;" +
+      "padding-top: 20px;margin-top: 20px;";
+    return ("<div style='" + style + "'>" +
+      "<table><tr style='color:#c2c2c2;'>" +
+      "<td style='width: 50%;float: left;padding: 0;'>" +
+      optAddress + "</td>" +
+      "<td style='width:50%;text-align:right;padding: 0;'><a>" +
+      optText + "</a></td></tr></table></div>");
+  },
+
   // re-construct tag name to smart-tags
   constructEmailTemplate(str) {
     let html = $.parseHTML(str);

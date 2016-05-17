@@ -73,7 +73,7 @@
     "zxcvbn": "^4.2.0"
   },
   "devDependencies": {
-    "babel-eslint": "^5.0.0",
+    "babel-eslint": "^6.0.0",
     "babel-loader": "^6.2.4",
     "eslint": "^2.2.0",
     "eslint-config-defaults": "^9.0.0",

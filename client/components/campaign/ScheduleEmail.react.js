@@ -5,6 +5,8 @@ import AddFollowups from "./AddFollowups.react";
 import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
 import PreviewMailsPopup from "./PreviewMailsPopup.react";
 import CampaignStore from "../../stores/CampaignStore";
+import UserStore from "../../stores/UserStore";
+import UserAction from "../../actions/UserAction";
 
 class ScheduleEmail extends React.Component {
   constructor(props) {
@@ -25,7 +27,12 @@ class ScheduleEmail extends React.Component {
       emailText: "",
       mainEmailContent: {},
       followupsEmailContent: [],
-      emailRawText: ""
+      emailRawText: "",
+      user: "",
+      optText: "",
+      address: "",
+      isOptText: true,
+      isAddress: true
     };
   }
 
@@ -61,11 +68,15 @@ class ScheduleEmail extends React.Component {
 
   onStoreChange = () => {
     let selectedEmailList = CampaignStore.getSelectedEmailList();
+    let user = UserStore.getUser();
     this.setState({
       emailList: selectedEmailList.emailList || [],
       commonSmartTags: selectedEmailList.commonSmartTags || [],
       unCommonSmartTags: selectedEmailList.unCommonSmartTags || [],
-      getAllPeopleList: selectedEmailList.peopleList || []
+      getAllPeopleList: selectedEmailList.peopleList || [],
+      user: user,
+      optText: user.optText || "",
+      address: user.address || ""
     });
     this.initTinyMCE();
   }
@@ -99,10 +110,12 @@ class ScheduleEmail extends React.Component {
     }
   }
 
-  displayScheduleCampaign = () => {
-    this.setState({
-      displayScheduleCampaign: !this.state.displayScheduleCampaign
-    });
+  toggleSetState (field) {
+    if(field) {
+      let state = {};
+      state[field] = !this.state[field];
+      this.setState(state);
+    }
   }
 
   //http://stackoverflow.com/questions/29527385/react-removing-element-from-array-in-component-state
@@ -165,6 +178,15 @@ class ScheduleEmail extends React.Component {
   }
 
   saveCampaignInfo = () => {
+    if(this.state.user.optText !== this.state.optText ||
+      this.state.user.address !== this.state.address){
+        let formData = {
+          "id": this.state.user.id,
+          "optText": this.state.optText,
+          "address": this.state.address
+        };
+        UserAction.userUpdate(formData);
+    }
     let followups = [];
     this.state.followups.map(function(val, key){
       //TODO Need to construct data here
@@ -188,6 +210,15 @@ class ScheduleEmail extends React.Component {
     }
   }
 
+  getOptText = () => {
+    return ({
+      isOptText: this.state.isOptText,
+      isAddress: this.state.isAddress,
+      optText: this.state.optText,
+      address: this.state.address
+    });
+  }
+
   render() {
     let displayIndex =
       (this.props.active === this.state.index ? "block" : "none");
@@ -196,6 +227,8 @@ class ScheduleEmail extends React.Component {
         ? "block" : "none");
     let displaySchedule = this.state.displayScheduleCampaign
       ? "block" : "none";
+    let isOptText = this.state.isOptText ? "block" : "none";
+    let isAddress = this.state.isAddress ? "block" : "none";
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
@@ -228,9 +261,9 @@ class ScheduleEmail extends React.Component {
               {/* email to list */}
               <div className="row m-lr-0">
                 <div className="col s12 p-lr-0">
-                  <input type="checkbox" className="filled-in" id="filled-in-box"
-                    defaultChecked=""
-                    onChange={this.displayScheduleCampaign} />
+                  <input onChange={() => this.toggleSetState("displayScheduleCampaign")}
+                    type="checkbox" className="filled-in"
+                    id="filled-in-box" defaultChecked="" />
                   <label htmlFor="filled-in-box">Schedule campaign for later</label>
                 </div>
               </div>
@@ -318,6 +351,38 @@ class ScheduleEmail extends React.Component {
                   :
                     ""
               }
+              <div className="row opt-text">
+                <div className="col s12 m-lr-0">
+                  <input type="checkbox" className="filled-in" id="optOutText"
+                    defaultChecked="checked"
+                    onChange={() => this.toggleSetState("isOptText")} />
+                  <label htmlFor="optOutText">Opt-Out-Text</label>
+                  <div className="input-field" style={{display: isOptText}}>
+                    <input id="optOutText" placeholder="Opt-Out-Text"
+                      type="text"
+                      value={this.state.optText}
+                      className="border-input"
+                      onChange={(e) => this.onChange(e, "optText")}
+                      name="optOutText" />
+                  </div>
+                </div>
+              </div>
+              <div className="row opt-text">
+                <div className="col s12 m-lr-0">
+                  <input type="checkbox" className="filled-in" id="optOutAddress"
+                    defaultChecked="checked"
+                    onChange={() => this.toggleSetState("isAddress")} />
+                  <label htmlFor="optOutAddress">Address</label>
+                  <div className="input-field" style={{display: isAddress}}>
+                    <textarea id="optOutAddress" placeholder="Address"
+                      type="text"
+                      value={this.state.address}
+                      name="Address"
+                      onChange={(e) => this.onChange(e, "address")}
+                      className="border-input materialize-textarea" />
+                  </div>
+                </div>
+              </div>
               {/* Popup starts here*/}
                 <CampaignIssuesPreviewPopup
                   emailSubject={this.state.subject}
@@ -355,6 +420,7 @@ class ScheduleEmail extends React.Component {
           followupsEmailContent={this.state.followupsEmailContent}
           emailSubject={this.state.subject}
           emailContent={this.state.emailContent}
+          getOptText={this.getOptText}
           ref="preview"/>
       </div>
     );

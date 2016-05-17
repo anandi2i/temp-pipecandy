@@ -21,6 +21,7 @@ class PreviewMailsPopup extends React.Component {
   }
 
   openModal = () => {
+    let getOptText = this.props.getOptText();
     let {
       peopleList,
       emailSubject,
@@ -33,7 +34,11 @@ class PreviewMailsPopup extends React.Component {
       emailContent: emailContent,
       emailSubject: emailSubject,
       mainEmailContent: mainEmailContent,
-      followupsEmailContent: followupsEmailContent
+      followupsEmailContent: followupsEmailContent,
+      isOptText: getOptText.isOptText,
+      isAddress: getOptText.isAddress,
+      optText: getOptText.optText,
+      address: getOptText.address
     }, () => {
       this.el.openModal({
         dismissible: false
@@ -89,9 +94,21 @@ class PreviewMailsPopup extends React.Component {
   applyEmailTemplates(id) {
     let currentPerson = this.state.peopleList[--id];
     let content, emailSubject;
+    let optTextContent = "";
     let issueCompletedList = this.state.mainEmailContent.issuesCompletedList;
     let findPerson = _.find(issueCompletedList,
       user => user.id === currentPerson.id);
+
+    //Get optional text content
+    if(this.state.isOptText || this.state.isAddress){
+      let optionalText = {
+        optText: this.state.optText,
+        address: this.state.address,
+        isOptText: this.state.isOptText,
+        isAddress: this.state.isAddress
+      };
+      optTextContent = CampaignStore.setOptText(optionalText);
+    }
     if(findPerson) {
       content = findPerson.template;
       emailSubject = findPerson.emailSubject;
@@ -101,7 +118,7 @@ class PreviewMailsPopup extends React.Component {
     }
     let setContent =
       CampaignStore.applySmartTagsValue(content, currentPerson);
-
+    setContent = setContent.concat(optTextContent);
     this.setState({
       listofEmails: [{
         "content": setContent,
@@ -123,6 +140,7 @@ class PreviewMailsPopup extends React.Component {
       }
       let followupContent =
         CampaignStore.applySmartTagsValue(followupEmail, currentPerson);
+      followupContent = followupContent.concat(optTextContent);
       followupsList.push({
         "content": followupContent,
         "emailSubject": followupSubject

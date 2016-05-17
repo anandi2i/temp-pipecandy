@@ -24,6 +24,7 @@ class Profile extends React.Component {
       "firstName" : user.firstName,
       "lastName" : user.lastName,
       "email" : user.email,
+      "address" : user.address || "",
       "cropperOpen": false,
       "img": null,
       "croppedImg": user.avatar || "",
@@ -68,6 +69,7 @@ class Profile extends React.Component {
       "firstName" : user.firstName,
       "lastName" : user.lastName,
       "email" : user.email,
+      "address" : user.address,
       "cropperOpen": false,
       "img": null,
       "croppedImg": this.state.img || user.avatar,
@@ -179,10 +181,10 @@ class Profile extends React.Component {
                         ? "validate"
                         : "invalid"
                     }
-                      value={this.state.lastName}
-                      name="Last Name"
-                      onChange={(e) => this.onChange(e, "lastName")}
-                      onBlur={this.props.handleValidation("lastName")} />
+                    value={this.state.lastName}
+                    name="Last Name"
+                    onChange={(e) => this.onChange(e, "lastName")}
+                    onBlur={this.props.handleValidation("lastName")} />
                   <label className="active" htmlFor="lastName">Last Name</label>
                   {!this.props.isValid("lastName")
                     ? this.renderHelpText("lastName")
@@ -194,6 +196,15 @@ class Profile extends React.Component {
                     type="email" value={this.state.email}
                     className="validate" name="email" />
                   <label className="active" htmlFor="email">Email</label>
+                </div>
+                <div className="input-field">
+                  <textarea id="address" placeholder="Address"
+                    type="text"
+                    value={this.state.address}
+                    name="Address"
+                    className="materialize-textarea"
+                    onChange={(e) => this.onChange(e, "address")} />
+                    <label className="active" htmlFor="address">Address</label>
                 </div>
                 { !this.state.isSocialAuth
                   ? <div>
