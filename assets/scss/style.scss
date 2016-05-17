@@ -407,32 +407,39 @@ a {
 }
 .avatar-container {
   text-align: center;
-}
-.avatar-pic {
-  width: 200px;
-  height: 200px;
-  background-size: cover;
-  margin-left: auto;
-  margin-right: auto;
-  .avatar-edit {
-    display: none;
-  }
-  &:hover {
+  .avatar-pic {
+    width: 200px;
+    height: 200px;
+    background-size: cover;
+    margin-left: auto;
+    margin-right: auto;
     .avatar-edit {
-      background-color: $gray-transparent-clr;
-      border: 5px solid $blue-clr;
-      height: 200px;
-      vertical-align: middle;
-      text-align: center;
-      display: table-cell;
-      width: 200px;
-      color: $white;
+      display: none;
+    }
+    &:hover {
+      .avatar-edit {
+        background-color: $gray-transparent-clr;
+        border: 5px solid $blue-clr;
+        height: 200px;
+        vertical-align: middle;
+        text-align: center;
+        display: table-cell;
+        width: 200px;
+        color: $white;
+      }
     }
   }
+  #selectAvatar {
+    display: none;
+  }
+  .change-pic {
+    width: 200px;
+    margin-top: 5px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
-#selectAvatar {
-  display: none;
-}
+
 /*********************
   Email List
 **********************/

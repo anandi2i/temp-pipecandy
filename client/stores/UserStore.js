@@ -10,6 +10,7 @@ import appHistory from "../RouteContainer";
 let _user = {};
 let _error = "";
 let _success = "";
+let isSocialAuth = false;
 
 /**
  * Has a list of success messages that the toast display
@@ -59,6 +60,14 @@ const UserStore = _.extend({}, EventEmitter.prototype, {
    */
   getSuccess() {
     return _success;
+  },
+
+  /**
+   * Check if the user is using social login
+   * @return {boolean} is social authenticated
+   */
+  isSocialAuth() {
+    return isSocialAuth;
   }
 
 });
@@ -91,7 +100,9 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.SET_USER_DETAIL:
       _user = action.data;
+      isSocialAuth = false;
       if(_user.identities[0] && _user.identities[0].profile) {
+        isSocialAuth = true;
         if(!_user.firstName && _user.identities[0].profile.name) {
           _user.firstName = _user.identities[0].profile.name.givenName || "";
           _user.lastName = _user.identities[0].profile.name.familyName || "";
@@ -105,6 +116,7 @@ AppDispatcher.register(function(payload) {
     case Constants.LOGOUT:
       UserApi.logout().then((response) => {
         _user = "";
+        isSocialAuth = false;
         appHistory.push("/login");
       });
       break;

@@ -27,7 +27,7 @@ class Profile extends React.Component {
       "cropperOpen": false,
       "img": null,
       "croppedImg": user.avatar || "",
-      "isSocialAuth": user.identities && user.identities.length ? true : false
+      "isSocialAuth": UserStore.isSocialAuth()
     };
   }
 
@@ -71,7 +71,7 @@ class Profile extends React.Component {
       "cropperOpen": false,
       "img": null,
       "croppedImg": this.state.img || user.avatar,
-      "isSocialAuth": user.identities.length ? true : false
+      "isSocialAuth": UserStore.isSocialAuth()
     });
     displayError(UserStore.getError());
     displaySuccess(UserStore.getSuccess());
@@ -138,9 +138,9 @@ class Profile extends React.Component {
                   <div className="avatar-pic"
                     style={avatarStyle}>
                   </div>
-                  <input type="button" className="btn blue"
+                  <input type="button" className="change-pic btn blue"
                     onClick={this.triggerFile}
-                    value="Click to Pick Avatar"/>
+                    value="Change Picture"/>
                 </div>
                 {this.state.cropperOpen &&
                   <AvatarCropper
