@@ -1,5 +1,8 @@
 import React from "react";
 import {Link} from "react-router";
+import strategy from "joi-validation-strategy";
+import validation from "react-validation-mixin";
+import validatorUtil from "../../utils/ValidationMessages";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
 
@@ -9,6 +12,13 @@ class CreateCampaign extends React.Component {
     this.state={
       campaignName: ""
     };
+    this.validatorTypes = {
+      campaignName: validatorUtil.campaignName,
+    };
+  }
+
+  getValidatorData() {
+    return this.state;
   }
 
   onChange(e, field) {
@@ -31,8 +41,22 @@ class CreateCampaign extends React.Component {
 
   onSubmit = (e) => {
     e.preventDefault();
-    const formData = {"name" : this.state.campaignName};
-    CampaignActions.createNewCampaign(formData);
+    const onValidate = (error) => {
+      if (!error) {
+        CampaignActions.createNewCampaign({
+          "name" : this.state.campaignName
+        });
+      }
+    };
+    this.props.validate(onValidate);
+  }
+
+  renderHelpText(el) {
+    return (
+      <div className="warning-block">
+        {this.props.getValidationMessages(el)[0]}
+      </div>
+    );
   }
 
   onStoreChange = () => {
@@ -58,8 +82,19 @@ class CreateCampaign extends React.Component {
                 <div className="input-field">
                   <input placeholder="Ex: Webinar Invitation, Feature updates, User Onboarding etc."
                     id="campaignName" type="text"
+                    name="Campaign Name"
+                    className={
+                      this.props.isValid("campaignName")
+                        ? "validate" : "invalid"
+                    }
                     value={this.state.campaignName}
-                    onChange={(e) => this.onChange(e, "campaignName")} />
+                    onChange={(e) => this.onChange(e, "campaignName")}
+                    onBlur={this.props.handleValidation("campaignName")} />
+                  {
+                    !this.props.isValid("campaignName")
+                      ? this.renderHelpText("campaignName")
+                      : null
+                  }
                 </div>
                 <div className="row r-btn-container">
                   <input type="submit" className="btn blue"
@@ -74,4 +109,4 @@ class CreateCampaign extends React.Component {
   }
 }
 
-export default CreateCampaign;
+export default validation(strategy)(CreateCampaign);

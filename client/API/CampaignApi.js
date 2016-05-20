@@ -2,7 +2,7 @@ import api from "axios";
 
 const CampaignApi = {
   createCampaign(data) {
-    return api.post(`/api/users/${getCookie("userId")}/campaigns`, data);
+    return api.post("/api/users/createCampaign", data);
   },
   getAllCampaign() {
     return api.get(`/api/users/${getCookie("userId")}/campaigns`);

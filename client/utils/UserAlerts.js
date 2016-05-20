@@ -17,7 +17,8 @@ export const ErrorMessages = {
   "EMAIL_NOT_FOUND": "The requested email doesn't exist",
   "FileUploadInvalidEmail": "One or more rows doesn't have valid email Id",
   "FileUploadInvalidHeader": "File Header is not in valid format",
-  "FileUploadFnameEmpty": "One or more rows have empty first name"
+  "FileUploadFnameEmpty": "One or more rows have empty first name",
+  "ExistsCampaign": "Campaign name already exist"
 };
 
 /**

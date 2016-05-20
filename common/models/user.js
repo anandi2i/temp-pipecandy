@@ -275,12 +275,61 @@ module.exports = function(user) {
     return cb.promise;
   };
 
+  /**
+   * Get new campaign name and create (if name is unique)
+   * @param ctx
+   * @param campaign
+   * @param cb
+   */
+  user.createCampaign = function(ctx, campaign, cb) {
+    campaign.createdBy = ctx.req.accessToken.userId;
+    user.app.models.Campaign.findOrCreate({
+      where: {
+        createdBy: campaign.createdBy,
+        name: campaign.name
+      }
+    }, campaign, (err, campaign, created) => {
+      if (err) {
+        logger.error("Error while creating a campaign", err);
+        cb(err);
+      }
+      if (created) {
+        logger.info("Campaign name created successfully", campaign);
+        cb(null);
+      } else {
+        let error = new Error();
+        error.message = "campaign name already exists";
+        error.name = "ExistsCampaign";
+        logger.error("Campaign name already exists", campaign);
+        cb(error);
+      }
+    });
+  };
+
   user.remoteMethod(
     "current",
     {
       http: {path: "/current", verb: "get"},
       description: "Returns the currently authenticated user",
       returns: {arg: "current", type: "object", root: true}
+    }
+  );
+  user.remoteMethod(
+    "createCampaign",
+    {
+      description: "Create unique campaign for user",
+      accepts: [
+        {
+          arg: "ctx", type: "object",
+          http: {source: "context"}
+        },
+        {
+          arg: "name", type: "object", required: true,
+          http: {source: "body"}
+        },
+      ],
+      returns: {arg: "campaign", type: "object", root: true},
+      http: {verb: "post"}
     }
   );
 
