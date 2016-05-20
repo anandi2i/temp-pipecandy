@@ -1,89 +1,63 @@
 import React from "react";
 import {Link} from "react-router";
-import Autosuggest from "react-autosuggest";
+import strategy from "joi-validation-strategy";
+import validation from "react-validation-mixin";
+import validatorUtil from "../../utils/ValidationMessages";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 
-function escapeRegexCharacters(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, /[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function getSuggestions(value, allEmailList) {
-  const escapedValue = escapeRegexCharacters(value.trim());
-  if (escapedValue === "") {
-    return [];
-  }
-  const regex = new RegExp("^" + escapedValue, "i");
-  return allEmailList.filter(emailList => regex.test(emailList.name));
-}
-
-function getAllListFromStore() {
-  return EmailListStore.getAllList();
-}
-
-//http://react-autosuggest.js.org/
-//http://codepen.io/moroshko/pen/LGNJMy
 class EmailList extends React.Component {
   constructor(props) {
     super(props);
     this.state={
-      value: "",
-      suggestions: getSuggestions(""),
-      emailList: getAllListFromStore()
+      listName: "",
     };
+    this.validatorTypes = {
+     listName: validatorUtil.listName,
+    };
+  }
+
+  getValidatorData() {
+    return this.state;
   }
 
   componentDidMount() {
     EmailListStore.addChangeListener(this.onStoreChange);
-    EmailListActions.getAllEmailList();
   }
 
   componentWillUnmount() {
     EmailListStore.removeChangeListener(this.onStoreChange);
   }
 
-  onStoreChange = () => {
-    this.setState({
-      emailList: getAllListFromStore()
-    });
-  }
-
-  onChange = (e, {newValue, method}) => {
-    this.setState({
-      value: newValue
-    });
-  }
-
-  onSuggestionsUpdateReq = ({value}) => {
-    this.setState({
-      suggestions: getSuggestions(value, this.state.emailList)
-    });
-  }
-
-  renderSuggestion = (suggestion) => {
-    return (
-      <span>{suggestion.name}</span>
-    );
-  }
-
-  getSuggestionValue = (suggestion) => {
-    return suggestion.name;
+  handleChange(e, field) {
+    let state = {};
+    state[field] = e.target.value;
+    this.setState(state);
   }
 
   onSubmit = (e) => {
     e.preventDefault();
-    const formData = {"name" : this.state.value};
-    EmailListActions.createNewList(formData);
+    const onValidate = (error) => {
+      if (!error) {
+        EmailListActions.createNewList({"name" : this.state.listName});
+      }
+    };
+    this.props.validate(onValidate);
+  }
+
+  renderHelpText(el) {
+    return (
+      <div className="warning-block">
+        {this.props.getValidationMessages(el)[0]}
+      </div>
+    );
+  }
+
+  onStoreChange = () => {
+    displayError(EmailListStore.getError());
   }
 
   render() {
-    const {value, suggestions} = this.state;
-    const inputProps={
-      placeholder: "Ex: List of CIOs I met at the Presidential Dinner",
-      id: "list",
-      value,
-      onChange: this.onChange
-    };
     return (
       <div>
         <div className="container">
@@ -100,18 +74,28 @@ class EmailList extends React.Component {
             </h3>
             <div className="row list-container">
               <form id="createEmailList" onSubmit={this.onSubmit}>
-              <div className="input-field">
-                <Autosuggest suggestions={suggestions}
-                  onSuggestionsUpdateRequested={this.onSuggestionsUpdateReq}
-                  getSuggestionValue={this.getSuggestionValue}
-                  renderSuggestion={this.renderSuggestion}
-                  inputProps={inputProps} />
-              </div>
-              <div className="row r-btn-container">
-                <input type="submit" className="btn blue"
-                  value="Save" />
-              </div>
-            </form>
+                <div className="input-field">
+                  <input placeholder="Ex: List of CIOs I met at the Presidential Dinner"
+                    id="listName" type="text"
+                    name="List Name"
+                    className={
+                      this.props.isValid("listName")
+                        ? "validate" : "invalid"
+                    }
+                    value={this.state.listName}
+                    onChange={(e) => this.handleChange(e, "listName")}
+                    onBlur={this.props.handleValidation("listName")} />
+                  {
+                    !this.props.isValid("listName")
+                      ? this.renderHelpText("listName")
+                      : null
+                  }
+                </div>
+                <div className="row r-btn-container">
+                  <input type="submit" className="btn blue"
+                    value="Save" />
+                </div>
+              </form>
             </div>
             <div className="hint-box m-t-47">
               A .csv file is just like an MS Excel file. If you have your list
@@ -127,4 +111,4 @@ class EmailList extends React.Component {
   }
 }
 
-export default EmailList;
+export default validation(strategy)(EmailList);

@@ -306,6 +306,37 @@ module.exports = function(user) {
     });
   };
 
+  /**
+   * Create new a unique list name for an user
+   * @param ctx
+   * @param list
+   * @param cb
+   */
+  user.createEmailList = function(ctx, list, cb) {
+    list.createdBy = ctx.req.accessToken.userId;
+    user.app.models.List.findOrCreate({
+      where: {
+        createdBy: list.createdBy,
+        name: list.name
+      }
+    }, list, (err, list, created) => {
+      if (err) {
+        logger.error("Error while creating a list", err);
+        cb(err);
+      }
+      if (created) {
+        logger.info("List name created successfully", list);
+        cb(null);
+      } else {
+        let error = new Error();
+        error.message = "List name already exists";
+        error.name = "ExistsList";
+        logger.error("List name already exists", list);
+        cb(error);
+      }
+    });
+  };
+
   user.remoteMethod(
     "current",
     {
@@ -329,6 +360,25 @@ module.exports = function(user) {
         },
       ],
       returns: {arg: "campaign", type: "object", root: true},
+      http: {verb: "post"}
+    }
+  );
+
+  user.remoteMethod(
+    "createEmailList",
+    {
+      description: "Create unique email list for an user",
+      accepts: [
+        {
+          arg: "ctx", type: "object",
+          http: {source: "context"}
+        },
+        {
+          arg: "name", type: "object", required: true,
+          http: {source: "body"}
+        },
+      ],
+      returns: {arg: "list", type: "object", root: true},
       http: {verb: "post"}
     }
   );

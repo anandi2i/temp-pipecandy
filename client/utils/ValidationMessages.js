@@ -49,6 +49,13 @@ var validatorObj = {
         empty: "!! Oops. Seems like you forgot to fill your campaign name!",
       }
     }
+  }),
+  listName: Joi.string().label("List Name").options({
+    language: {
+      any: {
+        empty: "!! Oops. Seems like you forgot to fill your list name!",
+      }
+    }
   })
 };
 

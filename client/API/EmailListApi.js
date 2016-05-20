@@ -5,7 +5,7 @@ const EmailListApi = {
     return api.get(`/api/users/${getCookie("userId")}/lists`);
   },
   createList(data) {
-    return api.post(`/api/users/${getCookie("userId")}/lists`, data);
+    return api.post("/api/users/createEmailList", data);
   },
   getSelectedList(data) {
     return api.post("api/lists/listPeopleField", data);
