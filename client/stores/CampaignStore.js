@@ -11,7 +11,7 @@ let _error = "";
 let _getAllCampaigns = {};
 let _allEmailTemplates = [];
 let selectedEmailList = {};
-let getAllPeopleList = {};
+let allPeopleList = [];
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignStore = _.extend({}, EventEmitter.prototype, {
@@ -63,15 +63,15 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   },
 
   getIssuesPeopleList(issueTags) {
-    let peopleList = _.filter(getAllPeopleList, function(person, key){
-        var fieldName = [];
-        if(person.firstName) fieldName.push("firstName");
-        if(person.middleName) fieldName.push("middleName");
-        if(person.lastName) fieldName.push("lastName");
-        if(person.salutation) fieldName.push("salutation");
-        if(person.email) fieldName.push("email");
-        return !(issueTags.length === _.intersection(issueTags,
-          fieldName.concat(_.pluck(person.fields, "name"))).length);
+    let peopleList = _.filter(allPeopleList, (person, key) => {
+      let fieldName = [];
+      if(person.firstName) fieldName.push("firstName");
+      if(person.middleName) fieldName.push("middleName");
+      if(person.lastName) fieldName.push("lastName");
+      if(person.salutation) fieldName.push("salutation");
+      if(person.email) fieldName.push("email");
+      return !(issueTags.length === _.intersection(issueTags,
+        fieldName.concat(_.pluck(person.fields, "name"))).length);
     });
     return peopleList;
   },
@@ -174,7 +174,7 @@ AppDispatcher.register(function(payload) {
         let smartTags = [];
         let commonSmartTags = [];
         let unCommonSmartTags = [];
-        getAllPeopleList = response.data[0].people;
+        allPeopleList = [];
         response.data.forEach(function(list, index) {
           emailList.push({
             id: list.id,
@@ -182,6 +182,7 @@ AppDispatcher.register(function(payload) {
             peopleCount: list.people.length
           });
           _.each(list.people, function(person) {
+            allPeopleList.push(person);
             let fieldName = [];
             if(person.firstName) fieldName.push("firstName");
             if(person.middleName) fieldName.push("middleName");
@@ -199,7 +200,7 @@ AppDispatcher.register(function(payload) {
           emailList: emailList,
           commonSmartTags: commonSmartTags,
           unCommonSmartTags: unCommonSmartTags,
-          peopleList: getAllPeopleList
+          peopleList: allPeopleList
         };
         _error = "";
         CampaignStore.emitEmailListChange();

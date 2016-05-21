@@ -19,15 +19,30 @@ class AddFollowups extends React.Component {
 
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
+    this.el.find("select").material_select();
+    initTimePicker(this.el.find(".timepicker"));
+    enabledropDownBtnByID(`#insertSmartTags${this.props.followupId}`);
+    this.initTinyMCE();
+    CampaignStore.addEmailListChangeListener(this.onStoreChange);
+  }
+
+  componentWillUnmount() {
+    CampaignStore.removeEmailListChangeListener(this.onStoreChange);
+  }
+
+  onStoreChange = () => {
+    this.initTinyMCE();
+  }
+
+  initTinyMCE() {
     let followupId = this.props.followupId;
     let emailContentId = `#emailContent${followupId}`;
     let mytoolbar = `#mytoolbar${followupId}`;
-    let insertSmartTags = `#insertSmartTags${followupId}`;
     let smartTagDrpDwnId = `#dropdown${followupId}`;
+    if(tinymce.get(`emailContent${followupId}`)) {
+      tinyMCE.execCommand("mceRemoveEditor", true, `emailContent${followupId}`);
+    }
     initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, this.tinyMceCb);
-    this.el.find("select").material_select();
-    initTimePicker(this.el.find(".timepicker"));
-    enabledropDownBtnByID(insertSmartTags);
   }
 
   tinyMceCb = (editor) => {
@@ -67,7 +82,13 @@ class AddFollowups extends React.Component {
   }
 
   openPreviewModal = () => {
-    this.refs.issues.openModal();
+    let content = tinymce.get(`emailContent${this.props.followupId}`)
+      .getContent();
+    let issueTags = getIssueTagsInEditor(content);
+    let personIssues = CampaignStore.getIssuesPeopleList(issueTags);
+    this.setState({
+      personIssues: personIssues
+    }, () => this.refs.issues.openModal());
   }
 
   closeCallback = () => {
@@ -113,6 +134,8 @@ class AddFollowups extends React.Component {
                   <option value="1, 'days'">1 day</option>
                   <option value="2, 'days'">2 days</option>
                   <option value="3, 'days'">3 days</option>
+                  <option value="4, 'days'">4 days</option>
+                  <option value="5, 'days'">5 days</option>
                 </select>
                 <label>Send if no response after</label>
               </div>

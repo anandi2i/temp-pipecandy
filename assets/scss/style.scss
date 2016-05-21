@@ -885,6 +885,11 @@ $lines-to-show: 8;
     .right-part {
       width: calc(100% - 50px);
       float: right;
+      .chip .remove-list {
+        float: right;
+        line-height: 32px;
+        cursor: pointer;
+      }
     }
     .separator {
       border-bottom: $border-1px;

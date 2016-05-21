@@ -108,6 +108,14 @@ class RunCampaign extends React.Component {
     displayError(CampaignStore.getError());
   }
 
+  changeSelectedList = (selectedRows) => {
+    this.refs
+      .selectEmailList.refs
+      .emailListGrid.setState({
+        selectedRowIds: selectedRows
+      });
+  }
+
   render() {
     return (
       <div>
@@ -117,9 +125,9 @@ class RunCampaign extends React.Component {
         <SelectEmailTemplate ref="SelectEmailTemplate"
           setTemplateContent={this.setTemplateContent}
           active={this.state.activeTab} />
-        <ScheduleEmail templateContent={this.state.selectedTemplate}
-          campaignId={this.props.params.id}
+        <ScheduleEmail campaignId={this.props.params.id}
           active={this.state.activeTab}
+          changeSelectedList={this.changeSelectedList}
           selectedTemplate={this.state.selectedTemplate} />
       </div>
     );

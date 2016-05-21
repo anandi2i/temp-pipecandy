@@ -32,7 +32,10 @@ class CampaignIssuesPreviewPopup extends React.Component {
       emailSubject: emailSubject,
       peopleList: peopleList,
       emailContent: emailContent,
-      issuesCompletedList: []
+      issuesCompletedList: [],
+      selectedPerson: 0,
+      displayPerson: 1,
+      initCount: 1,
     }, () => {
       this.el.openModal({
         dismissible: false
@@ -57,7 +60,6 @@ class CampaignIssuesPreviewPopup extends React.Component {
     let {emailContent} = this.props;
     if(emailContent) {
       tinyMCE.get(`previewMailContent-${id}`).setContent(emailContent);
-      // Starts with first person person[0]
       this.applySmartTags(selectedPerson);
     }
   }
@@ -212,7 +214,6 @@ class CampaignIssuesPreviewPopup extends React.Component {
         displayPerson: initCount
       }), () => {
         this.loadFirstPerson;
-
       });
     }
   }

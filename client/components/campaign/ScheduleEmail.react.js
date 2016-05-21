@@ -1,12 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import update from "react-addons-update";
+import _ from "underscore";
 import AddFollowups from "./AddFollowups.react";
 import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
 import PreviewMailsPopup from "./PreviewMailsPopup.react";
 import CampaignStore from "../../stores/CampaignStore";
 import UserStore from "../../stores/UserStore";
 import UserAction from "../../actions/UserAction";
+import CampaignActions from "../../actions/CampaignActions";
 
 class ScheduleEmail extends React.Component {
   constructor(props) {
@@ -15,7 +17,7 @@ class ScheduleEmail extends React.Component {
       index: 3,
       clicked: true,
       followups: [],
-      followusMaxLen: 5,
+      followupsMaxLen: 8,
       displayScheduleCampaign: false,
       emailList: [],
       commonSmartTags: [],
@@ -50,19 +52,20 @@ class ScheduleEmail extends React.Component {
   }
 
   initTinyMCE() {
+    if(tinymce.get("emailContent")) {
+      tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
+    }
     initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", this.tinyMceCb);
   }
 
   tinyMceCb = (editor) => {
     let content = editor.getContent();
     let issueTags = getIssueTagsInEditor(content);
-    let personIssues = CampaignStore.getIssuesPeopleList(issueTags);
     this.setState({
       emailContent: content,
       errorCount: parseInt(issueTags.length, 10),
       issueTags: issueTags,
-      personIssues: personIssues,
-	    emailRawText: editor.getBody().textContent
+      emailRawText: editor.getBody().textContent
     });
   }
 
@@ -99,14 +102,14 @@ class ScheduleEmail extends React.Component {
   }
 
   addFollowups = () => {
-    let maxLength = 5;
-    if(this.state.followups.length < maxLength) {
-      this.setState((state) => ({
-        followups: state.followups.concat({
+    let {followups, followupsMaxLen} = this.state;
+    if(followups.length < followupsMaxLen) {
+      this.setState({
+        followups: followups.concat({
           id: guid(),
           content: "click here to edit",
         })
-      }));
+      });
     }
   }
 
@@ -148,7 +151,12 @@ class ScheduleEmail extends React.Component {
 
   openPreviewModal(preview) {
     if(preview === "issues") {
-      this.refs.issues.openModal();
+      let content = tinymce.get("emailContent").getContent();
+      let issueTags = getIssueTagsInEditor(content);
+      let personIssues = CampaignStore.getIssuesPeopleList(issueTags);
+      this.setState({
+        personIssues: personIssues
+      }, () => this.refs.issues.openModal());
     } else {
       let followups = [];
       let followupsError = true;
@@ -219,11 +227,25 @@ class ScheduleEmail extends React.Component {
     });
   }
 
+  /**
+   * Delete the clicked list
+   * @param {object} e - event
+   * @param {number} listId - Id of the list to be removed
+   */
+  deleteList(e, listId) {
+    let filteredEmailList = _.chain(this.state.emailList)
+      .reject(list => (list.id === listId))
+      .pluck("id")
+      .value();
+    CampaignActions.getSelectedEmailList(filteredEmailList);
+    this.props.changeSelectedList(filteredEmailList);
+  }
+
   render() {
     let displayIndex =
       (this.props.active === this.state.index ? "block" : "none");
     let displayAddFollowup =
-      (this.state.followups.length < this.state.followusMaxLen
+      (this.state.followups.length < this.state.followupsMaxLen
         ? "block" : "none");
     let displaySchedule = this.state.displayScheduleCampaign
       ? "block" : "none";
@@ -292,7 +314,8 @@ class ScheduleEmail extends React.Component {
                         <div key={key} className="chip">
                           <span className="title">{list.name}</span>
                           <span className="count">{list.peopleCount}</span>
-                          <i className="material-icons">close</i>
+                          <i onClick={(e) => this.deleteList(e, list.id)}
+                            className="mdi mdi-close remove-list"></i>
                         </div>
                       );
                     }, this)
