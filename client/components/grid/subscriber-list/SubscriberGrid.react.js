@@ -1,61 +1,11 @@
 import React from "react";
 import validation from "react-validation-mixin";
-import validatorUtil from "../../utils/ValidationMessages";
+import validatorUtil from "../../../utils/ValidationMessages";
 import strategy from "joi-validation-strategy";
 import Griddle from "griddle-react";
-import EmailListStore from "../../stores/EmailListStore";
-import EmailListActions from "../../actions/EmailListActions";
-
-function getPeopleByList() {
-  return EmailListStore.getPeopleByList();
-}
-
-class EditLinkComponent extends React.Component {
-  render() {
-    return (
-      <a>
-        <i className="mdi mdi-pencil"></i>
-      </a>
-    );
-  }
-}
-
-class GriddlePager extends React.Component {
-
-  pageChange(event, key) {
-    this.props.setPage(key);
-  }
-
-  render() {
-    let options = [];
-    let index = 0;
-    let maxPerPage = 2;
-    let maxPagerShow = 6;
-    let minPagerShow = 5;
-    let sumWithPage = 1;
-    let startIndex = Math.max(this.props.currentPage - maxPerPage, index);
-    let endIndex = Math.min(startIndex + maxPagerShow, this.props.maxPage);
-    if (this.props.maxPage >= maxPagerShow &&
-      (endIndex - startIndex) <= minPagerShow ) {
-      startIndex = endIndex - maxPagerShow;
-    }
-    for(let i = startIndex; i < endIndex ; i++){
-      let selected = this.props.currentPage === i ? "active" : "link";
-      options.push(
-        <li key={i} className={selected} data-value={i} onClick={(e) => this.pageChange(e, i)}>
-          {i + sumWithPage}
-        </li>
-      );
-    }
-    return (
-      <ul className="pagination">
-        <span>Page&nbsp;</span>
-        {options}
-      </ul>
-    );
-  }
-
-}
+import CustomEditLinkComponent from "./CustomEditLinkComponent.react";
+import CustomPagerComponent from "../CustomGridPagination.react";
+import EmailListActions from "../../../actions/EmailListActions";
 
 let columnMeta = [{
     "columnName": "id",
@@ -132,7 +82,7 @@ let columnMeta = [{
     "displayName": "Edit",
     "cssClassName" : "icon",
     "sortable" : false,
-    "customComponent": EditLinkComponent
+    "customComponent": CustomEditLinkComponent
   }];
 
 class SubscriberGridView extends React.Component {
@@ -140,8 +90,6 @@ class SubscriberGridView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      people: getPeopleByList(),
-      listId: this.props[0].id,
       additionalFieldsLength: 5
     };
     this.validatorTypes = {
@@ -152,23 +100,13 @@ class SubscriberGridView extends React.Component {
   }
 
   componentDidMount() {
-    EmailListStore.addPersonChangeListener(this.onStoreChange);
     $(".modal-content").mCustomScrollbar({
       theme:"minimal-dark"
     });
   }
 
-  componentWillUnmount() {
-    EmailListStore.removePersonChangeListener(this.onStoreChange);
-  }
-
   closeModal = () => {
     $("#editSubbscriber").closeModal();
-  }
-
-  onStoreChange = () => {
-    let peopleUpdate = EmailListStore.getPeopleByListUpdated();
-    this.setState({people: peopleUpdate});
   }
 
   handleRowClick = (obj, eve) => {
@@ -239,7 +177,7 @@ class SubscriberGridView extends React.Component {
       value5:this.state.value5
     };
     let data = {
-      listId: this.state.listId,
+      listId: this.props.listId,
       personId: this.state.personId,
       person: person
     };
@@ -258,13 +196,13 @@ class SubscriberGridView extends React.Component {
     };
     this.props.validate(onValidate);
   }
-
+  
   render() {
     return (
       <div className="row" id="subscriber_list">
         <div className="container">
           <Griddle
-            results={this.state.people}
+            results={this.props.results}
             tableClassName="responsive-table"
             useGriddleStyles={false}
             columnMetadata={columnMeta}
@@ -278,7 +216,7 @@ class SubscriberGridView extends React.Component {
             showPager={true}
             resultsPerPage="10"
             useCustomPagerComponent={true}
-            customPagerComponent={GriddlePager}
+            customPagerComponent={CustomPagerComponent}
             showFilter={true}
             filterPlaceholderText="SEARCH BY NAME OR EMAIL"
             sortDefaultComponent={
@@ -291,7 +229,7 @@ class SubscriberGridView extends React.Component {
               <span className="mdi mdi-arrow-down active"></span>
             } />
         </div>
-    {/* Edit subscriber popup starts here */}
+        {/* Edit subscriber popup starts here */}
         <div id="editSubbscriber"
           className="modal modal-fixed-header modal-fixed-footer mini-modal">
           <i className="mdi mdi-close modal-close"></i>
@@ -460,18 +398,16 @@ class SubscriberGridView extends React.Component {
             <input type="button"className="btn red modal-action modal-close p-1-btn" value="Cancel" />
             <input type="button" onClick={this.onSubmit} className="btn blue modal-action" value="Update" />
           </div>
-      {/* Edit subscriber popup ends here */}
         </div>
+        {/* Edit subscriber popup ends here */}
       </div>
     );
   }
 }
 
-GriddlePager.defaultProps = {
-  "maxPage": 0,
-  "nextText": "",
-  "previousText": "",
-  "currentPage": 0
+SubscriberGridView.defaultProps = {
+  results: [],
+  listId: ""
 };
 
 export default validation(strategy)(SubscriberGridView);

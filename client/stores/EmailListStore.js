@@ -9,7 +9,7 @@ import appHistory from "../RouteContainer";
 
 let _allEmailList = {};
 let _getEmailList = {};
-let _peopleData = [];
+let _getEmailListByID = [];
 let _error = "";
 let _success = "";
 
@@ -73,37 +73,38 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
   },
 
   getEmailListByID() {
-    return _getEmailList;
+    let emailListByID = _getEmailList[0];
+    let _peopleData = [];
+    _.each(emailListByID.people, function(people, index) {
+      let _temp = {
+        id: people.id,
+        firstName: people.firstName || "",
+        middleName: people.middleName || "",
+        lastName: people.lastName || "",
+        email: people.email || "",
+        addField1: "",
+        addField2: "",
+        addField3: "",
+        addField4: "",
+        addField5: "",
+        edit: ""};
+      _.each(people.fields, function(field, index) {
+        if (field.name && field.value) {
+          _temp["addField"+(++index)] = field.name + ": "+field.value;
+        }
+      });
+      _peopleData.push(_temp);
+    });
+    _getEmailListByID = [{
+      id: emailListByID.id,
+      name: emailListByID.name,
+      peoples: _peopleData
+    }];
+    return _getEmailListByID;
   },
 
   getPeopleByListUpdated() {
-    return _peopleData;
-  },
-
-  getPeopleByList() {
-    _.each(_getEmailList, function(obj, index) {
-      _.each(obj.people, function(obj, index) {
-        let _temp = {
-          id: obj.id,
-          firstName: obj.firstName || "",
-          middleName: obj.middleName || "",
-          lastName: obj.lastName || "",
-          email: obj.email || "",
-          addField1: "",
-          addField2: "",
-          addField3: "",
-          addField4: "",
-          addField5: "",
-          edit: ""};
-        _.each(obj.fields, function(obj, index) {
-          if (obj.name && obj.value) {
-            _temp["addField"+(++index)] = obj.name + ": "+obj.value;
-          }
-        });
-        _peopleData.push(_temp);
-      });
-    });
-    return _peopleData;
+    return _getEmailListByID;
   },
 
   getError() {
@@ -179,6 +180,7 @@ AppDispatcher.register(function(payload) {
         _success = "Subscriber details updated successfully";
         let rowIndex = "";
         let data = response.data;
+        let _peopleData = _getEmailListByID[0].peoples;
         rowIndex = _.findIndex(_peopleData, {id: data.id});
         let _temp = _peopleData[rowIndex];
         let i = 1;
@@ -192,7 +194,7 @@ AppDispatcher.register(function(payload) {
             _temp[key] = data[key];
           }
         });
-        _peopleData[rowIndex] = _temp;
+        _getEmailListByID[0].peoples[rowIndex] = _temp;
         EmailListStore.emitPersonUpdate();
         _success = "";
       }, (err)=> {

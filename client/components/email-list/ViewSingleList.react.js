@@ -3,26 +3,25 @@ import {Link} from "react-router";
 import validation from "react-validation-mixin";
 import strategy from "joi-validation-strategy";
 import _ from "underscore";
+import Spinner from "../Spinner.react";
 import validatorUtil from "../../utils/ValidationMessages";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
-import SubscriberGrid from "../grid/SubscriberGrid.react";
-
-function getEmailListByID() {
-  return EmailListStore.getEmailListByID();
-}
+import SubscriberGrid from "../grid/subscriber-list/SubscriberGrid.react";
 
 class ListView extends React.Component {
   constructor(props) {
     super(props);
     this.initialStateValues = {
-      emailList: getEmailListByID(),
+      listName: "",
+      peoples: [],
       names: [],
       additionalFieldLen : 5,
       firstName: "",
       middleName: "",
       lastName: "",
-      email: ""
+      email: "",
+      spinning: true
     };
     this.state = {
       addAnother: false
@@ -38,6 +37,7 @@ class ListView extends React.Component {
   componentDidMount() {
     EmailListActions.getEmailListByID(this.props.params.listId);
     EmailListStore.addChangeListener(this.onStoreChange);
+    EmailListStore.addPersonChangeListener(this.onPersonChange);
     $(".modal-trigger").leanModal({
       dismissible: false
     });
@@ -48,6 +48,7 @@ class ListView extends React.Component {
 
   componentWillUnmount() {
     EmailListStore.removeChangeListener(this.onStoreChange);
+    EmailListStore.removePersonChangeListener(this.onPersonChange);
   }
 
   onStoreChange = () => {
@@ -60,12 +61,28 @@ class ListView extends React.Component {
     if(success) {
       displaySuccess(success);
     }
-    let emailList = getEmailListByID();
-    this.setState({
-      emailList: emailList,
-      listName: emailList[0].name
-    });
+    let gridUpdate = {
+      spinning: false
+    };
+    let emailList = EmailListStore.getEmailListByID();
+    if(emailList.length) {
+      gridUpdate = {
+        listName: emailList[0].name,
+        peoples: emailList[0].peoples,
+        spinning: false
+      };
+    }
+    this.setState(gridUpdate);
     return true;
+  }
+
+  onPersonChange = () => {
+    let emailList = EmailListStore.getPeopleByListUpdated();
+    if(emailList.length) {
+      this.setState({
+        peoples: emailList[0].peoples
+      });
+    }
   }
 
   addMoreFields = () => {
@@ -307,12 +324,14 @@ class ListView extends React.Component {
               <input type="button" onClick={this.onSubmit} className="btn blue modal-action" value="OK" />
             </div>
           </div>
+          <div className="spaced" style={{display: this.state.spinning ? "block" : "none"}}>
+            <Spinner />
+          </div>
         </div>
         {
-          this.state.emailList.length
-            ?
-              <SubscriberGrid {...this.state.emailList} />
-            : ""
+          this.state.peoples.length ?
+            <SubscriberGrid results={this.state.peoples} listId={this.props.params.listId} />
+          : ""
         }
       </div>
     );
