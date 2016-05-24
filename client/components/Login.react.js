@@ -118,9 +118,9 @@ class Login extends React.Component {
               <div className="row alt-login">
                 <span>Sign in with</span>
                 <img src="/images/linkedin-logo.png" />
-                or
+                <span>or</span>
                 <img src="/images/google-logo.png" />
-                instead?
+                <span>instead?</span>
               </div>
               <Link to="/signup">New user? Click here</Link>
             </div>
