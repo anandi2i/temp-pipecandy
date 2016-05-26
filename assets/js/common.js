@@ -97,9 +97,17 @@ function getIssueTagsInEditor(emailContent) {
   return result;
 }
 
-function initTinyMCE(id, toolBar, dropdownId, changeCb) {
+/**
+ * Initiate a tinyMCE editor with properties and able to insert smart tags
+ *
+ * @param  {string} id - tinyMCE editor ID
+ * @param  {HTML DIV} toolBar - tinyMCE toolbar position
+ * @param  {string} dropdownId - smart tags dropdown Id
+ * @param  {object} allTags - it contains all smart-tag objects by insert #mention
+ * @param  {function} changeCb - callback function after insert tags in to the editor
+ */
+function initTinyMCE(id, toolBar, dropdownId, allTags, changeCb) {
   let getFocusId = id.split("#")[1];
-
   tinymce.init({
     selector: id,
     inline: true,
@@ -111,8 +119,17 @@ function initTinyMCE(id, toolBar, dropdownId, changeCb) {
     fixed_toolbar_container: toolBar,
     plugins: [
       "advlist autolink lists link image charmap print preview anchor",
-      "insertdatetime media table paste code"
+      "insertdatetime media table paste code",
+      "link, mention"
     ],
+    mentions: {
+      source: allTags,
+      delimiter: "#",
+      items: 100,
+      insert: function(item) {
+        return constructSmartTags(item.classname, item.name);
+      }
+    },
     setup : function(editor) {
       editor.on("change", function(e) {
         changeCb(editor);

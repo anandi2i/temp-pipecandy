@@ -51,11 +51,17 @@ class ScheduleEmail extends React.Component {
     CampaignStore.removeEmailListChangeListener(this.onStoreChange);
   }
 
-  initTinyMCE() {
+/**
+ * Call init tinyMCE editor
+ *
+ * @param  {object} allTags - It contains collection of unique smart-tags based on selected list
+ */
+  initTinyMCE(allTags) {
     if(tinymce.get("emailContent")) {
       tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
     }
-    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", this.tinyMceCb);
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", allTags,
+      this.tinyMceCb);
   }
 
   tinyMceCb = (editor) => {
@@ -69,6 +75,10 @@ class ScheduleEmail extends React.Component {
     });
   }
 
+/**
+ * Set state object during store change and construct common and
+ * uncommon smart tags to insert into the editor
+ */
   onStoreChange = () => {
     let selectedEmailList = CampaignStore.getSelectedEmailList();
     let user = UserStore.getUser();
@@ -80,8 +90,16 @@ class ScheduleEmail extends React.Component {
       user: user,
       optText: user.optText || "",
       address: user.address || ""
+    }, () => {
+      let getAllTags = [];
+      this.state.commonSmartTags.map(function(tag, key) {
+        getAllTags.push({name: tag, className: "common"});
+      });
+      this.state.unCommonSmartTags.map(function(tag, key) {
+        getAllTags.push({name: tag, className: "un-common"});
+      });
+      this.initTinyMCE(getAllTags);
     });
-    this.initTinyMCE();
   }
 
   toggleEditContainer = () => {

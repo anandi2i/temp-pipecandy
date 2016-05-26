@@ -439,7 +439,6 @@ a {
     margin-right: auto;
   }
 }
-
 /*********************
   Email List
 **********************/
@@ -835,6 +834,41 @@ $lines-to-show: 8;
     }
   }
 }
+/***********************************
+  "@" mention dropdown autocomplete
+***********************************/
+.rte-autocomplete {
+  position: absolute;
+  box-shadow: $box-shadow;
+  background-color: $white;
+  li {
+    padding: 15px;
+    &:hover {
+      background-color: $lit-gray-bg;
+    }
+    &.active {
+      background-color: $lit-gray-bg;
+    }
+    &[data-classname="un-common"] {
+      a {
+        span {
+          color: $red-clr;
+        }
+      }
+    }
+  }
+}
+span#autocomplete {
+  background-color: $chip-border-clr;
+  border: solid 1px $drp-dwn-bg;
+  #autocomplete-delimiter {
+    background-color: $drp-dwn-bg;
+    padding: 0 2px;
+  }
+  #autocomplete-searchtext {
+    padding: 0 4px 0 2px;
+  }
+}
 /******************************
   Daft Email Templates
 *******************************/
@@ -1030,8 +1064,8 @@ $lines-to-show: 8;
   padding-left: 5px;
   margin-bottom: 0;
 }
-.opt-text{
-  textarea{
+.opt-text {
+  textarea {
     padding-top: 10px;
     padding-bottom: 25px;
   }
@@ -1272,7 +1306,7 @@ $lines-to-show: 8;
       padding: 0 10px;
       color: $gray-txt-clr;
       &:first-child {
-        padding-left: 0px;
+        padding-left: 0;
         &:after {
           content: " :";
         }
@@ -1327,17 +1361,17 @@ $lines-to-show: 8;
   }
 }
 @media only screen and (max-width: 700px) {
-  .hide-on-700{
+  .hide-on-700 {
     display: none !important;
   }
-  .tag-name-menu{
-    ul{
-      li{
-        &:first-child{
+  .tag-name-menu {
+    ul {
+      li {
+        &:first-child {
           width: 100%;
           text-align: center;
-          &:after{
-            content: ""
+          &:after {
+            content: "";
           }
         }
       }

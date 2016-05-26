@@ -4,5 +4,6 @@ public
 assets/js/common.js
 assets/js/utils.js
 assets/tinymce
+assets/js/tinymce-mention/plugin.js
 assets/js/materialize.clockpicker.js
 server/migrations
