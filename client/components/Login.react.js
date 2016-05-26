@@ -106,15 +106,23 @@ class Login extends React.Component {
                 <button type="submit" className="btn auth-btn login-btn">
                   Login
                 </button>
-                <div className="auth-cnter-pnl">
-                  <Link to="/forgot-password" className="left">Forgot password?</Link>
-                  <span className="right">
-                    <input type="checkbox" className="filled-in"
-                      id="filled-in-box" defaultChecked="checked" />
-                    <label htmlFor="filled-in-box">Remember me</label>
-                  </span>
+                <div className="row">
+                  <input type="checkbox" className="filled-in"
+                    id="filled-in-box" defaultChecked="checked" />
+                  <label htmlFor="filled-in-box">Remember me</label>
                 </div>
               </form>
+              <div className="row forgot-pwd">
+                <Link to="/forgot-password" className="">Forgot password?</Link>
+              </div>
+              <div className="row alt-login">
+                <span>Sign in with</span>
+                <img src="/images/linkedin-logo.png" />
+                or
+                <img src="/images/google-logo.png" />
+                instead?
+              </div>
+              <Link to="/signup">New user? Click here</Link>
             </div>
           </div>
         </div>

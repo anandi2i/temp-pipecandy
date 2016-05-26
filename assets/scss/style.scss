@@ -168,7 +168,7 @@ a {
   }
 }
 .auth-container {
-  width: 400px;
+  width: 390px;
   margin-left: auto;
   margin-right: auto;
   .auth-logo {
@@ -192,15 +192,25 @@ a {
     [type="checkbox"] + label {
       line-height: 21px;
     }
-    .auth-cnter-pnl {
-      padding-left: 16px;
-      padding-right: 16px;
-    }
     .show-pass {
       float: right;
       margin-right: 15px;
       margin-top: 10px;
       margin-bottom: 10px;
+    }
+  }
+  .forgot-pwd {
+    border-top: 1px solid $light-border;
+    padding-top: 20px;
+  }
+  .alt-login {
+    color: $dflt-txt-clr;
+    padding-top: 15px;
+    img {
+      vertical-align: middle;
+    }
+    span {
+      padding: 0px 10px;
     }
   }
 }
@@ -1470,10 +1480,6 @@ span#autocomplete {
       margin-top: 52px;
       .input-field {
         width: 300px;
-      }
-      .auth-cnter-pnl {
-        padding-left: 0;
-        padding-right: 0;
       }
     }
   }
