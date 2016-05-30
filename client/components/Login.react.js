@@ -117,9 +117,13 @@ class Login extends React.Component {
               </div>
               <div className="row alt-login">
                 <span>Sign in with</span>
-                <img src="/images/linkedin-logo.png" />
+                <a href="/auth/linkedin">
+                  <img src="/images/linkedin-logo.png" />
+                </a>
                 <span>or</span>
-                <img src="/images/google-logo.png" />
+                <a href="/auth/google">
+                  <img src="/images/google-logo.png" />
+                </a>
                 <span>instead?</span>
               </div>
               <Link to="/signup">New user? Click here</Link>
