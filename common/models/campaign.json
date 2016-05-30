@@ -12,7 +12,11 @@
       "required": true
     },
     "scheduledAt": {
-      "type": "date"
+      "type": "date",
+      "postgresql": {
+       "dataType": "timestamp with time zone",
+       "nullable": "YES"
+     }
     },
     "stopFollowUp": {
       "type": "boolean"
@@ -77,6 +81,12 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "status"
     }
   ],
   "methods": {}

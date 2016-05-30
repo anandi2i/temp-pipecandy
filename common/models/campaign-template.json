@@ -13,9 +13,6 @@
       "postgresql": {
         "dataType": "text"
       }
-    },
-    "isParent": {
-      "type": "boolean"
     }
   },
   "validations": [],
@@ -23,22 +20,17 @@
     "user": {
       "type": "belongsTo",
       "model": "user",
-      "foreignKey": ""
+      "foreignKey": "userid"
+    },
+    "person": {
+      "type": "belongsTo",
+      "model": "person",
+      "foreignKey": "personid"
     },
     "campaign": {
       "type": "belongsTo",
       "model": "campaign",
-      "foreignKey": ""
-    },
-    "emailQueues": {
-      "type": "hasMany",
-      "model": "emailQueue",
-      "foreignKey": ""
-    },
-    "customizedTemplates": {
-      "type": "hasMany",
-      "model": "customizedTemplate",
-      "foreignKey": ""
+      "foreignKey": "campaignid"
     }
   },
   "acls": [],
