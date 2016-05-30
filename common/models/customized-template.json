@@ -5,33 +5,28 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "content": {
+      "type": "string",
+      "required": true
+    }
+  },
   "validations": [],
   "relations": {
     "person": {
       "type": "belongsTo",
       "model": "person",
-      "foreignKey": ""
+      "foreignKey": "personId"
     },
     "user": {
       "type": "belongsTo",
       "model": "user",
-      "foreignKey": ""
+      "foreignKey": "userId"
     },
     "campaign": {
       "type": "belongsTo",
       "model": "campaign",
-      "foreignKey": ""
-    },
-    "campaignTemplate": {
-      "type": "belongsTo",
-      "model": "campaignTemplate",
-      "foreignKey": ""
-    },
-    "list": {
-      "type": "belongsTo",
-      "model": "list",
-      "foreignKey": ""
+      "foreignKey": "campaignId"
     }
   },
   "acls": [],

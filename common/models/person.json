@@ -23,6 +23,9 @@
     },
     "email": {
       "type": "string"
+    },
+    "time_zone": {
+      "type": "string"
     }
   },
   "validations": [],
@@ -42,10 +45,10 @@
       "model": "list",
       "foreignKey": ""
     },
-    "customizedTemplates": {
+    "campaignTemplate": {
       "type": "hasMany",
-      "model": "customizedTemplate",
-      "foreignKey": ""
+      "model": "campaignTemplate",
+      "foreignKey": "personid"
     },
     "campaignAudits": {
       "type": "hasMany",

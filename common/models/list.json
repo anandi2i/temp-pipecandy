@@ -40,19 +40,9 @@
       "model": "person",
       "foreignKey": ""
     },
-    "emailQueues": {
-      "type": "hasMany",
-      "model": "emailQueue",
-      "foreignKey": ""
-    },
     "campaigns": {
       "type": "hasAndBelongsToMany",
       "model": "campaign",
-      "foreignKey": ""
-    },
-    "campaignTemplates": {
-      "type": "hasMany",
-      "model": "campaignTemplate",
       "foreignKey": ""
     },
     "campaignAudits": {

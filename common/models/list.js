@@ -17,6 +17,7 @@ module.exports = function(List) {
         return cb(err);
       }
       cb(null, people);
+      return;
     });
   };
 

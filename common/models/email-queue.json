@@ -17,6 +17,12 @@
       "postgresql": {
         "dataType": "text"
       }
+    },
+    "scheduledAt": {
+      "type": "date",
+      "postgresql": {
+       "dataType": "timestamp with time zone"
+     }
     }
   },
   "validations": [],
@@ -24,22 +30,22 @@
     "campaignTemplate": {
       "type": "belongsTo",
       "model": "campaignTemplate",
-      "foreignKey": ""
+      "foreignKey": "campaignTemplateId"
     },
     "campaign": {
       "type": "belongsTo",
       "model": "campaign",
-      "foreignKey": ""
-    },
-    "list": {
-      "type": "belongsTo",
-      "model": "list",
-      "foreignKey": ""
+      "foreignKey": "campaignId"
     },
     "user": {
       "type": "belongsTo",
       "model": "user",
-      "foreignKey": ""
+      "foreignKey": "userId"
+    },
+    "person": {
+      "type": "belongsTo",
+      "model": "person",
+      "foreignKey": "personId"
     }
   },
   "acls": [],
