@@ -4,6 +4,8 @@
 "use strict";
 
 $(document).ready(function() {
+  // Set tinymce plugin location
+  tinymce.baseURL = "/tinymce";
   if ($(".side-nav-btn").length) {
     $(".side-nav-btn").sideNav();
   }
@@ -179,20 +181,67 @@ function initTinyMCEPopUp(id, toolBar, cb) {
 function initTimePicker(element) {
   let timepicker = element.pickatime({
     twelvehour: true,
+    default: 'now',
     afterDone: function() {
-      let val = timepicker.val();
-      let index = 0;
-      let till = -2;
-      let howManyFromLast = -2;
+      const time = timepicker.val();
+      const index = 0;
+      const till = -2;
+      const howManyFromLast = -2;
       // To display time in 00:00 AM format
-      timepicker.val(val.slice(index, till) +" "+ val.slice(howManyFromLast));
+      timepicker.val(`${time.slice(index, till)} ${time.slice(howManyFromLast)}`);
+      validateTime();
     }
   });
+}
+
+/**
+ * Validate the time is past
+ *
+ * @property {String} time - Schedule email time
+ * @property {String} date - Schedule email date
+ * @property {Object} date - Date now
+ * @property {Number} hourNow - Hour now
+ * @property {Number} minuteNow - Minute now
+ * @property {Number} timeSliceStartFrom - Slice time from time property starts at
+ * @property {Number} timeSliceLength - Slice time from time property total length
+ * @property {Number} timeSlicePeriodFromLast - Slice period from time property from last
+ * @property {Number} hoursToConvert - Hours to convert from 12 hours to 24 hours
+ */
+function validateTime() {
+  const time = $('.timepicker').val();
+  let date = $('.datepicker').val();
+  const today = new Date();
+  const hourNow = today.getHours();
+  const minuteNow = today.getMinutes();
+  const timeSliceStartFrom = 0;
+  const timeSliceLength = 5;
+  const timeSlicePeriodFromLast = -2;
+  const hoursToConvert = 12;
+  if(date && time) {
+    date = new Date(date);
+    if(date.getFullYear() === today.getFullYear() &&
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth()) {
+        let timeString = time.slice(timeSliceStartFrom, timeSliceLength);
+        let timeArray = timeString.split(':');
+        if(time.slice(timeSlicePeriodFromLast) === 'PM') {
+          timeArray[0] = parseInt(timeArray[0]) + hoursToConvert;
+        }
+        if(hourNow > parseInt(timeArray[0])) {
+          displayError('You have entered a past time');
+        } else if(hourNow == parseInt(timeArray[0])) {
+          if(minuteNow > parseInt(timeArray[1])) {
+            displayError('You have entered a past time');
+          }
+        }
+      }
+  }
 }
 
 function initDatePicker(element) {
   element.pickadate({
     selectMonths: true,
-    selectYears: 15
+    selectYears: 15,
+    min : true
   });
 }

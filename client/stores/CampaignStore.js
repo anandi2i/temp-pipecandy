@@ -12,6 +12,7 @@ let _getAllCampaigns = {};
 let _allEmailTemplates = [];
 let selectedEmailList = {};
 let allPeopleList = [];
+let duplicateEmailList = [];
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignStore = _.extend({}, EventEmitter.prototype, {
@@ -175,6 +176,8 @@ AppDispatcher.register(function(payload) {
         let commonSmartTags = [];
         let unCommonSmartTags = [];
         allPeopleList = [];
+        let allEmailList = [];
+        duplicateEmailList = [];
         response.data.forEach(function(list, index) {
           emailList.push({
             id: list.id,
@@ -183,6 +186,12 @@ AppDispatcher.register(function(payload) {
           });
           _.each(list.people, function(person) {
             allPeopleList.push(person);
+            // To get duplicate Email Ids
+            if(_.contains(allEmailList, person.email)) {
+              duplicateEmailList.push(person.email);
+            } else {
+              allEmailList.push(person.email);
+            }
             let fieldName = [];
             if(person.firstName) fieldName.push("firstName");
             if(person.middleName) fieldName.push("middleName");
