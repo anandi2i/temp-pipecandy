@@ -1,4 +1,3 @@
-
 var googleAuth = require("google-auth-library");
 var google = require("googleapis");
 var AWS = require("aws-sdk");
@@ -15,7 +14,7 @@ AWS.config.update({
 var gmailClass = google.gmail("v1");
 
 var dataSource = require(process.cwd() + "/server/server.js").dataSources
-                                                                    .psqlDs;
+                                                                  .psqlDs;
 
 var async = require("async");
 var App = dataSource.models;
@@ -44,16 +43,16 @@ var clientSecretCredentials = {
 var oneMinute = 60000;
 setInterval(function() {
 
-  async.waterfall([
-      getCurrentEmailQueue,
-      generateCredentials
-    ],
-    function(err) {
-      if (err) {
-        console.log("waterfallErr: " + err);
-      }
-      console.log("All Mails are sent");
-    });
+async.waterfall([
+    getCurrentEmailQueue,
+    generateCredentials
+  ],
+  function(err) {
+    if (err) {
+      console.log("waterfallErr: " + err);
+    }
+    console.log("All Mails are sent");
+  });
 
 }, oneMinute);
 
@@ -105,7 +104,7 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
         contents: emailQueueEntry.content
       };
 
-      if (tempCacheUserCredentials[emailQueueEntry.userId]) {
+      if (!tempCacheUserCredentials[emailQueueEntry.userId]) {
 
         App.userIdentity.find({
           where: {
@@ -129,9 +128,8 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
         });
       } else {
 
-
         var userCredentialsFromCache =
-          tempCacheUserCredentials[emailQueueEntry.userId];
+                              tempCacheUserCredentials[emailQueueEntry.userId];
 
         mailContent.userDetails = {
           userid: emailQueueEntry.userId,
@@ -143,6 +141,7 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
         mailSender(mailContent, function(err) {
           emailQueueItemCB();
         });
+
       }
     },
     function(err) {
@@ -188,12 +187,12 @@ function mailSender(mailContent, mailSenderCB) {
     var auth = new googleAuth();
     var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
-    oauth2Client.credentials = mailContent.userDetails.credential;
+    oauth2Client.credentials = mailContent.userDetails.credential.credentials;
 
     var emailLines = [];
 
     emailLines.push("From: " + mailContent.userDetails.name + " <"
-                                + mailContent.userDetails.email.value + ">");
+                                  + mailContent.userDetails.email.value + ">");
     emailLines.push("To: <" + mailContent.personEmail + ">");
     emailLines.push("Content-type: text/html;charset=iso-8859-1");
     emailLines.push("MIME-Version: 1.0");
@@ -203,15 +202,15 @@ function mailSender(mailContent, mailSenderCB) {
 
     var email = emailLines.join("\r\n").trim();
 
+
     var base64EncodedEmail = new Buffer(email).toString("base64");
     base64EncodedEmail = base64EncodedEmail.replace(/\+/g, "-")
-      .replace(/\//g, "_");
+                                                        .replace(/\//g, "_");
 
     buildEmailCB(null, base64EncodedEmail, oauth2Client
-                                          , mailContent.userDetails.userid);
+                                            , mailContent.userDetails.userid);
 
   }
-
 
   /**
    * Send the mail with the credentials and the mail content in base64 Encoded
@@ -230,22 +229,22 @@ function mailSender(mailContent, mailSenderCB) {
       resource: {
         raw: base64EncodedEmail
       }
-    }, function() {
+    }, function(err, results) {
+      if (err) {
+        console.log("Gmail err:", err);
+      } else {
 
-      // Delete the credentials from tempCacheUserCredentials for that user
-      // after all the mails are sent
-      delete tempCacheUserCredentials[userId];
+        delete tempCacheUserCredentials[userId];
 
-      //Delete from thr emailQueue table after all Mails are sent
+        App.emailQueue.destroyById(mailContent.mailId, function(err, data) {
+            if (err) {
+              sendEmailCB(err);
+            }
+            console.log(results);
 
-      App.emailQueue.destroyById(mailContent.mailId, function(err, data) {
-        if (err) {
-          sendEmailCB(err);
-        }
-        sendEmailCB();
-        console.log("Deleted Entries in emailQueue");
-        console.log("Mail Sent!");
-      });
+            sendEmailCB();
+          });
+      }
     });
 
   }
