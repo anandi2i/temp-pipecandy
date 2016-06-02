@@ -45,7 +45,7 @@
           color: $a-tag-clr; 
         }
         &:-moz-placeholder { 
-          color: $a-tag-clr; 
+          color: $a-tag-clr;
         }
       }
     }
@@ -181,7 +181,42 @@
       }
     }
   }
-}  
+}
+#campaign_list {
+  .griddle {
+    .griddle-container {
+      .griddle-body {
+        table {
+          tr {
+            > th, > td {
+              &:first-child {
+                border-right: 0 none;
+              }
+              &:last-child {
+                border-left: 0 none;
+              }
+            }
+            > td {
+              &.preview {
+                width: 8%;
+                text-align: center;
+                font-size: 20px;
+              }
+              &.campaign-run-btn {
+                a.btn {
+                  background-color: $white;
+                  border: 1px solid $a-tag-clr;
+                  border-radius: 0px;
+                  color: $a-tag-clr;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 @media only screen and (max-width: 1176px) {
   .griddle {
     width: 100%;

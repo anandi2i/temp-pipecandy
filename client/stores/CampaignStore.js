@@ -52,7 +52,25 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   },
 
   getAllCampaigns() {
-    return _getAllCampaigns;
+    let initialRange = 1;
+    let endRange = 10;
+    let _allCampaignListFlattenData = [];
+    _.each(_getAllCampaigns, function(obj, index) {
+      let randomVal = _.random(initialRange, endRange);
+      _allCampaignListFlattenData.push({
+        id: obj.id,
+        name: obj.name || "",
+        listSentTo: _.random(initialRange, endRange),
+        campaignStatus: obj.campaignStatus || "cStatus",
+        campaignReplies: _.random(initialRange, endRange),
+        campaignProgressDone: _.random(initialRange, randomVal),
+        campaignProgressTotal: randomVal,
+        campaignProgress: obj.campaignProgress || "cProgress",
+        campaignAction: obj.campaignAction || "cAction",
+        campaignRun: obj.campaignRun || "cRun"
+      });
+    });
+    return _allCampaignListFlattenData;
   },
 
   getAllEmailTemplates() {

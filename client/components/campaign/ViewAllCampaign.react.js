@@ -1,23 +1,23 @@
 import React from "react";
 import {Link} from "react-router";
+import Spinner from "../Spinner.react";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
-
-function getAllCampaigns() {
-  CampaignActions.getAllCampaigns();
-}
+import CampaignGrid from "../grid/campaign-list/Grid.react";
 
 class CampaignListView extends React.Component {
   constructor(props) {
     super(props);
-    getAllCampaigns();
-    this.state={
+    this.state = {
       allCampaignLists: [],
+      noDataBlock: false,
+      spinning: true
     };
   }
 
   componentDidMount() {
     CampaignStore.addChangeListener(this.onStoreChange);
+    CampaignActions.getAllCampaigns();
   }
 
   componentWillUnmount() {
@@ -27,7 +27,9 @@ class CampaignListView extends React.Component {
   onStoreChange = () => {
     let CampaignLists = CampaignStore.getAllCampaigns();
     this.setState({
-      allCampaignLists: CampaignLists
+      allCampaignLists: CampaignLists,
+      noDataBlock: CampaignLists.length ? false : true,
+      spinning: false
     });
     displayError(CampaignStore.getError());
   }
@@ -42,30 +44,28 @@ class CampaignListView extends React.Component {
               <Link to="/campaign/create">Create Campaign</Link>
             </div>
           </div>
-          <table className="striped">
-            <thead>
-              <tr>
-                <th data-field="id">Campaign Id</th>
-                <th data-field="name">Name</th>
-                <th data-field="edit">Edit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                this.state.allCampaignLists.map(
-                  $.proxy(function (campaign, key) {
-                  return (
-                    <tr key={key}>
-                      <td>{campaign.id}</td>
-                      <td>{campaign.name}</td>
-                      <td><Link to={`/campaign/${campaign.id}`}>view</Link></td>
-                    </tr>
-                  );
-                }), this)
-              }
-          </tbody>
-          </table>
+          <div className="spaced" 
+            style={{display: this.state.spinning ? "block" : "none"}}>
+            <Spinner />
+          </div>
         </div>
+        { 
+          this.state.noDataBlock 
+          ? 
+            <div className="row card">
+              <div className="col s12 center card-content">
+                <p>
+                  <Link to="/campaign/create">Create</Link> a new campaign!
+                </p>
+              </div>
+            </div>
+          : 
+          this.state.allCampaignLists.length
+          ?
+            <CampaignGrid results={this.state.allCampaignLists} />
+          :
+            ""
+        }
       </div>
     );
   }
