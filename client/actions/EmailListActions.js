@@ -37,6 +37,17 @@ const EmailListActions = {
       actionType: Constants.UPDATE_SINGLE_PERSON,
       data: data
     });
+  },
+  /**
+   * Delete list of persons from the emial list
+   *
+   * @param  {Object} data - Contains list of persons to delete and list of persons emaillist id
+   */
+  deletePersons(data){
+    AppDispatcher.handleAction({
+      actionType: Constants.DELETE_PERSONS,
+      data: data
+    });
   }
 };
 

@@ -19,7 +19,8 @@ export const ErrorMessages = {
   "FileUploadInvalidHeader": "File Header is not in valid format",
   "FileUploadFnameEmpty": "One or more rows have empty first name",
   "ExistsCampaign": "Campaign name already exist",
-  "ExistsList": "List name already exist"
+  "ExistsList": "List name already exist",
+  "DeletePerson" : "Please select a Subscriber to Delete"
 };
 
 /**
@@ -30,5 +31,6 @@ export const SuccessMessages = {
   "successUpdate": "Update successfully",
   "successSubscribeUpdate": "Subscriber details updated successfully",
   "successUpload": "The file has been uploaded successfully",
-  "successSubscribe": "Subscriber details saved successfully"
+  "successSubscribe": "Subscriber details saved successfully",
+  "successDelete": "Deleted successfully"
 };

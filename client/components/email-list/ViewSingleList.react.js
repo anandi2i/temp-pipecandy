@@ -8,6 +8,7 @@ import validatorUtil from "../../utils/ValidationMessages";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 import SubscriberGrid from "../grid/subscriber-list/SubscriberGrid.react";
+import {ErrorMessages} from "../../utils/UserAlerts";
 
 class ListView extends React.Component {
   constructor(props) {
@@ -202,6 +203,27 @@ class ListView extends React.Component {
     return true;
   }
 
+/**
+ * Delete selected persons from Email List
+ *
+ * @property {Array} ids - selected row ids to delete
+ * @property {Number} listId - id of the email list
+ * @property {Array} people - List of People present in the Email list
+ */
+  deleteSubscriber = () => {
+    const ids = this.refs.selectedRowIds.refs.component.state.selectedRowIds;
+    const listId = this.props.params.listId;
+    if(ids.length) {
+      const data = {
+        listId : listId,
+        peopleId : ids
+      };
+      EmailListActions.deletePersons(data);
+    } else {
+      displayError(ErrorMessages.DeletePerson);
+    }
+  }
+
   render() {
     return (
       <div>
@@ -225,6 +247,9 @@ class ListView extends React.Component {
               accept=".csv, .xls, .xlsx" onChange={this.fileChange} />
             <div className="btn btn-dflt blue sm-icon-btn" onClick={this.openDialog}>
               <i className="left mdi mdi-upload"></i> add from file
+            </div>
+            <div className="btn btn-dflt blue sm-icon-btn delete-button-margin" onClick={this.deleteSubscriber}>
+              <i className="left mdi mdi-delete"></i> DELETE
             </div>
           </div>
           <div id="addEmail"
@@ -330,7 +355,7 @@ class ListView extends React.Component {
         </div>
         {
           this.state.peoples.length ?
-            <SubscriberGrid results={this.state.peoples} listId={this.props.params.listId} />
+            <SubscriberGrid results={this.state.peoples} listId={this.props.params.listId} ref="selectedRowIds"/>
           : ""
         }
       </div>

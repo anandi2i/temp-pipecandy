@@ -6,91 +6,23 @@ import Griddle from "griddle-react";
 import CustomEditLinkComponent from "./CustomEditLinkComponent.react";
 import CustomPagerComponent from "../CustomGridPagination.react";
 import EmailListActions from "../../../actions/EmailListActions";
-
-let columnMeta = [{
-    "columnName": "id",
-    "locked": true,
-    "visible": false
-  }, {
-    "columnName": "firstName",
-    "order": 1,
-    "locked": false,
-    "visible": true,
-    "displayName": "First Name",
-    "cssClassName" : "name"
-  }, {
-    "columnName": "middleName",
-    "order": 2,
-    "locked": false,
-    "visible": true,
-    "displayName": "Middle Name",
-    "cssClassName" : "name"
-  }, {
-    "columnName": "lastName",
-    "order": 3,
-    "locked": false,
-    "visible": true,
-    "displayName": "Last Name",
-    "cssClassName" : "name"
-  }, {
-    "columnName": "email",
-    "order": 4,
-    "locked": false,
-    "visible": true,
-    "displayName": "e-mail",
-    "cssClassName" : "email"
-  }, {
-    "columnName": "addField1",
-    "order": 5,
-    "locked": false,
-    "visible": true,
-    "displayName": "Data 1",
-    "cssClassName" : "field"
-  }, {
-    "columnName": "addField2",
-    "order": 6,
-    "locked": false,
-    "visible": true,
-    "displayName": "Data 2",
-    "cssClassName" : "field"
-  }, {
-    "columnName": "addField3",
-    "order": 7,
-    "locked": false,
-    "visible": true,
-    "displayName": "Data 3",
-    "cssClassName" : "field"
-  }, {
-    "columnName": "addField4",
-    "order": 8,
-    "locked": false,
-    "visible": true,
-    "displayName": "Data 4",
-    "cssClassName" : "field"
-  }, {
-    "columnName": "addField5",
-    "order": 9,
-    "locked": false,
-    "visible": true,
-    "displayName": "Data 5",
-    "cssClassName" : "field"
-  }, {
-    "columnName": "edit",
-    "order": 10,
-    "locked": true,
-    "visible": true,
-    "displayName": "Edit",
-    "cssClassName" : "icon",
-    "sortable" : false,
-    "customComponent": CustomEditLinkComponent
-  }];
+import CustomSelectComponent from "./CustomSelectComponent.react";
+import CustomSelectAllComponent from "./CustomSelectAllComponent.react";
+import _ from "underscore";
 
 class SubscriberGridView extends React.Component {
 
   constructor(props) {
     super(props);
+    //TODO - Server side pagination, Now it take all persons from the eamil list
+    let visibleRowIds = [];
+    this.props.results.map(person => {
+      visibleRowIds.push(person.id);
+    });
     this.state = {
-      additionalFieldsLength: 5
+      additionalFieldsLength: 5,
+      selectedRowIds: [],
+      visibleRowIds: visibleRowIds
     };
     this.validatorTypes = {
       firstName: validatorUtil.firstName,
@@ -196,7 +128,194 @@ class SubscriberGridView extends React.Component {
     };
     this.props.validate(onValidate);
   }
-  
+
+  /**
+   * Grid Meta Data
+   *
+   * @return {Array} - List of Objects that contains Column data and config
+   */
+  getColumnMeta = () => {
+    return (
+      [{
+          "columnName": "id",
+          "locked": true,
+          "visible": false
+        }, {
+          "columnName": "select",
+          "order": 1,
+          "locked": true,
+          "visible": true,
+          "cssClassName" : "select",
+          "sortable" : false,
+          "customHeaderComponent": CustomSelectAllComponent,
+          "customHeaderComponentProps": this.getGlobalData(),
+          "customComponent": CustomSelectComponent,
+          "globalData": this.getGlobalData
+        }, {
+          "columnName": "firstName",
+          "order": 2,
+          "locked": false,
+          "visible": true,
+          "displayName": "First Name",
+          "cssClassName" : "name"
+        }, {
+          "columnName": "middleName",
+          "order": 3,
+          "locked": false,
+          "visible": true,
+          "displayName": "Middle Name",
+          "cssClassName" : "name"
+        }, {
+          "columnName": "lastName",
+          "order": 4,
+          "locked": false,
+          "visible": true,
+          "displayName": "Last Name",
+          "cssClassName" : "name"
+        }, {
+          "columnName": "email",
+          "order": 5,
+          "locked": false,
+          "visible": true,
+          "displayName": "e-mail",
+          "cssClassName" : "email"
+        }, {
+          "columnName": "addField1",
+          "order": 6,
+          "locked": false,
+          "visible": true,
+          "displayName": "Data 1",
+          "cssClassName" : "field"
+        }, {
+          "columnName": "addField2",
+          "order": 7,
+          "locked": false,
+          "visible": true,
+          "displayName": "Data 2",
+          "cssClassName" : "field"
+        }, {
+          "columnName": "addField3",
+          "order": 8,
+          "locked": false,
+          "visible": true,
+          "displayName": "Data 3",
+          "cssClassName" : "field"
+        }, {
+          "columnName": "addField4",
+          "order": 9,
+          "locked": false,
+          "visible": true,
+          "displayName": "Data 4",
+          "cssClassName" : "field"
+        }, {
+          "columnName": "addField5",
+          "order": 10,
+          "locked": false,
+          "visible": true,
+          "displayName": "Data 5",
+          "cssClassName" : "field"
+        }, {
+          "columnName": "edit",
+          "order": 11,
+          "locked": true,
+          "visible": true,
+          "displayName": "Edit",
+          "cssClassName" : "icon",
+          "sortable" : false,
+          "customComponent": CustomEditLinkComponent
+        }]
+    );
+  }
+
+  /**
+   * Toggle Custom Row Component(Checkbox)
+   * If the checkbox is checked, the row id added in the selectedRowIds
+   * If the checkbox is unchecked, the row id removed from the selectedRowIds
+   *
+   * @param  {Object}  row - The data of single row
+   * @param  {Boolean} isChecked - Wheather the checkbox checked or not
+   * @property {Array} selectedRowIds - List of ids selected from the Email list
+   */
+  toggleSelectRow = (row, isChecked) => {
+    let selectedRowIds = this.state.selectedRowIds;
+    if (isChecked) {
+      let isFound;
+      isFound = _.find(selectedRowIds, (id) => {
+        return row.id === id;
+      });
+      if(!isFound) {
+        selectedRowIds.push(row.id);
+      }
+    } else {
+      let howMany = 1;
+      selectedRowIds.splice(selectedRowIds.indexOf(row.id), howMany);
+    }
+    this.setState({
+      selectedRowIds: selectedRowIds
+    });
+  }
+
+  /**
+   * Toggle Custom Header Component(checkbox)
+   * If the checkbox is checked, visible row ids assigned to selected row ids
+   * If the checkbox is unchecked, the selected row ids make it empty
+   *
+   * @param  {Boolean} isChecked - Wheather the checkbox is checked or not
+   * @property {Array} visibleRowIds - the rows which are visible on
+   *   the Email list
+   */
+  toggleSelectAllRow = (isChecked) => {
+    const {visibleRowIds} = this.state;
+    if (isChecked) {
+      this.setState({
+        selectedRowIds : visibleRowIds
+      });
+    } else {
+      this.setState({
+        selectedRowIds : []
+      });
+    }
+  }
+
+  /**
+   * Wheather the row is checked or not
+   *
+   * @param  {Object} row - The row of the email list(person)
+   * @return {Boolean} - If the row id is present in the selectedRowIds,
+   *   return true, else false
+   */
+  getIsRowChecked = (row) => {
+    let check = -1;
+    return this.state.selectedRowIds.indexOf(row.id) > check ? true : false;
+  }
+
+  /**
+   * Wheather the header custom component(checkbox) checked or not
+   *
+   * @return {Boolean} sort visibleRowIds and selectedRowIds and compare,
+   *   if equal return true else false
+   */
+  getIsAllRowChecked = () => {
+    const {visibleRowIds, selectedRowIds} = this.state;
+    return _.isEqual(_.sortBy(visibleRowIds), _.sortBy(selectedRowIds));
+  }
+
+  /**
+   * It is return Object of functions that are used to check or uncheck
+   *   row from the email list. The functions are toggleSelectRow,
+   *   toggleSelectAllRow, getIsRowChecked, getIsAllRowChecked
+   *
+   * @return {Object} - Object of functions
+   */
+  getGlobalData = () => {
+    return {
+      toggleSelectRow: this.toggleSelectRow,
+      getIsRowChecked: this.getIsRowChecked,
+      toggleSelectAllRow: this.toggleSelectAllRow,
+      getIsAllRowChecked: this.getIsAllRowChecked
+    };
+  }
+
   render() {
     return (
       <div className="row" id="subscriber_list">
@@ -205,13 +324,15 @@ class SubscriberGridView extends React.Component {
             results={this.props.results}
             tableClassName="responsive-table"
             useGriddleStyles={false}
-            columnMetadata={columnMeta}
-            columns={["firstName", "middleName", "lastName",
+            columnMetadata={this.getColumnMeta()}
+            selectedRowIds={this.state.selectedRowIds}
+            globalData={this.getGlobalData}
+            columns={["select", "firstName", "middleName", "lastName",
               "email", "addField1", "addField2", "addField3",
               "addField4", "addField5", "edit"]}
             onRowClick={this.handleRowClick}
             metadataColumns={["id"]}
-            isMultipleSelection={true}
+            isMultipleSelection={false}
             uniqueIdentifier="id"
             showPager={true}
             resultsPerPage="10"

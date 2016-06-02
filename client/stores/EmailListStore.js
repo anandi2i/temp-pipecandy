@@ -78,6 +78,7 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
     _.each(emailListByID.people, function(people, index) {
       let _temp = {
         id: people.id,
+        select: people.id,
         firstName: people.firstName || "",
         middleName: people.middleName || "",
         lastName: people.lastName || "",
@@ -201,6 +202,15 @@ AppDispatcher.register(function(payload) {
         _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
         _error = "";
+      });
+      break;
+    case Constants.DELETE_PERSONS:
+      EmailListApi.deletePersons(action.data).then((response) => {
+        _success = SuccessMessages.successDelete;
+        EmailListStore.emitChange();
+      }, (err)=> {
+        _error = HandleError.evaluateError(err);
+        EmailListStore.emitChange();
       });
       break;
     default:
