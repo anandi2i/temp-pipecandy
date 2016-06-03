@@ -71,126 +71,111 @@ class SelectCampaignTemplate extends React.Component {
     super(props);
     this.state={
       innerTabIndex: 1,
-      followups0: 0,
-      followups1: 1,
-      followups2: 2,
-      followups3: 3,
-      followups4: 4,
-      followups5: 5,
+      template: {
+        content: "Hi <br /><br /> You had downloaded our report on the current \
+          app development economy and pricing standards. I hope the report was \
+          useful. <br /><br />  As a marketplace that identifies and aggregates\
+          information about over 10000 web &amp; mobile development agencies,\
+          ContractIQ had this data all along. So, we went ahead and published \
+          the first benchmark of it\'s kind. <br /><br /> How about a quick \
+          call sometime tomorrow morning, say 12 pm GMT?<br /><br /><br />",
+        name: "Blank Template"
+      },
+      followups: [
+        {
+          key: "followups0",
+          value: 0,
+          divStyle: {
+            width: "100%"
+          }
+        },
+        {
+          key: "followups1",
+          value: 1,
+          divStyle: {
+            width: "80%"
+          }
+        },
+        {
+          key: "followups2",
+          value: 2,
+          divStyle: {
+            width: "80%"
+          }
+        },
+        {
+          key: "followups3",
+          value: 3,
+          divStyle: {
+            width: "70%"
+          }
+        },
+        {
+          key: "followups4",
+          value: 4,
+          divStyle: {
+            width: "70%"
+          }
+        },
+        {
+          key: "followups5",
+          value: 5,
+          divStyle: {
+            width: "70%"
+          }
+        },
+      ]
     };
   }
 
   render() {
     let isDisplay =
       (this.props.active === this.state.innerTabIndex ? "block" : "none");
-    let followups0 = {
-      width: "100%"
-    };
-    let followups2 = {
-      width: "80%"
-    };
-    let followups3 = {
-      width: "70%"
-    };
     return (
       <div className="row" style={{display: isDisplay}}>
-        <div className="col s12 m6 l6">
-          <CampaignInfo />
-          <div className="card template-preview">
-            <div style={followups3} className="campaign-template">
-              <div className="card-title">Blank Template</div>
-              <div className="card-content">
-                Hi,
-                  <br /><br />You had downloaded our report on the current app development economy and pricing standards. I hope the report was useful.<br /><br />As a marketplace that identifies and aggregates information about over 10000 web &amp; mobile development agencies, ContractIQ had this data all along. So, we went ahead and published the first benchmark of it's kind.<br /><br />How about a quick call sometime tomorrow morning, say 12 pm GMT?<br /><br /><br />
+        {
+          this.state.followups.map(function (followup) {
+            return (
+              <div className="col s12 m6 l6" key={followup.value}>
+                <CampaignInfo />
+                <div className="card template-preview">
+                  <div style={followup.divStyle} className="campaign-template">
+                    <div className="card-title">{this.state.template.name}</div>
+                    <div className="card-content">
+                      <div dangerouslySetInnerHTML={{__html: this.state.template.content}} />
+                    </div>
+                    {
+                      <div className="card-action modal-trigger"
+                        href="#previewTemplate">
+                        <i className="mdi mdi-eye"></i> Preview
+                      </div>
+                    }
+                  </div>
+                  <AddFollowupsCount followups={followup.value}/>
+                </div>
               </div>
-              <div className="card-action">
-                <i className="mdi mdi-eye"></i> Preview
+            );
+          }, this)
+        }
+        <div id="previewTemplate" className="modal modal-fixed-header modal-fixed-footer">
+          <i className="mdi mdi-close modal-close"></i>
+          <div className="modal-header">
+            <div className="head">{this.state.template.name}</div>
+          </div>
+          <div className="modal-content">
+            <div className="template-content gray-bg p-10">
+              <div className="card-content">
+                <div dangerouslySetInnerHTML={{__html: this.state.template.content}} />
               </div>
             </div>
-            <AddFollowupsCount followups={this.state.followups5}/>
+          </div>
+          <div className="modal-footer r-btn-container">
+            <input type="button" value="Cancel"
+              className="btn red modal-action modal-close p-1-btn" />
+            <input type="button" value="Pick This Template"
+              className="btn blue modal-action modal-close" />
           </div>
         </div>
-        <div className="col s12 m6 l6">
-          <CampaignInfo />
-          <div className="card template-preview">
-            <div style={followups2} className="campaign-template">
-              <div className="card-title">Blank Template</div>
-              <div className="card-content">
-                Hi,
-                  <br /><br />You had downloaded our report on the current app development economy and pricing standards. I hope the report was useful.<br /><br />As a marketplace that identifies and aggregates information about over 10000 web &amp; mobile development agencies, ContractIQ had this data all along. So, we went ahead and published the first benchmark of it's kind.<br /><br />How about a quick call sometime tomorrow morning, say 12 pm GMT?<br /><br /><br />
-              </div>
-              <div className="card-action">
-                <i className="mdi mdi-eye"></i> Preview
-              </div>
-            </div>
-            <AddFollowupsCount followups={this.state.followups2}/>
-          </div>
-        </div>
-        <div className="col s12 m6 l6">
-          <CampaignInfo />
-          <div className="card template-preview">
-            <div style={followups3} className="campaign-template">
-              <div className="card-title">Blank Template</div>
-              <div className="card-content">
-                Hi,
-                  <br /><br />You had downloaded our report on the current app development economy and pricing standards. I hope the report was useful.<br /><br />As a marketplace that identifies and aggregates information about over 10000 web &amp; mobile development agencies, ContractIQ had this data all along. So, we went ahead and published the first benchmark of it's kind.<br /><br />How about a quick call sometime tomorrow morning, say 12 pm GMT?<br /><br /><br />
-              </div>
-              <div className="card-action">
-                <i className="mdi mdi-eye"></i> Preview
-              </div>
-            </div>
-            <AddFollowupsCount followups={this.state.followups4}/>
-          </div>
-        </div>
-        <div className="col s12 m6 l6">
-          <CampaignInfo />
-          <div className="card template-preview">
-            <div style={followups3} className="campaign-template">
-              <div className="card-title">Blank Template</div>
-              <div className="card-content">
-                Hi,
-                  <br /><br />You had downloaded our report on the current app development economy and pricing standards. I hope the report was useful.<br /><br />As a marketplace that identifies and aggregates information about over 10000 web &amp; mobile development agencies, ContractIQ had this data all along. So, we went ahead and published the first benchmark of it's kind.<br /><br />How about a quick call sometime tomorrow morning, say 12 pm GMT?<br /><br /><br />
-              </div>
-              <div className="card-action">
-                <i className="mdi mdi-eye"></i> Preview
-              </div>
-            </div>
-            <AddFollowupsCount followups={this.state.followups3}/>
-          </div>
-        </div>
-        <div className="col s12 m6 l6">
-          <CampaignInfo />
-          <div className="card template-preview">
-            <div style={followups0} className="campaign-template">
-              <div className="card-title">Blank Template</div>
-              <div className="card-content">
-                Hi,
-                  <br /><br />You had downloaded our report on the current app development economy and pricing standards. I hope the report was useful.<br /><br />As a marketplace that identifies and aggregates information about over 10000 web &amp; mobile development agencies, ContractIQ had this data all along. So, we went ahead and published the first benchmark of it's kind.<br /><br />How about a quick call sometime tomorrow morning, say 12 pm GMT?<br /><br /><br />
-              </div>
-              <div className="card-action">
-                <i className="mdi mdi-eye"></i> Preview
-              </div>
-            </div>
-            <AddFollowupsCount followups={this.state.followups0}/>
-          </div>
-        </div>
-        <div className="col s12 m6 l6">
-          <CampaignInfo />
-          <div className="card template-preview">
-            <div style={followups2} className="campaign-template">
-              <div className="card-title">Blank Template</div>
-              <div className="card-content">
-                Hi,
-                  <br /><br />You had downloaded our report on the current app development economy and pricing standards. I hope the report was useful.<br /><br />As a marketplace that identifies and aggregates information about over 10000 web &amp; mobile development agencies, ContractIQ had this data all along. So, we went ahead and published the first benchmark of it's kind.<br /><br />How about a quick call sometime tomorrow morning, say 12 pm GMT?<br /><br /><br />
-              </div>
-              <div className="card-action">
-                <i className="mdi mdi-eye"></i> Preview
-              </div>
-            </div>
-            <AddFollowupsCount followups={this.state.followups1}/>
-          </div>
-        </div>
-
       </div>
     );
   }
