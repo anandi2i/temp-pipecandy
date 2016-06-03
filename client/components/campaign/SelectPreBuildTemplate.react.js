@@ -1,6 +1,7 @@
 import React from "react";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
+import {SuccessMessages} from "../../utils/UserAlerts";
 
 class SelectPreBuildTemplate extends React.Component {
   constructor(props) {
@@ -39,7 +40,8 @@ class SelectPreBuildTemplate extends React.Component {
     }), () => {
       this.props.setTemplateContent();
     });
-
+    displaySuccess(`${this.state.templates[key].name} 
+      ${SuccessMessages.successSelectTemplate}`);
   }
 
   isActive(value){
@@ -93,10 +95,8 @@ class SelectPreBuildTemplate extends React.Component {
               </div>
             </div>
             <div className="modal-footer r-btn-container">
-              <input type="button" value="Cancel"
+              <input type="button" value="Close"
                 className="btn red modal-action modal-close p-1-btn" />
-              <input type="button" value="Pick This Template"
-                className="btn blue modal-action modal-close" />
             </div>
           </div>
         : null }

@@ -32,5 +32,6 @@ export const SuccessMessages = {
   "successSubscribeUpdate": "Subscriber details updated successfully",
   "successUpload": "The file has been uploaded successfully",
   "successSubscribe": "Subscriber details saved successfully",
-  "successDelete": "Deleted successfully"
+  "successDelete": "Deleted successfully",
+  "successSelectTemplate": "has been selected"
 };
