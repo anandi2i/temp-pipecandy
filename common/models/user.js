@@ -295,7 +295,7 @@ module.exports = function(user) {
       }
       if (created) {
         logger.info("Campaign name created successfully", campaign);
-        cb(null);
+        cb(null, campaign);
       } else {
         let error = new Error();
         error.message = "campaign name already exists";
@@ -326,7 +326,7 @@ module.exports = function(user) {
       }
       if (created) {
         logger.info("List name created successfully", list);
-        cb(null);
+        cb(null, list);
       } else {
         let error = new Error();
         error.message = "List name already exists";
