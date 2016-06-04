@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import {Link} from "react-router";
 import validation from "react-validation-mixin";
 import strategy from "joi-validation-strategy";
@@ -35,18 +36,26 @@ class ListView extends React.Component {
     };
   }
 
+  /**
+   * Initiate lean modal and mCustomScrollbar
+   * @listens {EmailListStore} change event
+   */
   componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
     EmailListActions.getEmailListByID(this.props.params.listId);
     EmailListStore.addChangeListener(this.onStoreChange);
     EmailListStore.addPersonChangeListener(this.onPersonChange);
-    $(".modal-trigger").leanModal({
+    this.el.find(".modal-trigger").leanModal({
       dismissible: false
     });
-    $(".modal-content").mCustomScrollbar({
+    this.el.find(".modal-content").mCustomScrollbar({
       theme:"minimal-dark"
     });
   }
 
+  /**
+   * clean up event listener
+   */
   componentWillUnmount() {
     EmailListStore.removeChangeListener(this.onStoreChange);
     EmailListStore.removePersonChangeListener(this.onPersonChange);
@@ -224,6 +233,10 @@ class ListView extends React.Component {
     }
   }
 
+  /**
+   * render
+   * @return {ReactElement} markup
+   */
   render() {
     return (
       <div>

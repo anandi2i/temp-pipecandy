@@ -1,4 +1,6 @@
 import React from "react";
+import ReactDOM from "react-dom";
+import {SuccessMessages} from "../../utils/UserAlerts";
 
 class AddFollowupsCount extends React.Component {
   constructor(props) {
@@ -8,6 +10,10 @@ class AddFollowupsCount extends React.Component {
     };
   }
 
+  /**
+   * render
+   * @return {ReactElement} markup
+   */
   render() {
     let indents = [];
     let followupsWidth;
@@ -53,6 +59,11 @@ class CampaignInfo extends React.Component {
     super(props);
     this.state={};
   }
+
+  /**
+   * render
+   * @return {ReactElement} markup
+   */
   render() {
     return(
       <div className="campaign-template-info">
@@ -66,6 +77,7 @@ class CampaignInfo extends React.Component {
     );
   }
 }
+
 class SelectCampaignTemplate extends React.Component {
   constructor(props) {
     super(props);
@@ -128,6 +140,32 @@ class SelectCampaignTemplate extends React.Component {
     };
   }
 
+  /**
+   * Initiate lean modal and mCustomScrollbar
+   */
+  componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
+    this.el.find(".modal-trigger").leanModal({
+      dismissible: false
+    });
+    this.el.find(".modal-content").mCustomScrollbar({
+      theme:"minimal-dark"
+    });
+  }
+
+  /**
+   * selectTemplate function to show selected template msg
+   * @param {string} templateName Name of the selected template
+   */
+  selectTemplate(templateName) {
+    displaySuccess(`${templateName}
+      ${SuccessMessages.successSelectTemplate}`);
+  }
+
+  /**
+   * render
+   * @return {ReactElement} markup
+   */
   render() {
     let isDisplay =
       (this.props.active === this.state.innerTabIndex ? "block" : "none");
@@ -139,25 +177,27 @@ class SelectCampaignTemplate extends React.Component {
               <div className="col s12 m6 l6" key={followup.value}>
                 <CampaignInfo />
                 <div className="card template-preview">
-                  <div style={followup.divStyle} className="campaign-template">
-                    <div className="card-title">{this.state.template.name}</div>
-                    <div className="card-content">
-                      <div dangerouslySetInnerHTML={{__html: this.state.template.content}} />
-                    </div>
-                    {
-                      <div className="card-action modal-trigger"
-                        href="#previewTemplate">
-                        <i className="mdi mdi-eye"></i> Preview
+                  <div onClick={this.selectTemplate.bind(this, this.state.template.name)}>
+                    <div style={followup.divStyle} className="campaign-template">
+                      <div className="card-title">{this.state.template.name}</div>
+                      <div className="card-content">
+                        <div dangerouslySetInnerHTML={{__html: this.state.template.content}} />
                       </div>
-                    }
+                      {
+                        <div className="card-action modal-trigger"
+                          href="#previewModal">
+                          <i className="mdi mdi-eye"></i> Preview
+                        </div>
+                      }
+                    </div>
+                    <AddFollowupsCount followups={followup.value}/>
                   </div>
-                  <AddFollowupsCount followups={followup.value}/>
                 </div>
               </div>
             );
           }, this)
         }
-        <div id="previewTemplate" className="modal modal-fixed-header modal-fixed-footer">
+        <div id="previewModal" className="modal modal-fixed-header modal-fixed-footer">
           <i className="mdi mdi-close modal-close"></i>
           <div className="modal-header">
             <div className="head">{this.state.template.name}</div>
@@ -172,8 +212,6 @@ class SelectCampaignTemplate extends React.Component {
           <div className="modal-footer r-btn-container">
             <input type="button" value="Cancel"
               className="btn red modal-action modal-close p-1-btn" />
-            <input type="button" value="Pick This Template"
-              className="btn blue modal-action modal-close" />
           </div>
         </div>
       </div>

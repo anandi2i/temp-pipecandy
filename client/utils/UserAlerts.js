@@ -20,7 +20,9 @@ export const ErrorMessages = {
   "FileUploadFnameEmpty": "One or more rows have empty first name",
   "ExistsCampaign": "Campaign name already exist",
   "ExistsList": "List name already exist",
-  "DeletePerson" : "Please select a Subscriber to Delete"
+  "DeletePerson" : "Please select a Subscriber to Delete",
+  "MinFileSize": "Select file size more the 10kb",
+  "PasswordFields": "Please enter both password fields"
 };
 
 /**

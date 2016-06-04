@@ -7,6 +7,7 @@ import passwordStrength from "zxcvbn";
 import validatorUtil from "../../utils/ValidationMessages";
 import UserStore from "../../stores/UserStore";
 import UserAction from "../../actions/UserAction";
+import {ErrorMessages} from "../../utils/UserAlerts";
 
 class Profile extends React.Component {
 
@@ -88,7 +89,7 @@ class Profile extends React.Component {
             let formData = this.state;
             UserAction.userUpdate(formData);
         } else {
-          displayError("Please enter both password fields");
+          displayError(ErrorMessages.PasswordFields);
         }
       }
     };
@@ -274,7 +275,7 @@ class FileUpload extends React.Component {
       return;
 
     if (file.size <= minFileSize) {
-      displayError("Select file size more the 10kb");
+      displayError(ErrorMessages.MinFileSize);
       return;
     }
 

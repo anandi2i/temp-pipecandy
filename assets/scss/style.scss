@@ -107,16 +107,16 @@ a {
     }
     i {
       float: right;
-      margin-top: -39px;
+      margin-top: 80px;
       font-size: 25px;
       cursor: pointer;
       margin-left: 5px;
       text-shadow: 0 0 1px $white, 0 0 1px $white;
-      @include rotate(-90deg);
+      @include rotate(0deg);
       transition: transform 0.5s;
       &.active {
-        margin-top: -38px;
-        @include rotate(0deg);
+        margin-top: 80px;
+        @include rotate(-180deg);
         transition: transform 0.5s;
       }
     }

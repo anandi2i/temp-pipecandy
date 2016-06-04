@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
 import {SuccessMessages} from "../../utils/UserAlerts";
@@ -16,6 +17,7 @@ class SelectPreBuildTemplate extends React.Component {
   }
 
   componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
     CampaignStore.addChangeListener(this.onStoreChange);
   }
 
@@ -27,8 +29,11 @@ class SelectPreBuildTemplate extends React.Component {
     this.setState({
       templates: CampaignStore.getAllEmailTemplates()
     });
-    $(".modal-trigger").leanModal({
+    this.el.find(".modal-trigger").leanModal({
       dismissible: false
+    });
+    this.el.find(".modal-content").mCustomScrollbar({
+      theme:"minimal-dark"
     });
     displayError(CampaignStore.getError());
   }
@@ -40,7 +45,7 @@ class SelectPreBuildTemplate extends React.Component {
     }), () => {
       this.props.setTemplateContent();
     });
-    displaySuccess(`${this.state.templates[key].name} 
+    displaySuccess(`${this.state.templates[key].name}
       ${SuccessMessages.successSelectTemplate}`);
   }
 
