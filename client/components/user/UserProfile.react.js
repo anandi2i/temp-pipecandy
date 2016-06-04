@@ -88,7 +88,7 @@ class Profile extends React.Component {
             let formData = this.state;
             UserAction.userUpdate(formData);
         } else {
-          this.displayError("Please enter both password fields");
+          displayError("Please enter both password fields");
         }
       }
     };
@@ -274,8 +274,7 @@ class FileUpload extends React.Component {
       return;
 
     if (file.size <= minFileSize) {
-      const timeToShow = 4000;
-      Materialize.toast("Select file size more the 10kb", timeToShow);
+      displayError("Select file size more the 10kb");
       return;
     }
 
