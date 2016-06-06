@@ -1,6 +1,7 @@
 import React from "react";
 import {Link} from "react-router";
 import TagNameMenu from "./TagNameMenu.react";
+import PerformanceReport from "./PerformanceReport.react";
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -164,7 +165,7 @@ class Dashboard extends React.Component {
             <h2>Sample Content </h2>
           </div>
         </div>
-        <div className="container">
+        <div className="container camp-chip-container">
           <div className="row main-head">
             Othar status
           </div>
@@ -174,6 +175,14 @@ class Dashboard extends React.Component {
               tab={this.state.tab1} />
           </div>
           <h1>Test</h1>
+        </div>
+        <div className="container">
+          <div className="row main-head">
+            Performance Report
+          </div>
+          <div>
+            <PerformanceReport />
+          </div>
         </div>
       </div>
     );
