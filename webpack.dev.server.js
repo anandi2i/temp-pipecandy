@@ -15,7 +15,7 @@ var server = new WebpackDevServer(webpack(config), {
   }
 });
 
-server.listen(defaultPort, "localhost", function (err) {
+server.listen(defaultPort, "localhost", function(err) {
   if (err) {
     console.log(err);
   }

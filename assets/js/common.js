@@ -1,6 +1,8 @@
 /* This file is ignored in eslint
 ** make sure that your code indentation and quality
 */
+
+(function () {
 "use strict";
 
 $(document).ready(function() {
@@ -24,10 +26,12 @@ function enableSideNavDropDown() {
     $(".side-nav .side-nav-drop-down").slideToggle("slow");
   });
 }
+window.enableSideNavDropDown = enableSideNavDropDown;
 
 function enableToolTip() {
   $(".tooltipped").tooltip();
 }
+window.enableToolTip = enableToolTip;
 
 function displayError(error) {
   const timeToShow = 4000;
@@ -46,6 +50,7 @@ function displayError(error) {
     Materialize.toast(warningContent, timeToShow);
   }
 }
+window.displayError = displayError;
 
 function displaySuccess(successInfo) {
   const timeToShow = 4000;
@@ -63,6 +68,7 @@ function displaySuccess(successInfo) {
     Materialize.toast(successContent, timeToShow);
   }
 }
+window.displaySuccess = displaySuccess;
 
 function enabledropDownBtn() {
   $(".dropdown-button").dropdown({
@@ -75,6 +81,7 @@ function enabledropDownBtn() {
     alignment: "right"
   });
 }
+window.enabledropDownBtn = enabledropDownBtn;
 
 function enabledropDownBtnByID(id) {
   $(id).dropdown({
@@ -87,6 +94,7 @@ function enabledropDownBtnByID(id) {
     alignment: "right"
   });
 }
+window.enabledropDownBtnByID = enabledropDownBtnByID;
 
 function getIssueTagsInEditor(emailContent) {
   let unCommonTags = /<span[^>]+?class="tag un-common".*?>&#{0,1}[a-z0-9]+;;*?([\s\S]*?)&#{0,1}[a-z0-9]+;*?<\/span>/g;
@@ -98,6 +106,7 @@ function getIssueTagsInEditor(emailContent) {
   }
   return result;
 }
+window.getIssueTagsInEditor = getIssueTagsInEditor;
 
 /**
  * Initiate a tinyMCE editor with properties and able to insert smart tags
@@ -150,11 +159,13 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, changeCb) {
     toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link image"
   });
 }
+window.initTinyMCE = initTinyMCE;
 
 function constructSmartTags(className, tagText) {
   return "<span data-tag='"+tagText+"' data-tag-name='"+tagText+"' class='tag "+className+"' contenteditable='false'>&lt;" +
     tagText + "&gt;</span>";
 }
+window.constructSmartTags = constructSmartTags;
 
 function initTinyMCEPopUp(id, toolBar, cb) {
   let getFocusId = id.split("#")[1];
@@ -177,6 +188,7 @@ function initTinyMCEPopUp(id, toolBar, cb) {
     toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link"
   });
 }
+window.initTinyMCEPopUp = initTinyMCEPopUp;
 
 function initTimePicker(element) {
   let timepicker = element.pickatime({
@@ -193,6 +205,7 @@ function initTimePicker(element) {
     }
   });
 }
+window.initTimePicker = initTimePicker;
 
 /**
  * Validate the time is past
@@ -245,3 +258,5 @@ function initDatePicker(element) {
     min : true
   });
 }
+window.initDatePicker = initDatePicker;
+})();

@@ -38,7 +38,7 @@ This guide was prepared on a machine with the following configuration:
 * npm run automigrate
 
 ######Run the server:
-gulp
+npm start or gulp
 
 ######Open the browser and hit:
-http://localhost:3000/
+http://localhost:3001 (proxy to webpack dev server)

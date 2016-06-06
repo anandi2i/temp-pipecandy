@@ -1,105 +1,128 @@
-var source = require("vinyl-source-stream");
+/**
+ * Gulp to run automated tasks and bundling the files for dev/prod to use.
+ *
+ * @ref http://codyburleson.com/2015/09/11/better-error-messages-from-gulp-using-gulp-util/
+ * @ref http://andrewhathaway.net/environment-based-configuration-for-javascript-applications/
+ * @ref https://knpuniversity.com/screencast/gulp/minify-only-production
+ * @ref https://css-tricks.com/gulp-for-beginners/
+ */
+
 var gulp = require("gulp");
-var browserify = require("browserify");
-var notify = require("gulp-notify");
 var sass = require("gulp-sass");
 var livereload = require("gulp-livereload");
 var nodemon = require("gulp-nodemon");
 var concat = require("gulp-concat");
 var uglify = require("gulp-uglify");
+var minifier = require("gulp-uglify/minifier");
+var uglifyjs = require("uglify-js"); //ES6 support
+var cssnano = require("gulp-cssnano");
 var mainBowerFiles = require("main-bower-files");
+var util = require("gulp-util");
+var del = require("del");
+var RunSequence = require("run-sequence");
+var WebpackDevServer = require("webpack-dev-server");
+var exec = require("gulp-exec");
+var webpack = require("webpack");
+var config = require("./webpack.config.dev");
+var devPort = 3001;
+var isProduction = !!util.env.production;
 
-function handleErrors() {
-  var args = Array.prototype.slice.call(arguments);
-  notify.onError({
-    title: "Compile Error",
-    message: "<%= error.message %>"
-  }).apply(this, args);
-  this.emit("end"); // Keep gulp from hanging on this task
-}
-
-//convert jsx to js
-gulp.task("browserify", function() {
-  browserify({
-      entries: "./client/app.js",
-      debug: true
-    })
-    .transform("babelify", {
-      "plugins": ["transform-class-properties"],
-      "presets": ["react", "es2015"]
-    })
-    .bundle()
-    .on("error", handleErrors)
-    .pipe(source("bundle.js"))
-    .pipe(gulp.dest("./public/assets"));
+/**
+ * Cleans the build directory
+ */
+gulp.task("clean", function(cb) {
+  del.sync("./public/assets", cb);
 });
 
-//watch js files
-gulp.task("browserify:watch", function() {
-  gulp.watch("./client/**/*.js", ["browserify"]);
-});
-
-//convert scss to css
+/**
+ * Convert scss to css
+ * Minfiy if it is production
+ */
 gulp.task("sass", function() {
   return gulp.src([
       "./assets/scss/importer.scss",
       "./assets/mdi-icons/materialdesignicons.css"
     ])
-    .pipe(sass().on("error", handleErrors))
-    .pipe(concat("style.css"))
+    .pipe(sass().on("error", util.log))
+    .pipe(concat("style.css").on("error", util.log))
+    .pipe(isProduction ? cssnano().on("error", util.log) : util.noop())
     .pipe(gulp.dest("./public/assets"));
 });
 
-//watch scss files
+/**
+ * Watch for scss file changes and run sass task
+ */
 gulp.task("sass:watch", function() {
-  gulp.watch("./assets/scss/**/*.scss", ["sass"]);
+  return gulp.watch("./assets/scss/**/*.scss", ["sass"]);
 });
 
+/**
+ * Bundle the js files of bower components
+ */
 gulp.task("bower:js", function() {
-  gulp.src(mainBowerFiles("**/*.js"))
-    .pipe(concat("bower.js"))
-    .pipe(uglify())
-    .pipe(gulp.dest("public/assets"));
+  return gulp.src(mainBowerFiles("**/*.js"))
+    .pipe(concat("bower.js").on("error", util.log))
+    .pipe(uglify().on("error", util.log))
+    .pipe(gulp.dest("./public/assets"));
 });
 
+/**
+ * Bundle the css files of bower components
+ */
 gulp.task("bower:css", function() {
-  gulp.src(mainBowerFiles("**/*.css"))
-    .pipe(concat("bower.css"))
-    .pipe(gulp.dest("public/assets"));
+  return gulp.src(mainBowerFiles("**/*.css"))
+    .pipe(concat("bower.css").on("error", util.log))
+    .pipe(cssnano().on("error", util.log))
+    .pipe(gulp.dest("./public/assets"));
 });
+
+/**
+ * Bundle the common js files
+ */
 
 gulp.task("js", function() {
-  gulp.src(["./assets/js/**/*"])
-    .pipe(concat("main.js"))
-    .pipe(gulp.dest("public/assets"));
+  return gulp.src(["./assets/js/**/*"])
+    .pipe(concat("main.js").on("error", util.log))
+    .pipe(isProduction ?
+      minifier({}, uglifyjs).on("error", util.log) : util.noop())
+    .pipe(gulp.dest("./public/assets"));
 });
 
+/**
+ * Copy fonts to build folder
+ */
 gulp.task("copy:fonts", function() {
-  gulp.src(["assets/fonts/**/*"], {
-      base: "assets"
-    })
-    .pipe(gulp.dest("public/assets"));
-  gulp.src(["assets/mdi-icons/fonts/**/*"], {
-      base: "assets/mdi-icons"
-    })
-    .pipe(gulp.dest("public/assets"));
+  return gulp.src([
+      "./assets/fonts/**/*",
+      "./assets/mdi-icons/fonts/**/*"
+    ])
+    .pipe(gulp.dest("./public/assets/fonts"));
 });
 
+/**
+ * Copy images to build folder
+ */
 gulp.task("copy:images", function() {
-  gulp.src(["assets/images/**/*"], {
+  return gulp.src(["./assets/images/**/*"], {
       base: "assets"
     })
-    .pipe(gulp.dest("public/assets"));
+    .pipe(gulp.dest("./public/assets"));
 });
 
+/**
+ * Copy tinymce bower component to build folder
+ * @TODO Needs to use this as node module
+ */
 gulp.task("copy:tinymce", function() {
-  gulp.src(["bower_components/tinymce/**/*"], {
+  return gulp.src(["./bower_components/tinymce/**/*"], {
       base: "bower_components"
     })
-    .pipe(gulp.dest("public/assets"));
+    .pipe(gulp.dest("./public/assets"));
 });
 
-// Start server
+/**
+ * Start the server if it is in development environment
+ */
 gulp.task("server", function() {
   // listen for changes
   livereload.listen();
@@ -112,30 +135,78 @@ gulp.task("server", function() {
     // when the app has restarted, run livereload.
     gulp.src("./server/server.js")
       .pipe(livereload())
-      .pipe(notify("Reloading page, please wait..."));
+      .pipe(util.log("Reloading page, please wait..."));
   });
 });
 
-gulp.task("default", [
-  "bower:js",
-  "bower:css",
-  "browserify",
-  "sass",
-  "js",
-  "copy:fonts",
-  "copy:images",
-  "copy:tinymce",
-  "sass:watch",
-  "server"
-]);
+/**
+ * Start the webpack dev server if it is in development mode
+ */
+gulp.task("webpack-dev-server", function() {
+  var server = new WebpackDevServer(webpack(config), {
+    // webpack-dev-server options
+    publicPath: config.output.publicPath,
+    cache: true,
+    colors: true,
+    hot: true,
+    historyApiFallback: true,
+    proxy: {
+      "*": "http://localhost:3000"
+    }
+  });
 
-gulp.task("build", [
-  "bower:js",
-  "bower:css",
-  "browserify",
-  "sass",
-  "js",
-  "copy:fonts",
-  "copy:images",
-  "copy:tinymce",
-]);
+  server.listen(devPort, "localhost", function(err) {
+    if (err) {
+      console.log(err);
+    }
+    console.log("Listening at localhost:3000");
+  });
+});
+
+/**
+ * Build the react components if it is not in development environment
+ */
+var exec = require("child_process").exec;
+gulp.task("buildJsxInProd", function (cb) {
+  exec("webpack --config webpack.config.prod.js", function(er, stdout, stderr) {
+    console.log("\n Build chunks details... \n", stdout);
+    if(stderr) util.log("Error in building JSX components...", stderr);
+    cb(er);
+  });
+});
+
+/**
+ * Tasks to run in development environment
+ */
+gulp.task("default", function(cb) {
+  RunSequence([
+    "clean",
+    "bower:js",
+    "bower:css",
+    "sass",
+    "js",
+    "copy:fonts",
+    "copy:images",
+    "copy:tinymce",
+    "sass:watch",
+    "server",
+    "webpack-dev-server"
+  ], cb);
+});
+
+/**
+ * Tasks to run in production environment
+ */
+gulp.task("build", function(cb) {
+  RunSequence([
+    "clean",
+    "bower:js",
+    "bower:css",
+    "sass",
+    "js",
+    "copy:fonts",
+    "copy:images",
+    "copy:tinymce",
+    "buildJsxInProd"
+  ], cb);
+});

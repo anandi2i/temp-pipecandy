@@ -1,24 +1,15 @@
 /**
- * Webpack configuration for development environment
+ * Webpack configuration for production environment
  */
-var webpack = require("webpack");
-
 module.exports = {
   devtool: "#eval-source-map",
-  debug: true,
   entry: [
-    "webpack-dev-server/client?http://localhost:3001",
-    "webpack/hot/only-dev-server",
     "./client/app.js",
   ],
   output: {
     path: __dirname + "/public/assets/",
     filename: "bundle.js"
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin(),
-  ],
   resolve: {
     extensions: ["", ".js", ".react.js"]
   },
@@ -29,7 +20,7 @@ module.exports = {
   module: {
     loaders: [{
       test: /\.jsx?$/,
-      loaders: ["react-hot", "babel"],
+      loaders: ["babel"],
       exclude: /node_modules/
     }]
   }

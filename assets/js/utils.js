@@ -3,7 +3,8 @@
  * @description All the utility methods for the app goes here
  */
 
-"use strict";
+ (function () {
+ "use strict";
 
 /**
  * Generate a random id
@@ -17,6 +18,7 @@ function guid() {
     return v.toString(16);
   });
 }
+window.guid = guid;
 
 /**
  * Get the cookie value
@@ -39,3 +41,5 @@ function getCookie(cname) {
   }
   return "";
 }
+window.getCookie = getCookie;
+})();
