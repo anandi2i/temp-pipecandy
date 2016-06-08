@@ -1,14 +1,21 @@
 {
-  "name": "customizedTemplate",
+  "name": "openedEmail",
+  "plural": "openedEmails",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "content": {
-      "type": "string",
-      "required": false
+    "count": {
+      "type": "number"
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],
@@ -17,11 +24,6 @@
       "type": "belongsTo",
       "model": "person",
       "foreignKey": "personId"
-    },
-    "user": {
-      "type": "belongsTo",
-      "model": "user",
-      "foreignKey": "userId"
     },
     "campaign": {
       "type": "belongsTo",

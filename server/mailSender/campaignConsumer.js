@@ -24,6 +24,8 @@ var app = Consumer.create({
 
     App.emailQueue.assembleEmails(campaignId);
 
+    done();
+
   },
   sqs: new AWS.SQS()
 });

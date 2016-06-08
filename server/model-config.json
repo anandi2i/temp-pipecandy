@@ -123,5 +123,21 @@
   "userEmailConfig": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "emailLink": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "clickedEmailLink": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "listMetric": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "campaignMetric": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

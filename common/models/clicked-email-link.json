@@ -1,27 +1,23 @@
 {
-  "name": "customizedTemplate",
+  "name": "clickedEmailLink",
+  "plural": "clickedEmailLinks",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
-  "properties": {
-    "content": {
-      "type": "string",
-      "required": false
-    }
-  },
+  "properties": {},
   "validations": [],
   "relations": {
+    "emailLink": {
+      "type": "belongsTo",
+      "model": "emailLink",
+      "foreignKey": "emailLinkId"
+    },
     "person": {
       "type": "belongsTo",
       "model": "person",
       "foreignKey": "personId"
-    },
-    "user": {
-      "type": "belongsTo",
-      "model": "user",
-      "foreignKey": "userId"
     },
     "campaign": {
       "type": "belongsTo",

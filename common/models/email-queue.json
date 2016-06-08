@@ -21,8 +21,8 @@
     "scheduledAt": {
       "type": "date",
       "postgresql": {
-       "dataType": "timestamp with time zone"
-     }
+        "dataType": "timestamp with time zone"
+      }
     }
   },
   "validations": [],

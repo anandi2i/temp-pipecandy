@@ -14,9 +14,9 @@
     "scheduledAt": {
       "type": "date",
       "postgresql": {
-       "dataType": "timestamp with time zone",
-       "nullable": "YES"
-     }
+        "dataType": "timestamp with time zone",
+        "nullable": "YES"
+      }
     },
     "stopFollowUp": {
       "type": "boolean"
@@ -67,6 +67,26 @@
     "campaignAudits": {
       "type": "hasMany",
       "model": "campaignAudit",
+      "foreignKey": ""
+    },
+    "emailLinks": {
+      "type": "hasMany",
+      "model": "emailLink",
+      "foreignKey": ""
+    },
+    "clickedEmailLinks": {
+      "type": "hasMany",
+      "model": "clickedEmailLink",
+      "foreignKey": ""
+    },
+    "listMetrics": {
+      "type": "hasMany",
+      "model": "listMetric",
+      "foreignKey": ""
+    },
+    "campaignMetrics": {
+      "type": "hasMany",
+      "model": "campaignMetric",
       "foreignKey": ""
     }
   },

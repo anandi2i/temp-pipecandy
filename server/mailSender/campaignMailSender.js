@@ -57,8 +57,6 @@ async.waterfall([
 }, oneMinute);
 
 
-
-
 /**
  * Gets all scheduled email from email queue table for the current time
  */
@@ -79,8 +77,6 @@ function getCurrentEmailQueue(getCurrentEmailQueueCB) {
     } else {
       getCurrentEmailQueueCB("No Mails scheduled");
     }
-
-
   });
 }
 

@@ -1,0 +1,53 @@
+{
+  "name": "listMetric",
+  "plural": "listMetrics",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "opened": {
+      "type": "number"
+    },
+    "responded": {
+      "type": "number"
+    },
+    "clicked": {
+      "type": "number"
+    },
+    "bounced": {
+      "type": "number"
+    },
+    "unsubscribed": {
+      "type": "number"
+    },
+    "spammed": {
+      "type": "number"
+    },
+    "sentEmails": {
+      "type": "number"
+    },
+    "failedEmails": {
+      "type": "number"
+    },
+    "erroredEmails": {
+      "type": "number"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "list": {
+      "type": "belongsTo",
+      "model": "list",
+      "foreignKey": "listId"
+    },
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": "campaignId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

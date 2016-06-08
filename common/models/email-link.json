@@ -1,0 +1,39 @@
+{
+  "name": "emailLink",
+  "plural": "emailLinks",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "linkurl": {
+      "type": "string"
+    },
+    "clickedCount": {
+      "type": "number"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": ""
+    },
+    "clickedEmailLink": {
+      "type": "hasMany",
+      "model": "clickedEmailLink",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "findById"
+    }
+  ],
+  "methods": {}
+}

@@ -54,6 +54,11 @@
       "type": "hasMany",
       "model": "campaignAudit",
       "foreignKey": ""
+    },
+    "clickedEmailLink": {
+      "type": "hasMany",
+      "model": "clickedEmailLink",
+      "foreignKey": ""
     }
   },
   "acls": [],
