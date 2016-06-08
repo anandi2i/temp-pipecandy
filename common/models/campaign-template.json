@@ -7,6 +7,10 @@
     "validateUpsert": true
   },
   "properties": {
+    "subject": {
+      "type": "string",
+      "required": true
+    },
     "content": {
       "type": "string",
       "required": true,
@@ -20,6 +24,12 @@
     },
     "updatedAt": {
       "type": "date"
+    },
+    "missingTagIds": {
+      "type": "string"
+    },
+    "usedTagIds": {
+      "type": "string"
     }
   },
   "validations": [],
@@ -27,17 +37,17 @@
     "user": {
       "type": "belongsTo",
       "model": "user",
-      "foreignKey": "userid"
+      "foreignKey": "userId"
     },
     "person": {
       "type": "belongsTo",
       "model": "person",
-      "foreignKey": "personid"
+      "foreignKey": "personId"
     },
     "campaign": {
       "type": "belongsTo",
       "model": "campaign",
-      "foreignKey": "campaignid"
+      "foreignKey": "campaignId"
     }
   },
   "acls": [],

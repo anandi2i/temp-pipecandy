@@ -89,11 +89,6 @@
       "type": "hasMany",
       "model": "campaignAudit",
       "foreignKey": ""
-    },
-    "userEmailConfigs": {
-      "type": "hasOne",
-      "model": "userEmailConfig",
-      "foreignKey": ""
     }
   },
   "acls": [

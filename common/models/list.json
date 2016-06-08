@@ -47,6 +47,11 @@
       "model": "person",
       "foreignKey": ""
     },
+    "fields": {
+      "type": "hasAndBelongsToMany",
+      "model": "additionalField",
+      "foreignKey": ""
+    },
     "campaigns": {
       "type": "hasAndBelongsToMany",
       "model": "campaign",
@@ -92,6 +97,24 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__updateById__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__link__fields"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__create__fields"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__fields"
     }
   ],
   "methods": {}

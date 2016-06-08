@@ -55,7 +55,7 @@
     "campaignTemplate": {
       "type": "hasMany",
       "model": "campaignTemplate",
-      "foreignKey": "personid"
+      "foreignKey": ""
     },
     "campaignAudits": {
       "type": "hasMany",

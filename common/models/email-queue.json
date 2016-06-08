@@ -30,6 +30,10 @@
     },
     "updatedAt": {
       "type": "date"
+    },
+    "isError": {
+      "type": "boolean",
+      "default": "fasle"
     }
   },
   "validations": [],

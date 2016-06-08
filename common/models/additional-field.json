@@ -1,0 +1,38 @@
+{
+  "name": "additionalField",
+  "plural": "additionalFields",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "string",
+      "required": true,
+      "default": "String"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "lists": {
+      "type": "hasAndBelongsToMany",
+      "model": "list",
+      "foreignKey": ""
+    }
+  },
+  "acls": [{
+    "principalType": "ROLE",
+    "principalId": "$everyone",
+    "permission": "DENY"
+  }, {
+    "principalType": "ROLE",
+    "principalId": "$authenticated",
+    "permission": "ALLOW",
+  }],
+  "methods": {}
+}

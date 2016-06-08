@@ -108,7 +108,11 @@
     "dataSource": "psqlDs",
     "public": true
   },
-  "userEmailConfig": {
+  "additionalField": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "additionalFieldValue": {
     "dataSource": "psqlDs",
     "public": true
   },
