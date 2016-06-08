@@ -45,7 +45,7 @@ module.exports = function(CampaignTemplate) {
           }
         }]
       }
-    }, function(err, campaignTemplates) {
+    }, function(campaignTemplatesErr, campaignTemplates) {
       async.each(campaignTemplates,
         function(campaignTemplate, campaignTemplateEachCB) {
           CampaignTemplate.app.models.emailQueue.push(
@@ -74,8 +74,9 @@ module.exports = function(CampaignTemplate) {
         peopleMap[person.id] = person;
         peopleMapCB();
       },
-      function(err) {
-        convertMapCB(err, campaign, individualTemplatePeople, peopleMap);
+      function(individualTemplatePeopleErr) {
+        convertMapCB(individualTemplatePeopleErr, campaign,
+           individualTemplatePeople, peopleMap);
       });
   };
 
@@ -147,4 +148,13 @@ module.exports = function(CampaignTemplate) {
     });
   };
 
+
+  CampaignTemplate.observe("before save", (ctx, next) => {
+    if (ctx.instance) {
+      ctx.instance.updatedAt = new Date();
+    } else {
+      ctx.data.updatedAt = new Date();
+    }
+    next();
+  });
 };

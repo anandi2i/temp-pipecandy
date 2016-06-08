@@ -20,9 +20,9 @@ module.exports = function(OpenedEmail) {
         "campaignId": campaignId,
         "personId": personId
       }
-    }, function(err, openedEmailEntry) {
-      if (err) {
-        trackEmailCB(err);
+    }, (openedEmailEntryErr, openedEmailEntry) => {
+      if (openedEmailEntryErr) {
+        trackEmailCB(openedEmailEntryErr);
       }
 
       if (openedEmailEntry.length > emptyArrayLength) {
@@ -32,9 +32,9 @@ module.exports = function(OpenedEmail) {
           "personId": personId
         }, {
           "count": ++openedEmailEntry[0].count
-        }, function(err, updatedopenedEmailEntry) {
-          if (err) {
-            trackEmailCB(err);
+        }, (updatedopenedEmailEntryErr, updatedopenedEmailEntry) => {
+          if (updatedopenedEmailEntryErr) {
+            trackEmailCB(updatedopenedEmailEntryErr);
           }
           trackEmailCB(null);
         });
@@ -46,124 +46,11 @@ module.exports = function(OpenedEmail) {
           openedEmailsEntry,
           listMetricEntry,
           campaignMetricEntry
-        ], function(err, results) {
-          if (err) {
-            trackEmailCB(err);
+        ], (asyncErr, results) => {
+          if (asyncErr) {
+            trackEmailCB(asyncErr);
           }
           trackEmailCB(null);
-        });
-
-      }
-
-      /**
-       * Placing an entry in openedEmails Table when a prospect opens it
-       * @param  openedEmailsEntryCB (Callback)
-       * @return void
-       */
-      function openedEmailsEntry(openedEmailsEntryCB) {
-        OpenedEmail.create({
-          "campaignId": campaignId,
-          "personId": personId,
-          "count": 1
-        }, function(err, openedEmailNewEntry) {
-          if (err) {
-            openedEmailsEntryCB(err);
-          }
-          openedEmailsEntryCB(null);
-        });
-      }
-
-      /**
-       * Increment the "opened" column in listMetric when a prospect clicks on
-       * it
-       * @param  listMetricEntryCB (Callback)
-       * @return void
-       */
-      function listMetricEntry(listMetricEntryCB) {
-
-        OpenedEmail.app.models.listMetric.find({
-          where: {
-            "campaignId": campaignId,
-            "listId": listId
-          }
-        }, function(err, listMetricEntry) {
-
-          if (err) {
-            listMetricEntryCB(err);
-          }
-
-          if (listMetricEntry.length > emptyArrayLength) {
-            OpenedEmail.app.models.listMetric.updateAll({
-              "campaignId": campaignId,
-              "listId": listId
-            }, {
-              "opened": ++listMetricEntry[0].opened
-            }, function(err, updatedListMetricEntry) {
-              if (err) {
-                listMetricEntryCB(err);
-              }
-              listMetricEntryCB(null);
-            });
-
-          } else {
-            OpenedEmail.app.models.listMetric.create({
-              "campaignId": campaignId,
-              "listId": listId,
-              "opened": 1
-            }, function(err, newlistMetricEntry) {
-              if (err) {
-                listMetricEntryCB(err);
-              }
-              listMetricEntryCB(null);
-            });
-          }
-
-        });
-
-      }
-
-      /**
-       * Increment the "opened" column in campaignMetric when a prospect clicks
-       * on it
-       * @param  campaignMetricEntryCB (Callback)
-       * @return void
-       */
-      function campaignMetricEntry(campaignMetricEntryCB) {
-
-        OpenedEmail.app.models.campaignMetric.find({
-          where: {
-            "campaignId": campaignId,
-          }
-        }, function(err, campaignMetricEntry) {
-          if (err) {
-            campaignMetricEntryCB(err);
-          }
-          if (campaignMetricEntry.length > emptyArrayLength) {
-
-            OpenedEmail.app.models.campaignMetric.updateAll({
-              "campaignId": campaignId,
-            }, {
-              "opened": ++campaignMetricEntry[0].opened
-            }, function(err, updatedListMetricEntry) {
-              if (err) {
-                campaignMetricEntryCB(err);
-              }
-              campaignMetricEntryCB(null);
-            });
-
-          } else {
-
-            OpenedEmail.app.models.campaignMetric.create({
-              "campaignId": campaignId,
-              "opened": 1
-            }, function(err, newcampaignMetricEntry) {
-              if (err) {
-                campaignMetricEntryCB(err);
-              }
-              campaignMetricEntryCB(null);
-            });
-
-          }
         });
 
       }
@@ -172,6 +59,119 @@ module.exports = function(OpenedEmail) {
 
   };
 
+
+  /**
+   * Placing an entry in openedEmails Table when a prospect opens it
+   * @param  openedEmailsEntryCB (Callback)
+   * @return void
+   */
+  let openedEmailsEntry = (openedEmailsEntryCB) => {
+    OpenedEmail.create({
+      "campaignId": campaignId,
+      "personId": personId,
+      "count": 1
+    }, function(openedEmailNewEntryErr, openedEmailNewEntry) {
+      if (openedEmailNewEntryErr) {
+        openedEmailsEntryCB(openedEmailNewEntryErr);
+      }
+      openedEmailsEntryCB(null);
+    });
+  };
+
+  /**
+   * Increment the "opened" column in listMetric when a prospect clicks on
+   * it
+   * @param  listMetricEntryCB (Callback)
+   * @return void
+   */
+  let listMetricEntry = (listMetricEntryCB) => {
+
+    OpenedEmail.app.models.listMetric.find({
+      where: {
+        "campaignId": campaignId,
+        "listId": listId
+      }
+    }, function(listMetricEntryErr, listMetricEntry) {
+
+      if (listMetricEntryErr) {
+        listMetricEntryCB(listMetricEntryErr);
+      }
+
+      if (listMetricEntry.length > emptyArrayLength) {
+        OpenedEmail.app.models.listMetric.updateAll({
+          "campaignId": campaignId,
+          "listId": listId
+        }, {
+          "opened": ++listMetricEntry[0].opened
+        }, function(updatedListMetricEntryErr, updatedListMetricEntry) {
+          if (updatedListMetricEntryErr) {
+            listMetricEntryCB(updatedListMetricEntryErr);
+          }
+          listMetricEntryCB(null);
+        });
+
+      } else {
+        OpenedEmail.app.models.listMetric.create({
+          "campaignId": campaignId,
+          "listId": listId,
+          "opened": 1
+        }, function(newlistMetricEntryErr, newlistMetricEntry) {
+          if (newlistMetricEntryErr) {
+            listMetricEntryCB(newlistMetricEntryErr);
+          }
+          listMetricEntryCB(null);
+        });
+      }
+
+    });
+
+  };
+
+  /**
+   * Increment the "opened" column in campaignMetric when a prospect clicks
+   * on it
+   * @param  campaignMetricEntryCB (Callback)
+   * @return void
+   */
+  let campaignMetricEntry = (campaignMetricEntryCB) => {
+
+    OpenedEmail.app.models.campaignMetric.find({
+      where: {
+        "campaignId": campaignId,
+      }
+    }, (campaignMetricEntryErr, campaignMetricEntry) => {
+      if (campaignMetricEntryErr) {
+        campaignMetricEntryCB(campaignMetricEntryErr);
+      }
+      if (campaignMetricEntry.length > emptyArrayLength) {
+
+        OpenedEmail.app.models.campaignMetric.updateAll({
+          "campaignId": campaignId,
+        }, {
+          "opened": ++campaignMetricEntry[0].opened
+        }, (updatedListMetricEntryErr, updatedListMetricEntry) => {
+          if (updatedListMetricEntryErr) {
+            campaignMetricEntryCB(updatedListMetricEntryErr);
+          }
+          campaignMetricEntryCB(null);
+        });
+
+      } else {
+
+        OpenedEmail.app.models.campaignMetric.create({
+          "campaignId": campaignId,
+          "opened": 1
+        }, (newcampaignMetricEntryErr, newcampaignMetricEntry) => {
+          if (newcampaignMetricEntryErr) {
+            campaignMetricEntryCB(newcampaignMetricEntryErr);
+          }
+          campaignMetricEntryCB(null);
+        });
+
+      }
+    });
+
+  };
 
   OpenedEmail.observe("before save", (ctx, next) => {
     if (ctx.instance) {

@@ -42,7 +42,8 @@ module.exports = function(Person) {
       next(error);
     }
     Person.app.models.Company.findOrCreate({
-      "name": companyName
+      "name": companyName,
+      "updatedAt" : new Date()
     }, (err, company) => {
       Person.app.models.Prospect.findOrCreate({
         "companyId": company.id

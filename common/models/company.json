@@ -13,6 +13,13 @@
       "index": {
         "unique": true
       }
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],

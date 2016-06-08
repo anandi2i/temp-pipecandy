@@ -26,6 +26,13 @@
     },
     "time_zone": {
       "type": "string"
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],
@@ -58,6 +65,11 @@
     "clickedEmailLink": {
       "type": "hasMany",
       "model": "clickedEmailLink",
+      "foreignKey": ""
+    },
+    "openedEmail": {
+      "type": "hasMany",
+      "model": "openedEmail",
       "foreignKey": ""
     }
   },

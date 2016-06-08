@@ -17,6 +17,26 @@ var logger = new (winston.Logger)({
       name: "error-file",
       filename: "log/error.log",
       level: "error"
+    }),
+    new (winston.transports.File)({
+      name: "assembler-info-file",
+      filename: "log/mailAssemblerInfo.log",
+      level: "mailAssemblerInfo"
+    }),
+    new (winston.transports.File)({
+      name: "assembler-error-file",
+      filename: "log/mailAssemblerError.log",
+      level: "mailAssemblerError"
+    }),
+    new (winston.transports.File)({
+      name: "mailSender-info-file",
+      filename: "log/mailSenderInfo.log",
+      level: "mailSenderInfo"
+    }),
+    new (winston.transports.File)({
+      name: "mailSender-error-file",
+      filename: "log/mailSenderError.log",
+      level: "mailSenderError"
     })
   ]
 });

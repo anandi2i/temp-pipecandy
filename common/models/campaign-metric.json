@@ -33,6 +33,13 @@
     },
     "erroredEmails": {
       "type": "number"
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],

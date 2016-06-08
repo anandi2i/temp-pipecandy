@@ -23,6 +23,13 @@
     "fromEmail": {
       "type": "string",
       "required": true
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],

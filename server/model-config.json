@@ -45,10 +45,6 @@
     "dataSource": "psqlDs",
     "public": false
   },
-  "CoffeeShop": {
-    "dataSource": "psqlDs",
-    "public": true
-  },
   "Email": {
     "dataSource": "Email"
   },
@@ -84,10 +80,6 @@
     "dataSource": "psqlDs",
     "public": true
   },
-  "field": {
-    "dataSource": "psqlDs",
-    "public": false
-  },
   "campaign": {
     "dataSource": "psqlDs",
     "public": true
@@ -107,10 +99,6 @@
   "emailQueue": {
     "dataSource": "psqlDs",
     "public": true
-  },
-  "customizedTemplate": {
-    "dataSource": "psqlDs",
-    "public": false
   },
   "followUp": {
     "dataSource": "psqlDs",
@@ -137,6 +125,10 @@
     "public": true
   },
   "campaignMetric": {
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "openedEmail": {
     "dataSource": "psqlDs",
     "public": true
   }

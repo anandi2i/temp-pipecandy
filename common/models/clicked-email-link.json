@@ -6,7 +6,15 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "properties": {
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
+    }
+  },
   "validations": [],
   "relations": {
     "emailLink": {

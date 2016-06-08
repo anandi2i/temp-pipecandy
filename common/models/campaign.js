@@ -22,15 +22,25 @@ module.exports = function(Campaign) {
           getPeopleCallback(listError);
         }
         async.each(lists, (list, listCallBack) => {
-          list.people((err, peopleList) => {
+          list.people((peopleListErr, peopleList) => {
             people = people.concat(peopleList);
             listCallBack();
           });
-        }, (err) => {
-          getPeopleCallback(err, lodash.uniqBy(people, "id"), campaign);
+        }, (asyncEachErr) => {
+          getPeopleCallback(asyncEachErr, lodash.uniqBy(people, "id"),
+           campaign);
         });
       });
     });
   };
+
+  Campaign.observe("before save", (ctx, next) => {
+    if (ctx.instance) {
+      ctx.instance.updatedAt = new Date();
+    } else {
+      ctx.data.updatedAt = new Date();
+    }
+    next();
+  });
 
 };

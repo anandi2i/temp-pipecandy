@@ -16,6 +16,13 @@
     },
     "query": {
       "type": "string"
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],
@@ -55,7 +62,6 @@
       "model": "listMetric",
       "foreignKey": ""
     }
-
   },
   "acls": [
     {

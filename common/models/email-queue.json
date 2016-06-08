@@ -23,6 +23,13 @@
       "postgresql": {
         "dataType": "timestamp with time zone"
       }
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],

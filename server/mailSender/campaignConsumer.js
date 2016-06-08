@@ -1,5 +1,6 @@
 var Consumer = require("sqs-consumer");
 var AWS = require("aws-sdk");
+import logger from "../../server/log";
 
 var dataSource = require(process.cwd() + "/server/server.js").dataSources
                                                                   .psqlDs;
@@ -31,7 +32,7 @@ var app = Consumer.create({
 });
 
 app.on("error", function(err) {
-  console.log(err.message);
+  logger.mailAssemblerError(err.message);
 });
 
 app.start();

@@ -14,7 +14,7 @@ AWS.config.update({
 var gmailClass = google.gmail("v1");
 
 var dataSource = require(process.cwd() + "/server/server.js").dataSources
-                                                                  .psqlDs;
+  .psqlDs;
 
 var async = require("async");
 var App = dataSource.models;
@@ -43,18 +43,20 @@ var clientSecretCredentials = {
 var oneMinute = 60000;
 setInterval(function() {
 
-async.waterfall([
-    getCurrentEmailQueue,
-    generateCredentials
-  ],
-  function(err) {
-    if (err) {
-      console.log("waterfallErr: " + err);
-    }
-    console.log("All Mails are sent");
-  });
+  async.waterfall([
+      getCurrentEmailQueue,
+      generateCredentials
+    ],
+    function(err) {
+      if (err) {
+        console.log("waterfallErr: " + err);
+      }
+      console.log("All Mails are sent");
+    });
 
 }, oneMinute);
+
+
 
 
 /**
@@ -68,15 +70,17 @@ function getCurrentEmailQueue(getCurrentEmailQueueCB) {
         lte: Date.now()
       }
     }
-  }, function(err, emailQueue) {
+  }, function(emailQueueErr, emailQueue) {
     if (err) {
-      getCurrentEmailQueueCB(err);
+      getCurrentEmailQueueCB(emailQueueErr);
     }
     if (emailQueue.length > emptyArrayLength) {
       getCurrentEmailQueueCB(null, emailQueue);
     } else {
       getCurrentEmailQueueCB("No Mails scheduled");
     }
+
+
   });
 }
 
@@ -125,7 +129,7 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
       } else {
 
         var userCredentialsFromCache =
-                              tempCacheUserCredentials[emailQueueEntry.userId];
+          tempCacheUserCredentials[emailQueueEntry.userId];
 
         mailContent.userDetails = {
           userid: emailQueueEntry.userId,
@@ -188,7 +192,7 @@ function mailSender(mailContent, mailSenderCB) {
     var emailLines = [];
 
     emailLines.push("From: " + mailContent.userDetails.name + " <"
-                                  + mailContent.userDetails.email.value + ">");
+                          + mailContent.userDetails.email.value + ">");
     emailLines.push("To: <" + mailContent.personEmail + ">");
     emailLines.push("Content-type: text/html;charset=iso-8859-1");
     emailLines.push("MIME-Version: 1.0");
@@ -201,10 +205,10 @@ function mailSender(mailContent, mailSenderCB) {
 
     var base64EncodedEmail = new Buffer(email).toString("base64");
     base64EncodedEmail = base64EncodedEmail.replace(/\+/g, "-")
-                                                        .replace(/\//g, "_");
+      .replace(/\//g, "_");
 
-    buildEmailCB(null, base64EncodedEmail, oauth2Client
-                                            , mailContent.userDetails.userid);
+    buildEmailCB(null, base64EncodedEmail, oauth2Client,
+                                      mailContent.userDetails.userid);
 
   }
 
@@ -233,13 +237,13 @@ function mailSender(mailContent, mailSenderCB) {
         delete tempCacheUserCredentials[userId];
 
         App.emailQueue.destroyById(mailContent.mailId, function(err, data) {
-            if (err) {
-              sendEmailCB(err);
-            }
-            console.log(results);
+          if (err) {
+            sendEmailCB(err);
+          }
+          console.log(results);
 
-            sendEmailCB();
-          });
+          sendEmailCB();
+        });
       }
     });
 

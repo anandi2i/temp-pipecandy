@@ -196,7 +196,7 @@ module.exports = function(user) {
   });
 
   /**
-   * Reset user's password if short-lived token is present
+   * Reset user"s password if short-lived token is present
    *
    * @param {object} options The plain text password & Access token
    * @returns {Boolean}
@@ -382,5 +382,14 @@ module.exports = function(user) {
       http: {verb: "post"}
     }
   );
+
+  user.observe("before save", (ctx, next) => {
+    if (ctx.instance) {
+      ctx.instance.updatedAt = new Date();
+    } else {
+      ctx.data.updatedAt = new Date();
+    }
+    next();
+  });
 
 };

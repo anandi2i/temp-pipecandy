@@ -10,6 +10,13 @@
         "dataType": "character varying",
         "dataLength": 10000
       }
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],
