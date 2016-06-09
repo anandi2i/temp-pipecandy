@@ -6,14 +6,13 @@ module.exports = function(OpenedEmail) {
   /**
    * API to track whether the campaign email has been opened by the prospect
    * http://localhost:3000/api/openedEmails/trackEmail?campaignId=1&personId=2&listId=1
-   * @param  campaignId
-   * @param  personId
-   * @param  listId
+   * @param  {[number]} campaignId
+   * @param  {[number]} personId
+   * @param  {[number]} listId
    * @param  trackEmailCB (Callback)
    * @return void
    */
-  OpenedEmail.trackEmail = function(campaignId, personId, listId,
-    trackEmailCB) {
+  OpenedEmail.trackEmail = (campaignId, personId, listId, trackEmailCB) => {
 
     OpenedEmail.find({
       where: {

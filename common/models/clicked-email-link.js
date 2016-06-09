@@ -6,13 +6,12 @@ module.exports = function(ClickedEmailLink) {
   /**
    * Tracks the email links in the campaign mail when it is clicked.
    * http://localhost:3000/api/ClickedEmailLink/track?campaignId=1&personId=1&emailLinkId=1
-   * @param  {[number]} campaignId         Campaign Id
-   * @param  {[number]} personId           Person Id
-   * @param  {[number]} emailLinkId        EmailLink Id
-   * @param  {[number]} emailLinkTrackCB   (Callback)
+   * @param  {[number]} campaignId
+   * @param  {[number]} personId
+   * @param  {[number]} emailLinkId
+   * @param  emailLinkTrackCB   (Callback)
    * @return void
    */
-
   ClickedEmailLink.track = (campaignId, personId, emailLinkId,
     clickedEmailLinkTrackCB) => {
 
@@ -38,7 +37,7 @@ module.exports = function(ClickedEmailLink) {
           campaignMetricEntry
         ], (asyncErr, results) => {
           if (asyncErr) {
-            clickedEmailLinkTrackCB("async err");
+            clickedEmailLinkTrackCB(asyncErr);
           }
           clickedEmailLinkTrackCB("Success");
         });
@@ -64,12 +63,12 @@ module.exports = function(ClickedEmailLink) {
       "personId": personId
     };
     ClickedEmailLink.create(clickedEmailLinkEntry,
-      (clickedEmailLinkEntryErr, clickedEmailLinkEntryData) => {
-        if (clickedEmailLinkEntryErr) {
-          clickedEmailLinkEntryCB("Error while creating ClickedEmailLink");
-        }
-        clickedEmailLinkEntryCB(null);
-      });
+      (clickedEmailLinkEntryDataErr, clickedEmailLinkEntryData) => {
+      if (clickedEmailLinkEntryDataErr) {
+        clickedEmailLinkEntryCB(clickedEmailLinkEntryDataErr);
+      }
+      clickedEmailLinkEntryCB(null);
+    });
   };
 
 
@@ -82,15 +81,15 @@ module.exports = function(ClickedEmailLink) {
 
   let emailLinkEntry = (emailLinkEntryCB) => {
     ClickedEmailLink.app.models.emailLink.findById(emailLinkId,
-      (emailLinkIdErr, emailLinkEntry) => {
-        if (emailLinkIdErr) {
-          emailLinkEntryCB("Error while finding emailLink");
+      (emailLinkEntryErr, emailLinkEntry) => {
+        if (emailLinkEntryErr) {
+          emailLinkEntryCB(emailLinkEntryErr);
         }
         emailLinkEntry.updateAttribute("clickedCount",
-          ++emailLinkEntry.clickedCount,
+        ++emailLinkEntry.clickedCount, 
           (updatedEmailLinkEntryErr, updatedEmailLinkEntry) => {
             if (updatedEmailLinkEntryErr) {
-              emailLinkEntryCB("Error while updating clickedCount");
+              emailLinkEntryCB(updatedEmailLinkEntryErr);
             }
             emailLinkEntryCB(null);
           });
@@ -123,7 +122,7 @@ module.exports = function(ClickedEmailLink) {
           "clicked": ++listMetricEntry[0].clicked
         }, (updatedListMetricEntryErr, updatedListMetricEntry) => {
           if (updatedListMetricEntryErr) {
-            listMetricEntryCB("Error while updating click in listMetric");
+            listMetricEntryCB(updatedListMetricEntryErr);
           }
           listMetricEntryCB(null);
         });
@@ -133,7 +132,7 @@ module.exports = function(ClickedEmailLink) {
           "campaignId": campaignId
         }, (listMetricEntryErr, listMetricEntry) => {
           if (listMetricEntryErr) {
-            listMetricEntryCB("Error while creating click in listMetric");
+            listMetricEntryCB(listMetricEntryErr);
           }
           listMetricEntryCB(null);
         });
@@ -162,23 +161,22 @@ module.exports = function(ClickedEmailLink) {
 
       if (campaignMetricEntry.length > emptyArrayLength) {
         ClickedEmailLink.app.models.campaignMetric.updateAll({
-            "campaignId": campaignId
-          }, {
-            "clicked": ++campaignMetricEntry[0].clicked
-          },
-          (updatedCampaignMetricEntryErr, updatedCampaignMetricEntry) => {
-            if (updatedCampaignMetricEntryErr) {
-              campaignMetricEntryCB("Update error in campaignMetric");
-            }
-            campaignMetricEntryCB(null);
-          });
+          "campaignId": campaignId
+        }, {
+          "clicked": ++campaignMetricEntry[0].clicked
+        }, (updatedCampaignMetricEntryErr, updatedCampaignMetricEntry) => {
+          if (updatedCampaignMetricEntryErr) {
+            campaignMetricEntryCB(updatedCampaignMetricEntryErr);
+          }
+          campaignMetricEntryCB(null);
+        });
       } else {
         ClickedEmailLink.app.models.campaignMetric.create({
           "clicked": 1,
           "campaignId": campaignId
         }, (campaignMetricEntryErr, campaignMetricEntry) => {
           if (campaignMetricEntryErr) {
-            campaignMetricEntryCB("Update error in campaignMetric");
+            campaignMetricEntryCB(campaignMetricEntryErr);
           }
           campaignMetricEntryCB(null);
         });
