@@ -115,6 +115,12 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__get__fields"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__people"
     }
   ],
   "methods": {}

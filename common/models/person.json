@@ -37,9 +37,9 @@
   },
   "validations": [],
   "relations": {
-    "fields": {
+    "fieldVaules": {
       "type": "hasMany",
-      "model": "field",
+      "model": "additionalFieldValue",
       "foreignKey": ""
     },
     "prospect": {

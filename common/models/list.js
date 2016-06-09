@@ -10,7 +10,7 @@ module.exports = function(List) {
   List.listPeopleField = function(ctx, options, cb) {
     List.find({
       where: {id: {inq: options.list}, createdBy: ctx.req.accessToken.userId},
-      include: {"people" : ["fields"]}
+      include: {"people" : ["fieldVaules"]}
     }, (err, people) => {
       if(err) {
         logger.error("Error in getting people data for lists", options.list);
