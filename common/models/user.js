@@ -57,7 +57,8 @@ module.exports = function(user) {
       user: user,
       fname: user.firstName,
       text: "{href}",
-      host: config.emailHost
+      host: config.emailHost,
+      port: config.emailPort
     };
 
     user.verify(options, function(err, response, next) {
