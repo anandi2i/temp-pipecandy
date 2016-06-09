@@ -89,6 +89,11 @@
       "type": "hasMany",
       "model": "campaignAudit",
       "foreignKey": ""
+    },
+    "additionalField": {
+      "type": "hasMany",
+      "model": "additionalField",
+      "foreignKey": ""
     }
   },
   "acls": [

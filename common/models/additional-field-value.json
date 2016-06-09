@@ -10,6 +10,13 @@
     "value": {
       "type": "string",
       "required": true
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],
@@ -37,7 +44,7 @@
   }, {
     "principalType": "ROLE",
     "principalId": "$authenticated",
-    "permission": "ALLOW",
+    "permission": "ALLOW"
   }],
   "methods": {}
 }

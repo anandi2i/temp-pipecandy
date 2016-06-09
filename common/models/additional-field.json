@@ -15,6 +15,18 @@
       "type": "string",
       "required": true,
       "default": "String"
+    },
+    "isApproved": {
+      "type": "string",
+      "required": true,
+      "default": true
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],
@@ -23,6 +35,11 @@
       "type": "hasAndBelongsToMany",
       "model": "list",
       "foreignKey": ""
+    },
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "userId"
     }
   },
   "acls": [{
@@ -32,7 +49,7 @@
   }, {
     "principalType": "ROLE",
     "principalId": "$authenticated",
-    "permission": "ALLOW",
+    "permission": "ALLOW"
   }],
   "methods": {}
 }

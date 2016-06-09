@@ -107,6 +107,11 @@ module.exports = function(EmailQueue) {
   };
 
 
+  /**
+   * Updates the updatedAt column with current Time
+   * @param ctx Context
+   * @param next (Callback)
+   */
   EmailQueue.observe("before save", (ctx, next) => {
     if (ctx.instance) {
       ctx.instance.updatedAt = new Date();

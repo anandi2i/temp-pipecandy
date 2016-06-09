@@ -26,6 +26,7 @@ module.exports = function(Person) {
     //instance for entity creation
     //data for entity updation
     let instance = ctx.instance || ctx.data;
+    instance.updatedAt = new Date();
     let companyName;
     if (instance.email) {
       companyName = instance.email.split("@")[1];
@@ -35,15 +36,16 @@ module.exports = function(Person) {
       error.name = "emailNotFound";
       next(error);
     }
+
     if (!companyName) {
       let error = new Error();
       error.message = "Email id is invalid";
       error.name = "InvalidEmail";
       next(error);
     }
+
     Person.app.models.Company.findOrCreate({
-      "name": companyName,
-      "updatedAt" : new Date()
+      "name": companyName
     }, (err, company) => {
       Person.app.models.Prospect.findOrCreate({
         "companyId": company.id

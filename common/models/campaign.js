@@ -34,6 +34,11 @@ module.exports = function(Campaign) {
     });
   };
 
+  /**
+   * Updates the updatedAt column with current Time
+   * @param ctx Context
+   * @param next (Callback)
+   */
   Campaign.observe("before save", (ctx, next) => {
     if (ctx.instance) {
       ctx.instance.updatedAt = new Date();

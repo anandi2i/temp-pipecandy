@@ -86,7 +86,7 @@ module.exports = function(ClickedEmailLink) {
           emailLinkEntryCB(emailLinkEntryErr);
         }
         emailLinkEntry.updateAttribute("clickedCount",
-        ++emailLinkEntry.clickedCount, 
+        ++emailLinkEntry.clickedCount,
           (updatedEmailLinkEntryErr, updatedEmailLinkEntry) => {
             if (updatedEmailLinkEntryErr) {
               emailLinkEntryCB(updatedEmailLinkEntryErr);
@@ -184,6 +184,11 @@ module.exports = function(ClickedEmailLink) {
     });
   };
 
+  /**
+   * Updates the updatedAt column with current Time
+   * @param ctx Context
+   * @param next (Callback)
+   */
   ClickedEmailLink.observe("before save", (ctx, next) => {
     if (ctx.instance) {
       ctx.instance.updatedAt = new Date();

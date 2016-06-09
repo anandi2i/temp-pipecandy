@@ -21,6 +21,11 @@ module.exports = function(List) {
     });
   };
 
+  /**
+   * Updates the updatedAt column with current Time
+   * @param ctx Context
+   * @param next (Callback)
+   */
   List.observe("before save", (ctx, next) => {
     if (ctx.instance) {
       ctx.instance.updatedAt = new Date();
