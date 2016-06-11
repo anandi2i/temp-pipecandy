@@ -17,8 +17,7 @@
       "default": "String"
     },
     "isApproved": {
-      "type": "string",
-      "required": true,
+      "type": "boolean",
       "default": true
     },
     "createdAt": {

@@ -121,6 +121,18 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__get__people"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "fieldsWithMeta"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "peopleWithFields"
     }
   ],
   "methods": {}

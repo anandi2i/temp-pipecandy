@@ -1,24 +1,70 @@
+"use strict";
+
 import logger from "../../server/log";
+import lodash from "lodash";
 
 module.exports = function(List) {
   /**
-   * Get all People and its related field data for the given lists id
-   * @param ctx
-   * @param options
-   * @param cb
+   * List fields with the meta fields will be returned for given list id
+   * @param  {[Context]} ctx [context object to get access token]
+   * @param  {[number]}  id  [List id]
+   * @param  {Function}  cb  [To return the value to API]
+   * @return {[void]}
    */
-  List.listPeopleField = function(ctx, options, cb) {
+  List.fieldsWithMeta = (ctx, id, fieldsWithMetaCB) => {
+    let listFieldsWithMeta = {};
+    //getting alll the list fields values
     List.find({
-      where: {id: {inq: options.list}, createdBy: ctx.req.accessToken.userId},
-      include: {"people" : ["fieldVaules"]}
-    }, (err, people) => {
-      if(err) {
-        logger.error("Error in getting people data for lists", options.list);
-        return cb(err);
+      where: {id: id, createdBy: ctx.req.accessToken.userId},
+      include: "fields"
+    }, (ListErr, lists) => {
+      if(ListErr) {
+        logger.error("Error in getting fields for the list", id);
+        return fieldsWithMetaCB(ListErr);
       }
-      cb(null, people);
-      return;
+      if(lodash.isEmpty(lists)) {
+        logger.error("List Not Found for the id : ", id);
+        let ListNotFoundErr = {
+            "name": "Error",
+            "status": 404,
+            "message": "Unknown List id "+id,
+            "statusCode": 404
+        };
+        return fieldsWithMetaCB(ListNotFoundErr);
+      }
+      let list = JSON.parse(JSON.stringify(lists[0]));
+      listFieldsWithMeta.listFields = list.fields;
+      // getting meta data
+      List.app.models.additionalField.find({where: {isApproved: true}},
+          (metaFieldsErr, fields) => {
+            if(metaFieldsErr) return fieldsWithMetaCB(metaFieldsErr);
+            let restFields = lodash.differenceBy(fields, list.fields, "id");
+            listFieldsWithMeta.metaFields = restFields;
+            return fieldsWithMetaCB(null, listFieldsWithMeta);
+          }
+      );
     });
+  };
+
+  /**
+   * Gets addtional fields and people with addtional field values
+   * for given list ids
+   * @param  {[Context]}      ctx   [context object to get access token]
+   * @param  {[number Array]} list  [list of list ids]
+   * @param  {[function]}     peopleWithFieldsCB
+   * @return {[Object]} {List[field], List[Person[FieldValue[Field]]]}
+   */
+  List.peopleWithFields = (ctx, list, peopleWithFieldsCB) => {
+    List.find({
+       where: {id: {inq: list.ids}, createdBy: ctx.req.accessToken.userId},
+       include: ["fields", {"people": ["fieldVaules"]}]
+     }, (ListErr, lists) => {
+       if(ListErr) {
+         logger.error("Error in getting people data for lists", list);
+         return peopleWithFieldsCB(ListErr);
+       }
+      return peopleWithFieldsCB(null, lists);
+     });
   };
 
   /**
@@ -36,7 +82,7 @@ module.exports = function(List) {
   });
 
   List.remoteMethod(
-    "listPeopleField",
+    "fieldsWithMeta",
     {
       description: "List all the people and its field data for given list id's",
       accepts: [
@@ -45,12 +91,31 @@ module.exports = function(List) {
           http: {source: "context"}
         },
         {
-          arg: "options", type: "object", required: true,
+          arg: "id", type: "any", required: true,
+          http: {source: "path"}
+        },
+      ],
+      returns: {arg: "additionalField", type: "additionalField", root: true},
+      http: {verb: "get", path: "/:id/fieldswithmeta"}
+    }
+  );
+
+  List.remoteMethod(
+    "peopleWithFields",
+    {
+      description: "List all the people and its field data for given list id's",
+      accepts: [
+        {
+          arg: "ctx", type: "object",
+          http: {source: "context"}
+        },
+        {
+          arg: "list", type: "Object", required: true,
           http: {source: "body"}
         },
       ],
-      returns: {arg: "peopleData", type: "object", root: true},
-      http: {verb: "post"}
+      returns: {arg: "additionalField", type: "additionalField", root: true},
+      http: {verb: "post", path: "/peopleWithFields"}
     }
   );
 
