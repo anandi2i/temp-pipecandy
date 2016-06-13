@@ -48,6 +48,18 @@ const EmailListActions = {
       actionType: Constants.DELETE_PERSONS,
       data: data
     });
+  },
+  getFields(data) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_FIELDS,
+      data: data
+    });
+  },
+  saveAdditionalField(data) {
+    AppDispatcher.handleAction({
+      actionType: Constants.SAVE_ADDITIONAL_FIELD,
+      data: data
+    });
   }
 };
 

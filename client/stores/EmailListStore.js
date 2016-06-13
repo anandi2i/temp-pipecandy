@@ -12,6 +12,7 @@ let _getEmailList = {};
 let _getEmailListByID = [];
 let _error = "";
 let _success = "";
+let _getFields = {};
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const EmailListStore = _.extend({}, EventEmitter.prototype, {
@@ -25,7 +26,18 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
   emitChange() {
     this.emit("change");
   },
-
+  // Emit get meta fiels
+  emitFields() {
+    this.emit("getFields");
+  },
+  // Add listener for fields
+  addFieldsListener(fieldsCB) {
+    this.on("getFields", fieldsCB);
+  },
+  // Remove listener for fields
+  removeFieldsListener(fieldsCB) {
+    this.removeListener("getFields", fieldsCB);
+  },
   // Add change listener
   addChangeListener(callback) {
     this.on("change", callback);
@@ -46,6 +58,9 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("changeUpdates", callback);
   },
 
+  getFieldsFromStore() {
+    return _getFields;
+  },
   //TODO need to get opens, clicks, spam and additions. Replace _.random by result.
   getAllList() {
     let _allEmailListFlattenData = [];
@@ -144,7 +159,7 @@ AppDispatcher.register(function(payload) {
       });
       break;
     case Constants.GET_LIST_BY_ID:
-      let data = {"list":[action.data]};
+      let data = {"ids":[action.data]};
       EmailListApi.getSelectedList(data).then((response) => {
         _getEmailList = response.data;
         EmailListStore.emitChange();
@@ -213,6 +228,25 @@ AppDispatcher.register(function(payload) {
         EmailListStore.emitChange();
       });
       break;
+    case Constants.GET_FIELDS:
+      EmailListApi.getFields(action.data).then((response) => {
+        _getFields = response.data;
+        EmailListStore.emitFields();
+      }, (err) => {
+        _error = HandleError.evaluateError(err);
+        EmailListStore.emitFields();
+      });
+      break;
+      case Constants.SAVE_ADDITIONAL_FIELD:
+      EmailListApi.saveAdditionalField(action.data).then((response) => {
+        _success = SuccessMessages.successAddAdditionalField;
+        EmailListStore.emitChange();
+        _success = "";
+      }, (err)=> {
+        _error = HandleError.evaluateError(err);
+        EmailListStore.emitChange();
+        _error = "";
+      });
     default:
       return true;
   }

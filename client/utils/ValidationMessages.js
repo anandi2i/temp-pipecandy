@@ -56,6 +56,13 @@ var validatorObj = {
         empty: "!! Oops. Seems like you forgot to fill your list name!",
       }
     }
+  }),
+  fieldName: Joi.string().label("Field Name").options({
+    language: {
+      any: {
+        empty: "!! Oops. Seems like you forgot to fill the field name!",
+      }
+    }
   })
 };
 

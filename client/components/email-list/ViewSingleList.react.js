@@ -10,6 +10,7 @@ import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 import SubscriberGrid from "../grid/subscriber-list/SubscriberGrid.react";
 import {ErrorMessages} from "../../utils/UserAlerts";
+import Autosuggest from "react-autosuggest";
 
 class ListView extends React.Component {
   constructor(props) {
@@ -23,16 +24,19 @@ class ListView extends React.Component {
       middleName: "",
       lastName: "",
       email: "",
-      spinning: true
-    };
-    this.state = {
-      addAnother: false
+      spinning: true,
+      fieldName: "",
+      suggestions: this.getSuggestions(""),
+      addAnother: false,
+      metaFields: [],
+      listFields: []
     };
     this.state = this.initialStateValues;
     this.validatorTypes = {
       firstName: validatorUtil.firstName,
       lastName: validatorUtil.lastName,
-      email: validatorUtil.email
+      email: validatorUtil.email,
+      fieldName: validatorUtil.fieldName
     };
   }
 
@@ -59,6 +63,7 @@ class ListView extends React.Component {
   componentWillUnmount() {
     EmailListStore.removeChangeListener(this.onStoreChange);
     EmailListStore.removePersonChangeListener(this.onPersonChange);
+    EmailListStore.removeFieldsListener(this.getFieldsFromStore);
   }
 
   onStoreChange = () => {
@@ -146,8 +151,50 @@ class ListView extends React.Component {
   onSubmitAnother = () => {
     this.setState({
       addAnother: true
-    });
-    this.onSubmit();
+    }, () => this.obSubmit());
+  }
+
+  addField = () => {
+    const onValidate = error => {
+      let fieldName = this.state.fieldName;
+      if(fieldName) {
+        $(this).find(".warning-block").addClass("hide");
+        error = false;
+      } else {
+        $(this).find(".warning-block").removeClass("hide");
+        error = true;
+      }
+      if (error) {
+        this.setState({
+          addAnother: false
+        });
+      } else {
+        this.saveAdditionalField();
+      }
+    };
+    this.props.validate(onValidate);
+  }
+
+  addAnotherField = () => {
+    this.setState({
+      addAnother: true
+    }, () => this.addField());
+  }
+
+  saveAdditionalField() {
+    let data = {
+      name: this.state.fieldName,
+      type: "String",
+      listId : this.props.params.listId
+    };
+    EmailListActions.saveAdditionalField(data);
+    this.props.clearValidations();
+    $(".validate").removeClass("valid");
+    if(!this.state.addAnother) {
+      this.closeModal();
+    }
+    this.setState(this.initialStateValues);
+    this.onStoreChange();
   }
 
   constructPersonDataAndSave() {
@@ -170,20 +217,17 @@ class ListView extends React.Component {
       person: person
     };
     EmailListActions.saveSinglePerson(data);
-    this.setState(this.initialStateValues);
     this.props.clearValidations();
     $(".validate").removeClass("valid");
-    if(this.state.addAnother) {
-      this.setState({
-        addAnother: false
-      });
-    } else {
+    if(!this.state.addAnother) {
       this.closeModal;
     }
+    this.setState(this.initialStateValues);
   }
 
   closeModal = () => {
     $("#addEmail").closeModal();
+    $("#addField").closeModal();
   }
 
   openDialog = () => {
@@ -233,11 +277,73 @@ class ListView extends React.Component {
     }
   }
 
+  getFields = () => {
+    let data = {
+      listId : this.props.params.listId
+    };
+    EmailListActions.getFields(data);
+  }
+
+  getFieldsFromStore = () => {
+    let fields = EmailListStore.getFieldsFromStore();
+    this.setState({
+      metaFields: fields.metaFields,
+      listFields: fields.listFields
+    });
+    console.log(this.state.listFields);
+  }
+
+  getSuggestions = (fieldName) => {
+    let inputValue = fieldName.trim().toLowerCase();
+    let inputLength = inputValue.length;
+    let index = 0;
+
+    return !inputLength ? [] : this.state.metaFields.filter(field =>
+      field.name.toLowerCase().slice(index, inputLength) === inputValue
+    );
+  }
+
+  onChange = (event, {newValue}) => {
+    this.setState({
+      fieldName: newValue
+    });
+  }
+
+  onSuggestionsUpdateRequested = ({value}) => {
+    this.setState({
+      suggestions: this.getSuggestions(value)
+    });
+  }
+
+  getSuggestionValue = (suggestion) => {
+    return suggestion.name;
+  }
+
+  renderSuggestion = (suggestion) => {
+    return (
+      <span>{suggestion.name}</span>
+    );
+  }
+
+  clearValidations = () => {
+    this.props.clearValidations();
+  }
+
   /**
    * render
    * @return {ReactElement} markup
    */
   render() {
+    const {fieldName, suggestions} = this.state;
+    const inputProps = {
+      id: "fieldName",
+      placeholder: "Field Name",
+      value: fieldName,
+      onChange: (event, fieldName) => this.onChange(event, fieldName),
+      className: "validate"
+    };
+    const addFieldClass = "modal modal-fixed-header modal-fixed-footer " +
+      "mini-modal add-field-model-height";
     return (
       <div>
         <div className="container">
@@ -253,8 +359,8 @@ class ListView extends React.Component {
               <i className="right mdi mdi-chevron-down"></i>
             </a>
             <ul id="addDropDown" className="dropdown-content">
-              <li><a className="modal-trigger" href="#addEmail">Add Recipient</a></li>
-              <li><a href="#">Sample content</a></li>
+              <li><a className="modal-trigger" href="#addEmail" onClick={this.getFields}>Add Recipient</a></li>
+              <li><a className="modal-trigger" href="#addField" onClick={this.getFields}>Add Field</a></li>
             </ul>
             <input id="fileUpload" type="file" className="hide" name="file"
               accept=".csv, .xls, .xlsx" onChange={this.fileChange} />
@@ -265,9 +371,38 @@ class ListView extends React.Component {
               <i className="left mdi mdi-delete"></i> DELETE
             </div>
           </div>
+          {/* Add new field starts here */}
+          <div id="addField" className={{addFieldClass}}>
+            <i className="mdi mdi-close modal-close" onClick={this.clearValidations}></i>
+            <div className="modal-header">
+              <div className="head">Add Field</div>
+            </div>
+            <div className="modal-content">
+              <div className="input-field">
+                <Autosuggest suggestions={suggestions}
+                  onSuggestionsUpdateRequested={(fieldName) =>
+                    this.onSuggestionsUpdateRequested(fieldName)}
+                  getSuggestionValue={this.getSuggestionValue}
+                  renderSuggestion={this.renderSuggestion}
+                  inputProps={inputProps} />
+                  <label htmlFor="fieldName"></label>
+                  {
+                    !this.props.isValid("fieldName")
+                    ? this.renderHelpText("fieldName")
+                    : null
+                  }
+              </div>
+            </div>
+            <div className="modal-footer r-btn-container">
+              <input type="button" onClick={this.addAnotherField} className="btn red modal-action p-1-btn" value="Add Another" />
+              <input type="button" onClick={this.addField} className="btn blue modal-action" value="Add" />
+            </div>
+          </div>
+          {/* Add new field ends here */}
+          {/* Add new person starts here */}
           <div id="addEmail"
             className="modal modal-fixed-header modal-fixed-footer mini-modal">
-            <i className="mdi mdi-close modal-close"></i>
+            <i className="mdi mdi-close modal-close" onClick={this.clearValidations}></i>
             <div className="modal-header">
               <div className="head">Add Recipient</div>
             </div>
@@ -320,13 +455,13 @@ class ListView extends React.Component {
                   }
               </div>
               <div className="newFieldContainer">
-                <div className={this.state.names.length ? "show" : "hide"}>
+                <div className={this.state.listFields.length ? "show" : "hide"}>
                   <div className="row m-lr-0 m-t-20 m-b-50">
                     <div className="gray-head">Additional Fields</div>
                   </div>
                 </div>
                 {
-                  this.state.names.map($.proxy(function (value, key) {
+                  this.state.listFields.map($.proxy(function (value, key) {
                     let minLen = 1;
                     let getLen = key + minLen;
                     let keyId = "field" + getLen;
@@ -351,9 +486,9 @@ class ListView extends React.Component {
                   }, this))
                 }
               </div>
-              <div className={this.state.names.length < this.state.additionalFieldLen ? "show" : "hide"}>
+              <div className={this.state.listFields.length ? "show" : "hide"}>
                 <div onClick={this.addMoreFields} className="add-new-field">
-                  <i className="mdi mdi-plus-circle"></i> Add a new fields
+                  <i className="mdi mdi-plus-circle"></i> Add another field
                 </div>
               </div>
             </div>
@@ -362,6 +497,7 @@ class ListView extends React.Component {
               <input type="button" onClick={this.onSubmit} className="btn blue modal-action" value="OK" />
             </div>
           </div>
+          {/* Add new person ends here */}
           <div className="spaced" style={{display: this.state.spinning ? "block" : "none"}}>
             <Spinner />
           </div>

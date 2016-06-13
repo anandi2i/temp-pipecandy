@@ -8,7 +8,7 @@ const EmailListApi = {
     return api.post("/api/users/createEmailList", data);
   },
   getSelectedList(data) {
-    return api.post("api/lists/listPeopleField", data);
+    return api.post("api/lists/peopleWithFields", data);
   },
   uploadFile(data) {
     return api.post("api/file/upload?listid=" + data.listId, data.fileObj);
@@ -29,6 +29,13 @@ const EmailListApi = {
     //TODO - call to delete list of persons
     console.log(data);
     return null;
+  },
+  getFields(data) {
+    return api.get("/api/lists/" + data.listId + "/fieldswithmeta");
+  },
+  saveAdditionalField(data) {
+    data.userId = getCookie("userId");
+    return api.post("/api/lists/" + data.listId + "/fields", data);
   }
 };
 
