@@ -18,6 +18,17 @@ This guide was prepared on a machine with the following configuration:
   2. CREATE DATABASE pipecandy;
   3. GRANT ALL PRIVILEGES ON DATABASE "pipecandy" to pguser;
 * Redis Server 2.8.4
+* Spamassassin installation
+  $ sudo apt-get install spamassassin spamc
+
+  To Enable the spamd
+  $ $ sudo gedit /etc/default/spamassassin
+
+  # Change to one to enable spamd
+  ENABLED=1
+
+  Restart the sampd demon using
+  sudo /etc/init.d/spamassassin start  
 
 #####One time installation
 * Install strongloop  

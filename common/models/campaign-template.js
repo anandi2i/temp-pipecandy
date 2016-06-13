@@ -1,6 +1,7 @@
 "use strict";
 
 import async from "async";
+import Spamc from "spamc";
 
 module.exports = function(CampaignTemplate) {
 
@@ -148,6 +149,43 @@ module.exports = function(CampaignTemplate) {
     });
   };
 
+  /**
+   * Integrated with spamassassin using spamc npm
+   * @param  {[context]} ctx
+   * @param  {[List[String]]} contents
+   * @param  {[function]} checkSpamCB
+   * @return {List[spamcResult]}
+   */
+  CampaignTemplate.checkSpam = (ctx, contents, checkSpamCB) => {
+    async.map(contents, (content, contentsAsyncCB) => {
+      let spamc = new Spamc();
+      spamc.process(content, function (err, result) {
+        contentsAsyncCB(err, {content: content, spamc: result});
+      });
+    }, (contentsAsyncErr, contentsAsyncResponse) => {
+      return checkSpamCB(contentsAsyncErr, contentsAsyncResponse);
+    });
+  };
+
+
+  CampaignTemplate.remoteMethod(
+    "checkSpam",
+    {
+      description: "Checks and returns whether contents is spam or not.",
+      accepts: [
+        {
+          arg: "ctx", type: "object",
+          http: {source: "context"}
+        },
+        {
+          arg: "contents", type: "object", required: true,
+          http: {source: "body"}
+        },
+      ],
+      returns: {arg: "additionalField", type: "object", root: true},
+      http: {verb: "post", path: "/checkSpam"}
+    }
+  );
 
   /**
    * Updates the updatedAt column with current Time
@@ -162,4 +200,5 @@ module.exports = function(CampaignTemplate) {
     }
     next();
   });
+
 };

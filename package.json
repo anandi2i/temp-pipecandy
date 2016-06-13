@@ -11,7 +11,8 @@
     "autoupdate": "node server/migrations/autoupdate.js",
     "campaignEnqueue": "node server/mailSender/campaignEnqueue.js",
     "campaignConsumer": "node server/mailSender/campaignConsumer.js",
-    "campaignMailSender": "node server/mailSender/campaignMailSender.js"
+    "campaignMailSender": "node server/mailSender/campaignMailSender.js",
+    "validate": "npm ls"
   },
   "dependencies": {
     "async": "^1.5.2",
@@ -71,6 +72,7 @@
     "react-validation-mixin": "^5.3.4",
     "run-sequence": "^1.2.1",
     "serve-favicon": "^2.0.1",
+    "spamc": "0.0.5",
     "sqs-consumer": "^3.1.3",
     "uglify-js": "github:mishoo/UglifyJS2#harmony",
     "underscore": "^1.8.3",
