@@ -24,6 +24,11 @@ const CampaignActions = {
       actionType: Constants.GET_SELECTED_EMAIL_LIST,
       data: emailListIds
     });
+  },
+  getAllInboxReport() {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_ALL_INBOX_REPORT
+    });
   }
 };
 

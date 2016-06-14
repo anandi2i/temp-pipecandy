@@ -73,7 +73,7 @@ class CreateCampaign extends React.Component {
               <Link to="/campaign">View all campaigns</Link>
             </div>
           </div>
-          <div className="create-container">
+          <div className="create-container m-t-45">
             <div className="row list-container">
               <form id="createCampaign" onSubmit={this.onSubmit}>
                 <h3>

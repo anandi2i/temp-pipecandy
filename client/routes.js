@@ -28,6 +28,12 @@ import ViewSingleList from "./components/email-list/ViewSingleList.react";
 import CreateCampaign from "./components/campaign/CreateCampaign.react";
 import RunCampaign from "./components/campaign/RunCampaign.react";
 import ViewALLCampaign from "./components/campaign/ViewAllCampaign.react";
+import ViewCampaign from
+  "./components/campaign/campaign-report/ViewCampaign.react";
+import CampaignInbox from
+  "./components/campaign/campaign-report/CampaignInbox.react";
+import CampaignOutbox from
+  "./components/campaign/campaign-report/CampaignOutbox.react";
 
 //Dashboard
 import Dashboard from "./components/campaign/Dashboard.react";
@@ -62,6 +68,9 @@ const routes = (
       <IndexRoute component={ViewALLCampaign} />
       <Route path="create" component={CreateCampaign} />
       <Route path=":id/run" component={RunCampaign} />
+      <Route path=":id" component={ViewCampaign} />
+      <Route path=":id/inbox" component={CampaignInbox} />
+      <Route path=":id/outbox" component={CampaignOutbox} />
     </Route>
     <Route path="dashboard" component={Dashboard} />
     <Route path="response" component={Response} />

@@ -1,6 +1,30 @@
 html {
   font-family: 'Ubuntu', sans-serif;
 }
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  height: 50px;
+  width: 100%;
+  z-index: 1;
+  background: $footer-color;
+  .container {
+    text-align: center;
+  }
+  .footer-tabs {
+    a {
+      cursor: pointer;
+      padding: 12px 90px;
+      color: $white;
+      display: inline-block;
+      &.active {
+        border-top: 3px solid $footer-tab-color;
+        color: $footer-tab-color;
+      }
+    }
+  }
+}
 body {
   background: url("../images/tile.png");
   background-repeat: repeat-x;
@@ -210,7 +234,7 @@ a {
       vertical-align: middle;
     }
     span {
-      padding: 0px 10px;
+      padding: 0 10px;
     }
   }
 }
@@ -491,7 +515,6 @@ a {
 }
 .sub-nav {
   margin-top: 28px;
-  margin-bottom: 45px;
   border-bottom: $border-1px;
   min-height: 50px;
   @include sub-nav-container;
@@ -559,11 +582,17 @@ a {
 .m-t-47 {
   margin-top: 47px;
 }
+.m-t-45 {
+  margin-top: 45px;
+}
 .m-t-50 {
   margin-top: 50px;
 }
 .m-b-50 {
   margin-bottom: 50px;
+}
+.m-b-120 {
+  margin-bottom: 120px;
 }
 .m-t-20 {
   margin-top: 20px;
@@ -599,6 +628,17 @@ a {
 }
 .p-10 {
   padding: 10px !important;
+}
+.full-w {
+  width: 100%;
+}
+.rit-txt {
+  text-align: right;
+}
+.row-container {
+  margin-bottom: 0;
+  margin-left: -10px;
+  margin-right: -10px;
 }
 /*********************
   Warning Class
@@ -837,6 +877,85 @@ $lines-to-show: 8;
   .mail-content {
     p {
       margin: 0;
+    }
+  }
+}
+/***********************************
+  campaign report
+***********************************/
+.camp-repo-grid {
+  border-bottom: 1px solid $light-border;
+  margin-left: -10px;
+  margin-right: -10px;
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: 17px 0 7px;
+  }
+  .drag-container {
+    cursor: move;
+    margin-top: 25px;
+    position: absolute;
+    i {
+      font-size: 20px;
+      margin-top: -24px;
+      position: absolute;
+    }
+  }
+  .content {
+    width: calc(100% - 20px);
+  }
+  label {
+    margin-left: 25px;
+    div {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+.infinity-spinner {
+  padding-top: 20px;
+  .custom-spinner {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+.filter-container {
+  color: $a-tag-clr;
+  &:before {
+    font: normal normal normal 24px/1 "Material Design Icons";
+    content: "\f349";
+    color: inherit;
+    position: absolute;
+    padding: 10px 0;
+  }
+  input {
+    text-decoration: none;
+    display: inline-block;
+    padding-left: 30px !important;
+    color: inherit;
+    border-bottom: 1px solid transparent;
+    white-space: nowrap;
+    width: 230px;
+    transition: 0.5s ease;
+    word-spacing: 2px;
+    &:focus {
+      border-bottom: 1px solid $a-tag-clr;
+      width: 260px;
+      &::-webkit-input-placeholder {
+        color: transparent;
+      }
+      &:-moz-placeholder {
+        color: transparent;
+      }
+    }
+    &::-webkit-input-placeholder {
+      color: $a-tag-clr;
+    }
+    &:-moz-placeholder {
+      color: $a-tag-clr;
     }
   }
 }
@@ -1245,11 +1364,11 @@ span#autocomplete {
   margin-top: 10px;
   color: $dflt-txt-clr;
 }
-.other-status{
-  padding: 20px 0px;
+.other-status {
+  padding: 20px 0;
   min-height: 135px;
   background-color: $chip-bg-clr;
-  .container{
+  .container {
     text-align: center;
     .head {
       text-transform: uppercase;
@@ -1261,7 +1380,7 @@ span#autocomplete {
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .value{
+    .value {
       margin-top: 10px;
       font-size: 30px;
     }
@@ -1398,6 +1517,15 @@ span#autocomplete {
     display: block;
   }
 }
+@media only screen and (max-width: 800px) {
+  .footer {
+    .footer-tabs {
+      a {
+        padding: 12px 80px;
+      }
+    }
+  }
+}
 @media only screen and (max-width: 700px) {
   .hide-on-700 {
     display: none !important;
@@ -1415,6 +1543,13 @@ span#autocomplete {
       }
     }
   }
+  .footer {
+    .footer-tabs {
+      a {
+        padding: 12px 10%;
+      }
+    }
+  }
 }
 @media only screen and (max-width: 680px) {
   .tiny-toolbar {
@@ -1424,6 +1559,9 @@ span#autocomplete {
   }
 }
 @media only screen and (max-width: 600px) {
+  .hide-on-600 {
+    display: none !important;
+  }
   .auth-container {
     .auth-logo {
       width: 250px;
@@ -1516,5 +1654,14 @@ span#autocomplete {
   }
   .lg-btn-dflt {
     width: 300px;
+  }
+}
+@media only screen and (max-width: 370px) {
+  .footer {
+    .footer-tabs {
+      a {
+        padding: 12px 7%;
+      }
+    }
   }
 }

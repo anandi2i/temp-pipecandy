@@ -22,5 +22,6 @@ export default keyMirror({
   DELETE_PERSONS: null,
   GET_FIELDS: null,
   SAVE_ADDITIONAL_FIELD: null,
-  RELATE_ADDITIONAL_FIELD: null
+  RELATE_ADDITIONAL_FIELD: null,
+  GET_ALL_INBOX_REPORT: null
 });

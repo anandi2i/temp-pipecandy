@@ -67,7 +67,7 @@ class EmailList extends React.Component {
               <Link to="/list">View lists</Link>
             </div>
           </div>
-          <div className="create-container">
+          <div className="create-container m-t-45">
             <h3>
               Name your new list (or) select an existing list by typing the
               list name to update it

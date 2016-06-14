@@ -237,6 +237,18 @@ AppDispatcher.register(function(payload) {
         CampaignStore.emitEmailListChange();
       });
       break;
+    case Constants.GET_ALL_INBOX_REPORT:
+      //TODO need to change API   
+      CampaignApi.getAllEmailTemplates().then((response) => {
+        _allEmailTemplates = response.data;
+        _error = "";
+        CampaignStore.emitChange();
+      }, (err) => {
+        _allEmailTemplates = [];
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
+      });
+      break;
     default:
       return true;
   }
