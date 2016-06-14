@@ -23,5 +23,6 @@ export default keyMirror({
   GET_FIELDS: null,
   SAVE_ADDITIONAL_FIELD: null,
   RELATE_ADDITIONAL_FIELD: null,
-  GET_ALL_INBOX_REPORT: null
+  GET_ALL_INBOX_REPORT: null,
+  CHECK_EXISTING_CAMPAIGN:  null
 });

@@ -8,6 +8,7 @@ import EmailListApi from "../API/EmailListApi";
 import appHistory from "../RouteContainer";
 
 let _error = "";
+let _isExistCampaignId = false;
 let _getAllCampaigns = {};
 let _allEmailTemplates = [];
 let selectedEmailList = {};
@@ -49,6 +50,14 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
 
   getError() {
     return _error;
+  },
+
+  /**
+   * Check existing campaign id
+   * @return {boolean} true or false
+   */
+  isExistCampaign() {
+    return _isExistCampaignId;
   },
 
   getAllCampaigns() {
@@ -319,6 +328,20 @@ AppDispatcher.register(function(payload) {
         _allEmailTemplates = [];
         _error = HandleError.evaluateError(err);
         CampaignStore.emitChange();
+      });
+      break;
+    case Constants.CHECK_EXISTING_CAMPAIGN:
+      CampaignApi.getCampaign(action.campaignId).then((response) => {
+        _isExistCampaignId = response.data.exists;
+        CampaignStore.emitChange();
+        if (response.data.exists) {
+          appHistory.push(`/campaign/${action.campaignId}/run`);
+        } else {
+          appHistory.push("/campaign");
+        }
+      }, (err) => {
+        CampaignStore.emitChange();
+        appHistory.push("/campaign");
       });
       break;
     default:

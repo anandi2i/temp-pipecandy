@@ -9,6 +9,15 @@ const CampaignApi = {
   },
   getAllEmailTemplates() {
     return api.get("api/defaultTemplates");
+  },
+
+  /**
+   * To check campaign id is exists or not
+   * @param  {integer} compaignId existing of campaign id
+   * @return {boolean}  true or false
+   */
+  getCampaign(compaignId) {
+    return api.get(`api/campaigns/${compaignId}/exists`);
   }
 };
 

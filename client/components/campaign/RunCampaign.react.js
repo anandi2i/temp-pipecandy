@@ -28,6 +28,10 @@ class TabsNav extends React.Component {
     this.props.handleClick(index);
   }
 
+  /**
+   * render
+   * @return {ReactElement} markup
+   */
   render() {
     let activePointer = "active position";
     let activeTab = "active tabs";
@@ -74,14 +78,25 @@ class RunCampaign extends React.Component {
     this.state = {
       activeTab: 1,
       selectedTemplate: "",
-      selectedListIds: {}
+      selectedListIds: {},
+      isExistId: false
     };
   }
 
+  /**
+   * To check campaign id is exists or not
+   * add change listener
+   */
   componentDidMount() {
+    if (this.props.params && this.props.params.id) {
+      CampaignActions.isExistCampaign(this.props.params.id);
+    }
     CampaignStore.addChangeListener(this.onStoreChange);
   }
 
+  /**
+   * remove change listener
+   */
   componentWillUnmount() {
     CampaignStore.removeChangeListener(this.onStoreChange);
   }
@@ -105,6 +120,10 @@ class RunCampaign extends React.Component {
   }
 
   onStoreChange = () => {
+    let isExistId = CampaignStore.isExistCampaign();
+    this.setState({
+      isExistId: isExistId
+    });
     displayError(CampaignStore.getError());
   }
 
@@ -116,19 +135,31 @@ class RunCampaign extends React.Component {
       });
   }
 
+  /**
+   * render
+   * @return {ReactElement} markup
+   */
   render() {
     return (
       <div>
-        <TabsNav handleClick={this.handleClick}
-          active={this.state.activeTab} />
-        <SelectEmailList ref="selectEmailList" active={this.state.activeTab} />
-        <SelectEmailTemplate ref="SelectEmailTemplate"
-          setTemplateContent={this.setTemplateContent}
-          active={this.state.activeTab} />
-        <ScheduleEmail campaignId={this.props.params.id}
-          active={this.state.activeTab}
-          changeSelectedList={this.changeSelectedList}
-          selectedTemplate={this.state.selectedTemplate} />
+       {
+         this.state.isExistId
+           ?
+             <div>
+               <TabsNav handleClick={this.handleClick}
+                 active={this.state.activeTab} />
+               <SelectEmailList ref="selectEmailList" active={this.state.activeTab} />
+               <SelectEmailTemplate ref="SelectEmailTemplate"
+                 setTemplateContent={this.setTemplateContent}
+                 active={this.state.activeTab} />
+               <ScheduleEmail campaignId={this.props.params.id}
+                 active={this.state.activeTab}
+                 changeSelectedList={this.changeSelectedList}
+                 selectedTemplate={this.state.selectedTemplate} />
+             </div>
+            :
+              ""
+       }
       </div>
     );
   }

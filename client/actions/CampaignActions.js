@@ -29,6 +29,16 @@ const CampaignActions = {
     AppDispatcher.handleAction({
       actionType: Constants.GET_ALL_INBOX_REPORT
     });
+  },
+  /**
+   * To check campaign id is exists or not
+   * @param  {integer} compaignId existing of campaign id
+   */
+  isExistCampaign(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.CHECK_EXISTING_CAMPAIGN,
+      campaignId: campaignId
+    });
   }
 };
 
