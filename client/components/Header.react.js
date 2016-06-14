@@ -12,6 +12,7 @@ class Header extends React.Component {
   }
 
   componentDidMount() {
+    enableSideNavDropDown();
     UserStore.addChangeListener(this.onStoreChange);
   }
 

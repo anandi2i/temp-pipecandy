@@ -4,13 +4,10 @@
 
 (function () {
 "use strict";
-
+let isOpenSideNav = false;
 $(document).ready(function() {
   // Set tinymce plugin location
   tinymce.baseURL = "/tinymce";
-  if ($(".side-nav-btn").length) {
-    $(".side-nav-btn").sideNav();
-  }
   if ($(".auth-container").length) {
     let position = $(".auth-container").position();
     let getPosition = 50;
@@ -21,6 +18,12 @@ $(document).ready(function() {
 });
 
 function enableSideNavDropDown() {
+  if ($(".side-nav-btn").length && !isOpenSideNav) {
+    isOpenSideNav = true;
+    $(".side-nav-btn").sideNav({
+      closeOnClick: true
+    });
+  }
   $(".side-nav-user-pic i").unbind("click").click(function(){
     $(this).toggleClass("active");
     $(".side-nav .side-nav-drop-down").slideToggle("slow");
