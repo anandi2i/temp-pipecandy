@@ -1,6 +1,5 @@
 module.exports = function(Person) {
 
-
   /**
    * Returns the peopleList who are all having separate email template
    *
@@ -56,28 +55,29 @@ module.exports = function(Person) {
     });
   });
 
-  Person.observe("after save", function(ctx, next) {
-    let person = ctx.instance;
-    let personAddtionalData = [];
-    let additionalFieldLen = 5;
-    for (let i = 1; i <= additionalFieldLen; i++) {
-      let field = "field" + i;
-      let value = "value" + i;
-      if (person[field] && person[value]) {
-        personAddtionalData.push({
-          name: person[field],
-          value: person[value]
-        });
-      }
-    }
-    //Updating the addtional fields is difficult and so delete & recreate it
-    person.fields.destroyAll((err, data) => {
-      if (err) next(err);
-      person.fields.create(personAddtionalData, (err, persons) => {
-        if (err) next(err);
-        next();
-      });
-    });
+  // Person.observe("after save", function(ctx, next) {
+  //   let person = ctx.instance;
+  //   let personAddtionalData = [];
+  //   let additionalFieldLen = 5;
+  //   for (let i = 1; i <= additionalFieldLen; i++) {
+  //     let field = "field" + i;
+  //     let value = "value" + i;
+  //     if (person[field] && person[value]) {
+  //       personAddtionalData.push({
+  //         name: person[field],
+  //         value: person[value]
+  //       });
+  //     }
+  //   }
+  //   //Updating the addtional fields is difficult and so delete & recreate it
+  //   person.fields.destroyAll((err, data) => {
+  //     if (err) next(err);
+  //     person.fields.create(personAddtionalData, (err, persons) => {
+  //       if (err) next(err);
+  //       next();
+  //     });
+  //   });
+  // });
 
-  });
+
 };

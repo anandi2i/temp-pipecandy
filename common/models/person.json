@@ -37,7 +37,7 @@
   },
   "validations": [],
   "relations": {
-    "fieldVaules": {
+    "fieldValues": {
       "type": "hasMany",
       "model": "additionalFieldValue",
       "foreignKey": ""
