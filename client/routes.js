@@ -30,7 +30,7 @@ import RunCampaign from "./components/campaign/RunCampaign.react";
 import ViewALLCampaign from "./components/campaign/ViewAllCampaign.react";
 
 //Dashboard
-import Dashboard from "./components/Dashboard.react";
+import Dashboard from "./components/campaign/Dashboard.react";
 
 function requireAuth(nextState, replace) {
   if(!($.isEmptyObject(UserStore.getUser()))) {

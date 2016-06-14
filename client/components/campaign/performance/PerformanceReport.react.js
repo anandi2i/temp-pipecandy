@@ -117,7 +117,12 @@ class PerformanceReport extends React.Component {
 
   render() {
     return (
-      <div id="performanceReport" className="graphSize"></div>
+      <div className="container">
+        <div className="row main-head">
+          Performance Report
+        </div>
+        <div id="performanceReport" className="graphSize" />
+      </div>
     );
   }
 }

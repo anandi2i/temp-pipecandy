@@ -1,7 +1,14 @@
 import React from "react";
 
+/**
+ * Display tabs in front of tag name
+ */
 class TagNameMenu extends React.Component {
 
+/**
+ * Call handleClick props function to set active-tab
+ * @param {string} index active-tab
+ */
   handleClick(index) {
     this.props.handleClick(index);
   }
@@ -15,7 +22,7 @@ class TagNameMenu extends React.Component {
         ?
           <li key={i}>{item.name}</li>
         :
-          <li key={i} onClick={() => this.handleClick(i)} className={this.props.active === i ? `active ${item.class}` : `${item.class}`}>
+          <li key={i} onClick={() => this.handleClick(i.toString())} className={this.props.active === i.toString() ? `active ${item.class}` : `${item.class}`}>
             {item.name}
           </li>
       );
