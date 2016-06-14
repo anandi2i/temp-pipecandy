@@ -121,7 +121,7 @@ module.exports = function(List) {
           http: {source: "path"}
         },
         {
-          arg: "options", type: "object", required: true,
+          arg: "reqParams", type: "object", required: true,
           http: {source: "body"}
         }
       ],
@@ -132,15 +132,29 @@ module.exports = function(List) {
 
   /**
    * Saves person object with related field values and associates with list
+   * Exmaple of a reqParam
+   *{
+   *  "firstName": "Test FN",
+   *  "middleName": "Test MN",
+   *  "lastName": "Test LN",
+   *  "email": "test@ideas2it.com",
+   *  "fieldVaules":  [{
+   *      "value": "test1",
+   *      "fieldId": 1
+   *    },{
+   *      "value": "test2",
+   *      "fieldId": 2
+   *    }]
+   *}
+   *
    * @param  {[Context]} ctx [Context Object to get accessToken]
    * @param  {[number]} id [listId]
-   * @param  {[Person]} person [object wants to save in the list]
-   * @param  {List[AdditionalFieldValue]} fieldVa1ues [list of values]
+   * @param  {[Object]} reqParam [Exmaple of an reqParam shown above]
    * @param  {[function]} savePersonWithFieldsCB [description]
    * @return {[person]} [Persisted person with fields and values]
    * @author Ramanavel Selvaraju
    */
-  List.savePersonWithFields = (ctx, id, options, savePersonWithFieldsCB) => {
+  List.savePersonWithFields = (ctx, id, reqParams, savePersonWithFieldsCB) => {
     List.find({
        where: {id: id, createdBy: ctx.req.accessToken.userId}
      }, (listErr, list) => {
@@ -148,16 +162,16 @@ module.exports = function(List) {
          logger.error("Error in getting List for id : ", id);
          return savePersonWithFieldsCB(listErr);
        }
-      list[0].people.create(options.person,
+      list[0].people.create(reqParams.person,
         (createPersonErr, persistedPerson) => {
         if(createPersonErr) {
-          logger.error("Error in saving Person Object : ", person);
+          logger.error("Error in saving Person Object : ", reqParams);
           return savePersonWithFieldsCB(createPersonErr);
         }
-        persistedPerson.fieldValues.create(options.fieldValues,
+        persistedPerson.fieldValues.create(reqParams.fieldValues,
           (fieldValuesCreateErr, persistedFieldValues) => {
             if(fieldValuesCreateErr) {
-              logger.error("Error in saving fields : ", options.fieldValues);
+              logger.error("Error in saving fields : ", reqParams);
               return savePersonWithFieldsCB(fieldValuesCreateErr);
             }
           return savePersonWithFieldsCB(null, persistedPerson);
