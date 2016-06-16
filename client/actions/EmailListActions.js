@@ -60,6 +60,17 @@ const EmailListActions = {
       actionType: Constants.SAVE_ADDITIONAL_FIELD,
       data: data
     });
+  },
+  /**
+   * Action to relate exisitng meta field to the list
+   * @param {Object} data Meta id and list id
+   * @emits {Constants.RELATE_ADDITIONAL_FIELD}
+   */
+  relateAdditionalField(data) {
+    AppDispatcher.handleAction({
+      actionType: Constants.RELATE_ADDITIONAL_FIELD,
+      data: data
+    });
   }
 };
 

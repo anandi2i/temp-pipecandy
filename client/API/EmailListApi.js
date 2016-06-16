@@ -13,8 +13,14 @@ const EmailListApi = {
   uploadFile(data) {
     return api.post("api/file/upload?listid=" + data.listId, data.fileObj);
   },
+  /**
+   * Api to save person with additional fields
+   *
+   * @return {object} Promise
+   */
   saveSinglePerson(data) {
-    return api.post("api/lists/" + data.listId + "/people", data.person);
+    return api.post(`api/lists/${data.listId}/savePersonWithFields`,
+      data.person);
   },
   updateSinglePerson(data) {
     return api.put("api/lists/" + data.listId + "/people/" + data.personId,
@@ -30,13 +36,30 @@ const EmailListApi = {
     console.log(data);
     return null;
   },
+  /**
+   * Api to get fields for the list
+   *
+   * @return {object} Promise
+   */
   getFields(data) {
-    return api.get("/api/lists/" + data.listId + "/fieldswithmeta");
+    return api.get(`/api/lists/${data.listId}/fieldswithmeta`);
   },
+  /**
+   * Api to create field in meta and relate it to list
+   *
+   * @return {object} Promise
+   */
   saveAdditionalField(data) {
-    data.userId = getCookie("userId");
-    return api.post("/api/lists/" + data.listId + "/fields", data);
-  }
+    return api.post(`/api/lists/${data.listId}/fields`, data);
+  },
+  /**
+   * Api to relate meta field to list
+   *
+   * @return {object} Promise
+   */
+  relateAdditionalField(data) {
+    return api.put(`/api/lists/${data.id}/fields/rel/${data.fk}`);
+  },
 };
 
 export default EmailListApi;

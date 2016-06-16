@@ -237,7 +237,7 @@ AppDispatcher.register(function(payload) {
         EmailListStore.emitFields();
       });
       break;
-      case Constants.SAVE_ADDITIONAL_FIELD:
+    case Constants.SAVE_ADDITIONAL_FIELD:
       EmailListApi.saveAdditionalField(action.data).then((response) => {
         _success = SuccessMessages.successAddAdditionalField;
         EmailListStore.emitChange();
@@ -247,6 +247,18 @@ AppDispatcher.register(function(payload) {
         EmailListStore.emitChange();
         _error = "";
       });
+      break;
+    case Constants.RELATE_ADDITIONAL_FIELD:
+      EmailListApi.relateAdditionalField(action.data).then((response) => {
+        _success = SuccessMessages.successAddAdditionalField;
+        EmailListStore.emitChange();
+        _success = "";
+      }, (err)=> {
+        _error = HandleError.evaluateError(err);
+        EmailListStore.emitChange();
+        _error = "";
+      });
+      break;
     default:
       return true;
   }

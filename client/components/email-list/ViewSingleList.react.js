@@ -12,22 +12,43 @@ import SubscriberGrid from "../grid/subscriber-list/SubscriberGrid.react";
 import {ErrorMessages} from "../../utils/UserAlerts";
 import Autosuggest from "react-autosuggest";
 
+/**
+ * ListView component to render single list data
+ * Add field and Person
+ * Upload People data
+ */
 class ListView extends React.Component {
+  /**
+   * constructor
+   * @param {object} props
+   */
   constructor(props) {
     super(props);
+    /**
+     * Initial state values
+     * @property {string} listName The name of the list
+     * @property {array} people The people array
+     * @property {string} firstName The first name of the person
+     * @property {string} middleName The middle name of the person
+     * @property {string} lastName The last name of the person
+     * @property {string} email The email id of the person
+     * @property {boolean} spinning Let the spinner be stopped at first
+     * @property {string} fieldName The name of the additional field
+     * @property {array} suggestions The values that match the input field
+     * @property {array} metaFields The metaFields array
+     * @property {array} listFields The listFields array
+     * @author Dinesh R <dinesh.r@ideas2it.com>
+     */
     this.initialStateValues = {
       listName: "",
-      peoples: [],
-      names: [],
-      additionalFieldLen : 5,
+      people: [],
       firstName: "",
       middleName: "",
       lastName: "",
       email: "",
       spinning: true,
       fieldName: "",
-      suggestions: this.getSuggestions(""),
-      addAnother: false,
+      suggestions: [],
       metaFields: [],
       listFields: []
     };
@@ -41,7 +62,7 @@ class ListView extends React.Component {
   }
 
   /**
-   * Initiate lean modal and mCustomScrollbar
+   * Initialize the lean modal and custom scrollbar
    * @listens {EmailListStore} change event
    */
   componentDidMount() {
@@ -49,6 +70,7 @@ class ListView extends React.Component {
     EmailListActions.getEmailListByID(this.props.params.listId);
     EmailListStore.addChangeListener(this.onStoreChange);
     EmailListStore.addPersonChangeListener(this.onPersonChange);
+    EmailListStore.addFieldsListener(this.getFieldsFromStore);
     this.el.find(".modal-trigger").leanModal({
       dismissible: false
     });
@@ -66,13 +88,20 @@ class ListView extends React.Component {
     EmailListStore.removeFieldsListener(this.getFieldsFromStore);
   }
 
+  /**
+   * Update the state varaiables on store change
+   * @property {String} error Error message
+   * @property {String} success Success message
+   * @property {Object} gridUpdate Make spinning false as default
+   * @property {Object} emailList The email List object
+   */
   onStoreChange = () => {
-    let error = EmailListStore.getError();
+    const error = EmailListStore.getError();
     if(error) {
       displayError(error);
       return false;
     }
-    let success = EmailListStore.getSuccess();
+    const success = EmailListStore.getSuccess();
     if(success) {
       displaySuccess(success);
     }
@@ -83,7 +112,7 @@ class ListView extends React.Component {
     if(emailList.length) {
       gridUpdate = {
         listName: emailList[0].name,
-        peoples: emailList[0].peoples,
+        people: emailList[0].peoples,
         spinning: false
       };
     }
@@ -91,34 +120,42 @@ class ListView extends React.Component {
     return true;
   }
 
+  /**
+   * Update the state variables on people change from store
+   * @property {Object} emailList THe email list object
+   */
   onPersonChange = () => {
     let emailList = EmailListStore.getPeopleByListUpdated();
     if(emailList.length) {
       this.setState({
-        peoples: emailList[0].peoples
+        people: emailList[0].peoples
       });
     }
   }
 
-  addMoreFields = () => {
-    let getLength = this.state.names.length;
-    let maxLength = 5;
-    if(getLength < maxLength){
-      this.state.names.push(getLength);
-      this.forceUpdate();
-    }
-  }
-
+  /**
+   * Update the state variable on input value onChange
+   * @param  {SytheticEvent} event
+   * @param  {String} field The field name
+   */
   getFieldState(event, field) {
     let state = {};
     state[field] = event.target.value;
     this.setState(state);
   }
 
+  /**
+   * Send state to validator
+   * @return {object} this.state The state object
+   */
   getValidatorData() {
     return this.state;
   }
 
+  /**
+   * Render the validation message if any
+   * @param  {String} el THe field name
+   */
   renderHelpText(el) {
     return (
       <div className="warning-block">
@@ -127,117 +164,142 @@ class ListView extends React.Component {
     );
   }
 
-  onSubmit = () => {
+  /**
+   * Submit the a single person object
+   * @param  {boolean} addAnotherField True if add another person
+   * @property {function} onValidate callback to execute after validation
+   */
+  onSubmit(addAnotherField) {
     const onValidate = error => {
-      for(let i = 1; i <= this.state.additionalFieldLen; i++) {
-        let field = this.state["field" + i];
-        let value = this.state["value" + i];
-        if((field && value) || (!field && !value)) {
-          $(this).find(".warning-block").addClass("hide");
-        } else {
-          $(this).find(".warning-block").removeClass("hide");
-          error = true;
+      const {firstName, lastName, email} = error;
+      if (!(firstName || lastName || email)) {
+        this.constructPersonDataAndSave();
+        if(!addAnotherField) {
+          this.closeModal();
         }
       }
-      if (error) {
-        //form has errors; do not submit
-      } else {
-        this.constructPersonDataAndSave();
-      }
     };
     this.props.validate(onValidate);
   }
 
-  onSubmitAnother = () => {
-    this.setState({
-      addAnother: true
-    }, () => this.obSubmit());
-  }
-
-  addField = () => {
+  /**
+   * Add new field or relate existing field
+   * @param  {boolean} addAnotherField True if add another field
+   * @property {function} onValidate callback to execute after validation
+   */
+  addField(addAnotherField) {
     const onValidate = error => {
-      let fieldName = this.state.fieldName;
-      if(fieldName) {
-        $(this).find(".warning-block").addClass("hide");
-        error = false;
-      } else {
-        $(this).find(".warning-block").removeClass("hide");
-        error = true;
-      }
-      if (error) {
-        this.setState({
-          addAnother: false
-        });
-      } else {
+      if(!error.fieldName) {
         this.saveAdditionalField();
+        if(!addAnotherField) {
+          this.closeModal();
+        }
       }
     };
     this.props.validate(onValidate);
   }
 
-  addAnotherField = () => {
-    this.setState({
-      addAnother: true
-    }, () => this.addField());
-  }
-
+  /**
+   * Call action to save field based on new or existing field
+   * @property {boolean} existingListField True if the field already exists in list
+   * @property {boolean} existingMetaField True if the field already exists in meta
+   */
   saveAdditionalField() {
-    let data = {
-      name: this.state.fieldName,
-      type: "String",
-      listId : this.props.params.listId
-    };
-    EmailListActions.saveAdditionalField(data);
-    this.props.clearValidations();
-    $(".validate").removeClass("valid");
-    if(!this.state.addAnother) {
-      this.closeModal();
+    const {fieldName, listFields, metaFields} = this.state;
+    const {listId} = this.props.params;
+    const existingListField = _.chain(listFields)
+      .pluck("name")
+      .contains(fieldName)
+      .value();
+    const existingMetaField = _.chain(metaFields)
+      .pluck("name")
+      .contains(fieldName)
+      .value();
+    if(existingListField) {
+      this.setState({
+        fieldName : ""
+      });
+    } else if(existingMetaField) {
+      EmailListActions.relateAdditionalField({
+        id: listId,
+        fk: _.findWhere(metaFields, {"name": fieldName}).id
+      });
+      this.setState(this.initialStateValues);
+    } else {
+      EmailListActions.saveAdditionalField({
+        name: fieldName,
+        type: "String",
+        listId : listId
+      });
+      this.setState(this.initialStateValues);
     }
-    this.setState(this.initialStateValues);
-    this.onStoreChange();
+    this.el.find(".validate").removeClass("valid");
+    this.props.clearValidations();
   }
 
+  /**
+   * Construct single Person object and Call action to save
+   * @property {object} person The person object
+   * @property {array} fieldValues The additional fields value
+   */
   constructPersonDataAndSave() {
-    let person = {
-      firstName: this.state.firstName,
-      lastName: this.state.lastName,
-      middleName: this.state.middleName,
-      email: this.state.email
+    const {firstName, lastName, middleName, email, listFields} = this.state;
+    const {listId} = this.props.params;
+    const person = {
+      firstName: firstName,
+      lastName: lastName,
+      middleName: middleName,
+      email: email
     };
-    for(let i = 1; i <= this.state.additionalFieldLen; i++) {
-      let field = this.state["field" + i];
-      let value = this.state["value" + i];
-      if(field && value) {
-        person["field" + i] = field;
-        person["value" + i] = value;
+    let fieldValues = [];
+    listFields.map((field, key) => {
+      if(this.state[field.name]){
+        fieldValues.push({
+          fieldId: field.id,
+          value: this.state[field.name]
+        });
       }
-    }
-    let data = {
-      listId: this.props.params.listId,
-      person: person
-    };
-    EmailListActions.saveSinglePerson(data);
+    }, this);
+    EmailListActions.saveSinglePerson({
+      listId: listId,
+      person: {
+        person : person,
+        fieldValues: fieldValues
+      }
+    });
     this.props.clearValidations();
-    $(".validate").removeClass("valid");
-    if(!this.state.addAnother) {
-      this.closeModal;
-    }
+    this.el.find(".validate").removeClass("valid");
     this.setState(this.initialStateValues);
   }
 
+  /**
+   * Call to close field modal and person modal
+   */
   closeModal = () => {
-    $("#addEmail").closeModal();
-    $("#addField").closeModal();
+    this.el.find("#addEmail").closeModal();
+    this.el.find("#addField").closeModal();
   }
 
+  /**
+   * Trigger browse file on clicking add from file button
+   */
   openDialog = () => {
-    $("#fileUpload").click();
+    this.el.find("#fileUpload").click();
   }
 
+  /**
+   * Construct formData post file uplaod and call action to upload
+   *
+   * @param {SytheticEvent} e
+   * @property {object} file The file object which file details
+   * @property {string} fileExt The uploaded file extension
+   * @property {array} acceptableFileTypes Extensions which are allowed
+   * @property {number} timeToShow Time to display toast message
+   */
   fileChange = (e) => {
-    let file = e.target.files[0];
-    let fileExt = _.last(file.name.split("."));
-    let acceptableFileTypes = ["csv", "xls", "xlsx"];
+    const file = e.target.files[0];
+    const fileExt = _.last(file.name.split("."));
+    const acceptableFileTypes = ["csv", "xls", "xlsx"];
     const timeToShow = 4000;
     if(!file) {
       return false;
@@ -277,30 +339,47 @@ class ListView extends React.Component {
     }
   }
 
+  /**
+   * Call action to retrieve fields for the list
+   */
   getFields = () => {
-    let data = {
+    EmailListActions.getFields({
       listId : this.props.params.listId
-    };
-    EmailListActions.getFields(data);
-  }
-
-  getFieldsFromStore = () => {
-    let fields = EmailListStore.getFieldsFromStore();
-    this.setState({
-      metaFields: fields.metaFields,
-      listFields: fields.listFields
     });
-    console.log(this.state.listFields);
   }
 
-  getSuggestions = (fieldName) => {
-    let inputValue = fieldName.trim().toLowerCase();
-    let inputLength = inputValue.length;
-    let index = 0;
+  /**
+   * Update listFields and metaFields state variable
+   * @property {object} fields The field object
+   * @property {object} setFields The fields that are to be set/update in state
+   */
+  getFieldsFromStore = () => {
+    const fields = EmailListStore.getFieldsFromStore();
+    const setFields = {};
+    setFields.metaFields = fields.metaFields;
+    setFields.listFields = fields.listFields;
+    _.each(fields.listFields, (list) => {
+      setFields[list.name] = "";
+      this.initialStateValues[list.name] = "";
+    });
+    this.setState(setFields);
+  }
 
-    return !inputLength ? [] : this.state.metaFields.filter(field =>
-      field.name.toLowerCase().slice(index, inputLength) === inputValue
+  /**
+   * Construct the matching fields
+   * @param  {string} fieldName The input value of the field
+   * @property {number} fieldLength The length of the field value
+   * @property {number} index The starting index of the value
+   * @return {array} suggestedValues The matched fields
+   */
+  getSuggestions = (fieldValue) => {
+    fieldValue = fieldValue.trim().toLowerCase();
+    const fieldLength = fieldValue.length;
+    const index = 0;
+    const suggestedValues = this.state.metaFields.filter(field =>
+      field.name.toLowerCase().slice(index, fieldLength) === fieldValue
     );
+    return suggestedValues || [];
   }
 
   onChange = (event, {newValue}) => {
@@ -325,6 +404,9 @@ class ListView extends React.Component {
     );
   }
 
+  /**
+   * Clear the validations
+   */
   clearValidations = () => {
     this.props.clearValidations();
   }
@@ -342,8 +424,6 @@ class ListView extends React.Component {
       onChange: (event, fieldName) => this.onChange(event, fieldName),
       className: "validate"
     };
-    const addFieldClass = "modal modal-fixed-header modal-fixed-footer " +
-      "mini-modal add-field-model-height";
     return (
       <div>
         <div className="container">
@@ -372,7 +452,7 @@ class ListView extends React.Component {
             </div>
           </div>
           {/* Add new field starts here */}
-          <div id="addField" className={{addFieldClass}}>
+          <div id="addField" className="modal modal-fixed-header mini-modal">
             <i className="mdi mdi-close modal-close" onClick={this.clearValidations}></i>
             <div className="modal-header">
               <div className="head">Add Field</div>
@@ -380,8 +460,9 @@ class ListView extends React.Component {
             <div className="modal-content">
               <div className="input-field">
                 <Autosuggest suggestions={suggestions}
-                  onSuggestionsUpdateRequested={(fieldName) =>
-                    this.onSuggestionsUpdateRequested(fieldName)}
+                  onSuggestionsUpdateRequested={
+                    (fieldName) => this.onSuggestionsUpdateRequested(fieldName)
+                  }
                   getSuggestionValue={this.getSuggestionValue}
                   renderSuggestion={this.renderSuggestion}
                   inputProps={inputProps} />
@@ -394,8 +475,8 @@ class ListView extends React.Component {
               </div>
             </div>
             <div className="modal-footer r-btn-container">
-              <input type="button" onClick={this.addAnotherField} className="btn red modal-action p-1-btn" value="Add Another" />
-              <input type="button" onClick={this.addField} className="btn blue modal-action" value="Add" />
+              <input type="button" onClick={() => this.addField(true)} className="btn red modal-action p-1-btn" value="Add Another" />
+              <input type="button" onClick={() => this.addField(false)} className="btn blue modal-action" value="Add" />
             </div>
           </div>
           {/* Add new field ends here */}
@@ -454,47 +535,28 @@ class ListView extends React.Component {
                     : null
                   }
               </div>
-              <div className="newFieldContainer">
-                <div className={this.state.listFields.length ? "show" : "hide"}>
-                  <div className="row m-lr-0 m-t-20 m-b-50">
-                    <div className="gray-head">Additional Fields</div>
-                  </div>
-                </div>
-                {
-                  this.state.listFields.map($.proxy(function (value, key) {
-                    let minLen = 1;
-                    let getLen = key + minLen;
-                    let keyId = "field" + getLen;
-                    let valueId = "value" + getLen;
+              <div>
+              {
+                this.state.listFields.length ?
+                  this.state.listFields.map((list, key) => {
+                    const id = `${guid()}-${list.name}`;
                     return (
-                      <div className="row m-lr-0 field-val-wrapper" key={getLen}>
-                        <div className="input-field">
-                          <input placeholder="Field Name" id={keyId} type="text"
-                            onChange={(e) => this.getFieldState(e, keyId)}
-                            className="validate field-name" />
-                          <label className="active" htmlFor={keyId}>{"Field Name " + getLen}</label>
-                        </div>
-                        <div className="input-field">
-                          <input placeholder="Value" id={valueId} type="text"
-                            onChange={(e) => this.getFieldState(e, valueId)}
-                            className="validate field-value" />
-                          <label className="active" htmlFor={valueId}>{"Value " + getLen}</label>
-                        </div>
-                        <div className="warning-block hide"> Field or Value should not be empty </div>
+                      <div key={key} className="input-field">
+                        <input placeholder={list.name} id={id} type="text"
+                          onChange={(e) => this.getFieldState(e, list.name)}
+                          value={this.state[list.name]}
+                          className="validate" />
+                        <label htmlFor={id}>{list.name}</label>
                       </div>
                     );
-                  }, this))
-                }
-              </div>
-              <div className={this.state.listFields.length ? "show" : "hide"}>
-                <div onClick={this.addMoreFields} className="add-new-field">
-                  <i className="mdi mdi-plus-circle"></i> Add another field
-                </div>
+                  }, this)
+                  : null
+              }
               </div>
             </div>
             <div className="modal-footer r-btn-container">
-              <input type="button" onClick={this.onSubmitAnother} className="btn red modal-action p-1-btn" value="Add Another" />
-              <input type="button" onClick={this.onSubmit} className="btn blue modal-action" value="OK" />
+              <input type="button" onClick={() => this.onSubmit(true)} className="btn red modal-action p-1-btn" value="Add Another" />
+              <input type="button" onClick={() => this.onSubmit(false)} className="btn blue modal-action" value="OK" />
             </div>
           </div>
           {/* Add new person ends here */}
@@ -503,8 +565,8 @@ class ListView extends React.Component {
           </div>
         </div>
         {
-          this.state.peoples.length ?
-            <SubscriberGrid results={this.state.peoples} listId={this.props.params.listId} ref="selectedRowIds"/>
+          this.state.people.length ?
+            <SubscriberGrid results={this.state.people} listId={this.props.params.listId} ref="selectedRowIds"/>
           : ""
         }
       </div>

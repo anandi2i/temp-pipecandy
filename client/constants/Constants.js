@@ -21,5 +21,6 @@ export default keyMirror({
   UPDATE_SINGLE_PERSON: null,
   DELETE_PERSONS: null,
   GET_FIELDS: null,
-  SAVE_ADDITIONAL_FIELD: null
+  SAVE_ADDITIONAL_FIELD: null,
+  RELATE_ADDITIONAL_FIELD: null
 });
