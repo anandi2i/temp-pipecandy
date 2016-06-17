@@ -174,7 +174,10 @@ module.exports = function(List) {
               logger.error("Error in saving fields : ", reqParams);
               return savePersonWithFieldsCB(fieldValuesCreateErr);
             }
-          return savePersonWithFieldsCB(null, persistedPerson);
+          return savePersonWithFieldsCB(null, {
+            person: persistedPerson,
+            fieldValues: persistedFieldValues
+          });
         });
       }); //people save
     }); //list find

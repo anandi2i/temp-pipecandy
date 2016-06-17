@@ -105,19 +105,14 @@ class ListView extends React.Component {
     if(success) {
       displaySuccess(success);
     }
-    let gridUpdate = {
-      spinning: false
-    };
     let emailList = EmailListStore.getEmailListByID();
-    if(emailList.length) {
-      gridUpdate = {
-        listName: emailList[0].name,
-        people: emailList[0].peoples,
-        spinning: false
-      };
-    }
-    this.setState(gridUpdate);
-    return true;
+    this.setState({
+      listName: emailList.name,
+      people: emailList.peoples,
+      fieldsName: emailList.fieldsName,
+      listFields: emailList.listFields,
+      spinning: false
+    });
   }
 
   /**
@@ -245,6 +240,7 @@ class ListView extends React.Component {
   constructPersonDataAndSave() {
     const {firstName, lastName, middleName, email, listFields} = this.state;
     const {listId} = this.props.params;
+    let initialStateValues = this.initialStateValues;
     const person = {
       firstName: firstName,
       lastName: lastName,
@@ -269,7 +265,8 @@ class ListView extends React.Component {
     });
     this.props.clearValidations();
     this.el.find(".validate").removeClass("valid");
-    this.setState(this.initialStateValues);
+    initialStateValues.listFields = listFields;
+    this.setState(initialStateValues);
   }
 
   /**
@@ -566,7 +563,10 @@ class ListView extends React.Component {
         </div>
         {
           this.state.people.length ?
-            <SubscriberGrid results={this.state.people} listId={this.props.params.listId} ref="selectedRowIds"/>
+            <SubscriberGrid results={this.state.people}
+              fieldsName={this.state.fieldsName}
+              listFields={this.state.listFields}
+              listId={this.props.params.listId} ref="selectedRowIds"/>
           : ""
         }
       </div>

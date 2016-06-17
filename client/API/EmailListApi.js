@@ -11,7 +11,7 @@ const EmailListApi = {
     return api.post("api/lists/peopleWithFields", data);
   },
   uploadFile(data) {
-    return api.post("api/file/upload?listid=" + data.listId, data.fileObj);
+    return api.post(`api/file/upload?listid=${data.listId}`, data.fileObj);
   },
   /**
    * Api to save person with additional fields
@@ -23,7 +23,7 @@ const EmailListApi = {
       data.person);
   },
   updateSinglePerson(data) {
-    return api.put("api/lists/" + data.listId + "/people/" + data.personId,
+    return api.put(`api/lists/${data.listId}/people/${data.personId}`,
       data.person);
   },
   /**

@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import validation from "react-validation-mixin";
 import validatorUtil from "../../../utils/ValidationMessages";
 import strategy from "joi-validation-strategy";
@@ -10,8 +11,11 @@ import CustomSelectComponent from "./CustomSelectComponent.react";
 import CustomSelectAllComponent from "./CustomSelectAllComponent.react";
 import _ from "underscore";
 
+/**
+ * Render the people data for a list using react-griddle
+ * Edit each and every person and update it
+ */
 class SubscriberGridView extends React.Component {
-
   constructor(props) {
     super(props);
     //TODO - Server side pagination, Now it take all persons from the eamil list
@@ -32,44 +36,35 @@ class SubscriberGridView extends React.Component {
   }
 
   componentDidMount() {
-    $(".modal-content").mCustomScrollbar({
+    this.el = $(ReactDOM.findDOMNode(this));
+    this.el.find(".modal-content").mCustomScrollbar({
       theme:"minimal-dark"
     });
   }
 
   closeModal = () => {
-    $("#editSubbscriber").closeModal();
+    this.el.find("#editSubbscriber").closeModal();
   }
 
   handleRowClick = (obj, eve) => {
-    let propsData = obj.props.data;
-    let addField1 = propsData.addField1.split(":");
-    let addField2 = propsData.addField2.split(":");
-    let addField3 = propsData.addField3.split(":");
-    let addField4 = propsData.addField4.split(":");
-    let addField5 = propsData.addField5.split(":");
-    this.setState({
+    const {fieldsName} = this.props;
+    const propsData = obj.props.data;
+    let person = {
       personId: propsData.id,
       firstName: propsData.firstName,
       middleName: propsData.middleName,
       lastName: propsData.lastName,
-      email: propsData.email,
-      field1: addField1[0] || "",
-      value1: addField1[1] || "",
-      field2: addField2[0] || "",
-      value2: addField2[1] || "",
-      field3: addField3[0] || "",
-      value3: addField3[1] || "",
-      field4: addField4[0] || "",
-      value4: addField4[1] || "",
-      field5: addField5[0] || "",
-      value5: addField5[1] || "",
+      email: propsData.email
+    };
+    fieldsName.map(field => {
+      person[field.name] = propsData[field.name] || "";
     });
+    this.setState(person);
     if (eve.target.className === "icon" ||
         eve.target.nodeName === "I" &&
         eve.target.className === "mdi mdi-pencil") {
           eve.stopPropagation();
-          $("#editSubbscriber").openModal();
+          this.el.find("#editSubbscriber").openModal();
     }
   }
 
@@ -135,96 +130,73 @@ class SubscriberGridView extends React.Component {
    * @return {Array} - List of Objects that contains Column data and config
    */
   getColumnMeta = () => {
-    return (
-      [{
-          "columnName": "id",
-          "locked": true,
-          "visible": false
-        }, {
-          "columnName": "select",
-          "order": 1,
-          "locked": true,
-          "visible": true,
-          "cssClassName" : "select",
-          "sortable" : false,
-          "customHeaderComponent": CustomSelectAllComponent,
-          "customHeaderComponentProps": this.getGlobalData(),
-          "customComponent": CustomSelectComponent,
-          "globalData": this.getGlobalData
-        }, {
-          "columnName": "firstName",
-          "order": 2,
-          "locked": false,
-          "visible": true,
-          "displayName": "First Name",
-          "cssClassName" : "name"
-        }, {
-          "columnName": "middleName",
-          "order": 3,
-          "locked": false,
-          "visible": true,
-          "displayName": "Middle Name",
-          "cssClassName" : "name"
-        }, {
-          "columnName": "lastName",
-          "order": 4,
-          "locked": false,
-          "visible": true,
-          "displayName": "Last Name",
-          "cssClassName" : "name"
-        }, {
-          "columnName": "email",
-          "order": 5,
-          "locked": false,
-          "visible": true,
-          "displayName": "e-mail",
-          "cssClassName" : "email"
-        }, {
-          "columnName": "addField1",
-          "order": 6,
-          "locked": false,
-          "visible": true,
-          "displayName": "Data 1",
-          "cssClassName" : "field"
-        }, {
-          "columnName": "addField2",
-          "order": 7,
-          "locked": false,
-          "visible": true,
-          "displayName": "Data 2",
-          "cssClassName" : "field"
-        }, {
-          "columnName": "addField3",
-          "order": 8,
-          "locked": false,
-          "visible": true,
-          "displayName": "Data 3",
-          "cssClassName" : "field"
-        }, {
-          "columnName": "addField4",
-          "order": 9,
-          "locked": false,
-          "visible": true,
-          "displayName": "Data 4",
-          "cssClassName" : "field"
-        }, {
-          "columnName": "addField5",
-          "order": 10,
-          "locked": false,
-          "visible": true,
-          "displayName": "Data 5",
-          "cssClassName" : "field"
-        }, {
-          "columnName": "edit",
-          "order": 11,
-          "locked": true,
-          "visible": true,
-          "displayName": "Edit",
-          "cssClassName" : "icon",
-          "sortable" : false,
-          "customComponent": CustomEditLinkComponent
-        }]
-    );
+    const {fieldsName} = this.props;
+    const genericFields = 5;
+    const nextField = 1;
+    let columnMeta = [{
+        "columnName": "id",
+        "locked": true,
+        "visible": false
+      }, {
+        "columnName": "select",
+        "order": 1,
+        "locked": true,
+        "visible": true,
+        "cssClassName" : "select",
+        "sortable" : false,
+        "customHeaderComponent": CustomSelectAllComponent,
+        "customHeaderComponentProps": this.getGlobalData(),
+        "customComponent": CustomSelectComponent,
+        "globalData": this.getGlobalData
+      }, {
+        "columnName": "firstName",
+        "order": 2,
+        "locked": false,
+        "visible": true,
+        "displayName": "First Name",
+        "cssClassName" : "name"
+      }, {
+        "columnName": "middleName",
+        "order": 3,
+        "locked": false,
+        "visible": true,
+        "displayName": "Middle Name",
+        "cssClassName" : "name"
+      }, {
+        "columnName": "lastName",
+        "order": 4,
+        "locked": false,
+        "visible": true,
+        "displayName": "Last Name",
+        "cssClassName" : "name"
+      }, {
+        "columnName": "email",
+        "order": 5,
+        "locked": false,
+        "visible": true,
+        "displayName": "e-mail",
+        "cssClassName" : "email"
+      }, {
+        "columnName": "edit",
+        "order": genericFields + fieldsName.length + nextField,
+        "locked": true,
+        "visible": true,
+        "displayName": "Edit",
+        "cssClassName" : "icon",
+        "sortable" : false,
+        "customComponent": CustomEditLinkComponent
+      }];
+    fieldsName.map((field, index) => {
+      columnMeta.push({
+        "columnName": field,
+        "order": genericFields + index + nextField,
+        "locked": false,
+        "visible": true,
+        "displayName": field,
+        "cssClassName" : "field"
+      });
+    });
+    return columnMeta;
   }
 
   /**
@@ -327,9 +299,6 @@ class SubscriberGridView extends React.Component {
             columnMetadata={this.getColumnMeta()}
             selectedRowIds={this.state.selectedRowIds}
             globalData={this.getGlobalData}
-            columns={["select", "firstName", "middleName", "lastName",
-              "email", "addField1", "addField2", "addField3",
-              "addField4", "addField5", "edit"]}
             onRowClick={this.handleRowClick}
             metadataColumns={["id"]}
             isMultipleSelection={false}
@@ -528,6 +497,8 @@ class SubscriberGridView extends React.Component {
 
 SubscriberGridView.defaultProps = {
   results: [],
+  fieldsName: [],
+  listFields: [],
   listId: ""
 };
 

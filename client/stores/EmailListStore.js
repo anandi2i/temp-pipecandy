@@ -9,7 +9,7 @@ import appHistory from "../RouteContainer";
 
 let _allEmailList = {};
 let _getEmailList = {};
-let _getEmailListByID = [];
+let _getEmailListByID = {};
 let _error = "";
 let _success = "";
 let _getFields = {};
@@ -90,32 +90,33 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
   getEmailListByID() {
     let emailListByID = _getEmailList[0];
     let _peopleData = [];
+    const fieldsList = _.indexBy(emailListByID.fields, "id");
+    const fieldsName = _.pluck(emailListByID.fields, "name");
     _.each(emailListByID.people, function(people, index) {
       let _temp = {
         id: people.id,
         select: people.id,
-        firstName: people.firstName || "",
+        firstName: people.firstName,
         middleName: people.middleName || "",
-        lastName: people.lastName || "",
-        email: people.email || "",
-        addField1: "",
-        addField2: "",
-        addField3: "",
-        addField4: "",
-        addField5: "",
-        edit: ""};
-      _.each(people.fields, function(field, index) {
-        if (field.name && field.value) {
-          _temp["addField"+(++index)] = field.name + ": "+field.value;
-        }
+        lastName: people.lastName,
+        email: people.email,
+        edit: ""
+      };
+      _.each(fieldsName, fieldName => {
+        _temp[fieldName] = "";
+      });
+      _.each(people.fieldValues, field => {
+        _temp[fieldsList[field.fieldId].name] = field.value;
       });
       _peopleData.push(_temp);
     });
-    _getEmailListByID = [{
+    _getEmailListByID = {
       id: emailListByID.id,
       name: emailListByID.name,
-      peoples: _peopleData
-    }];
+      peoples: _peopleData,
+      fieldsName: fieldsName,
+      listFields: emailListByID.fields
+    };
     return _getEmailListByID;
   },
 
@@ -196,7 +197,7 @@ AppDispatcher.register(function(payload) {
         _success = "Subscriber details updated successfully";
         let rowIndex = "";
         let data = response.data;
-        let _peopleData = _getEmailListByID[0].peoples;
+        let _peopleData = _getEmailListByID.peoples;
         rowIndex = _.findIndex(_peopleData, {id: data.id});
         let _temp = _peopleData[rowIndex];
         let i = 1;
@@ -210,7 +211,7 @@ AppDispatcher.register(function(payload) {
             _temp[key] = data[key];
           }
         });
-        _getEmailListByID[0].peoples[rowIndex] = _temp;
+        _getEmailListByID.peoples[rowIndex] = _temp;
         EmailListStore.emitPersonUpdate();
         _success = "";
       }, (err)=> {
