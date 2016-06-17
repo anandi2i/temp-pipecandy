@@ -27,6 +27,13 @@
     },
     "updatedAt": {
       "type": "date"
+    },
+    "lastRunAt": {
+      "type": "date",
+      "postgresql": {
+        "dataType": "timestamp with time zone",
+        "nullable": "YES"
+      }
     }
   },
   "validations": [],

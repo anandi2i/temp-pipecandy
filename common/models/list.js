@@ -2,6 +2,7 @@
 
 import logger from "../../server/log";
 import lodash from "lodash";
+import async from "async";
 
 module.exports = function(List) {
 
@@ -181,6 +182,98 @@ module.exports = function(List) {
         });
       }); //people save
     }); //list find
+  };
+
+  List.remoteMethod(
+    "listMetrics", {
+      description: "Get List Metrics",
+      accepts: [{
+        arg: "ctx",
+        type: "object",
+        http: {
+          source: "context"
+        }
+      }],
+      returns: {
+        arg: "list",
+        type: "array",
+        root: true
+      },
+      http: {
+        verb: "get",
+        path: "/listMetrics"
+      }
+    }
+  );
+  /**
+   * Method to return list metrics
+   * @return {[Object]} List and its metric
+   */
+  List.listMetrics = (ctx, callback) => {
+    List.find({
+      order: "createdAt DESC"
+    }, (listsErr, lists) => {
+      let listResponses = [];
+      async.each(lists, (list, listsCB) => {
+        let listResponse = {};
+        listResponse.name = list.name;
+        listResponse.createdAt = list.createdAt;
+
+        async.parallel([
+          (callback) => {
+            list.user((error, user) => {
+              let names = [user.firstName, user.lastName];
+              listResponse.createdBy = lodash.join(names, " ").trim();
+              callback(null, listResponse);
+            });
+          },
+          (callback) => {
+            list.people((error, people) => {
+              listResponse.membersCount = people.length;
+              callback(null, listResponse);
+            });
+          },
+          (callback) => {
+            list.listMetrics((error, listMetrics) => {
+              if (!lodash.isEmpty(listMetrics)) {
+                const hundred = 100;
+                let totalEmailReached =
+                      listMetrics[0].sentEmails - listMetrics[0].bounced;
+                listResponse.openPercentage = lodash.round(
+                      (listMetrics[0].opened / totalEmailReached) * hundred);
+                listResponse.clickPercentage = lodash.round(
+                      (listMetrics[0].clicked / totalEmailReached) * hundred);
+                listResponse.spamPercentage = lodash.round(
+                      (listMetrics[0].spammed / totalEmailReached) * hundred);
+              } else {
+                listResponse.openPercentage = 0;
+                listResponse.clickPercentage = 0;
+                listResponse.spamPercentage = 0;
+              }
+              callback(null, listResponse);
+            });
+          },
+          (callback) => {
+            list.campaigns((campaignErr, campaigns) => {
+              if (!lodash.isEmpty(campaigns)) {
+                campaigns = lodash.sortBy(campaigns, "lastRunAt");
+                let sizeToDec = 1;
+                let campaign = campaigns[campaigns.length - sizeToDec];
+                listResponse.lastRunAt = campaign.lastRunAt;
+              } else {
+                listResponse.lastRunAt = "0";
+              }
+              callback(null, listResponse);
+            });
+          }
+        ], (error, response) => {
+          listResponses.push(listResponse);
+          listsCB(null, listResponse);
+        });
+      }, function(error, response) {
+        callback(null, listResponses);
+      });
+    });
   };
 
   /**

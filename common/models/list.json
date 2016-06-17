@@ -139,6 +139,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "savePersonWithFields"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "listMetrics"
     }
   ],
   "methods": {}
