@@ -8,6 +8,7 @@ import {HandleError} from "../utils/ErrorMessageHandler";
 import appHistory from "../RouteContainer";
 
 let _user = {};
+let _prevLocation = "";
 let _error = "";
 let _success = "";
 let isSocialAuth = false;
@@ -55,6 +56,14 @@ const UserStore = _.extend({}, EventEmitter.prototype, {
   },
 
   /**
+   * Sets previous location
+   * @param {string} path name
+   */
+  setPrevLocation(location) {
+    _prevLocation = location;
+  },
+
+  /**
    * Gets success message if any
    * @return {string} success message
    */
@@ -88,10 +97,14 @@ AppDispatcher.register(function(payload) {
       });
       break;
     case Constants.LOGIN:
+      if (_prevLocation === "/") {
+        _prevLocation = "home";
+      }
       UserApi.login(action.data).then((response) => {
         _user = response.data.userData;
         _error = "";
-        appHistory.push("home");
+        appHistory.push(_prevLocation);
+        enabledropDownBtn();
       }, (err)=> {
         _user = {};
         _error = HandleError.evaluateError(err);
@@ -114,6 +127,7 @@ AppDispatcher.register(function(payload) {
       UserStore.emitChange();
       break;
     case Constants.LOGOUT:
+      _prevLocation = "home";
       UserApi.logout().then((response) => {
         _user = "";
         isSocialAuth = false;

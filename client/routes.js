@@ -39,6 +39,7 @@ import CampaignOutbox from
 import Dashboard from "./components/campaign/Dashboard.react";
 
 function requireAuth(nextState, replace) {
+  UserStore.setPrevLocation(nextState.location.pathname);
   if(!($.isEmptyObject(UserStore.getUser()))) {
     return;
   }
