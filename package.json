@@ -12,6 +12,7 @@
     "campaignEnqueue": "node server/mailSender/campaignEnqueue.js",
     "campaignConsumer": "node server/mailSender/campaignConsumer.js",
     "campaignMailSender": "node server/mailSender/campaignMailSender.js",
+    "mailCrawler": "node server/mailCrawler/crawl.js",
     "validate": "npm ls"
   },
   "dependencies": {
@@ -74,6 +75,7 @@
     "serve-favicon": "^2.0.1",
     "spamc": "0.0.5",
     "sqs-consumer": "^3.1.3",
+    "striptags": "^2.1.1",
     "uglify-js": "github:mishoo/UglifyJS2#harmony",
     "underscore": "^1.8.3",
     "winston": "^2.2.0",

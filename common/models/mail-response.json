@@ -1,0 +1,67 @@
+{
+  "name": "MailResponse",
+  "plural": "MailResponses",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "content": {
+      "type": "string"
+    },
+    "NLPClass": {
+      "type": "string"
+    },
+    "UserClass": {
+      "type": "string"
+    },
+    "sentTime": {
+      "type": "date"
+    },
+    "isUserResponse": {
+      "type": "boolean",
+      "default": false
+    },
+    "subject": {
+      "type": "string"
+    },
+    "fromEmailId": {
+      "type": "string"
+    },
+    "mailId": {
+      "type": "string"
+    },
+    "threadId": {
+      "type": "string"
+    },
+    "deliveredToEmailId": {
+      "type": "string"
+    },
+    "receivedDate": {
+      "type": "date"
+    },
+    "toEmailId": {
+      "type": "string"
+    },
+    "ccMailId": {
+      "type": "string"
+    },
+    "labels": {
+      "type": [
+        "string"
+      ]
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

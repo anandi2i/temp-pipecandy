@@ -135,5 +135,9 @@
   "openedEmail": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "MailResponse": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }
