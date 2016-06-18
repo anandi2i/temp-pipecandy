@@ -525,7 +525,8 @@ a {
   min-height: 50px;
   @include sub-nav-container;
 }
-#addField {
+#addField,
+.create-container {
   h3 {
     margin-bottom: 28px;
     text-align: center;
@@ -551,7 +552,7 @@ a {
       margin-top: -12px;
       .react-autosuggest__suggestion {
         cursor: pointer;
-        padding: 6px 0px;
+        padding: 6px 0;
         &.react-autosuggest__suggestion--focused {
           background-color: $drp-dwn-bg;
         }
@@ -866,12 +867,16 @@ $lines-to-show: 8;
   background-color: $lit-gray-bg;
   padding: 10px;
   margin-bottom: 10px;
+  border: $border-1px;
+  border-radius: 3px;
+  width: calc(100% - 5px);
+  margin-left: auto;
+  margin-right: auto;
   .head {
     font-weight: bold;
     margin-bottom: 10px;
   }
   .content {
-    margin-left: 10px;
     margin-bottom: 10px;
   }
   .mail-content {
@@ -879,6 +884,16 @@ $lines-to-show: 8;
       margin: 0;
     }
   }
+}
+.inline-tiny-mce {
+  border: $border-1px;
+  outline: 0 !important;
+  min-height: 40px;
+  padding: 10px;
+  border-radius: 3px;
+}
+.mce-floatpanel {
+  border: 0 !important;
 }
 /***********************************
   campaign report
@@ -972,14 +987,7 @@ $lines-to-show: 8;
       background-color: $lit-gray-bg;
     }
     &.active {
-      background-color: $lit-gray-bg;
-    }
-    &[data-classname="un-common"] {
-      a {
-        span {
-          color: $red-clr;
-        }
-      }
+      background-color: $light-border;
     }
   }
 }
@@ -1091,14 +1099,6 @@ span#autocomplete {
         p {
           margin: 0;
         }
-        .un-common {
-          color: $red-clr;
-        }
-        &.clear-err-count {
-          .un-common {
-            text-decoration: line-through;
-          }
-        }
       }
     }
     .preview-content {}
@@ -1135,11 +1135,8 @@ span#autocomplete {
   }
 }
 .email-body {
+  .common,
   .un-common {
-    color: $red-clr;
-    background-color: $lit-red-bg;
-  }
-  .common {
     color: $blue-clr;
     background-color: $lit-blue-bg;
   }
@@ -1261,6 +1258,12 @@ span#autocomplete {
       margin-left: 1px;
       outline: none;
     }
+    .issue-container {
+      .un-common {
+        color: $red-clr;
+        background-color: $lit-red-bg;
+      }
+    }
     .modal-content {
       padding: 0;
       position: relative;
@@ -1275,6 +1278,25 @@ span#autocomplete {
       padding: 0;
       height: 100%;
       overflow-y: auto;
+      .email-issue-subject {
+        margin-bottom: 20px;
+        border-radius: 3px;
+        border: $border-1px;
+        padding: 10px;
+        outline: 0;
+        margin-left: 1px;
+        .un-common {
+          color: $red-clr;
+          background-color: $lit-red-bg;
+        }
+        .common {
+          color: $blue-clr;
+          background-color: $lit-blue-bg;
+        }
+        p {
+          margin: 0;
+        }
+      }
     }
   }
   .mdi-close {

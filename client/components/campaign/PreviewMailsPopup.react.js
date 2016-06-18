@@ -11,7 +11,7 @@ class PreviewMailsPopup extends React.Component {
       displayPerson: 1,
       selectedPerson: 0,
       peopleList: this.props.peopleList || [],
-      listofEmails: [],
+      listofEmails: {},
       followupsList:[]
     };
   }
@@ -118,12 +118,15 @@ class PreviewMailsPopup extends React.Component {
     }
     let setContent =
       CampaignStore.applySmartTagsValue(content, currentPerson);
+    // concat optTextContent content
     setContent = setContent.concat(optTextContent);
+    let setSubject =
+      CampaignStore.applySmartTagsValue(emailSubject, currentPerson);
     this.setState({
-      listofEmails: [{
+      listofEmails: {
         "content": setContent,
-        "emailSubject": emailSubject
-      }]
+        "emailSubject": setSubject
+      }
     });
 
     let followupsList =[], followupEmail, followupSubject;
@@ -158,6 +161,7 @@ class PreviewMailsPopup extends React.Component {
     let leftStyle = {
       color: currentPerson > this.state.initCount ? "" : "#ebebeb"
     };
+    let listofEmails = this.state.listofEmails;
     let rightStyle = {
       color: currentPerson < peopelLength ? "" : "#ebebeb"
     };
@@ -189,26 +193,19 @@ class PreviewMailsPopup extends React.Component {
             <div className="modal-content">
               <div className="template-content">
                 <div>
-                  {
-                    this.state.listofEmails.map(function(a, key) {
-                      return (
-                        <div key={key} className="preview-mail-container">
-                          <div className="col s12 head">Subject</div>
-                          <div className="col s12 content">{a.emailSubject}</div>
-                          <div className="col s12 head">Email</div>
-                          <div className="col s12 mail-content content" dangerouslySetInnerHTML={{__html: a.content}}></div>
-                        </div>
-                      );
-                    })
-                  }
+                  <div className="preview-mail-container">
+                    <div className="col s12 head">Subject</div>
+                    <div className="col s12 content" dangerouslySetInnerHTML={{__html: listofEmails.emailSubject}} />
+                    <div className="col s12 head">Email</div>
+                    <div className="col s12 mail-content content" dangerouslySetInnerHTML={{__html: listofEmails.content}} />
+                  </div>
                   {
                     this.state.followupsList.map(function(a, key) {
                       return (
                         <div key={key} className="preview-mail-container">
-                          <div className="col s12 head">Subject</div>
-                          <div className="col s12 content">{a.emailSubject}</div>
+                          <h3>followUp {++key}</h3>
                           <div className="col s12 head">Email</div>
-                          <div className="col s12 mail-content content" dangerouslySetInnerHTML={{__html: a.content}}></div>
+                          <div className="col s12 mail-content content" dangerouslySetInnerHTML={{__html: a.content}} />
                         </div>
                       );
                     })

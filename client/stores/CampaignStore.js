@@ -55,7 +55,7 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     let initialRange = 1;
     let endRange = 10;
     let _allCampaignListFlattenData = [];
-    _.each(_getAllCampaigns, function(obj, index) {
+    _.each(_getAllCampaigns, (obj, index) => {
       let randomVal = _.random(initialRange, endRange);
       _allCampaignListFlattenData.push({
         id: obj.id,
@@ -82,17 +82,24 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   },
 
   getIssuesPeopleList(issueTags) {
-    let peopleList = _.filter(allPeopleList, (person, key) => {
-      let fieldName = [];
-      if(person.firstName) fieldName.push("firstName");
-      if(person.middleName) fieldName.push("middleName");
-      if(person.lastName) fieldName.push("lastName");
-      if(person.salutation) fieldName.push("salutation");
-      if(person.email) fieldName.push("email");
-      return !(issueTags.length === _.intersection(issueTags,
-        fieldName.concat(_.pluck(person.fields, "name"))).length);
+    let issuePeopleList = [];
+    _.each(allPeopleList, (person, key) => {
+      let getTags = _.intersection(person.fieldNames, issueTags);
+      if(getTags.length !== issueTags.length)
+        issuePeopleList.push(person);
     });
-    return peopleList;
+    return issuePeopleList;
+  },
+
+  constructSmartTags(allTags) {
+    let getAllTags = [];
+    allTags.commonSmartTags.map((tag, key) => {
+      getAllTags.push({name: tag, className: "common"});
+    });
+    allTags.unCommonSmartTags.map((tag, key) => {
+      getAllTags.push({name: tag, className: "un-common"});
+    });
+    return getAllTags;
   },
 
   setOptText(optionalText) {
@@ -117,7 +124,7 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   constructEmailTemplate(str) {
     let html = $.parseHTML(str);
     let findCommonTags = $(html).find("span.common");
-    _.each(findCommonTags, function(val, key){
+    _.each(findCommonTags, (val, key) => {
       let getTag = $(val).data("tag");
       $(val)[0].dataset.tagName = getTag;
       $(val).html("&lt;"+getTag+"&gt;");
@@ -126,24 +133,36 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     return $(steDom).html();
   },
 
+  replaceSmartTagContent(value) {
+    let tag = "<span class='tag common' data-id='"+value.id+"' "+
+      "contenteditable='false' data-tag='"+value.field+
+      "' data-tag-name='"+value.value+"'>"+value.value+"</span>";
+    return tag;
+  },
+
+  applyTags(emailContent, str, value){
+    let reg = new RegExp(str, "g");
+    emailContent = emailContent
+      .replace(reg, CampaignStore.replaceSmartTagContent(value));
+    return emailContent;
+  },
+
   applySmartTagsValue(emailContent, getPersonInfo) {
-    emailContent = emailContent.replace(/"/g, "'");
-    $.each(getPersonInfo, function (key, value) {
-      if(key === "fields") {
-        _.each(value, function (val, key) {
-          let fieldsStr = "<span class='tag un-common' "+
-            "contenteditable='false' data-tag='"+val.name+"' data-tag-name='"+
-            val.name+"'>&lt;"+val.name+"&gt;</span>";
-          let re = new RegExp(fieldsStr, "g");
-          emailContent = emailContent
-            .replace(re, val.value);
-        });
+    emailContent = emailContent.replace(/\"/g, "\'");
+    _.each(getPersonInfo.personFields, (value, key) => {
+      let common = "<span class='tag common' "+
+        "contenteditable='false' data-tag='"+value.field+"' data-tag-name='"+
+          value.field+"'>&lt;"+value.field+"&gt;</span>";
+      if(emailContent.includes(common)){
+        emailContent = CampaignStore.applyTags(emailContent, common, value);
+      } else {
+        let unCommon = "<span class='tag un-common' "+
+          "contenteditable='false' data-tag='"+value.field+"' data-tag-name='"+
+          value.field+"'>&lt;"+value.field+"&gt;</span>";
+        if(emailContent.includes(unCommon)){
+          emailContent = CampaignStore.applyTags(emailContent, unCommon, value);
+        }
       }
-      let str = "<span class='tag common' "+
-        "contenteditable='false' data-tag='"+key+"' data-tag-name='"+
-          key+"'>&lt;"+key+"&gt;</span>";
-      let re = new RegExp(str, "g");
-      emailContent = emailContent.replace(re, value);
     });
     return emailContent;
   }
@@ -186,24 +205,25 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.GET_SELECTED_EMAIL_LIST:
       let selectedList = {
-        list: action.data
+        ids: action.data
       };
       EmailListApi.getSelectedList(selectedList).then((response) => {
         let emailList = [];
         let smartTags = [];
         let commonSmartTags = [];
         let unCommonSmartTags = [];
+        let allFields = [];
         allPeopleList = [];
         let allEmailList = [];
         duplicateEmailList = [];
-        response.data.forEach(function(list, index) {
+        response.data.forEach((list, index) => {
           emailList.push({
             id: list.id,
             name: list.name,
             peopleCount: list.people.length
           });
-          _.each(list.people, function(person) {
-            allPeopleList.push(person);
+          let getFields = list.fields;
+          _.each(list.people, (person) => {
             // To get duplicate Email Ids
             if(_.contains(allEmailList, person.email)) {
               duplicateEmailList.push(person.email);
@@ -211,23 +231,75 @@ AppDispatcher.register(function(payload) {
               allEmailList.push(person.email);
             }
             let fieldName = [];
-            if(person.firstName) fieldName.push("firstName");
-            if(person.middleName) fieldName.push("middleName");
-            if(person.lastName) fieldName.push("lastName");
-            if(person.salutation) fieldName.push("salutation");
-            if(person.email) fieldName.push("email");
-            smartTags.push(fieldName.concat(_.pluck(person.fields, "name")));
+            let personFields = [];
+            if(person.firstName) {
+              fieldName.push("firstName");
+              personFields.push({
+                "field": "firstName",
+                "value": person.firstName,
+                "id": 1
+              });
+            }
+            if(person.middleName) {
+              fieldName.push("middleName");
+              personFields.push({
+                "field": "middleName",
+                "value": person.middleName,
+                "id": 2
+              });
+            }
+            if(person.lastName) {
+              fieldName.push("lastName");
+              personFields.push({
+                "field": "lastName",
+                "value": person.lastName,
+                "id": 3
+              });
+            }
+            if(person.email) {
+              fieldName.push("email");
+              personFields.push({
+                "field": "email",
+                "value": person.email,
+                "id": 4
+              });
+            }
+            if(person.salutation) {
+              fieldName.push("salutation");
+              personFields.push({
+                "field": "salutation",
+                "value": person.salutation,
+                "id": 5
+              });
+            }
+            const fieldsList = _.indexBy(getFields, "id");
+            _.each(person.fieldValues, field => {
+              fieldName.push(fieldsList[field.fieldId].name);
+              personFields.push(
+                {
+                  "field": fieldsList[field.fieldId].name,
+                  "value": field.value,
+                  "id": field.fieldId
+                }
+              );
+            });
+            smartTags.push(fieldName);
+            person.personFields = personFields;
+            person.fieldNames = fieldName;
+            allPeopleList.push(person);
           });
         });
         //http://stackoverflow.com/questions/16229479/how-to-perform-union-or-intersection-on-an-array-of-arrays-with-underscore-js
         commonSmartTags = _.intersection.apply(_, smartTags);
         smartTags = _.union.apply(_, smartTags);
+        allFields = smartTags;
         unCommonSmartTags = _.difference(smartTags, commonSmartTags);
         selectedEmailList = {
           emailList: emailList,
           commonSmartTags: commonSmartTags,
           unCommonSmartTags: unCommonSmartTags,
-          peopleList: allPeopleList
+          peopleList: allPeopleList,
+          allFields: allFields
         };
         _error = "";
         CampaignStore.emitEmailListChange();
@@ -238,7 +310,7 @@ AppDispatcher.register(function(payload) {
       });
       break;
     case Constants.GET_ALL_INBOX_REPORT:
-      //TODO need to change API   
+      //TODO need to change API
       CampaignApi.getAllEmailTemplates().then((response) => {
         _allEmailTemplates = response.data;
         _error = "";

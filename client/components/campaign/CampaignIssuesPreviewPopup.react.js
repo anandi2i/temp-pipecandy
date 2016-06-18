@@ -26,12 +26,19 @@ class CampaignIssuesPreviewPopup extends React.Component {
 
   openModal = () => {
     let {id} = this.state;
-    let {personIssues, emailSubject, peopleList, emailContent} = this.props;
+    let {
+      personIssues,
+      emailSubject,
+      peopleList,
+      emailContent,
+      allFields
+    } = this.props;
     this.setState({
       personIssues: personIssues,
       emailSubject: emailSubject,
       peopleList: peopleList,
       emailContent: emailContent,
+      allFields: allFields,
       issuesCompletedList: [],
       selectedPerson: 0,
       displayPerson: 1,
@@ -41,7 +48,9 @@ class CampaignIssuesPreviewPopup extends React.Component {
         dismissible: false
       });
       initTinyMCEPopUp(`#previewMailContent-${id}`, `#previewToolbar-${id}`,
-        this.setEmailContent);
+        true, this.setEmailContent);
+      initTinyMCEPopUp(`#previewSubContent-${id}`, "",
+        false, this.setEmailSubject);
       this.el.find(".preview-modal-content").mCustomScrollbar({
         theme:"minimal-dark"
       });
@@ -52,15 +61,24 @@ class CampaignIssuesPreviewPopup extends React.Component {
     this.el.closeModal();
     tinyMCE.execCommand("mceRemoveEditor", true,
       `previewMailContent-${this.state.id}`);
+    tinyMCE.execCommand("mceRemoveEditor", true,
+      `previewSubContent-${this.state.id}`);
     this.props.closeCallback(this.state.issuesCompletedList);
   }
 
   setEmailContent = () => {
-    let {id, selectedPerson} = this.state;
+    let {selectedPerson} = this.state;
     let {emailContent} = this.props;
     if(emailContent) {
-      tinyMCE.get(`previewMailContent-${id}`).setContent(emailContent);
-      this.applySmartTags(selectedPerson);
+      this.applySmartTags(selectedPerson, emailContent, "previewMailContent");
+    }
+  }
+
+  setEmailSubject = () => {
+    let {selectedPerson} = this.state;
+    let {emailSubject} = this.props;
+    if(emailSubject) {
+      this.applySmartTags(selectedPerson, emailSubject, "previewSubContent");
     }
   }
 
@@ -77,7 +95,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
   handleBlur = () => {
     let {initCount, displayPerson, personIssues} = this.state;
     if(displayPerson >= initCount && displayPerson <= personIssues.length) {
-      this.applySmartTags(displayPerson - initCount);
+      this.applyAllSmartTags(displayPerson - initCount);
     } else {
       this.setState({
         displayPerson: parseInt(initCount, 10)
@@ -88,7 +106,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
 
   loadFirstPerson = () => {
     let firstPerson = 0;
-    this.applySmartTags(firstPerson);
+    this.applyAllSmartTags(firstPerson);
   }
 
   slider(position) {
@@ -100,95 +118,75 @@ class CampaignIssuesPreviewPopup extends React.Component {
       this.setState({
         displayPerson: displayPerson - initCount
       });
-      this.applySmartTags(id);
+      this.applyAllSmartTags(id);
     }
     if(position === "right" && id < --peopleLength) {
       id += initCount;
       this.setState({
         displayPerson: displayPerson + initCount
       });
-      this.applySmartTags(id);
+      this.applyAllSmartTags(id);
     }
   }
 
-  applySmartTags(personId) {
+  applyAllSmartTags(personId) {
+    this.applySmartTags(personId, this.props.emailContent,
+      "previewMailContent");
+    this.applySmartTags(personId, this.props.emailSubject,
+      "previewSubContent");
+  }
+
+  applySmartTags(personId, tagContent, editorId) {
     let getPersonInfo = this.state.personIssues[personId];
     this.setState({
       selectedPerson: personId
     });
-    let emailContent = this.props.emailContent.replace(/"/g, "'");
-    emailContent = this.applySmartTagsValue(emailContent, getPersonInfo);
-    tinyMCE.get(`previewMailContent-${this.state.id}`).setContent(emailContent);
+    let content = CampaignStore.applySmartTagsValue(tagContent, getPersonInfo);
+    tinyMCE.get(`${editorId}-${this.state.id}`).setContent(content);
   }
 
-  replaceSmartTagContent(val, key) {
-    let tag = "<span class='tag common' "+
-      "contenteditable='false' data-tag='"+key+
-      "' data-tag-name='"+val+"'>"+val+"</span>";
-    return tag;
-  }
-
-  applySmartTagsValue(emailContent, getPersonInfo) {
-    _.each(getPersonInfo, $.proxy(function (value, key) {
-      if(key === "fields") {
-        _.each(value, $.proxy(function (val, key) {
-          let fieldsStr = "<span class='tag un-common' "+
-            "contenteditable='false' data-tag='"+val.name+"' data-tag-name='"+
-            val.name+"'>&lt;"+val.name+"&gt;</span>";
-          let re = new RegExp(fieldsStr, "g");
-          emailContent = emailContent
-            .replace(re, this.replaceSmartTagContent(val.value, val.name));
-        }), this);
-      }
-      let str = "<span class='tag common' "+
-        "contenteditable='false' data-tag='"+key+"' data-tag-name='"+
-          key+"'>&lt;"+key+"&gt;</span>";
-      let re = new RegExp(str, "g");
-      emailContent = emailContent
-        .replace(re, this.replaceSmartTagContent(value, key));
-    }), this);
-    return emailContent;
+  checkIssueTags(editorId){
+    let getContent = tinyMCE.get(`${editorId}-${this.state.id}`).getContent();
+    return {
+      "issueTags": getIssueTagsInEditor(getContent),
+      "content": getContent
+    };
   }
 
   saveSinglePerson = () => {
-    let {id, initCount, personIssues, displayPerson} = this.state;
-    let index = displayPerson - initCount;
-    let getPersonInfo = _.clone(personIssues[index]);
-    let currentContent = tinyMCE.get(`previewMailContent-${id}`).getContent();
-    let getIssueTags = getIssueTagsInEditor(currentContent);
-    if(getIssueTags.length) {
+    let getContent = this.checkIssueTags("previewMailContent");
+    let getSubject = this.checkIssueTags("previewSubContent");
+    if(getContent.issueTags.length || getSubject.issueTags.length) {
+      displayError("Please remove all error tags to save changes");
       console.log("Please remove all error tags to save changes");
     } else {
+      let {initCount, personIssues, displayPerson} = this.state;
+      let index = displayPerson - initCount;
+      let getPersonInfo = _.clone(personIssues[index]);
       let myList = [];
-      getPersonInfo.template = currentContent;
-      getPersonInfo.emailSubject = this.state.emailSubject;
+      getPersonInfo.template = getContent.content;
+      getPersonInfo.emailSubject = getSubject.content;
       myList.push(getPersonInfo);
       personIssues.splice(index, initCount);
       this.setState((state) => ({
         issuesCompletedList: update(state.issuesCompletedList,
-          {$push: myList}),
+          {$push: myList})
       }), () => {
-        if(personIssues.length - initCount) {
-          this.setState((state) => ({
-            displayPerson: initCount
-          }), () => {
-            this.applySmartTags(displayPerson);
-          });
-        } else {
-          this.applySmartTags(displayPerson);
-        }
+        this.handleBlur();
       });
     }
   }
 
   applyAllPerson = () => {
-    let {id, initCount, personIssues, displayPerson, emailSubject} = this.state;
-    let currentContent = tinyMCE.get(`previewMailContent-${id}`).getContent();
-    currentContent = CampaignStore.constructEmailTemplate(currentContent);
-    let getIssueTags = getIssueTagsInEditor(currentContent);
-    let currentPerson = personIssues[displayPerson - initCount];
-    let currentIssueTags = this.checkSmartTags(currentPerson);
-    if(!getIssueTags.length) {
+    let getContent = this.checkIssueTags("previewMailContent");
+    let getSubject = this.checkIssueTags("previewSubContent");
+    if(getContent.issueTags.length || getSubject.issueTags.length) {
+      displayError("Please remove all error tags to save changes");
+      console.log("Please remove all error tags to save changes");
+    } else {
+      let {initCount, personIssues, displayPerson} = this.state;
+      let currentPerson = personIssues[displayPerson - initCount];
+      let currentIssueTags = this.checkSmartTags(currentPerson);
       let myList = [];
       let fixedPeopleId = [];
       _.each(personIssues, $.proxy(function(person, key) {
@@ -197,8 +195,10 @@ class CampaignIssuesPreviewPopup extends React.Component {
         let isMatch = _.all(currentIssueTags.issuesTags,
           function(v) { return _.include(findIssues.issuesTags, v); });
         if(isMatch && getPersonInfo) {
-          getPersonInfo.template = currentContent;
-          getPersonInfo.emailSubject = emailSubject;
+          getPersonInfo.template = CampaignStore.applySmartTagsValue(
+            getContent.content, getPersonInfo);
+          getPersonInfo.emailSubject = CampaignStore.applySmartTagsValue(
+            getSubject.content, getPersonInfo);
           myList.push(getPersonInfo);
           fixedPeopleId.push(getPersonInfo.id);
         }
@@ -219,9 +219,10 @@ class CampaignIssuesPreviewPopup extends React.Component {
   }
 
   checkSmartTags(getPersonInfo) {
-    let getEmailContent = this.props.emailContent;
-    getEmailContent = getEmailContent.replace(/\"/g, "\'");
-    let applyTags = this.applySmartTagsValue(getEmailContent, getPersonInfo);
+    let getEmailContent =
+      this.props.emailSubject.concat(this.props.emailContent);
+    let applyTags =
+      CampaignStore.applySmartTagsValue(getEmailContent, getPersonInfo);
     applyTags = CampaignStore.constructEmailTemplate(applyTags);
     let issuesTags = getIssueTagsInEditor(applyTags);
     return {
@@ -267,20 +268,12 @@ class CampaignIssuesPreviewPopup extends React.Component {
           <div className="col s12">
             <div className="modal-content">
               <div className="template-content">
-                <div className="input-field">
-                  <input placeholder="subject" type="text"
-                    className="field-name"
-                    value={this.state.emailSubject}
-                    id="emailSubject"
-                    onChange={(e) => this.onChange(e, "emailSubject")} />
-                  <label className="active" htmlFor="subject">
-                    Subject
-                  </label>
-                </div>
+                <div id={`previewSubContent-${this.state.id}`}
+                  className="email-issue-subject"></div>
                 <div id={`previewToolbar-${this.state.id}`}
                   className="tiny-toolbar"></div>
                 <div id={`previewMailContent-${this.state.id}`}
-                  className="email-body"></div>
+                  className="email-body issue-container"></div>
               </div>
             </div>
           </div>

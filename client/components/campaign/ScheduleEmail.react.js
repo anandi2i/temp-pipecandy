@@ -23,12 +23,15 @@ class ScheduleEmail extends React.Component {
       commonSmartTags: [],
       unCommonSmartTags: [],
       emailContent: "",
+      emailSubject: "",
       errorCount: 0,
-      issueTags: [],
+      contentIssueTags: [],
+      subjectIssueTags: [],
       personIssues: [],
       emailText: "",
       mainEmailContent: {},
       followupsEmailContent: [],
+      allFields: [],
       emailRawText: "",
       user: "",
       optText: "",
@@ -60,8 +63,12 @@ class ScheduleEmail extends React.Component {
     if(tinymce.get("emailContent")) {
       tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
     }
-    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", allTags,
+    if(tinymce.get("emailSubject")) {
+      tinyMCE.execCommand("mceRemoveEditor", true, "emailSubject");
+    }
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", allTags, true,
       this.tinyMceCb);
+    initTinyMCE("#emailSubject", "", "", allTags, false, this.tinyMceSubCb);
   }
 
   tinyMceCb = (editor) => {
@@ -69,10 +76,31 @@ class ScheduleEmail extends React.Component {
     let issueTags = getIssueTagsInEditor(content);
     this.setState({
       emailContent: content,
-      errorCount: parseInt(issueTags.length, 10),
-      issueTags: issueTags,
+      contentIssueTags: issueTags,
       emailRawText: editor.getBody().textContent
+    }, () => {
+      this.setState({
+        errorCount: this.getErrorCount()
+      });
     });
+  }
+
+  tinyMceSubCb = (editor) => {
+    let content = editor.getContent();
+    let issueTags = getIssueTagsInEditor(content);
+    this.setState({
+      emailSubject: content,
+      subjectIssueTags: issueTags
+    }, () => {
+      this.setState({
+        errorCount: this.getErrorCount()
+      });
+    });
+  }
+
+  getErrorCount(){
+    return parseInt(this.state.subjectIssueTags.length, 10) +
+      parseInt(this.state.contentIssueTags.length, 10);
   }
 
 /**
@@ -87,17 +115,16 @@ class ScheduleEmail extends React.Component {
       commonSmartTags: selectedEmailList.commonSmartTags || [],
       unCommonSmartTags: selectedEmailList.unCommonSmartTags || [],
       getAllPeopleList: selectedEmailList.peopleList || [],
+      allFields: selectedEmailList.allFields || [],
       user: user,
       optText: user.optText || "",
       address: user.address || ""
     }, () => {
-      let getAllTags = [];
-      this.state.commonSmartTags.map(function(tag, key) {
-        getAllTags.push({name: tag, className: "common"});
-      });
-      this.state.unCommonSmartTags.map(function(tag, key) {
-        getAllTags.push({name: tag, className: "un-common"});
-      });
+      let allTags = {
+        commonSmartTags: this.state.commonSmartTags,
+        unCommonSmartTags: this.state.unCommonSmartTags
+      };
+      let getAllTags = CampaignStore.constructSmartTags(allTags);
       this.initTinyMCE(getAllTags);
     });
   }
@@ -167,14 +194,22 @@ class ScheduleEmail extends React.Component {
     this.setState(state);
   }
 
+  getPersonIssues() {
+    let emailContent = tinymce.get("emailContent").getContent();
+    let emailIssueTags = getIssueTagsInEditor(emailContent);
+    let emailSubject = tinymce.get("emailSubject").getContent();
+    let subjectIssueTags = getIssueTagsInEditor(emailSubject);
+    let issueTags = _.union(emailIssueTags, subjectIssueTags);
+    return CampaignStore.getIssuesPeopleList(issueTags);
+  }
+
   openPreviewModal(preview) {
     if(preview === "issues") {
-      let content = tinymce.get("emailContent").getContent();
-      let issueTags = getIssueTagsInEditor(content);
-      let personIssues = CampaignStore.getIssuesPeopleList(issueTags);
       this.setState({
-        personIssues: personIssues
-      }, () => this.refs.issues.openModal());
+        personIssues: this.getPersonIssues()
+      }, () => {
+        this.refs.issues.openModal();
+      });
     } else {
       let followups = [];
       let followupsError = true;
@@ -197,6 +232,7 @@ class ScheduleEmail extends React.Component {
           !this.state.mainEmailContent.personIssues.length && followupsError){
             this.refs.preview.openModal();
         } else {
+          displayError("Fix all smart tag values");
           console.log("fix all smart tag values");
         }
       });
@@ -272,8 +308,6 @@ class ScheduleEmail extends React.Component {
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
-    let checkErrorCount = this.state.errorCount
-      ? "email-body" : "email-body clear-err-count";
 
     return (
       <div className="container" style={{display: displayIndex}}>
@@ -342,9 +376,7 @@ class ScheduleEmail extends React.Component {
               </div>
               {/* email subject */}
               <div className="row email-subject m-lr-0">
-                <input type="text" className="border-input"
-                  placeholder="Campaign subject"
-                  onChange={(e) => this.onChange(e, "subject")} />
+                <div id="emailSubject" className="email-body inline-tiny-mce" />
               </div>
               <div className="row email-content m-lr-0">
                 <div className="tiny-toolbar" id="mytoolbar">
@@ -375,7 +407,7 @@ class ScheduleEmail extends React.Component {
                       </ul>
                   </div>
                 </div>
-                <div id="emailContent" className={checkErrorCount}
+                <div id="emailContent" className="email-body"
                   dangerouslySetInnerHTML={{
                     __html: this.props.selectedTemplate
                   }} />
@@ -426,10 +458,11 @@ class ScheduleEmail extends React.Component {
               </div>
               {/* Popup starts here*/}
                 <CampaignIssuesPreviewPopup
-                  emailSubject={this.state.subject}
+                  emailSubject={this.state.emailSubject}
                   emailContent={this.state.emailContent}
                   peopleList={this.state.getAllPeopleList}
                   personIssues={this.state.personIssues}
+                  allFields={this.state.allFields}
                   closeCallback={this.closeCallback}
                   ref="issues"
                 />
@@ -459,7 +492,7 @@ class ScheduleEmail extends React.Component {
           peopleList={this.state.getAllPeopleList}
           mainEmailContent={this.state.mainEmailContent}
           followupsEmailContent={this.state.followupsEmailContent}
-          emailSubject={this.state.subject}
+          emailSubject={this.state.emailSubject}
           emailContent={this.state.emailContent}
           getOptText={this.getOptText}
           ref="preview"/>

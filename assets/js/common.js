@@ -117,8 +117,12 @@ window.getIssueTagsInEditor = getIssueTagsInEditor;
  * @param  {object} allTags - it contains all smart-tag objects by insert #mention
  * @param  {function} changeCb - callback function after insert tags in to the editor
  */
-function initTinyMCE(id, toolBar, dropdownId, allTags, changeCb) {
+function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
   let getFocusId = id.split("#")[1];
+  let toolbar = isToolbar;
+  if(isToolbar){
+    toolbar = "bold italic underline | alignleft aligncenter alignright alignjustify | link image";
+  }
   tinymce.init({
     selector: id,
     inline: true,
@@ -128,6 +132,7 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, changeCb) {
     contextmenu: false,
     auto_focus: getFocusId,
     fixed_toolbar_container: toolBar,
+    toolbar: toolbar,
     plugins: [
       "advlist autolink lists link image charmap print preview anchor",
       "insertdatetime media table paste code",
@@ -155,8 +160,7 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, changeCb) {
         }
         editor.insertContent(constructSmartTags(className, currentText));
       });
-    },
-    toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link image"
+    }
   });
 }
 window.initTinyMCE = initTinyMCE;
@@ -167,7 +171,11 @@ function constructSmartTags(className, tagText) {
 }
 window.constructSmartTags = constructSmartTags;
 
-function initTinyMCEPopUp(id, toolBar, cb) {
+function initTinyMCEPopUp(id, toolBar, isToolbar, cb) {
+  let toolbar = isToolbar;
+  if(isToolbar){
+    toolbar = "bold italic underline | alignleft aligncenter alignright alignjustify | link";
+  }
   let getFocusId = id.split("#")[1];
   tinymce.init({
     selector: id,
@@ -178,14 +186,14 @@ function initTinyMCEPopUp(id, toolBar, cb) {
     contextmenu: false,
     auto_focus: getFocusId,
     fixed_toolbar_container: toolBar,
+    toolbar: toolbar,
     init_instance_callback : function() {
       cb();
     },
     plugins: [
       "advlist autolink lists link image charmap print preview anchor",
       "insertdatetime media table contextmenu paste code"
-    ],
-    toolbar: "bold italic underline | alignleft aligncenter alignright alignjustify | link"
+    ]
   });
 }
 window.initTinyMCEPopUp = initTinyMCEPopUp;

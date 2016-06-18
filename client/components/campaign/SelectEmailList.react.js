@@ -3,7 +3,7 @@ import Spinner from "../Spinner.react";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 import EmailListGrid from "../grid/select-email-list/Grid.react";
-import NoDataComponent 
+import NoDataComponent
   from "../grid/select-email-list/CustomNoDataComponent.react";
 
 function getAllEmailList() {
@@ -46,11 +46,11 @@ class SelectEmailList extends React.Component {
         <div className="spaced" style={{display: this.state.spinning ? "block" : "none"}}>
           <Spinner />
         </div>
-        { 
+        {
           this.state.noDataBlock 
-          ? 
-            <NoDataComponent /> 
-          : 
+          ?
+            <NoDataComponent />
+          :
           this.state.allEmailLists.length
           ?
             <EmailListGrid ref="emailListGrid" results={this.state.allEmailLists} />

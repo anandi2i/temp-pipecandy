@@ -11,7 +11,6 @@ class AddFollowups extends React.Component {
       errorCount: 0,
       personIssues: [],
       emailText: "",
-      subject: "",
       emailContent: "",
       emailRawText: ""
     };
@@ -42,7 +41,13 @@ class AddFollowups extends React.Component {
     if(tinymce.get(`emailContent${followupId}`)) {
       tinyMCE.execCommand("mceRemoveEditor", true, `emailContent${followupId}`);
     }
-    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, this.tinyMceCb);
+    let allTags = {
+      commonSmartTags: this.props.commonSmartTags,
+      unCommonSmartTags: this.props.unCommonSmartTags
+    };
+    let getAllTags = CampaignStore.constructSmartTags(allTags);
+    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, getAllTags,
+      true, this.tinyMceCb);
   }
 
   tinyMceCb = (editor) => {
@@ -73,12 +78,6 @@ class AddFollowups extends React.Component {
         });
       }
     });
-  }
-
-  onChange(e, field) {
-    let state = {};
-    state[field] = e.target.value;
-    this.setState(state);
   }
 
   openPreviewModal = () => {
@@ -145,12 +144,6 @@ class AddFollowups extends React.Component {
               <input type="text" className="timepicker border-input" placeholder="00:00AM" />
             </div>
           </div>
-            {/* email subject */}
-            <div className="row email-subject m-lr-0">
-              <input type="text" className="border-input"
-                placeholder="Campaign subject"
-                onChange={(e) => this.onChange(e, "subject")} />
-            </div>
             <div className="row email-content m-lr-0">
               <div className="tiny-toolbar" id={"mytoolbar" + followupId}>
                 <div className="right smart-tag-container">
@@ -197,7 +190,7 @@ class AddFollowups extends React.Component {
             }
             {/* Popup starts here*/}
             <CampaignIssuesPreviewPopup
-              emailSubject={this.state.subject}
+              emailSubject=""
               emailContent={this.state.emailContent}
               peopleList={this.props.peopleList}
               personIssues={this.state.personIssues}
