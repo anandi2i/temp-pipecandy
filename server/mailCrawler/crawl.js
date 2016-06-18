@@ -62,7 +62,8 @@ function getUserCredentials(callback) {
   App.userIdentity.getCrawlableUsers(function(usersErr, users) {
     _(users).forEach((user) => {
         let userMailId = user.profile.emails[0].value;
-        oauth2Client.credentials = user.credentials;
+        oauth2Client.credentials.access_token = user.credentials.accessToken;
+        oauth2Client.credentials.refresh_token = user.credentials.refreshToken;
         callback(null, oauth2Client, userMailId);
     });
   });

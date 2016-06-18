@@ -7,3 +7,4 @@ assets/tinymce
 assets/js/tinymce-mention/plugin.js
 assets/js/materialize.clockpicker.js
 server/migrations
+server/mailCrawler/crawl.js
