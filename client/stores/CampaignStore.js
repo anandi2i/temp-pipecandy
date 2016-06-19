@@ -14,6 +14,7 @@ let _allEmailTemplates = [];
 let selectedEmailList = {};
 let allPeopleList = [];
 let duplicateEmailList = [];
+let fieldIds = [];
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignStore = _.extend({}, EventEmitter.prototype, {
@@ -102,11 +103,15 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
 
   constructSmartTags(allTags) {
     let getAllTags = [];
+    fieldIds = _.union.apply(_, fieldIds);
+    fieldIds = _.uniq(fieldIds, "id");
     allTags.commonSmartTags.map((tag, key) => {
-      getAllTags.push({name: tag, className: "common"});
+      let getId = _.where(fieldIds, {field: tag});
+      getAllTags.push({name: tag, className: "common", id: getId[0].id});
     });
     allTags.unCommonSmartTags.map((tag, key) => {
-      getAllTags.push({name: tag, className: "un-common"});
+      let getId = _.where(fieldIds, {field: tag});
+      getAllTags.push({name: tag, className: "un-common", id: getId[0].id});
     });
     return getAllTags;
   },
@@ -160,14 +165,15 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     emailContent = emailContent.replace(/\"/g, "\'");
     _.each(getPersonInfo.personFields, (value, key) => {
       let common = "<span class='tag common' "+
-        "contenteditable='false' data-tag='"+value.field+"' data-tag-name='"+
-          value.field+"'>&lt;"+value.field+"&gt;</span>";
+        "contenteditable='false' data-tag='"+value.field+"' data-id='"+value.id
+        +"' data-tag-name='"+value.field+"'>&lt;"+value.field+"&gt;</span>";
       if(emailContent.includes(common)){
         emailContent = CampaignStore.applyTags(emailContent, common, value);
       } else {
         let unCommon = "<span class='tag un-common' "+
-          "contenteditable='false' data-tag='"+value.field+"' data-tag-name='"+
-          value.field+"'>&lt;"+value.field+"&gt;</span>";
+          "contenteditable='false' data-tag='"+value.field+"' data-id='"+
+          value.id+"' data-tag-name='"+value.field+
+          "'>&lt;"+value.field+"&gt;</span>";
         if(emailContent.includes(unCommon)){
           emailContent = CampaignStore.applyTags(emailContent, unCommon, value);
         }
@@ -219,6 +225,7 @@ AppDispatcher.register(function(payload) {
       EmailListApi.getSelectedList(selectedList).then((response) => {
         let emailList = [];
         let smartTags = [];
+        fieldIds = [];
         let commonSmartTags = [];
         let unCommonSmartTags = [];
         let allFields = [];
@@ -241,58 +248,72 @@ AppDispatcher.register(function(payload) {
             }
             let fieldName = [];
             let personFields = [];
+            let newField = [];
+            let newtag = {};
             if(person.firstName) {
               fieldName.push("firstName");
-              personFields.push({
+              newtag = {
                 "field": "firstName",
                 "value": person.firstName,
                 "id": 1
-              });
+              };
+              personFields.push(newtag);
+              newField.push(_.omit(newtag, "value"));
             }
             if(person.middleName) {
               fieldName.push("middleName");
-              personFields.push({
+              newtag = {
                 "field": "middleName",
                 "value": person.middleName,
                 "id": 2
-              });
+              };
+              personFields.push(newtag);
+              newField.push(_.omit(newtag, "value"));
             }
             if(person.lastName) {
               fieldName.push("lastName");
-              personFields.push({
+              newtag = {
                 "field": "lastName",
                 "value": person.lastName,
                 "id": 3
-              });
+              };
+              personFields.push(newtag);
+              newField.push(_.omit(newtag, "value"));
             }
             if(person.email) {
               fieldName.push("email");
-              personFields.push({
+              newtag = {
                 "field": "email",
                 "value": person.email,
                 "id": 4
-              });
+              };
+              personFields.push(newtag);
+              newField.push(_.omit(newtag, "value"));
             }
             if(person.salutation) {
               fieldName.push("salutation");
-              personFields.push({
+              newtag = {
                 "field": "salutation",
                 "value": person.salutation,
                 "id": 5
-              });
+              };
+              personFields.push(newtag);
+              newField.push(_.omit(newtag, "value"));
             }
             const fieldsList = _.indexBy(getFields, "id");
             _.each(person.fieldValues, field => {
               fieldName.push(fieldsList[field.fieldId].name);
-              personFields.push(
-                {
-                  "field": fieldsList[field.fieldId].name,
-                  "value": field.value,
-                  "id": field.fieldId
-                }
-              );
+              newtag = {
+                "field": fieldsList[field.fieldId].name,
+                "value": field.value,
+                "id": field.fieldId
+              };
+              personFields.push(newtag);
+              newField.push(_.omit(newtag, "value"));
+              ;
             });
             smartTags.push(fieldName);
+            fieldIds.push(newField);
             person.personFields = personFields;
             person.fieldNames = fieldName;
             allPeopleList.push(person);

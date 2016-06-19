@@ -148,30 +148,20 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
       delimiter: "#",
       items: 100,
       insert: function(item) {
-        return constructSmartTags(item.classname, item.name);
+        return constructSmartTags(item.classname, item.name, item.id);
       }
     },
     setup : function(editor) {
       editor.on("change", function(e) {
         changeCb(editor);
       });
-      $(dropdownId + " li").off("click").on("click", function(event) {
-        let currentText = event.currentTarget.innerText.trim();
-        let className;
-        if($(event.currentTarget).find("a").hasClass("common")) {
-          className = "common";
-        } else {
-          className = "un-common";
-        }
-        editor.insertContent(constructSmartTags(className, currentText));
-      });
     }
   });
 }
 window.initTinyMCE = initTinyMCE;
 
-function constructSmartTags(className, tagText) {
-  return "<span data-tag='"+tagText+"' data-tag-name='"+tagText+"' class='tag "+className+"' contenteditable='false'>&lt;" +
+function constructSmartTags(className, tagText, id) {
+  return "<span data-tag='"+tagText+"' data-id='"+id+"' data-tag-name='"+tagText+"' class='tag "+className+"' contenteditable='false'>&lt;" +
     tagText + "&gt;</span>";
 }
 window.constructSmartTags = constructSmartTags;

@@ -259,7 +259,20 @@ class ScheduleEmail extends React.Component {
       followupsEmailContent: followups
     }), function(){
       //TODO Need to construct data here
-      console.log(this.state.mainEmailContent);
+      const index = 0, removed = 0;
+      let listIds = _.pluck(this.state.emailList, "id");
+      let mainTemplate = {};
+      let issuesCompletedList = this.state.mainEmailContent.issuesCompletedList;
+      mainTemplate.subject = this.state.mainEmailContent.emailSubject;
+      mainTemplate.content = this.state.mainEmailContent.emailContent;
+      mainTemplate.usedTagIds = this.state.mainEmailContent.usedTagIds;
+      mainTemplate.userId = getCookie("userId");
+      issuesCompletedList.splice(index, removed, mainTemplate);
+      let campaignTemplates = {
+        listIds: listIds,
+        campaignTemplates: issuesCompletedList
+      };
+      console.log(campaignTemplates);
       console.log(this.state.followupsEmailContent);
     });
   }

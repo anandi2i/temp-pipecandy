@@ -47,6 +47,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
       this.el.openModal({
         dismissible: false
       });
+      this.usedTagIds();
       initTinyMCEPopUp(`#previewMailContent-${id}`, `#previewToolbar-${id}`,
         true, this.setEmailContent);
       initTinyMCEPopUp(`#previewSubContent-${id}`, "",
@@ -54,6 +55,18 @@ class CampaignIssuesPreviewPopup extends React.Component {
       this.el.find(".preview-modal-content").mCustomScrollbar({
         theme:"minimal-dark"
       });
+    });
+  }
+
+  usedTagIds(){
+    let {emailSubject, emailContent} = this.state;
+    let htmlDom = $.parseHTML(emailSubject.concat(emailContent));
+    let getUsedTagIds = [];
+    _.each($(htmlDom).find("span.tag"), function(val, key){
+      getUsedTagIds.push($(val).attr("data-id"));
+    });
+    this.setState({
+      usedTagIds: _.sortBy(_.uniq(getUsedTagIds)).join().replace(/,/g, "|")
     });
   }
 
@@ -164,9 +177,13 @@ class CampaignIssuesPreviewPopup extends React.Component {
       let index = displayPerson - initCount;
       let getPersonInfo = _.clone(personIssues[index]);
       let myList = [];
-      getPersonInfo.template = getContent.content;
-      getPersonInfo.emailSubject = getSubject.content;
-      myList.push(getPersonInfo);
+      let issuePerson = {};
+      issuePerson.subject = getSubject.content;
+      issuePerson.content = getContent.content;
+      issuePerson.personId = getPersonInfo.id;
+      issuePerson.usedTagIds = this.state.usedTagIds;
+      issuePerson.userId = getCookie("userId");
+      myList.push(issuePerson);
       personIssues.splice(index, initCount);
       this.setState((state) => ({
         issuesCompletedList: update(state.issuesCompletedList,
