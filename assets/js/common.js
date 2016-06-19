@@ -33,6 +33,11 @@ function enableToolTip() {
 }
 window.enableToolTip = enableToolTip;
 
+function removeToast() {
+  $("#toast-container").remove();
+}
+window.removeToast = removeToast;
+
 function displayError(error) {
   const timeToShow = 4000;
   if(error) {
@@ -47,7 +52,7 @@ function displayError(error) {
         $("<span>", {
           text: error
         }));
-    Materialize.toast(warningContent, timeToShow);
+    Materialize.toast(warningContent, timeToShow, "", removeToast());
   }
 }
 window.displayError = displayError;
@@ -65,7 +70,7 @@ function displaySuccess(successInfo) {
         $("<span>", {
           text: successInfo
         }));
-    Materialize.toast(successContent, timeToShow);
+    Materialize.toast(successContent, timeToShow, "", removeToast());
   }
 }
 window.displaySuccess = displaySuccess;

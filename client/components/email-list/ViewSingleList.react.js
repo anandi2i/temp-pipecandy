@@ -297,7 +297,6 @@ class ListView extends React.Component {
     const file = e.target.files[0];
     const fileExt = _.last(file.name.split("."));
     const acceptableFileTypes = ["csv", "xls", "xlsx"];
-    const timeToShow = 4000;
     if(!file) {
       return false;
     }
@@ -310,7 +309,7 @@ class ListView extends React.Component {
       };
       EmailListActions.uploadFile(data);
     } else {
-      Materialize.toast("Please upload file of type csv/xls", timeToShow);
+      displayError(ErrorMessages.InValidFileType);
     }
     return true;
   }

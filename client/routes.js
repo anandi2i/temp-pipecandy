@@ -1,7 +1,7 @@
 import React from "react";
 import {Router, Route, IndexRoute} from "react-router";
 import AppContainer from "./components/AppContainer.react";
-import IndexPage from "./components/IndexPage.react";
+//import IndexPage from "./components/IndexPage.react";
 import Home from "./components/Home.react";
 
 //User routes
@@ -58,8 +58,7 @@ function requireAuth(nextState, replace) {
 const routes = (
 <Router>
   <Route path="/" component={AppContainer} onEnter={requireAuth}>
-    <IndexRoute component={IndexPage} />
-    <Route path="home" component={Home} />
+    <IndexRoute component={Home} />
     <Route path="list">
       <IndexRoute component={ViewAllList} />
       <Route path="create" component={CreateEmailList} />

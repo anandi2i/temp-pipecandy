@@ -22,7 +22,8 @@ export const ErrorMessages = {
   "ExistsList": "List name already exist",
   "DeletePerson" : "Please select a Subscriber to Delete",
   "MinFileSize": "Select file size more the 10kb",
-  "PasswordFields": "Please enter both password fields"
+  "PasswordFields": "Please enter both password fields",
+  "InValidFileType": "Please upload file of type csv/xls"
 };
 
 /**

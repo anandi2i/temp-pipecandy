@@ -134,8 +134,8 @@ gulp.task("server", function() {
   }).on("restart", function() {
     // when the app has restarted, run livereload.
     gulp.src("./server/server.js")
-      .pipe(livereload())
-      .pipe(util.log("Reloading page, please wait..."));
+      .pipe(livereload());
+    util.log("Reloading page, please wait...");
   });
 });
 

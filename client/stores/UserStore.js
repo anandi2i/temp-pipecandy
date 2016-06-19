@@ -97,9 +97,6 @@ AppDispatcher.register(function(payload) {
       });
       break;
     case Constants.LOGIN:
-      if (_prevLocation === "/") {
-        _prevLocation = "home";
-      }
       UserApi.login(action.data).then((response) => {
         _user = response.data.userData;
         _error = "";
