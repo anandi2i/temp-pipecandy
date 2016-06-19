@@ -34,6 +34,7 @@ class Header extends React.Component {
   }
 
   render () {
+    const {user} = this.state;
     return (
       <div>
         <div className="navbar-fixed">
@@ -44,11 +45,11 @@ class Header extends React.Component {
                 <img src="/images/logo.png" />
               </Link>
               <ul className="right hide-on-med-and-down">
-                <Menu user={this.state.user} />
-                {this.state.user ?
+                <Menu user={user} />
+                {user && user.firstName ?
                 <li className="user-pic hide-on-med-and-down">
                   <a className="dropdown-button" data-activates="userDropDown">
-                    <img src={this.state.user.avatar} alt="" className="circle" />
+                    <img src={user.avatar} alt="" className="circle" />
                     <i className="mdi mdi-chevron-down"></i>
                   </a>
                 </li> : ""}
@@ -62,7 +63,7 @@ class Header extends React.Component {
           </nav>
         </div>
         <ul id="main-side-nav" className="side-nav">
-          <Menu user={this.state.user} />
+          <Menu user={user} />
         </ul>
       </div>
     );

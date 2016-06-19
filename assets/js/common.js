@@ -187,7 +187,7 @@ function initTinyMCEPopUp(id, toolBar, isToolbar, cb) {
     },
     plugins: [
       "advlist autolink lists link image charmap print preview anchor",
-      "insertdatetime media table contextmenu paste code"
+      "insertdatetime media table paste code"
     ]
   });
 }

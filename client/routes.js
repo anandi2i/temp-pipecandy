@@ -50,7 +50,9 @@ function requireAuth(nextState, replace) {
       replace("/register");
     });
   } else {
-    replace("/register");
+    if (nextState.location.pathname !== "/email-verified") {
+      replace("/register");
+    }
   }
   return;
 }

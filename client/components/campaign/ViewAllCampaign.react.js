@@ -35,6 +35,7 @@ class CampaignListView extends React.Component {
   }
 
   render() {
+    const {spinning, noDataBlock, allCampaignLists} = this.state;
     return (
       <div>
         <div className="container">
@@ -44,28 +45,28 @@ class CampaignListView extends React.Component {
               <Link to="/campaign/create">Create Campaign</Link>
             </div>
           </div>
-          <div className="spaced" 
-            style={{display: this.state.spinning ? "block" : "none"}}>
+          <div className="spaced"
+            style={{display: spinning ? "block" : "none"}}>
             <Spinner />
           </div>
-        </div>
-        { 
-          this.state.noDataBlock 
-          ? 
-            <div className="row card">
-              <div className="col s12 center card-content">
-                <p>
-                  <Link to="/campaign/create">Create</Link> a new campaign!
-                </p>
+          {
+            noDataBlock
+            ?
+              <div className="row card">
+                <div className="col s12 center card-content">
+                  <p>
+                    <Link to="/campaign/create">Create</Link> a new campaign!
+                  </p>
+                </div>
               </div>
-            </div>
-          : 
-          this.state.allCampaignLists.length
-          ?
-            <CampaignGrid results={this.state.allCampaignLists} />
-          :
-            ""
-        }
+            :
+            allCampaignLists && allCampaignLists.length
+            ?
+              <CampaignGrid results={allCampaignLists} />
+            :
+              ""
+          }
+        </div>
       </div>
     );
   }

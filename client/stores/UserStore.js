@@ -60,7 +60,12 @@ const UserStore = _.extend({}, EventEmitter.prototype, {
    * @param {string} path name
    */
   setPrevLocation(location) {
-    _prevLocation = location;
+    if (location === "/email-verified" || location === "response" ||
+       location === "/response") {
+      _prevLocation = "/";
+    } else {
+      _prevLocation = location;
+    }
   },
 
   /**
@@ -124,10 +129,10 @@ AppDispatcher.register(function(payload) {
       UserStore.emitChange();
       break;
     case Constants.LOGOUT:
-      _prevLocation = "home";
       UserApi.logout().then((response) => {
         _user = "";
         isSocialAuth = false;
+        _prevLocation = "/";
         appHistory.push("/login");
       });
       break;
