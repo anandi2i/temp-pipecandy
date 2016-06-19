@@ -55,7 +55,7 @@
     "campaigns": {
       "type": "hasAndBelongsToMany",
       "model": "campaign",
-      "foreignKey": ""
+      "foreignKey": "campaignId"
     },
     "campaignAudits": {
       "type": "hasMany",

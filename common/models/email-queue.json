@@ -18,6 +18,13 @@
         "dataType": "text"
       }
     },
+    "subject": {
+      "type": "string",
+      "required": true,
+      "postgresql": {
+        "dataType": "text"
+      }
+    },
     "scheduledAt": {
       "type": "date",
       "postgresql": {

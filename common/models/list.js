@@ -3,8 +3,37 @@
 import logger from "../../server/log";
 import lodash from "lodash";
 import async from "async";
+import _ from "underscore";
 
 module.exports = function(List) {
+  /**
+   * Itterates the list and send list object for generating emails for
+   * corresponding person
+   *
+   * @param  {[campaign]} campaignObject
+   * @param  {[function]} getPoepleAndGenerateEmailCB [callback]
+   * @return {[void]}
+   * @author Ramanavel Selvaraju
+   */
+  List.getListAndSaveEmail = (campaign, getListAndSaveEmailCB) => {
+    campaign.lists((listErr, lists) => {
+      if(listErr) {
+        logger.error("Error on getting the lists for a  campaign",
+          {campaign: campaign, error: listErr});
+          return getListAndSaveEmailCB(listErr);
+      }
+
+      let listIds = _.pluck(lists, "id");
+      async.each(lists, (list, listsCB) => {
+        List.app.models.person.getPoepleAndGenerateEmail(campaign, list,
+          listIds, (getPoepleByListForEmailErr) => {
+            listsCB(getPoepleByListForEmailErr);
+          });
+      }, (asyncEachErr) => {
+        return getListAndSaveEmailCB(asyncEachErr);
+      });
+    });
+  };
 
   List.remoteMethod(
     "fieldsWithMeta",
@@ -135,17 +164,19 @@ module.exports = function(List) {
    * Saves person object with related field values and associates with list
    * Exmaple of a reqParam
    *{
-   *  "firstName": "Test FN",
-   *  "middleName": "Test MN",
-   *  "lastName": "Test LN",
-   *  "email": "test@ideas2it.com",
-   *  "fieldVaules":  [{
-   *      "value": "test1",
-   *      "fieldId": 1
+   *"person":{
+   *    "firstName": "Test FN",
+   *    "middleName": "Test MN",
+   *    "lastName": "Test LN",
+   *    "email": "test@ideas2it.com"
+   *  },
+   *"fieldValues":  [{
+   *    "value": "test1",
+   *    "fieldId": 1
    *    },{
-   *      "value": "test2",
-   *      "fieldId": 2
-   *    }]
+   *    "value": "test2",
+   *    "fieldId": 2
+   *  }]
    *}
    *
    * @param  {[Context]} ctx [Context Object to get accessToken]

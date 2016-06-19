@@ -26,23 +26,29 @@ module.exports = function(ClickedEmailLink) {
         clickedEmailLinkTrackCB(ClickedEmailLinkEntryErr);
       }
 
+      async.series([
+        clickedEmailLinkEntry,
+        emailLinkEntry
+      ], (asyncErr, results) => {
+        if (asyncErr) {
+          clickedEmailLinkTrackCB(asyncErr);
+        }
+        clickedEmailLinkTrackCB("Success");
+      });
+
       if (ClickedEmailLinkEntry.length > emptyArrayLength) {
-        clickedEmailLinkTrackCB(null, "Already exisits");
-      } else {
-
-        async.series([
-          clickedEmailLinkEntry,
-          emailLinkEntry,
-          listMetricEntry,
-          campaignMetricEntry
-        ], (asyncErr, results) => {
-          if (asyncErr) {
-            clickedEmailLinkTrackCB(asyncErr);
-          }
-          clickedEmailLinkTrackCB("Success");
-        });
-
+        return clickedEmailLinkTrackCB(null, "Already exisits");
       }
+
+      async.parallel([
+        listMetricEntry,
+        campaignMetricEntry
+      ], (asyncErr, results) => {
+        if (asyncErr) {
+          return clickedEmailLinkTrackCB(asyncErr);
+        }
+        return clickedEmailLinkTrackCB("Success");
+      });
 
     });
 
