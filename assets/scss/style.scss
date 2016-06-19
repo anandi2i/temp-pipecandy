@@ -1052,11 +1052,6 @@ span#autocomplete {
     .right-part {
       width: calc(100% - 50px);
       float: right;
-      .chip .remove-list {
-        float: right;
-        line-height: 32px;
-        cursor: pointer;
-      }
     }
     .separator {
       border-bottom: $border-1px;
@@ -1071,23 +1066,28 @@ span#autocomplete {
       border-radius: 5px;
       padding: 0 10px;
       margin-bottom: 5px;
-      width: 255px;
-      .title {
-        width: 170px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        display: inline-block;
+      .title-wrapper {
+        display: inline-flex;
+        .title {
+          max-width: 170px;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+        }
       }
       .count {
         margin-left: 5px;
-        position: absolute;
         &::after {
           content: ")";
         }
         &::before {
           content: "(";
         }
+      }
+      .remove-list {
+        margin-left: 5px;
+        line-height: 32px;
+        cursor: pointer;
       }
     }
     .email-content {

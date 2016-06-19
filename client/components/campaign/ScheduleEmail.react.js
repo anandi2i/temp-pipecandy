@@ -377,7 +377,9 @@ class ScheduleEmail extends React.Component {
                     this.state.emailList.map(function(list, key) {
                       return (
                         <div key={key} className="chip">
-                          <span className="title">{list.name}</span>
+                          <div className="title-wrapper">
+                            <span className="title">{list.name}</span>
+                          </div>
                           <span className="count">{list.peopleCount}</span>
                           <i onClick={(e) => this.deleteList(e, list.id)}
                             className="mdi mdi-close remove-list"></i>
