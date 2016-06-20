@@ -578,15 +578,17 @@ class ListView extends React.Component {
               listFields={this.state.listFields}
               listId={this.props.params.listId} ref="selectedRowIds"/>
           :
-            <div className="container">
-              <div className="row card">
-                <div className="col s12 center card-content">
-                  <p>
-                    People list seems to be empty. Could you please add ?
-                  </p>
+            !this.state.spinning ?
+              <div className="container">
+                <div className="row card">
+                  <div className="col s12 center card-content">
+                    <p>
+                      People list seems to be empty. Could you please add ?
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            : ""
         }
       </div>
     );
