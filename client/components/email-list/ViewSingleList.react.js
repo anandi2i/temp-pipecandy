@@ -412,7 +412,7 @@ class ListView extends React.Component {
    * @return {ReactElement} markup
    */
   render() {
-    const {fieldName, suggestions} = this.state;
+    const {fieldName, suggestions, people} = this.state;
     const inputProps = {
       id: "fieldName",
       placeholder: "Field Name",
@@ -443,9 +443,12 @@ class ListView extends React.Component {
             <div className="btn btn-dflt blue sm-icon-btn" onClick={this.openDialog}>
               <i className="left mdi mdi-upload"></i> add from file
             </div>
-            <div className="btn btn-dflt blue sm-icon-btn delete-button-margin" onClick={this.deleteSubscriber}>
-              <i className="left mdi mdi-delete"></i> DELETE
-            </div>
+            { people && people.length ?
+                <div className="btn btn-dflt blue sm-icon-btn delete-button-margin" onClick={this.deleteSubscriber}>
+                  <i className="left mdi mdi-delete"></i> DELETE
+                </div>
+              : ""
+            }
           </div>
           {/* Add new field starts here */}
           <div id="addField" className="modal modal-fixed-header mini-modal">
@@ -561,12 +564,21 @@ class ListView extends React.Component {
           </div>
         </div>
         {
-          this.state.people.length ?
-            <SubscriberGrid results={this.state.people}
+          people && people.length ?
+            <SubscriberGrid results={people}
               fieldsName={this.state.fieldsName}
               listFields={this.state.listFields}
               listId={this.props.params.listId} ref="selectedRowIds"/>
-          : ""
+          :
+            <div className="container">
+              <div className="row card">
+                <div className="col s12 center card-content">
+                  <p>
+                    People list seems to be empty. Could you please add ?
+                  </p>
+                </div>
+              </div>
+            </div>
         }
       </div>
     );
