@@ -1,6 +1,7 @@
 import React from "react";
 import TagNameMenu from "../../TagNameMenu.react";
-
+import CampaignActions from "../../../actions/CampaignActions";
+import CampaignStore from "../../../stores/CampaignStore";
 /**
  * Display campaign performance component in dashboard
  */
@@ -8,56 +9,8 @@ class PerformanceCompare extends React.Component {
   constructor(props) {
     super(props);
     // TODO remove static data
-    this.state={
-      count: [{
-        "title": "opened",
-        "percentage": "67",
-        "count": "1312",
-        "class": "green",
-        "status": "7"
-        },
-        {
-        "title": "unopened",
-        "percentage": "33",
-        "count": "370",
-        "class": "blue",
-        "status": "7"
-        },
-        {
-        "title": "clicked",
-        "percentage": "12",
-        "count": "370",
-        "class": "green",
-        "status": "3"
-        },
-        {
-        "title": "actionable responses",
-        "percentage": "06",
-        "count": "100",
-        "class": "",
-        "status": ""
-        },
-        {
-        "title": "bounsed",
-        "percentage": "09",
-        "count": "370",
-        "class": "red",
-        "status": "7"
-        },
-        {
-        "title": "unsubscribed",
-        "percentage": "09",
-        "count": "370",
-        "class": "red",
-        "status": "7"
-        },
-        {
-        "title": "spam",
-        "percentage": "09",
-        "count": "370",
-        "class": "red",
-        "status": "7"
-      }],
+    this.state = {
+      count: [],
       tab: [
         {
           name: "Performance compared with",
@@ -77,6 +30,25 @@ class PerformanceCompare extends React.Component {
     };
   }
 
+  componentDidMount() {
+    const {campaignId} = this.props;;
+    CampaignStore.addChangeListener(this.onStoreChange);
+    if(!campaignId) {
+      CampaignActions.getRecentCampaignMetrics();
+    } else{
+      CampaignActions.getCurrentCampaignMetrics(campaignId);
+    }
+  }
+
+  componentWillUnmount() {
+    CampaignStore.removeChangeListener(this.onStoreChange);
+  }
+
+  onStoreChange = () => {
+      this.setState({
+        count:CampaignStore.getCampaignMetrics()
+      });
+  }
   /**
    * handle tab navigations
    * @param {string} index active-tab

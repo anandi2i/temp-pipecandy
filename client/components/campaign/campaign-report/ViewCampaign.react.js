@@ -21,7 +21,7 @@ class ViewCampaign extends React.Component {
             {/* Dashboard head */}
             <CampaignReportHead />
             {/* Performance Compared Menu */}
-            <PerformanceCompare />
+            <PerformanceCompare campaignId={this.props.params.id}/>
             {/* Performance Chart */}
             <PerformanceStatus />
             {/* Performance Chart */}

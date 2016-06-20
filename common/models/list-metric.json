@@ -8,31 +8,40 @@
   },
   "properties": {
     "opened": {
-      "type": "number"
+      "type": "number",
+      "default": 0
     },
     "responded": {
-      "type": "number"
+      "type": "number",
+      "default": 0
     },
     "clicked": {
-      "type": "number"
+      "type": "number",
+      "default": 0
     },
     "bounced": {
-      "type": "number"
+      "type": "number",
+      "default": 0
     },
     "unsubscribed": {
-      "type": "number"
+      "type": "number",
+      "default": 0
     },
     "spammed": {
-      "type": "number"
+      "type": "number",
+      "default": 0
     },
     "sentEmails": {
-      "type": "number"
+      "type": "number",
+      "default": 0
     },
     "failedEmails": {
-      "type": "number"
+      "type": "number",
+      "default": 0
     },
     "erroredEmails": {
-      "type": "number"
+      "type": "number",
+      "default": 0
     },
     "createdAt": {
       "type": "date",

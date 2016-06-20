@@ -3,6 +3,8 @@
 import logger from "../../server/log";
 import async from "async";
 import lodash from "lodash";
+import campaignMetricArray from "../../server/utils/campaign-metric-fields";
+
 
 module.exports = function(Campaign) {
 
@@ -10,22 +12,36 @@ module.exports = function(Campaign) {
     "saveCampaignTemplate",
     {
       description: "Save the campaign tempalate and associates with list",
-      accepts: [
-        {
-          arg: "ctx", type: "object",
-          http: {source: "context"}
-        },
-        {
-          arg: "id", type: "any", required: true,
-          http: {source: "path"}
-        },
-        {
-          arg: "reqParams", type: "object", required: true,
-          http: {source: "body"}
+      accepts: [{
+        arg: "ctx",
+        type: "object",
+        http: {
+          source: "context"
         }
-      ],
-      returns: {arg: "campaign", type: "campaign", root: true},
-      http: {verb: "post", path: "/:id/saveCampaignTemplate"}
+      }, {
+        arg: "id",
+        type: "any",
+        required: true,
+        http: {
+          source: "path"
+        }
+      }, {
+        arg: "reqParams",
+        type: "object",
+        required: true,
+        http: {
+          source: "body"
+        }
+      }],
+      returns: {
+        arg: "campaign",
+        type: "campaign",
+        root: true
+      },
+      http: {
+        verb: "post",
+        path: "/:id/saveCampaignTemplate"
+      }
     }
   );
 
@@ -89,7 +105,7 @@ module.exports = function(Campaign) {
            saveList: associateList.bind(null, campaign[0], reqParams.listIds),
            saveTemplates: saveTemplates.bind(null, campaign[0],
                reqParams.campaignTemplates)
-           }, function (parallelErr, response) {
+           }, (parallelErr, response) => {
              if(parallelErr){
                logger.error("Error on saveCampaignTemplate : ",
                     {campginId: id, reqParams:reqParams, error: parallelErr});
@@ -363,7 +379,255 @@ module.exports = function(Campaign) {
 
   };
 
-//observers
+
+  /**
+   * Get the campaign metrics for the current campaign
+   * @param  {[campaignId]} campaignId
+   * @param  {[callback]} getCurrentCampaignMetricsCB
+   * @return {[object]} currentCampaignMetricsData
+   * @author Aswin Raj A
+   */
+  Campaign.getCurrentCampaignMetrics = (campaignId,
+    getCurrentCampaignMetricsCB) => {
+    Campaign.findById(campaignId, (CampaignErr, Campaigns) => {
+      if (!Campaigns) {
+        getCurrentCampaignMetricsCB(null,
+          "There is no campaign with that campaignId");
+      }
+      Campaigns.campaignMetrics(
+        (campaignMetricsErr, campaignMetricsData) => {
+          if (campaignMetricsErr) {
+            getCurrentCampaignMetricsCB(campaignMetricsErr);
+          }
+          Campaign.app.models.emailLink.find({
+            where: {
+              campaignId: campaignId
+            }
+          }, (err, emailLinks) => {
+            const totalLinks = emailLinks.length;
+            buildCampaignMetricObject(campaignMetricArray,
+              campaignMetricsData, totalLinks,
+              (err, campaignMetricsObj) => {
+                getCurrentCampaignMetricsCB(null, campaignMetricsObj);
+              });
+          });
+        });
+    });
+  };
+
+
+  /**
+   * Get Recent campaign metrics data fo the current user
+   * @param  {[callback]} getRecentCampaignMetricsCB
+   * @return {[object]} recentCampaignMetricsData
+   * @author Aswin Raj A
+   */
+  Campaign.getRecentCampaignMetrics = (ctx, getRecentCampaignMetricsCB) => {
+    const emptyCampaignMetricsData = {
+      opened: 0,
+      responded: 0,
+      clicked: 0,
+      bounced: 0,
+      unsubscribed: 0,
+      spammed: 0,
+      sentEmails: 0,
+      failedEmails: 0,
+      erroredEmails: 0
+    };
+    const totalEmptyLinks = 0;
+    Campaign.find({
+      where: {
+        "createdBy": ctx.req.accessToken.userId
+      },
+      order: "lastrunat DESC",
+      limit: 1
+    }, (campaignErr, campaigns) => {
+      if(campaignErr){
+        logger.error(campaignErr);
+        getRecentCampaignMetricsCB(campaignErr);
+      }
+      if(lodash.isEmpty(campaigns)){
+        buildCampaignMetricObject(campaignMetricArray,
+          emptyCampaignMetricsData, totalEmptyLinks,
+          (err, campaignMetricsObj) => {
+            getRecentCampaignMetricsCB(null, campaignMetricsObj);
+        });
+      } else {
+        campaigns[0].campaignMetrics(
+          (campaignMetricsErr, campaignMetricsData) => {
+            if (campaignMetricsErr) {
+              getRecentCampaignMetricsCB(campaignMetricsErr);
+            }
+            if(lodash.isEmpty(campaignMetricsData)){
+              buildCampaignMetricObject(campaignMetricArray,
+                emptyCampaignMetricsData, totalEmptyLinks,
+                (err, campaignMetricsObj) => {
+                  getRecentCampaignMetricsCB(null, campaignMetricsObj);
+              });
+            } else {
+              Campaign.app.models.emailLink.find({
+                where: {
+                  campaignId: campaigns[0].campaignId
+                }
+              }, (err, emailLinks) => {
+                const totalLinks = emailLinks.length;
+                buildCampaignMetricObject(campaignMetricArray,
+                  campaignMetricsData[0], totalLinks,
+                  (err, campaignMetricsObj) => {
+                    getRecentCampaignMetricsCB(null, campaignMetricsObj);
+                  });
+              });
+            }
+          });
+      }
+    });
+  };
+
+  /**
+   * Build the campaign metric object for the recent campaign.
+   * @param  {[campaignMetricArray]} campaignMetricArray
+   * @param  {[campaignMetricsData]} campaignMetricsData
+   * @param  {[totalLinks]} totalLinks
+   * @param  {[callback]} buildCampaignMetricObjectCB [description]
+   * @return campaign metric object
+   * @author Aswin Raj A
+   */
+  let buildCampaignMetricObject = (campaignMetricArray,
+    campaignMetricsData, totalLinks, buildCampaignMetricObjectCB) => {
+    let campaignMetricObject = [];
+    let openedRate = 0;
+    const emptycount = 0;
+    const hundredPercent = 100; //Denotes 100%
+
+    async.eachSeries(campaignMetricArray,
+      (campaignMetric, campaignMetricCB) => {
+        let campaignMetricObj = {};
+        //Construct object for each campaignMetricArray data and push it into
+        //campaignMetricObject Array
+        switch (campaignMetric) {
+          case "OPENED":
+            campaignMetricObj.title = "opened";
+            openedRate = (campaignMetricsData.opened /
+              (campaignMetricsData.sentEmails - campaignMetricsData.bounced))
+              * hundredPercent;
+            campaignMetricObj.percentage = openedRate || "0";
+            campaignMetricObj.count = campaignMetricsData.opened || "0";
+            campaignMetricObj.class = "green";
+            campaignMetricObj.status = "7";
+            campaignMetricObject.push(campaignMetricObj);
+            break;
+          case "UNOPENED":
+            campaignMetricObj.title = "unopened";
+            campaignMetricObj.percentage = hundredPercent -
+              (campaignMetricsData.opened /
+                (campaignMetricsData.sentEmails - campaignMetricsData.bounced)
+              ) * hundredPercent || "0";
+            campaignMetricObj.count =
+              (campaignMetricsData.sentEmails - campaignMetricsData.bounced)
+              - campaignMetricsData.opened || "0";
+            campaignMetricObj.class = "blue";
+            campaignMetricObj.status = "7";
+            campaignMetricObject.push(campaignMetricObj);
+            break;
+          case "CLICKED":
+            campaignMetricObj.title = "clicked";
+            campaignMetricObj.percentage = (totalLinks < emptycount) ? "0" :
+            (campaignMetricsData.clicked
+              / totalLinks) * hundredPercent || "0";
+            campaignMetricObj.count = campaignMetricsData.clicked || "0";
+            campaignMetricObj.class = "green";
+            campaignMetricObj.status = "3";
+            campaignMetricObject.push(campaignMetricObj);
+            break;
+          case "ACTIONABLE RESPONSES":
+            campaignMetricObj.title = "actionable responses";
+            campaignMetricObj.percentage = "06";
+            campaignMetricObj.count = "100";
+            campaignMetricObj.class = "";
+            campaignMetricObj.status = "";
+            campaignMetricObject.push(campaignMetricObj);
+            break;
+          case "BOUNCED":
+            campaignMetricObj.title = "bounced";
+            campaignMetricObj.percentage = (campaignMetricsData.bounced
+              / campaignMetricsData.sentEmails) * hundredPercent || "0";
+            campaignMetricObj.count = campaignMetricsData.bounced || "0";
+            campaignMetricObj.class = "red";
+            campaignMetricObj.status = "7";
+            campaignMetricObject.push(campaignMetricObj);
+            break;
+          case "UNSUBSCRIBED":
+            campaignMetricObj.title = "unsubscribed";
+            campaignMetricObj.percentage = (campaignMetricsData.unsubscribed
+              / (campaignMetricsData.sentEmails - campaignMetricsData.bounced)
+            ) * hundredPercent || "0";
+            campaignMetricObj.count = campaignMetricsData.unsubscribed || "0";
+            campaignMetricObj.class = "green";
+            campaignMetricObj.status = "7";
+            campaignMetricObject.push(campaignMetricObj);
+            break;
+          case "SPAM":
+            campaignMetricObj.title = "spam";
+            campaignMetricObj.percentage = (campaignMetricsData.spammed /
+              (campaignMetricsData.sentEmails - campaignMetricsData.bounced)
+            ) * hundredPercent || "0";
+            campaignMetricObj.count = campaignMetricsData.spammed || "0";
+            campaignMetricObj.class = "green";
+            campaignMetricObj.status = "7";
+            campaignMetricObject.push(campaignMetricObj);
+            break;
+          default:
+            //Do nothing when there is no matched campaignMetricArray
+            logger.info("No Metrics");
+        };
+        campaignMetricCB();
+      },
+      (err) => {
+        logger.error(err);
+        buildCampaignMetricObjectCB(null, campaignMetricObject);
+      });
+  };
+
+  Campaign.remoteMethod(
+    "getCurrentCampaignMetrics", {
+      description: "Get recent campaign metrics for the current user",
+      accepts: [{
+        arg: "campaignId",
+        type: "any"
+      }],
+      returns: {
+        arg: "currentCampaignMetrics",
+        type: "object"
+      },
+      http: {
+        verb: "get",
+        path: "/getCurrentCampaignMetrics/:campaignId"
+      }
+    }
+  );
+
+
+  Campaign.remoteMethod(
+    "getRecentCampaignMetrics", {
+      description: "Get recent campaign metrics for the current user",
+      accepts: [{
+        arg: "ctx",
+        type: "object",
+        http: {
+          source: "context"
+        }
+      }],
+      returns: {
+        arg: "recentCampaignMetrics",
+        type: "object"
+      },
+      http: {
+        verb: "get",
+        path: "/getRecentCampaignMetrics"
+      }
+    }
+  );
+
   /**
    * Updates the updatedAt column with current Time
    * @param ctx Context

@@ -18,6 +18,20 @@ const CampaignApi = {
    */
   getCampaign(compaignId) {
     return api.get(`api/campaigns/${compaignId}/exists`);
+  },
+  /**
+   * Get the campagin metric data
+   * Get the campaign matrics for the current campaign
+   * @param  {[campaignId]} campaignId
+   */
+  getCurrentCampaignMetrics(campaignId) {
+    return api.get(`api/campaigns/getCurrentCampaignMetrics/${campaignId}`);
+  },
+  /**
+   * Get recent campaign matrics
+   */
+  getRecentCampaignMetrics() {
+    return api.get("api/campaigns/getRecentCampaignMetrics");
   }
 };
 

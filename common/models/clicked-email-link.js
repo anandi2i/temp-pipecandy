@@ -1,20 +1,22 @@
 import async from "async";
 const emptyArrayLength = 0;
+const firstClick = 1;
 
 module.exports = function(ClickedEmailLink) {
 
   /**
    * Tracks the email links in the campaign mail when it is clicked.
-   * http://localhost:3000/api/ClickedEmailLink/track?campaignId=1&personId=1&emailLinkId=1
+   * TODO Move out the async methods definition outside the function block
+   * http://localhost:3001/api/clickedEmailLinks/track/campaign/1/person/1/linkId/1
    * @param  {[number]} campaignId
    * @param  {[number]} personId
    * @param  {[number]} emailLinkId
    * @param  emailLinkTrackCB   (Callback)
    * @return void
    */
+
   ClickedEmailLink.track = (campaignId, personId, emailLinkId,
     clickedEmailLinkTrackCB) => {
-
     ClickedEmailLink.find({
       where: {
         "campaignId": campaignId,
@@ -22,170 +24,177 @@ module.exports = function(ClickedEmailLink) {
         "emailLinkId": emailLinkId
       }
     }, (ClickedEmailLinkEntryErr, ClickedEmailLinkEntry) => {
-      if (ClickedEmailLinkEntryErr) {
+      if(ClickedEmailLinkEntryErr) {
         clickedEmailLinkTrackCB(ClickedEmailLinkEntryErr);
       }
+      if(ClickedEmailLinkEntry.length > emptyArrayLength) {
+        async.each(ClickedEmailLinkEntry,
+          (ClickedEmailLinkEntryData, ClickedEmailLinkEntryCB) => {
+          ClickedEmailLinkEntryData.updateAttributes(
+            {"count": ++ClickedEmailLinkEntryData.count},
+            (updatedClickedEmailLinkErr, updatedClickedEmailLinkEntry) => {
+              if(updatedClickedEmailLinkErr){
+                ClickedEmailLinkEntryCB(updatedClickedEmailLinkErr);
+              }
+              ClickedEmailLinkEntryCB(null);
+            });
+        });
+        clickedEmailLinkTrackCB(null, "Already exisits");
+      } else{
 
-      async.series([
-        clickedEmailLinkEntry,
-        emailLinkEntry
-      ], (asyncErr, results) => {
-        if (asyncErr) {
-          clickedEmailLinkTrackCB(asyncErr);
-        }
-        clickedEmailLinkTrackCB("Success");
-      });
+        /**
+         * Make an entry in clickedEmailLink table if there is no record for
+         * current campaignId, personId and emailLinkId
+         * @param  clickedEmailLinkEntryCB (Callback)
+         * @return void
+         */
 
-      if (ClickedEmailLinkEntry.length > emptyArrayLength) {
-        return clickedEmailLinkTrackCB(null, "Already exisits");
-      }
-
-      async.parallel([
-        listMetricEntry,
-        campaignMetricEntry
-      ], (asyncErr, results) => {
-        if (asyncErr) {
-          return clickedEmailLinkTrackCB(asyncErr);
-        }
-        return clickedEmailLinkTrackCB("Success");
-      });
-
-    });
-
-  };
-
-
-  /**
-   * Make an entry in clickedEmailLink table if there is no record for
-   * current campaignId, personId and emailLinkId
-   * @param  clickedEmailLinkEntryCB (Callback)
-   * @return void
-   */
-
-  let clickedEmailLinkEntry = (clickedEmailLinkEntryCB) => {
-    let clickedEmailLinkEntry = {
-      "emailLinkId": emailLinkId,
-      "campaignId": campaignId,
-      "personId": personId
-    };
-    ClickedEmailLink.create(clickedEmailLinkEntry,
-      (clickedEmailLinkEntryDataErr, clickedEmailLinkEntryData) => {
-      if (clickedEmailLinkEntryDataErr) {
-        clickedEmailLinkEntryCB(clickedEmailLinkEntryDataErr);
-      }
-      clickedEmailLinkEntryCB(null);
-    });
-  };
+        let clickedEmailLinkEntry =
+        (emailLinkId, campaignId, personId, clickedEmailLinkEntryCB) => {
+          let clickedEmailLinkObj = {
+            "emailLinkId": emailLinkId,
+            "campaignId": campaignId,
+            "personId": personId,
+            "count": firstClick
+          };
+          ClickedEmailLink.create(clickedEmailLinkObj,
+            (clickedEmailLinkEntryDataErr, clickedEmailLinkEntryData) => {
+              if(clickedEmailLinkEntryDataErr) {
+                clickedEmailLinkEntryCB(clickedEmailLinkEntryDataErr);
+              }
+              clickedEmailLinkEntryCB(null);
+            });
+        };
 
 
-  /**
-   * Increment the clicked count for the current campaignId in emailLink
-   * table
-   * @param  emailLinkEntryCB (Callback)
-   * @return void
-   */
+        /**
+         * Increment the clicked count for the current campaignId in emailLink
+         * table
+         * @param  emailLinkEntryCB (Callback)
+         * @return void
+         */
 
-  let emailLinkEntry = (emailLinkEntryCB) => {
-    ClickedEmailLink.app.models.emailLink.findById(emailLinkId,
-      (emailLinkEntryErr, emailLinkEntry) => {
-        if (emailLinkEntryErr) {
-          emailLinkEntryCB(emailLinkEntryErr);
-        }
-        emailLinkEntry.updateAttribute("clickedCount",
-        ++emailLinkEntry.clickedCount,
-          (updatedEmailLinkEntryErr, updatedEmailLinkEntry) => {
-            if (updatedEmailLinkEntryErr) {
-              emailLinkEntryCB(updatedEmailLinkEntryErr);
+        let emailLinkEntry = (emailLinkEntryCB) => {
+          ClickedEmailLink.app.models.emailLink.findById(emailLinkId,
+            (emailLinkEntryErr, emailLinkEntry) => {
+              if(emailLinkEntryErr) {
+                emailLinkEntryCB(emailLinkEntryErr);
+              }
+              emailLinkEntry.updateAttribute("clickedCount",
+                ++emailLinkEntry.clickedCount,
+                (updatedEmailLinkEntryErr, updatedEmailLinkEntry) => {
+                  if(updatedEmailLinkEntryErr) {
+                    emailLinkEntryCB(updatedEmailLinkEntryErr);
+                  }
+                  emailLinkEntryCB(null);
+                });
+            });
+        };
+
+        /**
+         * Place an new entry in listMetric Table if there is no record for the
+         * current campaignId
+         * If there is any record, update the click count by 1 for the current
+         * campaignId
+         * @param  listMetricEntryCB (Callback)
+         * @return void
+         */
+
+        let listMetricEntry = (listMetricEntryCB) => {
+          ClickedEmailLink.app.models.listMetric.find({
+            where: {
+              "campaignId": campaignId
             }
-            emailLinkEntryCB(null);
+          }, (listMetricEntryErr, listMetricEntry) => {
+            if(listMetricEntryErr) {
+              listMetricEntryCB(listMetricEntryErr);
+            }
+            if(listMetricEntry.length > emptyArrayLength) {
+              ClickedEmailLink.app.models.listMetric.updateAll({
+                "campaignId": campaignId
+              }, {
+                "clicked": ++listMetricEntry[0].clicked
+              }, (updatedListMetricEntryErr, updatedListMetricEntry) => {
+                if(updatedListMetricEntryErr) {
+                  listMetricEntryCB(updatedListMetricEntryErr);
+                }
+                listMetricEntryCB(null);
+              });
+            } else{
+              ClickedEmailLink.app.models.listMetric.create({
+                "clicked": 1,
+                "campaignId": campaignId
+              }, (listMetricEntryErr, listMetricEntry) => {
+                if(listMetricEntryErr) {
+                  listMetricEntryCB(listMetricEntryErr);
+                }
+                listMetricEntryCB(null);
+              });
+            }
+
           });
-      });
-  };
+        };
 
+        /**
+         * Place an new entry in campaignMetric Table if there is no record for
+         * the current campaignId
+         * If there is any record, update the click count by 1 for the current
+         * campaignId
+         * @param  campaignMetricEntryCB (Callback)
+         * @return void
+         */
+        let campaignMetricEntry = (campaignMetricEntryCB) => {
+          ClickedEmailLink.app.models.campaignMetric.find({
+            where: {
+              "campaignId": campaignId
+            }
+          }, (campaignMetricEntryErr, campaignMetricEntry) => {
 
-  /**
-   * Place an new entry in listMetric Table if there is no record for the
-   * current campaignId
-   * If there is any record, update the click count by 1 for the current
-   * campaignId
-   * @param  listMetricEntryCB (Callback)
-   * @return void
-   */
+            if(campaignMetricEntryErr) {
+              campaignMetricEntryCB(campaignMetricEntryErr);
+            }
 
-  let listMetricEntry = (listMetricEntryCB) => {
-    ClickedEmailLink.app.models.listMetric.find({
-      where: {
-        "campaignId": campaignId
-      }
-    }, (listMetricEntryErr, listMetricEntry) => {
-      if (listMetricEntryErr) {
-        listMetricEntryCB(listMetricEntryErr);
-      }
-      if (listMetricEntry.length > emptyArrayLength) {
-        ClickedEmailLink.app.models.listMetric.updateAll({
-          "campaignId": campaignId
-        }, {
-          "clicked": ++listMetricEntry[0].clicked
-        }, (updatedListMetricEntryErr, updatedListMetricEntry) => {
-          if (updatedListMetricEntryErr) {
-            listMetricEntryCB(updatedListMetricEntryErr);
+            if(campaignMetricEntry.length > emptyArrayLength) {
+              ClickedEmailLink.app.models.campaignMetric.updateAll({
+                "campaignId": campaignId
+              }, {
+                "clicked": ++campaignMetricEntry[0].clicked
+              },
+              (updatedCampaignMetricEntryErr, updatedCampaignMetricEntry) => {
+                if(updatedCampaignMetricEntryErr) {
+                  campaignMetricEntryCB(updatedCampaignMetricEntryErr);
+                }
+                campaignMetricEntryCB(null);
+              });
+            } else{
+              ClickedEmailLink.app.models.campaignMetric.create({
+                "clicked": 1,
+                "campaignId": campaignId
+              }, (campaignMetricEntryErr, campaignMetricEntry) => {
+                if(campaignMetricEntryErr) {
+                  campaignMetricEntryCB(campaignMetricEntryErr);
+                }
+                campaignMetricEntryCB(null);
+              });
+            }
+          });
+        };
+
+        async.waterfall([
+          function(setArgs) {
+            setArgs(null, emailLinkId, campaignId, personId);
+          },
+          clickedEmailLinkEntry,
+          emailLinkEntry,
+          listMetricEntry,
+          campaignMetricEntry
+        ], (asyncErr, results) => {
+          if(asyncErr) {
+            clickedEmailLinkTrackCB(asyncErr);
           }
-          listMetricEntryCB(null);
+          clickedEmailLinkTrackCB(null, "Success");
         });
-      } else {
-        ClickedEmailLink.app.models.listMetric.create({
-          "clicked": 1,
-          "campaignId": campaignId
-        }, (listMetricEntryErr, listMetricEntry) => {
-          if (listMetricEntryErr) {
-            listMetricEntryCB(listMetricEntryErr);
-          }
-          listMetricEntryCB(null);
-        });
-      }
-    });
-  };
 
-  /**
-   * Place an new entry in campaignMetric Table if there is no record for
-   * the current campaignId
-   * If there is any record, update the click count by 1 for the current
-   * campaignId
-   * @param  campaignMetricEntryCB (Callback)
-   * @return void
-   */
-  let campaignMetricEntry = (campaignMetricEntryCB) => {
-    ClickedEmailLink.app.models.campaignMetric.find({
-      where: {
-        "campaignId": campaignId
-      }
-    }, (campaignMetricEntryErr, campaignMetricEntry) => {
-
-      if (campaignMetricEntryErr) {
-        campaignMetricEntryCB(campaignMetricEntryErr);
-      }
-
-      if (campaignMetricEntry.length > emptyArrayLength) {
-        ClickedEmailLink.app.models.campaignMetric.updateAll({
-          "campaignId": campaignId
-        }, {
-          "clicked": ++campaignMetricEntry[0].clicked
-        }, (updatedCampaignMetricEntryErr, updatedCampaignMetricEntry) => {
-          if (updatedCampaignMetricEntryErr) {
-            campaignMetricEntryCB(updatedCampaignMetricEntryErr);
-          }
-          campaignMetricEntryCB(null);
-        });
-      } else {
-        ClickedEmailLink.app.models.campaignMetric.create({
-          "clicked": 1,
-          "campaignId": campaignId
-        }, (campaignMetricEntryErr, campaignMetricEntry) => {
-          if (campaignMetricEntryErr) {
-            campaignMetricEntryCB(campaignMetricEntryErr);
-          }
-          campaignMetricEntryCB(null);
-        });
       }
     });
   };
@@ -196,9 +205,9 @@ module.exports = function(ClickedEmailLink) {
    * @param next (Callback)
    */
   ClickedEmailLink.observe("before save", (ctx, next) => {
-    if (ctx.instance) {
+    if(ctx.instance) {
       ctx.instance.updatedAt = new Date();
-    } else {
+    } else{
       ctx.data.updatedAt = new Date();
     }
     next();
@@ -221,7 +230,25 @@ module.exports = function(ClickedEmailLink) {
         type: "string"
       },
       http: {
-        path: "/track",
+      path: "/track/campaign/:campaignId/person/:personId/linkId/:emailLinkId",
+      verb: "GET"
+      }
+    }
+  );
+
+
+  ClickedEmailLink.remoteMethod(
+    "sample", {
+      accepts: [{
+        arg: "campaignId",
+        type: "number"
+      }],
+      returns: {
+        arg: "result",
+        type: "string"
+      },
+      http: {
+        path: "/sample/:campaignId",
         verb: "GET"
       }
     }

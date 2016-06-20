@@ -127,6 +127,18 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "exists"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "getCurrentCampaignMetrics"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "getRecentCampaignMetrics"
     }
   ],
   "methods": {}

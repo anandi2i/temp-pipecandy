@@ -11,6 +11,7 @@ let _error = "";
 let _isExistCampaignId = false;
 let _getAllCampaigns = {};
 let _allEmailTemplates = [];
+let _campaignMetrics = [];
 let selectedEmailList = {};
 let allPeopleList = [];
 let duplicateEmailList = [];
@@ -91,6 +92,10 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     return selectedEmailList;
   },
 
+  getCampaignMetrics() {
+    return _campaignMetrics;
+  },
+
   getIssuesPeopleList(issueTags) {
     let issuePeopleList = [];
     _.each(allPeopleList, (person, key) => {
@@ -106,22 +111,34 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     fieldIds = _.union.apply(_, fieldIds);
     fieldIds = _.uniq(fieldIds, "id");
     allTags.commonSmartTags.map((tag, key) => {
-      let getId = _.where(fieldIds, {field: tag});
-      getAllTags.push({name: tag, className: "common", id: getId[0].id});
+      let getId = _.where(fieldIds, {
+        field: tag
+      });
+      getAllTags.push({
+        name: tag,
+        className: "common",
+        id: getId[0].id
+      });
     });
     allTags.unCommonSmartTags.map((tag, key) => {
-      let getId = _.where(fieldIds, {field: tag});
-      getAllTags.push({name: tag, className: "un-common", id: getId[0].id});
+      let getId = _.where(fieldIds, {
+        field: tag
+      });
+      getAllTags.push({
+        name: tag,
+        className: "un-common",
+        id: getId[0].id
+      });
     });
     return getAllTags;
   },
 
   setOptText(optionalText) {
     let optAddress = "", optText = "";
-    if(optionalText.isAddress){
+    if(optionalText.isAddress) {
       optAddress = optionalText.address;
     }
-    if(optionalText.isOptText){
+    if(optionalText.isOptText) {
       optText = optionalText.optText;
     }
     let style = "width: 100%;border-top: 1px solid #c2c2c2;" +
@@ -141,7 +158,7 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     _.each(findCommonTags, (val, key) => {
       let getTag = $(val).data("tag");
       $(val)[0].dataset.tagName = getTag;
-      $(val).html("&lt;"+getTag+"&gt;");
+      $(val).html("&lt;" + getTag + "&gt;");
     });
     let steDom = $("<div/>").html(html);
     return $(steDom).html();
@@ -166,9 +183,9 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   },
 
   replaceSmartTagContent(value) {
-    let tag = "<span class='tag common' data-id='"+value.id+"' "+
-      "contenteditable='false' data-tag='"+value.field+
-      "' data-tag-name='"+value.value+"'>"+value.value+"</span>";
+    let tag = "<span class='tag common' data-id='" + value.id + "' " +
+      "contenteditable='false' data-tag='" + value.field +
+      "' data-tag-name='" + value.value + "'>" + value.value + "</span>";
     return tag;
   },
 
@@ -182,17 +199,18 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   applySmartTagsValue(emailContent, getPersonInfo) {
     emailContent = emailContent.replace(/\"/g, "\'");
     _.each(getPersonInfo.personFields, (value, key) => {
-      let common = "<span class='tag common' "+
-        "contenteditable='false' data-tag='"+value.field+"' data-id='"+value.id
-        +"' data-tag-name='"+value.field+"'>&lt;"+value.field+"&gt;</span>";
-      if(emailContent.includes(common)){
+      let common = "<span class='tag common' " +
+        "contenteditable='false' data-tag='" + value.field + "' data-id='" +
+         value.id + "' data-tag-name='" + value.field + "'>&lt;" +
+          value.field + "&gt;</span>";
+      if (emailContent.includes(common)) {
         emailContent = CampaignStore.applyTags(emailContent, common, value);
       } else {
-        let unCommon = "<span class='tag un-common' "+
-          "contenteditable='false' data-tag='"+value.field+"' data-id='"+
-          value.id+"' data-tag-name='"+value.field+
-          "'>&lt;"+value.field+"&gt;</span>";
-        if(emailContent.includes(unCommon)){
+        let unCommon = "<span class='tag un-common' " +
+          "contenteditable='false' data-tag='" + value.field + "' data-id='" +
+          value.id + "' data-tag-name='" + value.field +
+          "'>&lt;" + value.field + "&gt;</span>";
+        if (emailContent.includes(unCommon)) {
           emailContent = CampaignStore.applyTags(emailContent, unCommon, value);
         }
       }
@@ -328,7 +346,6 @@ AppDispatcher.register(function(payload) {
               };
               personFields.push(newtag);
               newField.push(_.omit(newtag, "value"));
-              ;
             });
             smartTags.push(fieldName);
             fieldIds.push(newField);
@@ -381,6 +398,29 @@ AppDispatcher.register(function(payload) {
       }, (err) => {
         CampaignStore.emitChange();
         appHistory.push("/campaign");
+      });
+      break;
+    case Constants.GET_RECENT_CAMPAIGN_METRICS:
+      CampaignApi.getRecentCampaignMetrics().then((response) => {
+        _campaignMetrics = response.data.recentCampaignMetrics;
+        _error = "";
+        CampaignStore.emitChange();
+      }, (err) => {
+        _campaignMetrics = [];
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
+      });
+      break;
+    case Constants.GET_CURRENT_CAMPAIGN_METRICS:
+      CampaignApi.getCurrentCampaignMetrics(action.campaignId)
+      .then((response) => {
+        _campaignMetrics = response.data.currentCampaignMetrics;
+        _error = "";
+        CampaignStore.emitChange();
+      }, (err) => {
+        _campaignMetrics = [];
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
       });
       break;
     default:

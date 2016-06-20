@@ -39,6 +39,23 @@ const CampaignActions = {
       actionType: Constants.CHECK_EXISTING_CAMPAIGN,
       campaignId: campaignId
     });
+  },
+  /**
+   * To get the recent campaignMetrics
+   */
+  getRecentCampaignMetrics() {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_RECENT_CAMPAIGN_METRICS
+    });
+  },
+  /**
+   * To get the current campaignMetrics
+   */
+  getCurrentCampaignMetrics(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_CURRENT_CAMPAIGN_METRICS,
+      campaignId : campaignId
+    });
   }
 };
 

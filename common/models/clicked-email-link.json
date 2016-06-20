@@ -13,6 +13,10 @@
     },
     "updatedAt": {
       "type": "date"
+    },
+    "count":{
+      "type": "number",
+      "default": 0
     }
   },
   "validations": [],
@@ -33,6 +37,11 @@
       "foreignKey": "campaignId"
     }
   },
-  "acls": [],
+  "acls": [{
+    "principalType": "ROLE",
+    "principalId": "$everyone",
+    "permission": "ALLOW",
+    "property": "track"
+  }],
   "methods": {}
 }
