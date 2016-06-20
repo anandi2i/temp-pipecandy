@@ -1,57 +1,64 @@
-var googleAuth = require("google-auth-library");
 var google = require("googleapis");
 var async = require("async");
-var _ = require("lodash");
+var lodash = require("lodash");
 
 const gmail = google.gmail("v1");
 
 const dataSource = require(process.cwd() + "/server/server.js")
-      .dataSources.psqlDs;
+  .dataSources.psqlDs;
 let App = dataSource.models;
 
-
-const clientSecretClientID = "478206392598-5f7o7lchi5nsfiomn8btrg2g2ninu5fv\
-.apps.googleusercontent.com";
-
 const clientSecretCredentials = {
-  "installed": {
-    "client_id": clientSecretClientID,
+  "web": {
+    "client_id": "478206392598-0uq1vtkne494bdhnlb1k4fjson3shjap.apps.googleusercontent.com",
     "project_id": "pipecandy-1294",
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
     "token_uri": "https://accounts.google.com/o/oauth2/token",
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_secret": "JA8ZGbKaMmg4sOZhLQ08Eb_y",
-    "redirect_uris": ["urn:ietf:wg:oauth:2.0:oob", "http://localhost"]
+    "client_secret": "-9z-cU18aImvflghMHWaz4oW",
+    "redirect_uris": [
+      "http://staging.pipecandy.com/auth/google/callback",
+      "http://localhost:3001/auth/google/callback",
+      "http://pipecandy.com/auth/google/callback",
+      "http://localhost:3000/auth/google/callback",
+      "http://dev.pipecandy.com/auth/google/callback"
+    ]
   }
 };
 
-const clientSecret = clientSecretCredentials.installed.client_secret;
-const clientId = clientSecretCredentials.installed.client_id;
-const redirectUrl = clientSecretCredentials.installed.redirect_uris[0];
+const clientSecret = clientSecretCredentials.web.client_secret;
+const clientId = clientSecretCredentials.web.client_id;
+const redirectUrl = clientSecretCredentials.web.redirect_uris[0];
 
-const auth = new googleAuth();
-const oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+const OAuth2 = google.auth.OAuth2;
+const oauth2Client = new OAuth2(clientId, clientSecret, redirectUrl);
 
 
-const interval = 60000;
-setInterval(function() {
+const interval = 5000;
 
-  /**
-   * Provides a list of mails for the current userId from the last recorded
-   * mailId
-   * @param  {[function]} getUserCredentials for the current user
-   * @param  {[function]} fetches the mails for the current user
-   * @param  {[callback]}
-   * @return void
-   */
+initCrawl();
+
+/**
+ * Initiate Workflow for every interval
+ */
+function initCrawl() {
+  setTimeout(initWorkflow, interval);
+}
+
+/**
+ * Workflow initiator to read mail box
+ */
+function initWorkflow() {
+
   async.waterfall([
     getUserCredentials,
-    crawler
+    crawler,
+    initCrawl
   ], function(err, result) {
     console.log("Emails fetched for user id - ", result);
   });
 
-}, interval);
+};
 
 
 /**
@@ -60,11 +67,11 @@ setInterval(function() {
  */
 function getUserCredentials(callback) {
   App.userIdentity.getCrawlableUsers(function(usersErr, users) {
-    _(users).forEach((user) => {
-        let userMailId = user.profile.emails[0].value;
-        oauth2Client.credentials.access_token = user.credentials.accessToken;
-        oauth2Client.credentials.refresh_token = user.credentials.refreshToken;
-        callback(null, oauth2Client, user.id, userMailId);
+    lodash(users).forEach((user) => {
+      let userMailId = user.profile.emails[0].value;
+      oauth2Client.credentials.access_token = user.credentials.accessToken;
+      oauth2Client.credentials.refresh_token = user.credentials.refreshToken;
+      callback(null, oauth2Client, user.id, userMailId);
     });
   });
 }
@@ -83,8 +90,9 @@ function crawler(auth, userId, userMailId, callback) {
       date = mailResponse.receivedDate;
     }
     App.MailResponse.getUserMails(gmail, auth, userId, userMailId, messageId,
-        date, null, function() {
-      callback(null, userMailId);
-    });
+      date, null,
+      function() {
+        callback(null, userMailId);
+      });
   });
 }

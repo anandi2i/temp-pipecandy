@@ -3,6 +3,10 @@ import logger from "../../server/log";
 
 module.exports = function(userIdentity) {
 
+  /**
+   * Returns users who allows mail box crawl
+   * @param  {Function} callback [description]
+   */
   userIdentity.getCrawlableUsers = (callback) => {
     let users = [];
     userIdentity.find({
@@ -18,6 +22,20 @@ module.exports = function(userIdentity) {
         }
       });
       callback(null, users);
+    });
+  };
+
+  /**
+   * Update user credentials
+   * @param  {Function} callback [description]
+   */
+  userIdentity.updateCredentials = (userIdentityInst, callback) => {
+    userIdentity.update({
+      "id": userIdentityInst.id
+    }, {
+      credentials: userIdentityInst.credentials
+    }, (err, results) => {
+      return callback(err, userIdentityInst);
     });
   };
 

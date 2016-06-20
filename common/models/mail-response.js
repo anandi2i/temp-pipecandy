@@ -4,6 +4,7 @@ import striptags from "striptags";
 import logger from "../../server/log";
 import mailEnqueue from "../../server/mailCrawler/mailEnqueue";
 import emojiStrip from "emoji-strip";
+import googleTokenHandler from "../../server/mailCrawler/googleTokenHandler";
 
 module.exports = function(MailResponse) {
 
@@ -76,7 +77,7 @@ module.exports = function(MailResponse) {
     lastMsgDate, nextPageToken, callback) => {
     const qryParam = "-in:CHAT -in:SENT";
     const mailToCount = 50;
-    getMessageList(gmail, auth, userMailId, mailToCount, qryParam,
+    getMessageList(gmail, auth, userId, userMailId, mailToCount, qryParam,
       nextPageToken,
       (response) => {
         nextPageToken = response.nextPageToken;
@@ -162,9 +163,9 @@ module.exports = function(MailResponse) {
               MailResponse.createResponse(mailResponse, (error, response) => {
                 let queueName = "mailNLPIdentification";
                 mailEnqueue.enqueueMail(JSON.stringify(response), queueName,
-                    () => {
-                  callbackMessage();
-                });
+                  () => {
+                    callbackMessage();
+                  });
               });
             } else {
               callbackMessage();
@@ -190,11 +191,11 @@ module.exports = function(MailResponse) {
    * @param {maxResults} Maximum number of mails to read.
    * @param {callback} A callback function.
    */
-  const getMessageList = (gmail, auth, userId, maxResults, qryParam,
+  const getMessageList = (gmail, auth, userId, userMailId, maxResults, qryParam,
     nextPageToken, callback) => {
     gmail.users.messages.list({
       auth: auth,
-      userId: userId,
+      userId: userMailId,
       maxResults: maxResults,
       pageToken: nextPageToken ? nextPageToken : null,
       includeSpamTrash: true,
@@ -204,7 +205,24 @@ module.exports = function(MailResponse) {
         callback(response);
       } else {
         logger.error("Error while Getting Message List", error);
-        callback(error);
+        if (error.responseCode = 401) {
+          MailResponse.app.models.userIdentity.findById(userId,
+                    (err, userIdentity) => {
+            googleTokenHandler.updateAccessToken(userIdentity,
+                      (tokenHandlerErr, updateUser) => {
+              MailResponse.app.models.userIdentity
+                      .updateCredentials(userIdentity,
+                            (userIdentityErr, userIdentityInst) => {
+                auth.credentials.access_token =
+                          userIdentityInst.credentials.accessToken;
+                auth.credentials.refresh_token =
+                          userIdentityInst.credentials.refreshToken;
+                return getMessageList(gmail, auth, userId, userMailId,
+                          maxResults, qryParam, nextPageToken, callback);
+              });
+            });
+          });
+        }
       }
     });
   };
@@ -218,10 +236,10 @@ module.exports = function(MailResponse) {
    * @param {labelIds} Labels to pull filter the mails.
    * @param {callback} A callback function.
    */
-  const getMessage = (gmail, auth, userId, messageId, callback) => {
+  const getMessage = (gmail, auth, userMailId, messageId, callback) => {
     gmail.users.messages.get({
       auth: auth,
-      userId: userId,
+      userId: userMailId,
       id: messageId
     }, (error, response) => {
       if (!error) {
