@@ -2,7 +2,7 @@
 
 import logger from "../../server/log";
 import async from "async";
-import Spamc from "spamc";
+import Spamd from "node-spamd";
 import lodash from "lodash";
 import _ from "underscore";
 
@@ -38,23 +38,36 @@ module.exports = function(CampaignTemplate) {
     }
   );
   /**
-   * Integrated with spamassassin using spamc npm
+   * Integrated with spamassassin using node-spamd npm
+   * Sample Input:
+   * [{
+   * "subject": "test",
+   * "body": "This is a test message."
+   * }, {
+   * "subject": "Viagra, Cialis, Vicodin: buy medicines without prescription! CHEAPEST PRICE!",
+   * "body": "Cheap prices on viagra, cialis, vicodin! FPA approved! High quality is guaranteed!  Get your medicine without prescription, online! Loose weight, gain strenght.    Word at home and get a lot of money! See it for yourself!  This message is not a spam.  Take a look at my pictures! Your forgot it on my cellphone.  <a href=\"http://moxpage.info/get-paid-taking-surveys.html\">Visit your Yahoo Group now</a>"
+   *
+   * }]
    * @param  {[context]} ctx
-   * @param  {[List[String]]} contents
+   * @param  {[List[String]]} mails
    * @param  {[function]} checkSpamCB
    * @return {List[spamcResult]}
    */
-  CampaignTemplate.checkSpam = (ctx, contents, checkSpamCB) => {
-    async.map(contents, (content, contentsAsyncCB) => {
-      let spamc = new Spamc();
-      spamc.process(content, function(err, result) {
-        contentsAsyncCB(err, {
-          content: content,
-          spamc: result
-        });
+  CampaignTemplate.checkSpam = (ctx, mails, checkSpamCB) => {
+    let response = [];
+    const spamAssassinPort = 783;
+    async.eachSeries(mails, (mail, mailsAsyncCB) => {
+      let spamd = new Spamd("from@yourdomain.com", "to@anotherdomain.com",
+                                                 "localhost", spamAssassinPort);
+      spamd.evaluate(mail.subject, mail.body, function(result, err) {
+        if(err){
+          mailsAsyncCB(err);
+        }
+        response.push({mail: mail, spamResult: result});
+        mailsAsyncCB(null);
       });
-    }, (contentsAsyncErr, contentsAsyncResponse) => {
-      return checkSpamCB(contentsAsyncErr, contentsAsyncResponse);
+    }, (mailsAsyncErr) => {
+      return checkSpamCB(mailsAsyncErr, response);
     });
   };
 

@@ -60,6 +60,7 @@
     "main-bower-files": "^2.13.1",
     "moment": "^2.13.0",
     "moment-timezone": "^0.5.4",
+    "node-spamd": "https://github.com/Spicykoala/node-spamd.git",
     "node-xlsx": "^0.7.1",
     "passport": "^0.3.2",
     "passport-google-oauth": "^1.0.0",
@@ -75,7 +76,6 @@
     "react-validation-mixin": "^5.3.4",
     "run-sequence": "^1.2.1",
     "serve-favicon": "^2.0.1",
-    "spamc": "0.0.5",
     "sqs-consumer": "^3.1.3",
     "striptags": "^2.1.1",
     "uglify-js": "github:mishoo/UglifyJS2#harmony",
@@ -101,6 +101,10 @@
   },
   "description": "loopback-isomorphic-react-flux",
   "contributors": [
+    {
+      "name": "Ramanavel",
+      "email": "ramanavel@pipecandy.com"
+    },
     {
       "name": "Rajesh P R",
       "email": "rajesh.p.r@ideas2it.com"

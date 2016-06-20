@@ -316,9 +316,9 @@ module.exports = function(Campaign) {
    */
   let applySmartTags = (campaign, person, additionalValues, template,
     applySmartTagsCB) => {
-    let subject = Campaign.app.models.campaignTemplate.applySmartTags(
+    let subject = Campaign.app.models.campaignTemplate.personalize(
       template.subject, additionalValues);
-    let content = Campaign.app.models.campaignTemplate.applySmartTags(
+    let content = Campaign.app.models.campaignTemplate.personalize(
       template.content, additionalValues);
 
     let email = {
