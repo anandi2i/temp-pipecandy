@@ -112,7 +112,7 @@ class ListView extends React.Component {
       fieldsName: emailList.fieldsName,
       listFields: emailList.listFields,
       spinning: false
-    }
+    };
     _.each(emailList.listFields, (list) => {
       setFields[list.name] = "";
       this.initialStateValues[list.name] = "";

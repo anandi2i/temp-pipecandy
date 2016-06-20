@@ -41,13 +41,8 @@ class AddFollowups extends React.Component {
     if(tinymce.get(`emailContent${followupId}`)) {
       tinyMCE.execCommand("mceRemoveEditor", true, `emailContent${followupId}`);
     }
-    let allTags = {
-      commonSmartTags: this.props.commonSmartTags,
-      unCommonSmartTags: this.props.unCommonSmartTags
-    };
-    let getAllTags = CampaignStore.constructSmartTags(allTags);
-    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId, getAllTags,
-      true, this.tinyMceCb);
+    initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId,
+      this.props.getAllTags, true, this.tinyMceCb);
   }
 
   tinyMceCb = (editor) => {
@@ -145,34 +140,7 @@ class AddFollowups extends React.Component {
             </div>
           </div>
             <div className="row email-content m-lr-0">
-              <div className="tiny-toolbar" id={"mytoolbar" + followupId}>
-                <div className="right smart-tag-container">
-                  <div id={"insertSmartTags" + followupId} className="btn btn-dflt dropdown-button sm-icon-btn" data-activates={"dropdown" + followupId}>
-                    <i className="left mdi mdi-code-tags"></i>
-                    <span>Insert Smart Tags</span>
-                  </div>
-                    <ul id={"dropdown" + followupId} className="dropdown-content">
-                      {
-                        this.props.commonSmartTags.map(function(tag, key) {
-                          return (
-                            <li key={key}>
-                              <a className="common" href="javascript:;">{tag}</a>
-                            </li>
-                          );
-                        })
-                      }
-                      {
-                        this.props.unCommonSmartTags.map(function(tag, key) {
-                          return (
-                            <li key={key}>
-                              <a className="un-common" href="javascript:;">{tag}</a>
-                            </li>
-                          );
-                        })
-                      }
-                    </ul>
-                </div>
-              </div>
+              <div className="tiny-toolbar" id={"mytoolbar" + followupId} />
               <div id={"emailContent" + followupId} className={checkErrorCount}
                 dangerouslySetInnerHTML={{__html: this.props.content}} />
             </div>

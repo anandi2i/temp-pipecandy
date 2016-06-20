@@ -263,6 +263,8 @@ class CampaignIssuesPreviewPopup extends React.Component {
     let rightStyle = {
       color: currentPerson < peopelLength ? "" : "#ebebeb"
     };
+    let subjectClass = this.state.emailSubject
+      ? "email-issue-subject" : "empty-email-issue-subject";
     return (
       <div id="previewCampaign" className="modal modal-fixed-header modal-fixed-footer lg-modal">
         <i className="mdi mdi-close" onClick={this.closeModal}></i>
@@ -292,7 +294,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
             <div className="modal-content">
               <div className="template-content">
                 <div id={`previewSubContent-${this.state.id}`}
-                  className="email-issue-subject"></div>
+                  className={subjectClass}></div>
                 <div id={`previewToolbar-${this.state.id}`}
                   className="tiny-toolbar"></div>
                 <div id={`previewMailContent-${this.state.id}`}
