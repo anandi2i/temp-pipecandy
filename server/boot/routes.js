@@ -23,7 +23,7 @@ module.exports = function(app) {
         signed: !req.signedCookies ? true : false,
         maxAge: milliSec * req.accessToken.ttl
       });
-      return res.redirect("/#/home");
+      return res.redirect("/#/");
     };
     app.models.user.findById(
       req.accessToken.userId,

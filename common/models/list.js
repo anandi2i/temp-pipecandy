@@ -239,16 +239,20 @@ module.exports = function(List) {
   /**
    * Method to return list metrics
    * @return {[Object]} List and its metric
+   * @todo change listResponse.additions to dynamic value
    */
   List.listMetrics = (ctx, callback) => {
     List.find({
+      where: {createdBy: ctx.req.accessToken.userId},
       order: "createdAt DESC"
     }, (listsErr, lists) => {
       let listResponses = [];
       async.each(lists, (list, listsCB) => {
         let listResponse = {};
+        listResponse.id = list.id;
         listResponse.name = list.name;
         listResponse.createdAt = list.createdAt;
+        listResponse.additions = 0;
 
         async.parallel([
           (callback) => {

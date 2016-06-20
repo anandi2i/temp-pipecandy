@@ -11,9 +11,10 @@ class CustomGridRowComponent extends React.Component {
   }
 
   render() {
-    let data = this.props.data;
     let checkboxId = guid();
     let checkedStatus = this.props.globalData().getIsRowChecked(data);
+    const {id, name, membersCount, createdBy, openPercentage,
+      lastRunAt, clickPercentage, spamPercentage, additions} = this.props.data;
     return (
       <div className="email-list">
         <div className="row">
@@ -32,36 +33,36 @@ class CustomGridRowComponent extends React.Component {
               <div className="row-table-cell valign-middle">
                 {
                   this.props.globalData().listLink
-                    ? <h1><Link to={`/list/${data.id}`}>{data.name}</Link></h1>
-                    : <h1>{data.name}</h1>
+                    ? <h1><Link to={`/list/${id}`}>{name}</Link></h1>
+                    : <h1>{name}</h1>
                 }
                 <span className="subscriber-count">
                   <i className="mdi mdi-account"></i>
-                  &nbsp;{data.subscriberCount}
+                  &nbsp;{membersCount}
                   <i className="mdi mdi-record circle-dot"></i>
                 </span>
-                <span className="owner">{data.owner}</span>
+                <span className="owner">{createdBy}</span>
               </div>
             </div>
           </div>
           <div className="col m6 s12 block-2">
             <div className="row">
               <div className="col s12">
-                <h2>Last Sent: {data.lastSentAt}</h2>
+                <h2>Last Sent: {lastRunAt}</h2>
               </div>
             </div>
             <div className="row campaign-details">
               <div className="col m3 s6">
-                <span>{data.opens} Opens</span>
+                <span>{openPercentage}% Opens</span>
               </div>
               <div className="col m3 s6">
-                <span>{data.clicks} Clicks</span>
+                <span>{clickPercentage}% Clicks</span>
               </div>
               <div className="col m3 s6">
-                <span>{data.spam} Spam</span>
+                <span>{spamPercentage}% Spam</span>
               </div>
               <div className="col m3 s6">
-                <span>{data.additions} Additions</span>
+                <span>{additions} Additions</span>
               </div>
             </div>
           </div>

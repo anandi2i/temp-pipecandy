@@ -42,7 +42,7 @@ class Header extends React.Component {
           <div className="top-candy-bdr"></div>
           <nav id="mainNav">
             <div className="nav-wrapper">
-              <Link to="/home" className="brand-logo" activeClassName="active">
+              <Link to="/" className="brand-logo" activeClassName="active">
                 <img src="/images/logo.png" />
               </Link>
               <ul className="right hide-on-med-and-down">

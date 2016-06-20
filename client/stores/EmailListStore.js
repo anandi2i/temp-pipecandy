@@ -61,30 +61,11 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
   getFieldsFromStore() {
     return _getFields;
   },
-  //TODO need to get opens, clicks, spam and additions. Replace _.random by result.
+  /**
+   * @return {Array} All lists created by the current user
+   */
   getAllList() {
-    let _allEmailListFlattenData = [];
-    let initialRange = 0;
-    let subscriberCountEndRange = 10000;
-    let endRange = 50;
-    _.each(_allEmailList, function(obj, index) {
-      _allEmailListFlattenData.push({
-        id: obj.id,
-        name: obj.name || "",
-        query: obj.query || null,
-        type: obj.type || null,
-        createdFor: obj.createdFor || null,
-        owner: obj.owner || "",
-        subscriberCount: _.random(initialRange, subscriberCountEndRange),
-        lastSentAt: (new Date(_.now() + _.random(initialRange, endRange)))
-          .toUTCString(),
-        opens: _.random(initialRange, endRange) + "%",
-        clicks: _.random(initialRange, endRange) + "%",
-        spam: _.random(initialRange, endRange) + "%",
-        additions: _.random(initialRange, endRange)
-      });
-    });
-    return _allEmailListFlattenData;
+    return _allEmailList;
   },
 
   getEmailListByID() {
@@ -139,7 +120,7 @@ AppDispatcher.register(function(payload) {
   let action = payload.action;
   switch (action.actionType) {
     case Constants.ALL_EMAIL_LIST:
-      EmailListApi.findAll().then((response) => {
+      EmailListApi.getAllEmailList().then((response) => {
         _allEmailList = response.data;
         EmailListStore.emitChange();
       }, (err)=> {

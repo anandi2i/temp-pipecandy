@@ -1,8 +1,13 @@
 import api from "axios";
 
 const EmailListApi = {
-  findAll() {
-    return api.get(`/api/users/${getCookie("userId")}/lists`);
+  /**
+   * Api to get all the cureent user's list with its details
+   *
+   * @return {object} Promise
+   */
+  getAllEmailList() {
+    return api.get("/api/lists/listMetrics");
   },
   createList(data) {
     return api.post("/api/users/createEmailList", data);
