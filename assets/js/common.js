@@ -55,7 +55,7 @@ function displayError(error) {
         $("<span>", {
           text: error
         }));
-    Materialize.toast(warningContent, timeToShow, "", removeToast());
+    Materialize.toast(warningContent, timeToShow, "", removeToast);
   }
 }
 window.displayError = displayError;
@@ -73,7 +73,7 @@ function displaySuccess(successInfo) {
         $("<span>", {
           text: successInfo
         }));
-    Materialize.toast(successContent, timeToShow, "", removeToast());
+    Materialize.toast(successContent, timeToShow, "", removeToast);
   }
 }
 window.displaySuccess = displaySuccess;

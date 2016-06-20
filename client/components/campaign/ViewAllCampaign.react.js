@@ -49,14 +49,17 @@ class CampaignListView extends React.Component {
             style={{display: spinning ? "block" : "none"}}>
             <Spinner />
           </div>
+        </div>
           {
             noDataBlock
             ?
-              <div className="row card">
-                <div className="col s12 center card-content">
-                  <p>
-                    <Link to="/campaign/create">Create</Link> a new campaign!
-                  </p>
+              <div className="container">
+                <div className="row card">
+                  <div className="col s12 center card-content">
+                    <p>
+                      <Link to="/campaign/create">Create</Link> a new campaign!
+                    </p>
+                  </div>
                 </div>
               </div>
             :
@@ -66,7 +69,6 @@ class CampaignListView extends React.Component {
             :
               ""
           }
-        </div>
       </div>
     );
   }
