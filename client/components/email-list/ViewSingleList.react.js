@@ -106,13 +106,18 @@ class ListView extends React.Component {
       displaySuccess(success);
     }
     let emailList = EmailListStore.getEmailListByID();
-    this.setState({
+    let setFields = {
       listName: emailList.name,
       people: emailList.peoples,
       fieldsName: emailList.fieldsName,
       listFields: emailList.listFields,
       spinning: false
+    }
+    _.each(emailList.listFields, (list) => {
+      setFields[list.name] = "";
+      this.initialStateValues[list.name] = "";
     });
+    this.setState(setFields);
   }
 
   /**
@@ -200,6 +205,7 @@ class ListView extends React.Component {
    * @property {boolean} existingMetaField True if the field already exists in meta
    */
   saveAdditionalField() {
+    const userId = getCookie("userId");
     const {fieldName, listFields, metaFields} = this.state;
     const {listId} = this.props.params;
     const existingListField = _.chain(listFields)
@@ -224,7 +230,8 @@ class ListView extends React.Component {
       EmailListActions.saveAdditionalField({
         name: fieldName,
         type: "String",
-        listId : listId
+        listId: listId,
+        userId: userId
       });
       this.setState(this.initialStateValues);
     }
@@ -252,7 +259,8 @@ class ListView extends React.Component {
       if(this.state[field.name]){
         fieldValues.push({
           fieldId: field.id,
-          value: this.state[field.name]
+          value: this.state[field.name],
+          listId: listId
         });
       }
     }, this);
