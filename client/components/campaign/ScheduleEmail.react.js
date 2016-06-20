@@ -309,6 +309,7 @@ class ScheduleEmail extends React.Component {
   }
 
   render() {
+    let selectEmailListIndex = 1;
     let displayIndex =
       (this.props.active === this.state.index ? "block" : "none");
     let displayAddFollowup =
@@ -387,6 +388,13 @@ class ScheduleEmail extends React.Component {
                       );
                     }, this)
                   }
+                </div>
+                <div className="right-part m-t-5"
+                   style={{display: this.state.emailList.length ?
+                   "none" : "block"}}>
+                   <a onClick={ () => this.props.handleClick(selectEmailListIndex)}>
+                     select email list
+                   </a>
                 </div>
               </div>
               {/* email subject */}

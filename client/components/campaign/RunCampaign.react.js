@@ -155,7 +155,8 @@ class RunCampaign extends React.Component {
                <ScheduleEmail campaignId={this.props.params.id}
                  active={this.state.activeTab}
                  changeSelectedList={this.changeSelectedList}
-                 selectedTemplate={this.state.selectedTemplate} />
+                 selectedTemplate={this.state.selectedTemplate}
+                 handleClick={this.handleClick} />
              </div>
             :
               ""

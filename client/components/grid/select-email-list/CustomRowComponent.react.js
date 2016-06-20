@@ -11,10 +11,11 @@ class CustomGridRowComponent extends React.Component {
   }
 
   render() {
+    const data = this.props.data;
     let checkboxId = guid();
     let checkedStatus = this.props.globalData().getIsRowChecked(data);
     const {id, name, membersCount, createdBy, openPercentage,
-      lastRunAt, clickPercentage, spamPercentage, additions} = this.props.data;
+      lastRunAt, clickPercentage, spamPercentage, additions} = data;
     return (
       <div className="email-list">
         <div className="row">
