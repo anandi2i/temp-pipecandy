@@ -34,7 +34,7 @@
     }],
     "operator-assignment": [2, "always"],
     "comma-style": [2, "last"],
-    "camelcase": [2, {
+    "camelcase": [1, {
       "properties": "always"
     }],
     "no-func-assign": 2,

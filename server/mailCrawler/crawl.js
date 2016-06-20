@@ -33,7 +33,7 @@ const auth = new googleAuth();
 const oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
 
-const interval = 5000;
+const interval = 60000;
 setInterval(function() {
 
   /**
@@ -64,7 +64,7 @@ function getUserCredentials(callback) {
         let userMailId = user.profile.emails[0].value;
         oauth2Client.credentials.access_token = user.credentials.accessToken;
         oauth2Client.credentials.refresh_token = user.credentials.refreshToken;
-        callback(null, oauth2Client, userMailId);
+        callback(null, oauth2Client, user.id, userMailId);
     });
   });
 }
@@ -74,15 +74,15 @@ function getUserCredentials(callback) {
  * @param  {[object]} auth  Generated OAuth2 for the current user
  * @param  {[callback]} crawlerCB
  */
-function crawler(auth, userMailId, callback) {
+function crawler(auth, userId, userMailId, callback) {
   let messageId = null;
   let date = null;
-  App.MailResponse.getLatestResponse(userMailId, function(mailResponse) {
+  App.MailResponse.getLatestResponse(userId, userMailId, function(mailResponse) {
     if (mailResponse) {
       messageId = mailResponse.mailId;
       date = mailResponse.receivedDate;
     }
-    App.MailResponse.getUserMails(gmail, auth, userMailId, messageId,
+    App.MailResponse.getUserMails(gmail, auth, userId, userMailId, messageId,
         date, null, function() {
       callback(null, userMailId);
     });

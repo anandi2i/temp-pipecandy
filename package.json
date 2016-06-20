@@ -13,6 +13,7 @@
     "campaignConsumer": "node server/mailSender/campaignConsumer.js",
     "campaignMailSender": "node server/mailSender/campaignMailSender.js",
     "mailCrawler": "node server/mailCrawler/crawl.js",
+    "mailDequeue": "node server/mailCrawler/mailDequeue.js",
     "validate": "npm ls"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
     "connect-redis": "^3.0.2",
     "cors": "^2.5.2",
     "del": "^2.2.0",
+    "emoji-strip": "0.0.3",
     "express-flash": "0.0.2",
     "express-session": "^1.13.0",
     "fast-csv": "^2.0.0",

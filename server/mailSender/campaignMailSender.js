@@ -71,7 +71,7 @@ function getCurrentEmailQueue(getCurrentEmailQueueCB) {
       }
     }
   }, function(emailQueueErr, emailQueue) {
-    if (err) {
+    if (emailQueueErr) {
       getCurrentEmailQueueCB(emailQueueErr);
     }
     if (emailQueue.length > emptyArrayLength) {
@@ -187,7 +187,11 @@ function mailSender(mailContent, mailSenderCB) {
     var auth = new googleAuth();
     var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
-    oauth2Client.credentials = mailContent.userDetails.credential.credentials;
+    oauth2Client.credentials.access_token =
+          mailContent.userDetails.credential.credentials.accessToken;
+    oauth2Client.credentials.refresh_token =
+          mailContent.userDetails.credential.credentials.refreshToken;
+    //oauth2Client.credentials = mailContent.userDetails.credential.credentials;
 
     var emailLines = [];
 
@@ -208,7 +212,7 @@ function mailSender(mailContent, mailSenderCB) {
       .replace(/\//g, "_");
 
     buildEmailCB(null, base64EncodedEmail, oauth2Client,
-                                      mailContent.userDetails.userid);
+          mailContent.userDetails.userid, mailContent.userDetails.email.value);
 
   }
 
@@ -221,11 +225,12 @@ function mailSender(mailContent, mailSenderCB) {
    * @return void
    */
 
-  function sendEmail(base64EncodedEmail, oauth2Client, userId, sendEmailCB) {
+  function sendEmail(base64EncodedEmail, oauth2Client, userId,
+          userEmailId, sendEmailCB) {
 
     gmailClass.users.messages.send({
       auth: oauth2Client,
-      userId: "me",
+      userId: userEmailId,
       resource: {
         raw: base64EncodedEmail
       }

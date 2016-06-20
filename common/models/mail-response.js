@@ -1,35 +1,63 @@
-import _ from "lodash";
+import lodash from "lodash";
 import async from "async";
 import striptags from "striptags";
 import logger from "../../server/log";
+import mailEnqueue from "../../server/mailCrawler/mailEnqueue";
+import emojiStrip from "emoji-strip";
 
 module.exports = function(MailResponse) {
 
+  /**
+   * Method to create mail response entry
+   * @param  {Object}   mailResponse contains properties for mail response table
+   * @param  {Function} callback     callback function
+   */
   MailResponse.createResponse = (mailResponse, callback) => {
     MailResponse.find({
       where: {
         "mailId": mailResponse.mailId
       }
     }, (mailResponseEntryErr, mailResponseEntry) => {
-      if (!_.isEmpty(mailResponseEntry)) {
-        _(mailResponseEntry).forEach(mailResponse => {
+      if (!lodash.isEmpty(mailResponseEntry)) {
+        lodash(mailResponseEntry).forEach(mailResponse => {
           MailResponse.destroyById(mailResponse.id);
         });
       }
       MailResponse.create(mailResponse, (error, response) => {
-        callback();
+        callback(error, response);
       });
     });
   };
 
-  MailResponse.getLatestResponse = (mailId, callback) => {
+  /**
+   * Method to get latest mail
+   * @param  {Integer}   userId
+   * @param  {String}   mailId
+   * @param  {Function} callback
+   */
+  MailResponse.getLatestResponse = (userId, mailId, callback) => {
     MailResponse.findOne({
       where: {
-        "mailId": mailId
+        "userId": userId
       },
       order: "receivedDate desc"
     }, (mailResponseEntryErr, mailResponseEntry) => {
       callback(mailResponseEntry);
+    });
+  };
+
+  /**
+   * update nlp class for mail
+   * @param  {Object}   mailResponse
+   * @param  {Function} callback
+   */
+  MailResponse.updateMailClass = (mailResponse, callback) => {
+    MailResponse.update({
+      "id": mailResponse.id
+    }, {
+      NLPClass: mailResponse.NLPClass
+    }, (err, results) => {
+      return callback(err, results);
     });
   };
 
@@ -44,8 +72,8 @@ module.exports = function(MailResponse) {
    * @param  {[String]}   nextPageToken accessToken to read next page
    * @param  {Function} callback      a callback function
    */
-  MailResponse.getUserMails = (gmail, auth, userMailId, messageId, lastMsgDate,
-    nextPageToken, callback) => {
+  MailResponse.getUserMails = (gmail, auth, userId, userMailId, messageId,
+    lastMsgDate, nextPageToken, callback) => {
     const qryParam = "-in:CHAT -in:SENT";
     const mailToCount = 50;
     getMessageList(gmail, auth, userMailId, mailToCount, qryParam,
@@ -55,21 +83,24 @@ module.exports = function(MailResponse) {
         let messagesToRead = mailToCount;
         let messageFound = false;
         if (messageId) {
-          messageFound = _.find(response.messages,
-            _.matchesProperty("id", messageId));
+          messageFound = lodash.find(response.messages,
+            lodash.matchesProperty("id", messageId));
           if (messageFound) {
-            messagesToRead = _.findIndex(response.messages,
-              _.matchesProperty("id", messageId));
+            messagesToRead = lodash.findIndex(response.messages,
+              lodash.matchesProperty("id", messageId));
           }
         }
 
-        let messagesSubList = _.take(response.messages, (messagesToRead++));
-        async.eachSeries(messagesSubList, function(message, callbackMessage) {
+        let messageSubList = lodash.take(response.messages, (messagesToRead++));
+        async.eachSeries(messageSubList, function(message, callbackMessage) {
           getMessage(gmail, auth, userMailId, message.id, (response) => {
-            if (response.payload) {
+            let payload = response.payload;
+            if (payload) {
               let mailResponse = {};
-              let date = _.find(response.payload.headers,
-                _.matchesProperty("name", "Date"));
+              mailResponse.userId = userId;
+              let headers = payload.headers;
+              let date = lodash.find(headers,
+                lodash.matchesProperty("name", "Date"));
               if (date) {
                 mailResponse.receivedDate = new Date(date.value);
                 if (!messageFound && lastMsgDate) {
@@ -81,46 +112,59 @@ module.exports = function(MailResponse) {
               mailResponse.mailId = response.id;
               mailResponse.threadId = response.threadId;
               mailResponse.labels = response.labelIds;
-              let deliveredTo = _.find(response.payload.headers,
-                _.matchesProperty("name", "Delivered-To"));
+              let deliveredTo = lodash.find(headers,
+                lodash.matchesProperty("name", "Delivered-To"));
               if (deliveredTo) {
                 mailResponse.deliveredToEmailId = deliveredTo.value;
               }
-              let from = _.find(response.payload.headers,
-                _.matchesProperty("name", "From"));
+              let from = lodash.find(headers,
+                lodash.matchesProperty("name", "From"));
               if (from) {
                 mailResponse.fromEmailId = from.value;
               }
-              let to = _.find(response.payload.headers,
-                _.matchesProperty("name", "To"));
+              let to = lodash.find(headers,
+                lodash.matchesProperty("name", "To"));
               if (to) {
                 mailResponse.toEmailId = to.value;
               }
-              let subject = _.find(response.payload.headers,
-                _.matchesProperty("name", "Subject"));
+              let subject = lodash.find(headers,
+                lodash.matchesProperty("name", "Subject"));
               if (subject) {
                 mailResponse.subject = subject.value;
               }
-              let cc = _.find(response.payload.headers,
-                _.matchesProperty("name", "Cc"));
+              let cc = lodash.find(headers,
+                lodash.matchesProperty("name", "Cc"));
               if (cc) {
                 mailResponse.ccMailId = cc.value;
               }
               let body = null;
-              if (response.payload.body) {
-                body = response.payload.body.data;
+              if (payload.body) {
+                body = payload.body.data;
               }
               if (!body) {
-                body = getMessageBody(response.payload.parts[0]);
+                body = getMessageBody(payload.parts[0]);
               }
               if (body) {
                 let mailBody = new Buffer(body, "base64");
                 let decodedBody = striptags(mailBody.toString());
                 decodedBody = decodedBody.replace(/\r?\n|\r/g, " ");
-                mailResponse.content = decodedBody;
+                // Regular expression to extract reply message alone
+                let regExBody = "On (Sun|Mon|Tue|Wed|Thu|Fri|Sat), (.*)wrote:";
+                let regExIndex = decodedBody.match(regExBody);
+                let replyMsg = decodedBody.trim();
+                if (regExIndex) {
+                  const zero = 0;
+                  replyMsg = decodedBody.substr(zero, regExIndex.index).trim();
+                }
+                replyMsg = emojiStrip(replyMsg);
+                mailResponse.content = replyMsg;
               }
-              MailResponse.createResponse(mailResponse, function() {
-                callbackMessage();
+              MailResponse.createResponse(mailResponse, (error, response) => {
+                let queueName = "mailNLPIdentification";
+                mailEnqueue.enqueueMail(JSON.stringify(response), queueName,
+                    () => {
+                  callbackMessage();
+                });
               });
             } else {
               callbackMessage();
@@ -128,7 +172,8 @@ module.exports = function(MailResponse) {
           });
         }, (error, result) => {
           if (messageId && !messageFound) {
-            listLabels(auth, messageId, lastMsgDate, nextPageToken, callback);
+            MailResponse.getUserMails(gmail, auth, userId, userMailId,
+              messageId, lastMsgDate, nextPageToken, callback);
           } else {
             callback();
           }

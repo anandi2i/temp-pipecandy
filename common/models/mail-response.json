@@ -8,7 +8,8 @@
   },
   "properties": {
     "content": {
-      "type": "string"
+      "type": "string",
+      "length": 10000
     },
     "NLPClass": {
       "type": "string"
@@ -61,7 +62,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "userId"
+    }
+  },
   "acls": [],
   "methods": {}
 }
