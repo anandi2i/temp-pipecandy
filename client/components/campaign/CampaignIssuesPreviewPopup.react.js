@@ -47,7 +47,13 @@ class CampaignIssuesPreviewPopup extends React.Component {
       this.el.openModal({
         dismissible: false
       });
-      this.usedTagIds();
+      let {emailSubject, emailContent} = this.state;
+      let getUsedTagIds = CampaignStore.usedTagIds(
+        emailSubject.concat(emailContent));
+      this.setState({
+        usedTagIds: getUsedTagIds.usedTagIds,
+        usedTagIdsArr: getUsedTagIds.usedTagIdsArr
+      });
       initTinyMCEPopUp(`#previewMailContent-${id}`, `#previewToolbar-${id}`,
         true, this.setEmailContent);
       initTinyMCEPopUp(`#previewSubContent-${id}`, "",
@@ -55,18 +61,6 @@ class CampaignIssuesPreviewPopup extends React.Component {
       this.el.find(".preview-modal-content").mCustomScrollbar({
         theme:"minimal-dark"
       });
-    });
-  }
-
-  usedTagIds(){
-    let {emailSubject, emailContent} = this.state;
-    let htmlDom = $.parseHTML(emailSubject.concat(emailContent));
-    let getUsedTagIds = [];
-    _.each($(htmlDom).find("span.tag"), function(val, key){
-      getUsedTagIds.push($(val).attr("data-id"));
-    });
-    this.setState({
-      usedTagIds: _.sortBy(_.uniq(getUsedTagIds)).join().replace(/,/g, "|")
     });
   }
 
@@ -209,20 +203,28 @@ class CampaignIssuesPreviewPopup extends React.Component {
       _.each(personIssues, $.proxy(function(person, key) {
         let getPersonInfo = _.clone(person);
         let findIssues = this.checkSmartTags(getPersonInfo);
-        let isMatch = _.all(currentIssueTags.issuesTags,
-          function(v) { return _.include(findIssues.issuesTags, v); });
+        let isMatch = currentIssueTags.issuesTags.equals(findIssues.issuesTags);
         if(isMatch && getPersonInfo) {
-          getPersonInfo.template = CampaignStore.applySmartTagsValue(
-            getContent.content, getPersonInfo);
-          getPersonInfo.emailSubject = CampaignStore.applySmartTagsValue(
-            getSubject.content, getPersonInfo);
-          myList.push(getPersonInfo);
+          let issuePerson = {};
+          let subj = CampaignStore.constructEmailTemplate(getSubject.content);
+          let mail = CampaignStore.constructEmailTemplate(getContent.content);
+          let getUsedTagIds = CampaignStore.usedTagIds(subj.concat(mail));
+          let missingTagIds = _.difference(this.state.usedTagIdsArr,
+            getUsedTagIds.usedTagIdsArr).join().replace(/,/g, "|");
+          issuePerson.subject = CampaignStore.applySmartTagsValue(
+            subj, getPersonInfo);
+          issuePerson.content = CampaignStore.applySmartTagsValue(
+            mail, getPersonInfo);
+          issuePerson.usedTagIds = getUsedTagIds.usedTagIds;
+          issuePerson.missingTagIds = missingTagIds;
+          issuePerson.userId = getCookie("userId");
+          myList.push(issuePerson);
           fixedPeopleId.push(getPersonInfo.id);
         }
       }), this);
 
       _.each(fixedPeopleId, (val, key) => {
-        personIssues.splice(personIssues.indexOf(val), initCount);
+        personIssues.splice(_.findIndex(personIssues, {id: val}), initCount);
       });
 
       this.setState((state) => ({

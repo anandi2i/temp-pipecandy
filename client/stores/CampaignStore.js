@@ -135,8 +135,8 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   },
 
   // re-construct tag name to smart-tags
-  constructEmailTemplate(str) {
-    let html = $.parseHTML(str);
+  constructEmailTemplate(contentText) {
+    let html = $.parseHTML(contentText);
     let findCommonTags = $(html).find("span.common");
     _.each(findCommonTags, (val, key) => {
       let getTag = $(val).data("tag");
@@ -147,6 +147,24 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     return $(steDom).html();
   },
 
+/**
+ * Find additional field ID's from given string
+ * @param  {string} contentText
+ * @return {object} (join array of tag ID's using | symbole and array of tag ID's)
+ */
+  usedTagIds(contentText){
+    let htmlDom = $.parseHTML(contentText);
+    let getUsedTagIds = [];
+    _.each($(htmlDom).find("span.tag"), function(val, key){
+      getUsedTagIds.push($(val).attr("data-id"));
+    });
+    getUsedTagIds = _.sortBy(_.uniq(getUsedTagIds));
+    return {
+      usedTagIds: getUsedTagIds.join().replace(/,/g, "|"),
+      usedTagIdsArr: getUsedTagIds
+    };
+  },
+
   replaceSmartTagContent(value) {
     let tag = "<span class='tag common' data-id='"+value.id+"' "+
       "contenteditable='false' data-tag='"+value.field+
@@ -154,8 +172,8 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     return tag;
   },
 
-  applyTags(emailContent, str, value){
-    let reg = new RegExp(str, "g");
+  applyTags(emailContent, tagContent, value){
+    let reg = new RegExp(tagContent, "g");
     emailContent = emailContent
       .replace(reg, CampaignStore.replaceSmartTagContent(value));
     return emailContent;
