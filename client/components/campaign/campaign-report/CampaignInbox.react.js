@@ -5,15 +5,18 @@ import Spinner from "../../Spinner.react";
 import TagMenu from "../../TagMenu.react";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
+import inboxDataObject from "../../../staticData/inboxData";
 
 /**
  * Display selected campaign inbox report
+ * TODO Remove static data and replace with dynamic data from mail response
  */
 class CampaignInbox extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       data: [],
+      inboxData : [],
       requestSent: false,
       count: 1,
       activeTab: "0",
@@ -69,10 +72,10 @@ class CampaignInbox extends React.Component {
    * Append fake data
    */
   appendData() {
-    let fakeData = this.createFakeData(this.state.data.length,
+    let fakeData = this.createFakeData(this.state.inboxData.length,
       this.state.temp.length);
-    let newData = this.state.data.concat(fakeData);
-    this.setState({data: newData, requestSent: false});
+    let newData = this.state.inboxData.concat(fakeData);
+    this.setState({inboxData: newData, requestSent: false});
   }
 
   /**
@@ -80,8 +83,8 @@ class CampaignInbox extends React.Component {
    */
   initFakeData() {
     let newCount = 20;
-    let data = this.createFakeData(this.state.data.length, newCount);
-    this.setState({data: data});
+    let inboxData = this.createFakeData(this.state.inboxData.length, newCount);
+    this.setState({inboxData: inboxData});
   }
 
   /**
@@ -91,6 +94,7 @@ class CampaignInbox extends React.Component {
    * @return {object}           react dom object
    */
   createFakeData(startKey, counter) {
+    const emptyCount = 0;
     let i = 0;
     let data = [];
     for (i = 0; i < counter; i++) {
@@ -104,9 +108,26 @@ class CampaignInbox extends React.Component {
               <input type="checkbox" className="filled-in"
                 id={startKey+i} defaultChecked="" />
               <label htmlFor={startKey+i} className="full-w">
-                <div className="data-info col s8 m3 l3">User {startKey+i}</div>
-                <div className="data-info col s4 m6 l6 hide-on-600">User {startKey+i}</div>
-                <div className="data-info col s4 m3 l3 rit-txt">User {startKey+i}</div>
+                <div className="data-info col s8 m3 l3 personName">
+                  <b>
+                    <span>{inboxDataObject[i].person}</span>, <span>{inboxDataObject[i].replyTo}</span>
+                    {
+                      (inboxDataObject[i].replyCount > emptyCount)
+                      ?
+                      <span> ({inboxDataObject[i].replyCount}) </span> : ""
+                    }
+
+                  </b>
+                </div>
+                <div className="data-info col s4 m6 l6 hide-on-600">
+                  <div className="mailDescription">
+                    <span className="subjectLine">{inboxDataObject[i].subject}</span>
+                    <span className="mailContentLine">{inboxDataObject[i].content}</span>
+                  </div>
+                </div>
+                <div className="data-info col s4 m3 l3 rit-txt">
+                  {inboxDataObject[i].replyDate}
+                </div>
               </label>
             </div>
           </div>
@@ -162,7 +183,7 @@ class CampaignInbox extends React.Component {
       <div>
         <div className="m-b-120">
           {/* Dashboard head */}
-          <CampaignReportHead />
+          <CampaignReportHead campaignId={this.props.params.id}/>
           <div className="container">
             <div className="row row-container">
               <div className="col s12 m6 l6 filter-container p-lr-0">
@@ -191,7 +212,7 @@ class CampaignInbox extends React.Component {
             mainClass={"container"} />
           <div style={{display: this.state.activeTab === this.state.tabs[0] ? "block" : "none"}}>
             <div className="container">
-              {this.state.data}
+              {this.state.inboxData}
             </div>
             {
               this.state.requestSent ?

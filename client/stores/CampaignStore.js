@@ -12,6 +12,7 @@ let _isExistCampaignId = false;
 let _getAllCampaigns = {};
 let _allEmailTemplates = [];
 let _campaignMetrics = [];
+let _campaignDetails = {};
 let selectedEmailList = {};
 let allPeopleList = [];
 let duplicateEmailList = [];
@@ -118,6 +119,10 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
 
   getCampaignMetrics() {
     return _campaignMetrics;
+  },
+
+  getCampaignDetails(){
+    return _campaignDetails;
   },
 
   getIssuesPeopleList(issueTags) {
@@ -471,6 +476,30 @@ AppDispatcher.register(function(payload) {
         spamScore = 0;
         _error = HandleError.evaluateError(err);
         CampaignStore.emitSpamScoreChange();
+      });
+      break;
+    case Constants.GET_RECENT_CAMPAIGN_DETAILS:
+      CampaignApi.getRecentCampaignDetails()
+      .then((response) => {
+        _campaignDetails = response.data.recentCampaignDetails;
+        _error = "";
+        CampaignStore.emitChange();
+      }, (err) => {
+        _campaignDetails = [];
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
+      });
+      break;
+    case Constants.GET_CURRENT_CAMPAIGN_DETAILS:
+      CampaignApi.getCurrentCampaignDetails(action.campaignId)
+      .then((response) => {
+        _campaignDetails = response.data.currentCampaignDetails;
+        _error = "";
+        CampaignStore.emitChange();
+      }, (err) => {
+        _campaignDetails = [];
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
       });
       break;
     default:

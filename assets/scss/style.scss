@@ -497,6 +497,7 @@ a {
     font-size: 24px;
     font-weight: 300;
     margin-right: 30px;
+    width: 100%;
     .separator {
       font-size: 14px;
       margin-top: 11px;
@@ -528,6 +529,9 @@ a {
   border-bottom: $border-1px;
   min-height: 50px;
   @include sub-nav-container;
+  .campaignDetailSection{
+    width:auto;
+  }
 }
 .sub-head-container {
   margin-top: 30px;
@@ -945,6 +949,15 @@ $lines-to-show: 8;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+    .personName {
+      color: $black-clr;
+    }
+    .mailDescription{
+      .subjectLine{
+        color: $black-clr;
+        margin-right: 10px;
+      }
     }
   }
 }

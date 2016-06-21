@@ -689,6 +689,135 @@ module.exports = function(Campaign) {
   );
 
   /**
+   * Get campaign details for the recent campaign
+   * @param  {[callback]} getRecentCampaignDetailsCB
+   * @return {[object]} recentCampaignDetailsObj
+   * @author Aswin Raj A
+   */
+  Campaign.getRecentCampaignDetails = (ctx, getRecentCampaignDetailsCB) => {
+    let recentCampaignDetailsObj = {};
+    let peopleArray = [];
+    Campaign.find({
+      where: {
+        "createdBy": ctx.req.accessToken.userId
+      },
+      order: "lastrunat DESC",
+      limit: 1
+    }, (campaignErr, campaigns) => {
+      const recentCampaign = campaigns[0];
+      recentCampaignDetailsObj.campaignName = recentCampaign.name;
+      recentCampaignDetailsObj.executedAt = new Date(recentCampaign.lastRunAt);
+      campaigns[0].lists((campaignListErr, campaignLists) => {
+        recentCampaignDetailsObj.listCount = campaignLists.length;
+        async.eachSeries(campaignLists, (campaignList, campaignListCB) => {
+          campaignList.people((personErr, people) => {
+            async.eachSeries(people, (person, peopleSeriesCB) => {
+              peopleArray.push(lodash.pick(person, "id"));
+              peopleSeriesCB(null);
+            }, (seriesErr) => {
+              if(seriesErr){
+                campaignListCB(seriesErr);
+              }
+              campaignListCB(null);
+            });
+          });
+
+        }, (campaignListsErr) => {
+          if(campaignListsErr){
+            campaignListCB(campaignListsErr);
+          }
+          recentCampaignDetailsObj.recepientCount = lodash
+                                          .uniqBy(peopleArray, "id").length;
+          getRecentCampaignDetailsCB(null, recentCampaignDetailsObj);
+        });
+      });
+  });
+
+};
+
+  Campaign.remoteMethod(
+    "getRecentCampaignDetails", {
+      description: "Get recent campaign details for the current user",
+      accepts: [{
+        arg: "ctx",
+        type: "object",
+        http: {
+          source: "context"
+        }
+      }],
+      returns: {
+        arg: "recentCampaignDetails",
+        type: "object"
+      },
+      http: {
+        verb: "get",
+        path: "/getRecentCampaignDetails"
+      }
+    }
+  );
+
+
+  /**
+   * Get the campaign details for the current campaign
+   * @param  {[campaignId]} campaignId
+   * @param  {[callback]} getCurrentCampaignDetailsCB
+   * @return {[object]} currentCampaignDetailsObj
+   * @author Aswin Raj A
+   */
+  Campaign.getCurrentCampaignDetails = (campaignId,
+    getCurrentCampaignDetailsCB) => {
+    let currentCampaignDetailsObj = {};
+    let peopleArray = [];
+    Campaign.findById(campaignId, (campaignErr, campaign) => {
+      if(campaignErr){
+        getCurrentCampaignDetailsCB(campaignErr);
+      }
+      currentCampaignDetailsObj.campaignName = campaign.name;
+      currentCampaignDetailsObj.executedAt = new Date(campaign.lastRunAt);
+      campaign.lists((campaignListsErr, campaignList) => {
+        currentCampaignDetailsObj.listCount = campaignList.length;
+        async.eachSeries(campaignList, (campaignList, campaignListCB) => {
+          campaignList.people((personErr, people) => {
+            async.eachSeries(people, (person, peopleSeriesCB) => {
+              peopleArray.push(lodash.pick(person, "id"));
+              peopleSeriesCB(null);
+            }, (seriesErr) => {
+              if(seriesErr){
+                campaignListCB(seriesErr);
+              }
+              campaignListCB(null);
+            });
+          });
+
+        }, (campaignListsErr) => {
+          currentCampaignDetailsObj.recepientCount = lodash
+                                            .uniqBy(peopleArray, "id").length;
+          getCurrentCampaignDetailsCB(null, currentCampaignDetailsObj);
+        });
+      });
+    });
+  };
+
+
+    Campaign.remoteMethod(
+      "getCurrentCampaignDetails", {
+        description: "Get current campaign details for the current campaign",
+        accepts: [{
+          arg: "campaignId",
+          type: "any"
+        }],
+        returns: {
+          arg: "currentCampaignDetails",
+          type: "object"
+        },
+        http: {
+          verb: "get",
+          path: "/getCurrentCampaignDetails/:campaignId"
+        }
+      }
+    );
+
+  /**
    * Updates the updatedAt column with current Time
    * @param ctx Context
    * @param next (Callback)

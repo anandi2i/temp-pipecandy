@@ -31,7 +31,7 @@ class PerformanceCompare extends React.Component {
   }
 
   componentDidMount() {
-    const {campaignId} = this.props;;
+    const {campaignId} = this.props;
     CampaignStore.addChangeListener(this.onStoreChange);
     if(!campaignId) {
       CampaignActions.getRecentCampaignMetrics();

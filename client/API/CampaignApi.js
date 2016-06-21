@@ -19,15 +19,14 @@ const CampaignApi = {
     return api.get(`api/campaigns/${compaignId}/exists`);
   },
   /**
-   * Get the campagin metric data
-   * Get the campaign matrics for the current campaign
+   * Get the campaign metrics for the current campaign
    * @param  {[campaignId]} campaignId
    */
   getCurrentCampaignMetrics(campaignId) {
     return api.get(`api/campaigns/getCurrentCampaignMetrics/${campaignId}`);
   },
   /**
-   * Get recent campaign matrics
+   * Get recent campaign metrics
    */
   getRecentCampaignMetrics() {
     return api.get("api/campaigns/getRecentCampaignMetrics");
@@ -45,6 +44,19 @@ const CampaignApi = {
    */
   checkSpam(data) {
     return api.post("api/campaignTemplates/checkSpam", data);
+  },
+  /**
+   * Get recent campaign details
+   */
+  getRecentCampaignDetails() {
+    return api.get("api/campaigns/getRecentCampaignDetails");
+  },
+  /**
+   * Get current campaign details
+   * * @param  {[campaignId]} campaignId
+   */
+  getCurrentCampaignDetails(campaignId) {
+    return api.get(`api/campaigns/getCurrentCampaignDetails/${campaignId}`);
   }
 };
 

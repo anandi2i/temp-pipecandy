@@ -76,6 +76,23 @@ const CampaignActions = {
       actionType: Constants.CHECK_SPAM,
       data: data
     });
+  },
+  /**
+   * To get the recent campaignDetails
+   */
+  getRecentCampaignDetails() {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_RECENT_CAMPAIGN_DETAILS,
+    });
+  },
+  /**
+   * To get the current campaignDetails
+   */
+  getCurrentCampaignDetails(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_CURRENT_CAMPAIGN_DETAILS,
+      campaignId : campaignId
+    });
   }
 };
 

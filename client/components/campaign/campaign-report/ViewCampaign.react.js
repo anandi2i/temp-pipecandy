@@ -15,19 +15,20 @@ class ViewCampaign extends React.Component {
   }
 
   render() {
+    const campaignId = this.props.params.id;
     return (
         <div>
           <div className="m-b-120">
             {/* Dashboard head */}
-            <CampaignReportHead />
+            <CampaignReportHead campaignId={campaignId}/>
             {/* Performance Compared Menu */}
-            <PerformanceCompare campaignId={this.props.params.id}/>
+            <PerformanceCompare campaignId={campaignId}/>
             {/* Performance Chart */}
             <PerformanceStatus />
             {/* Performance Chart */}
             <PerformanceReport />
           </div>
-          <CampaignFooter campaignId={this.props.params.id} activePage={"report"}/>
+          <CampaignFooter campaignId={campaignId} activePage={"report"}/>
       </div>
     );
   }

@@ -12,6 +12,7 @@ module.exports = function(ClickedEmailLink) {
    * @param  {[number]} personId
    * @param  {[number]} emailLinkId
    * @param  emailLinkTrackCB   (Callback)
+   * @author Aswin Raj A
    * @return void
    */
 
