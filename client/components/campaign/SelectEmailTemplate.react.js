@@ -51,6 +51,7 @@ class SelectEmailTemplate extends React.Component {
   }
 
   render() {
+    const scheduleEmailIndex = 3;
     return (
       <div className="container" style={{display: this.props.active === this.state.index ? "block" : "none"}}>
         <div className="row sub-head-container m-lr-0">
@@ -61,7 +62,7 @@ class SelectEmailTemplate extends React.Component {
             <div className="nav-wrapper">
               <TabsNav handleClick={this.handleClick} active={this.state.activeTab}/>
               <ul className="right">
-              <a href="#!" className="btn blue">Save & continue</a>
+              <a className="btn blue" onClick={() => this.props.handleClick(scheduleEmailIndex)}>Save & continue</a>
               </ul>
             </div>
           </nav>

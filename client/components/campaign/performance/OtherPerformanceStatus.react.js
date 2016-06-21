@@ -77,7 +77,7 @@ class OtherPerformanceStatus extends React.Component {
     const tab = this.state.tab;
     const tabs = this.state.tabs;
     return (
-      <div className="container camp-chip-container">
+      <div className="container">
         <div className="row main-head">
           Othar status
         </div>

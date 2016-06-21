@@ -19,6 +19,7 @@ class PerformanceReport extends React.Component {
    */
   drawGraph() {
     //TODO - Remove static data
+    //TODO - Use variable colours
     let pointInterval = 86400000;
     let year = 2016;
     let month = 0;
@@ -81,7 +82,7 @@ class PerformanceReport extends React.Component {
       },
       plotOptions: {
           areaspline: {
-              fillOpacity: 1.0
+              fillOpacity: 0.0
           },
           series: {
               pointStart: pointStart,
@@ -92,24 +93,27 @@ class PerformanceReport extends React.Component {
           name: "Click rates",
           data: series1,
           color: "#FF6549",
+          lineColor: "#FF6549",
+          lineWidth: 3,
           marker: {
               symbol: "circle",
               radius: 4,
-              fillColor: null,
+              fillColor: "#FFFFFF",
               lineWidth: 3,
-              lineColor: "#FFFFFF"
+              lineColor: "#FF6549"
           }
       }, {
           name: "Open rates",
           data: series2,
           color: "#FFC66D",
-          lineColor: "#FFFFFF",
+          lineColor: "#FFC66D",
+          lineWidth: 3,
           marker: {
               symbol: "circle",
               radius: 4,
-              fillColor: null,
+              fillColor: "#FFFFFF",
               lineWidth: 3,
-              lineColor: "#FFFFFF"
+              lineColor: "#FFC66D"
           }
       }]
     });
