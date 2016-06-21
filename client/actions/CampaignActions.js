@@ -54,7 +54,17 @@ const CampaignActions = {
   getCurrentCampaignMetrics(campaignId) {
     AppDispatcher.handleAction({
       actionType: Constants.GET_CURRENT_CAMPAIGN_METRICS,
-      campaignId : campaignId
+      campaignId: campaignId
+    });
+  },
+  /**
+   * Save campaign templates
+   * TODO need to save followups also
+   */
+  saveCampaignTemplates(campaignData) {
+    AppDispatcher.handleAction({
+      actionType: Constants.SAVE_CAMPAIGN_TEMPLATES,
+      campaign: campaignData
     });
   }
 };

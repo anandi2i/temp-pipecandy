@@ -32,6 +32,13 @@ const CampaignApi = {
    */
   getRecentCampaignMetrics() {
     return api.get("api/campaigns/getRecentCampaignMetrics");
+  },
+  /**
+   * Save campaign templates
+   */
+  saveCampaignTemplates(campaign) {
+    return api.post(`api/campaigns/${campaign.id}/saveCampaignTemplate`,
+      campaign.templates);
   }
 };
 

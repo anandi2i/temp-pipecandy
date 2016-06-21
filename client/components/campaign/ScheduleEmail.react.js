@@ -214,32 +214,32 @@ class ScheduleEmail extends React.Component {
         this.refs.issues.openModal();
       });
     } else {
-      let followups = [];
-      let followupsError = true;
-      this.state.followups.map((val, key) => {
-        let content = this.refs[`addFollowups${val.id}`].refs.issues;
-        let emailSubject = content.props.emailSubject;
-        let emailContent = content.props.emailContent;
-        content.state.emailSubject = emailSubject;
-        content.state.emailContent = emailContent;
-        followups.push(content.state);
-        if(content.props.personIssues.length){
-          followupsError = false;
-        }
-      }, this);
-      this.setState((state) => ({
-        mainEmailContent: this.refs.issues.state,
-        followupsEmailContent: followups
-      }), () => {
-        if(!this.state.errorCount &&
-          !this.state.mainEmailContent.personIssues.length && followupsError){
-            this.refs.preview.openModal();
-        } else {
-          displayError("Fix all smart tag values");
-          console.log("fix all smart tag values");
-        }
-      });
+      // Check if all missing tags are fixed
+      if(this.checkEmailContentError()) {
+        this.refs.preview.openModal();
+      }
     }
+  }
+
+ /**
+  * Check if all missing tags are fixed by user
+  * @return {boolean}
+  */
+  checkEmailContentError() {
+    let followupsError = true;
+    this.state.followups.map((val, key) => {
+      let content = this.refs[`addFollowups${val.id}`].refs.issues;
+      if(content.props.personIssues.length){
+        followupsError = false;
+      }
+    }, this);
+    let mainEmailErr = this.refs.issues.state.personIssues.length;
+    if(!this.state.errorCount && !mainEmailErr && followupsError){
+        return true;
+    }
+    displayError("Fix all smart tag values");
+    console.log("Fix all smart tag values");
+    return false;
   }
 
   saveCampaignInfo = () => {
@@ -252,21 +252,28 @@ class ScheduleEmail extends React.Component {
         };
         UserAction.userUpdate(formData);
     }
-    let mainTemplate = this.refs.issues.state;
-    let mainEmailContent = this.constructSavedTemplateObjects(mainTemplate);
-    let followups = [];
-    this.state.followups.map(function(val, key) {
-      let followup = this.refs[`addFollowups${val.id}`].refs.issues.state;
-      let followupObj = this.constructSavedTemplateObjects(followup);
-      followups.push(followupObj);
-    }, this);
-    this.setState((state) => ({
-      mainEmailContent: mainEmailContent,
-      followupsEmailContent: followups
-    }), function(){
-      console.log(this.state.mainEmailContent);
-      console.log(this.state.followupsEmailContent);
-    });
+    // Check if all missing tags are fixed
+    if(this.checkEmailContentError()) {
+      let mainTemplate = this.refs.issues.state;
+      let mainEmailContent = this.constructSavedTemplateObjects(mainTemplate);
+      let followups = [];
+      this.state.followups.map(function(val, key) {
+        let followup = this.refs[`addFollowups${val.id}`].refs.issues.state;
+        let followupObj = this.constructSavedTemplateObjects(followup);
+        followups.push(followupObj);
+      }, this);
+      this.setState((state) => ({
+        mainEmailContent: mainEmailContent,
+        followupsEmailContent: followups
+      }), function(){
+        CampaignActions.saveCampaignTemplates({
+          id: this.props.campaignId,
+          templates: this.state.mainEmailContent
+        });
+        console.log(this.state.mainEmailContent);
+        console.log(this.state.followupsEmailContent);
+      });
+    }
   }
 
   constructSavedTemplateObjects(mainTemplate){

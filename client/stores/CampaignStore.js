@@ -423,6 +423,17 @@ AppDispatcher.register(function(payload) {
         CampaignStore.emitChange();
       });
       break;
+    case Constants.SAVE_CAMPAIGN_TEMPLATES:
+      //TODO need to clean
+      CampaignApi.saveCampaignTemplates(action.campaign)
+      .then((response) => {
+        appHistory.push("/campaign");
+        displaySuccess("Campaign saved successfully");
+      }, (err) => {
+        console.log(err);
+        displayError("Problem in saving");
+      });
+      break;
     default:
       return true;
   }
