@@ -118,7 +118,7 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
             userid: emailQueueEntry.userId,
             name: usercredential[0].profile.displayName,
             email: usercredential[0].profile.emails[0],
-            credential: tempCacheUserCredentials[emailQueueEntry.userId]
+            credential: usercredential[0].credentials
           };
 
           mailSender(mailContent, function(err) {
@@ -188,9 +188,9 @@ function mailSender(mailContent, mailSenderCB) {
     var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
     oauth2Client.credentials.access_token =
-          mailContent.userDetails.credential.credentials.accessToken;
+          mailContent.userDetails.credential.accessToken;
     oauth2Client.credentials.refresh_token =
-          mailContent.userDetails.credential.credentials.refreshToken;
+          mailContent.userDetails.credential.refreshToken;
     //oauth2Client.credentials = mailContent.userDetails.credential.credentials;
 
     var emailLines = [];

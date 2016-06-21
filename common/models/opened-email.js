@@ -5,15 +5,13 @@ module.exports = function(OpenedEmail) {
 
   /**
    * API to track whether the campaign email has been opened by the prospect
-   * http://localhost:3000/api/openedEmails/trackEmail?campaignId=1&personId=2&listId=1
+   * http://localhost:3000/api/openedEmails/trackEmail/:campaignId/:personId/track.png
    * @param  {[number]} campaignId
    * @param  {[number]} personId
-   * @param  {[number]} listId
    * @param  trackEmailCB (Callback)
    * @return void
    */
-  OpenedEmail.trackEmail = (campaignId, personId, listId, trackEmailCB) => {
-
+  OpenedEmail.trackEmail = (campaignId, personId, trackEmailCB) => {
     OpenedEmail.find({
       where: {
         "campaignId": campaignId,
@@ -56,7 +54,7 @@ module.exports = function(OpenedEmail) {
 
     });
 
-  };
+
 
 
   /**
@@ -84,46 +82,51 @@ module.exports = function(OpenedEmail) {
    * @return void
    */
   let listMetricEntry = (listMetricEntryCB) => {
-
-    OpenedEmail.app.models.listMetric.find({
-      where: {
-        "campaignId": campaignId,
-        "listId": listId
-      }
-    }, function(listMetricEntryErr, listMetricEntry) {
-
-      if (listMetricEntryErr) {
-        listMetricEntryCB(listMetricEntryErr);
-      }
-
-      if (listMetricEntry.length > emptyArrayLength) {
-        OpenedEmail.app.models.listMetric.updateAll({
-          "campaignId": campaignId,
-          "listId": listId
-        }, {
-          "opened": ++listMetricEntry[0].opened
-        }, function(updatedListMetricEntryErr, updatedListMetricEntry) {
-          if (updatedListMetricEntryErr) {
-            listMetricEntryCB(updatedListMetricEntryErr);
-          }
-          listMetricEntryCB(null);
+    OpenedEmail.app.models.campaign.findById(campaignId,
+            (campaignErr, campaign) => {
+      campaign.lists( (listsErr, lists) => {
+        async.each(lists, (list, listCB) => {
+          OpenedEmail.app.models.listMetric.find({
+            where: {
+              "campaignId": campaignId,
+              "listId": list.id
+            }
+          }, function(listMetricEntryErr, listMetricEntry) {
+            if (listMetricEntryErr) {
+              return listCB(listMetricEntryErr);
+            }
+            if (listMetricEntry.length > emptyArrayLength) {
+              OpenedEmail.app.models.listMetric.updateAll({
+                "campaignId": campaignId,
+                "listId": list.id
+              }, {
+                "opened": ++listMetricEntry[0].opened
+              }, function(updatedListMetricEntryErr, updatedListMetricEntry) {
+                if (updatedListMetricEntryErr) {
+                  return listCB(updatedListMetricEntryErr);
+                }
+                listCB(null);
+              });
+            } else {
+              const one = 1;
+              OpenedEmail.app.models.listMetric.create({
+                "campaignId": campaignId,
+                "listId": list.id,
+                "opened": one
+              }, function(newlistMetricEntryErr, newlistMetricEntry) {
+                if (newlistMetricEntryErr) {
+                  return listCB(newlistMetricEntryErr);
+                }
+                listCB(null);
+              });
+            }
+          });
+        }, (listError) => {
+          if(listError) return listMetricEntryCB(error);
+          return listMetricEntryCB(null);
         });
-
-      } else {
-        OpenedEmail.app.models.listMetric.create({
-          "campaignId": campaignId,
-          "listId": listId,
-          "opened": 1
-        }, function(newlistMetricEntryErr, newlistMetricEntry) {
-          if (newlistMetricEntryErr) {
-            listMetricEntryCB(newlistMetricEntryErr);
-          }
-          listMetricEntryCB(null);
-        });
-      }
-
+      });
     });
-
   };
 
   /**
@@ -172,6 +175,8 @@ module.exports = function(OpenedEmail) {
 
   };
 
+};
+
   /**
    * Updates the updatedAt column with current Time
    * @param ctx Context
@@ -194,16 +199,13 @@ module.exports = function(OpenedEmail) {
       }, {
         arg: "personId",
         type: "number"
-      }, {
-        arg: "listId",
-        type: "number"
       }],
       returns: {
         arg: "results",
         type: "string"
       },
       http: {
-        path: "/trackEmail",
+        path: "/trackEmail/:campaignId/:personId/track.png",
         verb: "GET"
       }
     }

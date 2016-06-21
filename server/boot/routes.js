@@ -9,6 +9,34 @@ module.exports = function(app) {
   });
 
   /**
+   * Method to interrup open email call for redirect after processing
+   */
+  app.get("/api/openedEmails/trackEmail/:campaignId/:personId/track.png",
+        function(req, res) {
+    let campaignId = req.params.campaignId;
+    let personId = req.params.personId;
+    app.models.OpenedEmail.trackEmail(campaignId, personId,
+            (error, response) => {
+      res.send("/images/1x1.png");
+    });
+  });
+
+  /**
+   * Method to interrup link click call for redirect after processing
+   */
+  app.get(
+    "/api/ClickedEmailLink/track/:campaignId/:personId/:emailLinkId/track.png",
+        function(req, res) {
+    let campaignId = req.params.campaignId;
+    let personId = req.params.personId;
+    let linkId = req.params.emailLinkId;
+    app.models.ClickedEmailLink.track(campaignId, personId, linkId,
+            (error, response) => {
+      res.send("/images/1x1.png");
+    });
+  });
+
+  /**
    * Set unsigned cookie for userId and redirect to homepage
    * Download user profile picture an update it
    */

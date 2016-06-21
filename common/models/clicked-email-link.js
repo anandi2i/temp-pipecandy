@@ -7,7 +7,7 @@ module.exports = function(ClickedEmailLink) {
   /**
    * Tracks the email links in the campaign mail when it is clicked.
    * TODO Move out the async methods definition outside the function block
-   * http://localhost:3001/api/clickedEmailLinks/track/campaign/1/person/1/linkId/1
+   * http://localhost:3001/api/clickedEmailLinks/track/:campaign/:person/:emailLinkId/track.png
    * @param  {[number]} campaignId
    * @param  {[number]} personId
    * @param  {[number]} emailLinkId
@@ -230,7 +230,7 @@ module.exports = function(ClickedEmailLink) {
         type: "string"
       },
       http: {
-      path: "/track/campaign/:campaignId/person/:personId/linkId/:emailLinkId",
+      path: "/track/:campaignId/:personId/:emailLinkId/track.png",
       verb: "GET"
       }
     }

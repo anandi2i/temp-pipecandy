@@ -359,7 +359,7 @@ module.exports = function(Campaign) {
    */
   let appendOpenTracker = (campaign, person, template, email,
     applyOpenTrackCB) => {
-
+    email.imgsrc = `http://localhost:3000/api/openedEmails/trackEmail/${compaign.id}/${person.id}/track.png`;
     applyOpenTrackCB(null, campaign, person, template, email);
   };
 

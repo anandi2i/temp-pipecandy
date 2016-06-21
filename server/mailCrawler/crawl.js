@@ -1,6 +1,5 @@
 var google = require("googleapis");
 var async = require("async");
-var lodash = require("lodash");
 
 const gmail = google.gmail("v1");
 
@@ -34,7 +33,7 @@ const OAuth2 = google.auth.OAuth2;
 const oauth2Client = new OAuth2(clientId, clientSecret, redirectUrl);
 
 
-const interval = 5000;
+const interval = 10000;
 
 initCrawl();
 
@@ -51,11 +50,9 @@ function initCrawl() {
 function initWorkflow() {
 
   async.waterfall([
-    getUserCredentials,
-    crawler,
-    initCrawl
+    getUserCredentials
   ], function(err, result) {
-    console.log("Emails fetched for user id - ", result);
+    initCrawl();
   });
 
 };
@@ -67,11 +64,16 @@ function initWorkflow() {
  */
 function getUserCredentials(callback) {
   App.userIdentity.getCrawlableUsers(function(usersErr, users) {
-    lodash(users).forEach((user) => {
+    async.eachSeries(users, function (user , userCB) {
       let userMailId = user.profile.emails[0].value;
       oauth2Client.credentials.access_token = user.credentials.accessToken;
       oauth2Client.credentials.refresh_token = user.credentials.refreshToken;
-      callback(null, oauth2Client, user.id, userMailId);
+      crawler(oauth2Client, user.id, userMailId, function(err, userMailId) {
+        console.log("Emails fetched for user mail id - ", userMailId);
+        userCB(null, userMailId);
+      });
+    }, function done() {
+      callback(null, "Done");
     });
   });
 }

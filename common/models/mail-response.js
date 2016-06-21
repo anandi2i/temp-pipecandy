@@ -205,7 +205,7 @@ module.exports = function(MailResponse) {
         callback(response);
       } else {
         logger.error("Error while Getting Message List", error);
-        if (error.responseCode = 401) {
+        if (error.code = 401) {
           MailResponse.app.models.userIdentity.findById(userId,
                     (err, userIdentity) => {
             googleTokenHandler.updateAccessToken(userIdentity,
