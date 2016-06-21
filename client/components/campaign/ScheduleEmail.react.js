@@ -63,12 +63,24 @@ class ScheduleEmail extends React.Component {
     if(tinymce.get("emailContent")) {
       tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
     }
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", allTags, true,
+      this.tinyMceCb);
     if(tinymce.get("emailSubject")) {
       tinyMCE.execCommand("mceRemoveEditor", true, "emailSubject");
     }
-    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", allTags, true,
-      this.tinyMceCb);
     initTinyMCE("#emailSubject", "", "", allTags, false, this.tinyMceSubCb);
+    const mainContent = this.props.selectedTemplate;
+    const tinyMceDelayTime = 500;
+    //TODO need to remove setTimeout
+    if(mainContent){
+      this.setState({
+        emailContent: mainContent
+      }, () => {
+        setTimeout(function(){
+          tinyMCE.get("emailContent").setContent(mainContent);
+        }, tinyMceDelayTime);
+      });
+    }
   }
 
   tinyMceCb = (editor) => {
@@ -79,8 +91,10 @@ class ScheduleEmail extends React.Component {
       contentIssueTags: issueTags,
       emailRawText: editor.getBody().textContent
     }, () => {
+      let errorCount = this.getErrorCount();
       this.setState({
-        errorCount: this.getErrorCount()
+        errorCount: errorCount,
+        editorErrorCount: errorCount
       });
     });
   }
@@ -92,8 +106,10 @@ class ScheduleEmail extends React.Component {
       emailSubject: content,
       subjectIssueTags: issueTags
     }, () => {
+      let errorCount = this.getErrorCount();
       this.setState({
-        errorCount: this.getErrorCount()
+        errorCount: errorCount,
+        editorErrorCount: errorCount
       });
     });
   }
@@ -254,8 +270,22 @@ class ScheduleEmail extends React.Component {
     }
     // Check if all missing tags are fixed
     if(this.checkEmailContentError()) {
-      let mainTemplate = this.refs.issues.state;
-      let mainEmailContent = this.constructSavedTemplateObjects(mainTemplate);
+      let mainEmailContent = {};
+      if(!this.state.editorErrorCount){
+        let template = {};
+        template.subject = this.state.emailSubject;
+        template.content = this.state.emailContent;
+        template.usedTagIds = CampaignStore.usedTagIds(
+          template.subject.concat(template.content)).usedTagIds;
+        template.userId = getCookie("userId");
+        mainEmailContent = {
+          listIds: _.pluck(this.state.emailList, "id"),
+          campaignTemplates: template
+        };
+      } else {
+        let mainTemplate = this.refs.issues.state;
+        mainEmailContent = this.constructSavedTemplateObjects(mainTemplate);
+      }
       let followups = [];
       this.state.followups.map(function(val, key) {
         let followup = this.refs[`addFollowups${val.id}`].refs.issues.state;
@@ -446,10 +476,7 @@ class ScheduleEmail extends React.Component {
                       </ul>
                   </div>
                 </div>
-                <div id="emailContent" className="email-body"
-                  dangerouslySetInnerHTML={{
-                    __html: this.props.selectedTemplate
-                  }} />
+                <div id="emailContent" className="email-body" />
               </div>
               {/* Preview button */}
               {
