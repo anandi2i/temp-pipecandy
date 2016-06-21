@@ -4,7 +4,7 @@ import CustomPagerComponent from "../CustomGridPagination.react";
 import CustomPreviewComponent from "./CustomPreviewComponent.react";
 import CustomCampaignLinkComponent from "./CustomCampaignLinkComponent.react";
 import CustomCampaignRunComponent from "./CustomCampaignRunComponent.react";
-import CustomCampaignProgressComponent from 
+import CustomCampaignProgressComponent from
   "./CustomCampaignProgressComponent.react";
 
 let columnMeta = [{
@@ -45,6 +45,7 @@ let columnMeta = [{
     "locked": true,
     "visible": true,
     "displayName": "Replies",
+    "cssClassName": "replies",
     "sortable": false
   }, {
     "columnName": "campaignProgress",
@@ -90,7 +91,7 @@ class CampaignGrid extends React.Component {
             useGriddleStyles={false}
             columnMetadata={columnMeta}
             columns={["id", "name", "listSentTo",
-              "campaignStatus", "campaignReplies", 
+              "campaignStatus", "campaignReplies",
               "campaignProgress", "campaignAction",
               "campaignRun"]}
             metadataColumns={[]}

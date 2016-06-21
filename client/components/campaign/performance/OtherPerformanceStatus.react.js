@@ -79,7 +79,7 @@ class OtherPerformanceStatus extends React.Component {
     return (
       <div className="container">
         <div className="row main-head">
-          Othar status
+          Other status
         </div>
         <div className="row tag-name-menu">
           <TagNameMenu handleClick={this.handleClick}

@@ -34,17 +34,17 @@
         &:focus {
           border-bottom: 1px solid $a-tag-clr;
           width: 260px;
-          &::-webkit-input-placeholder { 
-            color: transparent; 
+          &::-webkit-input-placeholder {
+            color: transparent;
           }
-          &:-moz-placeholder { 
-            color: transparent; 
+          &:-moz-placeholder {
+            color: transparent;
           }
         }
-        &::-webkit-input-placeholder { 
-          color: $a-tag-clr; 
+        &::-webkit-input-placeholder {
+          color: $a-tag-clr;
         }
-        &:-moz-placeholder { 
+        &:-moz-placeholder {
           color: $a-tag-clr;
         }
       }
@@ -208,7 +208,11 @@
                   border: 1px solid $a-tag-clr;
                   border-radius: 0px;
                   color: $a-tag-clr;
+                  line-height: 34px;
                 }
+              }
+              &.replies {
+                padding-left: 30px;
               }
             }
           }
