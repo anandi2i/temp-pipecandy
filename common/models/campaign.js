@@ -4,7 +4,9 @@ import logger from "../../server/log";
 import async from "async";
 import lodash from "lodash";
 import campaignMetricArray from "../../server/utils/campaign-metric-fields";
+import queueUtil from "../../server/mailCrawler/mailEnqueue";
 
+const serverUrl = "http://dev.pipecandy.com";
 
 module.exports = function(Campaign) {
 
@@ -109,8 +111,14 @@ module.exports = function(Campaign) {
              if(parallelErr){
                logger.error("Error on saveCampaignTemplate : ",
                     {campginId: id, reqParams:reqParams, error: parallelErr});
+                return saveCampaignTemplateCB(parallelErr, response);
              }
-             saveCampaignTemplateCB(parallelErr, response);
+             let queueName = "mailAssemblerQueue";
+             queueUtil.enqueueMail(JSON.stringify(campaign[0]), queueName,
+               () => {
+                 saveCampaignTemplateCB(parallelErr, response);
+               });
+
            });
         });
       });
@@ -332,19 +340,36 @@ module.exports = function(Campaign) {
    */
   let applySmartTags = (campaign, person, additionalValues, template,
     applySmartTagsCB) => {
-    let subject = Campaign.app.models.campaignTemplate.personalize(
-      template.subject, additionalValues);
-    let content = Campaign.app.models.campaignTemplate.personalize(
-      template.content, additionalValues);
-
-    let email = {
-      subject: subject.template,
-      content: content.template
-    };
-    if(subject.error || content.error){
-      email.isError = true;
-    }
-    applySmartTagsCB(null, campaign, person, template, email);
+    Campaign.app.models.campaignTemplate.personalize(
+      template.subject, additionalValues,
+      (subjectPersonalizeError, subject) => {
+        if(subjectPersonalizeError) {
+          let email = {
+            subject: subject,
+            content: template.content,
+            isError: true
+          };
+          return applySmartTagsCB(null, campaign, person, template, email);
+        }
+        Campaign.app.models.campaignTemplate.personalize(
+          template.content, additionalValues,
+          (contentPersonalizeError, content) => {
+            if(contentPersonalizeError) {
+              let email = {
+                subject: subject,
+                content: template.content,
+                isError: true
+              };
+              return applySmartTagsCB(null, campaign, person, template, email);
+            }
+            let email = {
+              subject: subject,
+              content: content,
+              isError: false
+            };
+            return applySmartTagsCB(null, campaign, person, template, email);
+          });
+      });
   };
 
   /**
@@ -359,14 +384,49 @@ module.exports = function(Campaign) {
    */
   let appendOpenTracker = (campaign, person, template, email,
     applyOpenTrackCB) => {
-    email.imgsrc = `http://localhost:3000/api/openedEmails/trackEmail/${compaign.id}/${person.id}/track.png`;
+    let trackerContent = email.content;
+    let url =
+    `${serverUrl}/api/campaign/:campaignId/person/:personId/trackEmail.png`;
+    let trackerTag = `<img src='${url}'/>`;
+    console.log(trackerTag);
+    trackerContent += trackerTag;
+    email.content = trackerContent;
     applyOpenTrackCB(null, campaign, person, template, email);
   };
 
+  /**
+   * Applies the click tracking machnaisam
+   *
+   * @param  {[type]} campaign                 [description]
+   * @param  {[type]} person                   [description]
+   * @param  {[type]} template                 [description]
+   * @param  {[type]} email                    [description]
+   * @param  {[type]} appendLinkClickTrackerCB [description]
+   * @return {[type]}                          [description]
+   * @author Ramanavel Selvaraju
+   */
   let appendLinkClickTracker = (campaign, person,
     template, email, appendLinkClickTrackerCB) => {
+    let hrefTags = email.content.match(/href=("|')(.*?)("|')/g);
+    async.eachSeries(hrefTags, (href, hrefTagsCB) => {
+      href = lodash.replace(href, /("|')/g, `"`);
+      let linkurl = href.split(/"/)[1];
+      Campaign.app.models.emailLink.getOrSave(campaign, linkurl,
+        (getOrSaveErr, link) => {
+          if(getOrSaveErr) {
+            return hrefTagsCB(getOrSaveErr);
+          }
+          let content = email.content;
+          let proxyUrl = `${serverUrl}/api/clickedEmailLinks/${link.id}
+                  /campaign/${campaign.id}/person/${person.id}/track`;
+          content = lodash.replace(content, linkurl, proxyUrl);
+          email.content = content;
+          hrefTagsCB(null);
+      });
+    }, (eachSeriesErr) => {
+      return appendLinkClickTrackerCB(null, campaign, person, template, email);
+    });
 
-    appendLinkClickTrackerCB(null, campaign, person, template, email);
   };
 
   let sendToEmailQueue = (campaign, person, template, email,

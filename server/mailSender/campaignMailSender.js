@@ -100,7 +100,7 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
       var mailContent = {
         mailId: emailQueueEntry.id,
         personEmail: emailQueueEntry.email,
-        mailSubject: "Subject",
+        mailSubject: emailQueueEntry.subject,
         contents: emailQueueEntry.content
       };
 

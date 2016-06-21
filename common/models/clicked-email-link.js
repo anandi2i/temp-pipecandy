@@ -230,7 +230,7 @@ module.exports = function(ClickedEmailLink) {
         type: "string"
       },
       http: {
-      path: "/track/:campaignId/:personId/:emailLinkId/track.png",
+      path: "/:emailLinkId/campaign/:campaignId/person/:personId/track",
       verb: "GET"
       }
     }

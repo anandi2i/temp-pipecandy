@@ -7,7 +7,8 @@ const region = "ap-southeast-1";
 
 const queueUrl = {
   mailNLPIdentification: "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-dev-intelligence-in",
-  mailNLPDetermined: "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-dev-intelligence-out"
+  mailNLPDetermined: "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-dev-intelligence-out",
+  mailAssemblerQueue: "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-dev-email-assembler"
 };
 
 module.exports = {

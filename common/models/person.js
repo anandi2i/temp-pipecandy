@@ -33,7 +33,6 @@ module.exports = function(Person) {
 
         Person.app.models.emailQueue.checkEmailExists(campaign, person,
           (checkEmailExistsErr, isEmailgenerated) => {
-
             if (checkEmailExistsErr || isEmailgenerated) {
               return peopleEachCB(checkEmailExistsErr);
             }
@@ -69,34 +68,41 @@ module.exports = function(Person) {
       order: "updatedat DESC"
     }, (additionalFieldValueFindErr, fieldValues) => {
       let addtionalFields = lodash.uniqBy(fieldValues, "fieldId");
-      addtionalFields.push(personToFieldValues(person));
+      personToFieldValues(person, addtionalFields);
       return preparePersonWithExtraFieldsCB(null, addtionalFields);
     });
   };
 
-  let personToFieldValues = (person) => {
-    let personValues = [];
-    person.firstName ? personValues.push({
+  /**
+   * merges the person object with additionalFieldValue Object
+   *
+   * @param  {[Person]} person
+   * @param  {List[AdditionalFieldValue]} addtionalFields
+   * @return {List[AdditionalFieldValue]} addtionalFields
+   * @author Ramanavel Selvaraju
+   */
+  let personToFieldValues = (person, addtionalFields) => {
+    person.firstName ? addtionalFields.push({
       fieldId: 1,
       value: person.firstName
     }) : "";
-    person.middleName ? personValues.push({
+    person.middleName ? addtionalFields.push({
       fieldId: 2,
       value: person.middleName
     }) : "";
-    person.lastName ? personValues.push({
+    person.lastName ? addtionalFields.push({
       fieldId: 3,
       value: person.lastName
     }) : "";
-    person.email ? personValues.push({
+    person.email ? addtionalFields.push({
       fieldId: 4,
       value: person.email
     }) : "";
-    person.salutation ? personValues.push({
+    person.salutation ? addtionalFields.push({
       fieldId: 5,
       value: person.salutation
     }) : "";
-    return personValues;
+    return addtionalFields;
   };
 
   /**

@@ -11,13 +11,13 @@ module.exports = function(app) {
   /**
    * Method to interrup open email call for redirect after processing
    */
-  app.get("/api/openedEmails/trackEmail/:campaignId/:personId/track.png",
+  app.get("/api/campaign/:campaignId/person/:personId/trackEmail.png",
         function(req, res) {
     let campaignId = req.params.campaignId;
     let personId = req.params.personId;
     app.models.OpenedEmail.trackEmail(campaignId, personId,
             (error, response) => {
-      res.send("/images/1x1.png");
+      res.redirect("/images/1x1.png");
     });
   });
 
@@ -25,14 +25,14 @@ module.exports = function(app) {
    * Method to interrup link click call for redirect after processing
    */
   app.get(
-    "/api/ClickedEmailLink/track/:campaignId/:personId/:emailLinkId/track.png",
+   "/api/clickedEmailLinks/:linkId/campaign/:campaignId/person/:personId/track",
         function(req, res) {
     let campaignId = req.params.campaignId;
     let personId = req.params.personId;
-    let linkId = req.params.emailLinkId;
+    let linkId = req.params.linkId;
     app.models.ClickedEmailLink.track(campaignId, personId, linkId,
             (error, response) => {
-      res.send("/images/1x1.png");
+      res.redirect("/images/1x1.png");
     });
   });
 

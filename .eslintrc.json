@@ -23,7 +23,7 @@
   },
   "rules": {
     "semi": [2, "always"],
-    "quotes": [2, "double", "avoid-escape"],
+    "quotes": [1, "double", "avoid-escape"],
     "object-curly-spacing": [2, "never"],
     "no-whitespace-before-property": 2,
     "jsx-quotes": [2, "prefer-double"],

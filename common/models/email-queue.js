@@ -115,8 +115,8 @@ module.exports = function(EmailQueue) {
    */
   EmailQueue.checkEmailExists = (campaign, person, checkEmailExistsCB) => {
 
-    EmailQueue.find({campaignId: campaign.id, personId: person.id},
-      (checkEmailExistsFindErr, emails)=>{
+    EmailQueue.find({where: {and: [{campaignId: campaign.id},
+      {personId: person.id}]}}, (checkEmailExistsFindErr, emails)=>{
 
       if(checkEmailExistsFindErr) {
         logger.error("Check Email Exists in EmailQueue Find Error", {
@@ -126,7 +126,6 @@ module.exports = function(EmailQueue) {
         });
         return checkEmailExistsCB(checkEmailExistsFindErr);
       }
-
     return checkEmailExistsCB(null, lodash.isEmpty(emails) ? false : true);
 
     }); //EmailQueue.find

@@ -149,20 +149,22 @@ module.exports = function(CampaignTemplate) {
         logger.error({
           error: error,
           input: {
-            campign: campign,
+            campign: campaign,
             person: person
           }
         });
         return getCommonTemplatesCB(error);
       }
-      if(tempalate.usedTagIds) {
-        let one = 1;
-        let randomIndex = lodash.random(campaignTemplates.length - one);
-        let tempalate = campaignTemplates[randomIndex];
 
+      let one = 1;
+      let randomIndex = lodash.random(campaignTemplates.length - one);
+      let tempalate = campaignTemplates[randomIndex];
+
+      if(tempalate.usedTagIds) {
         let tagIdsArray = _.pluck(additionalValues, "fieldId");
         let personTagIds = lodash.sortedUniq(tagIdsArray);
-        let usedTagIds = lodash.split(tempalate.usedTagIds, "|");
+        let usedTagIds =
+        lodash.map(lodash.split(tempalate.usedTagIds, "|"), lodash.parseInt);
         let missingTagIds = lodash.difference(usedTagIds, personTagIds);
         return getCommonTemplatesCB(null, tempalate,
           lodash.join(missingTagIds, "|"));
@@ -184,7 +186,7 @@ module.exports = function(CampaignTemplate) {
    */
   CampaignTemplate.getAlternateTemplate = (campaign, person, additionalValues,
     missingTagIds, getAlternateTemplateCB) => {
-
+    console.log(missingTagIds);
     CampaignTemplate.find({
       where: {
         and: [{
@@ -213,7 +215,7 @@ module.exports = function(CampaignTemplate) {
         logger.error({
           error: error,
           input: {
-            campign: campign,
+            campign: campaign,
             person: person,
             additionalValues: additionalValues,
             missingTagIds: missingTagIds
@@ -234,26 +236,30 @@ module.exports = function(CampaignTemplate) {
    * @return {error: spanTagsErr, template: template}
    * @author Ramanavel Selvaraju
    */
-  CampaignTemplate.personalize = (template, fieldValues) => {
+  CampaignTemplate.personalize = (template, fieldValues, personalizeCB) => {
     let spanTags = template.match(/<span class=("|')(tag)(.*?)(<\/span>)/g);
     async.eachSeries(spanTags, (spanTag, spanTagsCB) => {
-      let spanDataId = spanTag.match(/data-id="(\d*)"/g);
-      let fieldId = spanDataId[0].split(/"/)[1];
-      let fieldValue = lodash.find(headers,
-                                  lodash.matchesProperty("fieldId", fieldId));
+      let spanDataId = spanTag.match(/data-id=("|')(\d*)("|')/g);
+      spanDataId = lodash.replace(spanDataId, /("|')/g, `"`);
+      let fieldId = spanDataId.split(/"/)[1];
+      let fieldValue = lodash.find(fieldValues,
+                lodash.matchesProperty("fieldId", lodash.toInteger(fieldId)));
       if(fieldValue) {
-        template = tempalate.replace(spanTag, fieldValue.value);
+        template = lodash.replace(template, spanTag, fieldValue.value);
         spanTagsCB(null);
+      } else {
+        let error = new Error();
+        error.message = `Tag id: ${fieldId} not found in fieldvalues :
+                                                              ${fieldValues}`;
+        error.name = "smartTagNotFound";
+        return spanTagsCB(error);
       }
-      let error = new Error();
-      error.message = `Tag id: ${fieldId} not found in fieldvalues :
-                                                                ${fieldValues}`;
-      error.name = "smartTagNotFound";
-      spanTagsCB(error);
     }, (spanTagsErr) => {
-      logger.error("Error on CampaignTemplate.personalize",
-                                                        {error: spanTagsErr});
-      return {error: spanTagsErr, template: template};
+      if(spanTagsErr){
+        logger.error("Error on CampaignTemplate.personalize",
+                                                          {error: spanTagsErr});
+      }
+      return personalizeCB(spanTagsErr, template);
     });
   };
   //observers

@@ -24,7 +24,7 @@ module.exports = function(List) {
       }
 
       let listIds = _.pluck(lists, "id");
-      async.each(lists, (list, listsCB) => {
+      async.eachSeries(lists, (list, listsCB) => {
         List.app.models.person.getPoepleAndGenerateEmail(campaign, list,
           listIds, (getPoepleByListForEmailErr) => {
             listsCB(getPoepleByListForEmailErr);
