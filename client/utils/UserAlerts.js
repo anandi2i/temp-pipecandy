@@ -23,7 +23,8 @@ export const ErrorMessages = {
   "DeletePerson" : "Please select a Subscriber to Delete",
   "MinFileSize": "Select file size more the 10kb",
   "PasswordFields": "Please enter both password fields",
-  "InValidFileType": "Please upload file of type csv/xls"
+  "InValidFileType": "Please upload file of type csv/xls",
+  "SamePasswordUpdate": "Please update new different password"
 };
 
 /**

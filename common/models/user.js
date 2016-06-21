@@ -84,10 +84,11 @@ module.exports = function(user) {
     let userID = req.params.id;
     let isCroppedImg = false;
     let isPassword = false;
-    if (req.body.croppedImg) {
-      isCroppedImg = req.body.croppedImg.includes("data:image/png;base64,");
+    const {croppedImg, oldPassword, newPassword, id} = req.body;
+    if(croppedImg) {
+      isCroppedImg = croppedImg.includes("data:image/png;base64,");
     }
-    if (req.body.oldPassword && req.body.newPassword) {
+    if (oldPassword && newPassword) {
       isPassword = true;
     }
     if (isCroppedImg || isPassword){
@@ -104,8 +105,7 @@ module.exports = function(user) {
           if (!fs.existsSync(dir)){
             fs.mkdirSync(dir);
           }
-          let base64Data = req.body.croppedImg
-            .replace(/^data:image\/png;base64,/, "");
+          let base64Data = croppedImg.replace(/^data:image\/png;base64,/, "");
           let avatarPath = dir + "/photo.png";
           fs.writeFile(avatarPath, base64Data, "base64", function(err) {
             let savePath = "/api/containers/" + userID + "/download/photo.png";
@@ -123,7 +123,7 @@ module.exports = function(user) {
           });
         }
         if(isPassword){
-          getUser.hasPassword(req.body.oldPassword, function(err, isMatch) {
+          getUser.hasPassword(oldPassword, function(err, isMatch) {
             if (err) {
               logger.error("error in update password");
               let error = new Error();
@@ -131,7 +131,14 @@ module.exports = function(user) {
               error.name = "ErrorInUpdatePass";
               next(error);
             } else if (isMatch) {
-              getUser.updateAttribute("password", req.body.newPassword,
+              if(oldPassword === newPassword) {
+                logger.error("Old password and new password are same");
+                let error = new Error();
+                error.message = "Old password and new password are same";
+                error.name = "SamePasswordUpdate";
+                next(error);
+              }
+              getUser.updateAttribute("password", newPassword,
                 function(err, resl) {
                   if (err) {
                     logger.error("error in update password");
@@ -140,13 +147,11 @@ module.exports = function(user) {
                     error.name = "ErrorInUpdatePass";
                     next(error);
                   }
-                  logger.info("userId %d password changed successfully",
-                    req.body.id);
+                  logger.info("userId %d password changed successfully", id);
                   next();
               });
             } else {
-              logger.error("The password is invalid for userId %d",
-                req.body.id);
+              logger.error("The password is invalid for userId %d", id);
               let error = new Error();
               error.message = "Enter valid password";
               error.name = "InvalidPassChange";
