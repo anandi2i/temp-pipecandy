@@ -72,8 +72,8 @@ class PerformanceReport extends React.Component {
               color: "#FFFFFF"
           },
           formatter: function () {
-              return Highcharts.dateFormat("%d %b %Y", this.x)
-                + "<br><b>" + this.y + "% Click rate</b>";
+            return Highcharts.dateFormat("%d %b %Y", this.x)
+              + "<br><b>" + this.y + "% " + this.series.name + "</b>";
           },
           xDateFormat: "%Y-%m-%d"
       },

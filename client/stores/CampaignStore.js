@@ -16,6 +16,7 @@ let selectedEmailList = {};
 let allPeopleList = [];
 let duplicateEmailList = [];
 let fieldIds = [];
+let spamScore;
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignStore = _.extend({}, EventEmitter.prototype, {
@@ -48,6 +49,29 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   // Remove change listener
   removeEmailListChangeListener(callback) {
     this.removeListener("emailListChange", callback);
+  },
+
+  /**
+   * @emit spam score change event
+   */
+  emitSpamScoreChange() {
+    this.emit("spamScoreChange");
+  },
+
+  /**
+   * Listen spam score change event
+   * @param {function} callback
+   */
+  addSpamScoreChangeListener(callback) {
+    this.on("spamScoreChange", callback);
+  },
+
+  /**
+   * remove spam score change listened event
+   * @param {function} callback
+   */
+  removeSpamScoreChangeListener(callback) {
+    this.removeListener("spamScoreChange", callback);
   },
 
   getError() {
@@ -216,6 +240,12 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
       }
     });
     return emailContent;
+  },
+  /**
+   * @return {number} spamScore
+   */
+  getSpamScore() {
+    return spamScore;
   }
 
 });
@@ -396,7 +426,6 @@ AppDispatcher.register(function(payload) {
           appHistory.push("/campaign");
         }
       }, (err) => {
-        CampaignStore.emitChange();
         appHistory.push("/campaign");
       });
       break;
@@ -432,6 +461,16 @@ AppDispatcher.register(function(payload) {
       }, (err) => {
         console.log(err);
         displayError("Problem in saving");
+      });
+      break;
+    case Constants.CHECK_SPAM:
+      CampaignApi.checkSpam(action.data).then(response => {
+        spamScore = response.data[0].spamResult.evaluation;
+        CampaignStore.emitSpamScoreChange();
+      }, err => {
+        spamScore = 0;
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitSpamScoreChange();
       });
       break;
     default:

@@ -33,17 +33,20 @@ class ScheduleEmail extends React.Component {
       followupsEmailContent: [],
       allFields: [],
       emailRawText: "",
+      subjectRawText: "",
       user: "",
       optText: "",
       address: "",
       isOptText: true,
-      isAddress: true
+      isAddress: true,
+      spamRating: ""
     };
   }
 
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
     CampaignStore.addEmailListChangeListener(this.onStoreChange);
+    CampaignStore.addSpamScoreChangeListener(this.onSpamScoreChange);
     enabledropDownBtnByID("#insertSmartTags");
     this.el.find("select").material_select();
     initDatePicker(this.el.find(".datepicker"));
@@ -52,6 +55,7 @@ class ScheduleEmail extends React.Component {
 
   componentWillUnmount() {
     CampaignStore.removeEmailListChangeListener(this.onStoreChange);
+    CampaignStore.removeSpamScoreChangeListener(this.onSpamScoreChange);
   }
 
 /**
@@ -104,7 +108,8 @@ class ScheduleEmail extends React.Component {
     let issueTags = getIssueTagsInEditor(content);
     this.setState({
       emailSubject: content,
-      subjectIssueTags: issueTags
+      subjectIssueTags: issueTags,
+      subjectRawText: editor.getBody().textContent
     }, () => {
       let errorCount = this.getErrorCount();
       this.setState({
@@ -146,6 +151,30 @@ class ScheduleEmail extends React.Component {
         this.initTinyMCE(this.state.getAllTags);
       });
     });
+  }
+
+  /**
+   * Update the spamscore on spam score change
+   */
+  onSpamScoreChange = () => {
+    const spamScore = CampaignStore.getSpamScore();
+    const safe = 3;
+    const danger = 5;
+    const timeout = 5000; //5 seconds
+    let spamRating = "CAREFUL";
+    if(spamScore < safe) {
+      spamRating = "SAFE";
+    } else if(spamScore > danger) {
+      spamRating = "DANGER";
+    }
+    this.setState({
+      spamRating: spamRating
+    });
+    setTimeout($.proxy(function() {
+      this.setState({
+        spamRating: ""
+      });
+    }, this), timeout);
   }
 
   toggleEditContainer = () => {
@@ -354,6 +383,20 @@ class ScheduleEmail extends React.Component {
     this.props.changeSelectedList(filteredEmailList);
   }
 
+  /**
+   * Check the spam rate of the given content
+   * Example:
+   */
+  checkSpam = () => {
+    const {subjectRawText, emailRawText} = this.state;
+    CampaignActions.checkSpam(
+      new Array({
+        "subject": subjectRawText,
+        "body": emailRawText
+      })
+    );
+  }
+
   render() {
     let selectEmailListIndex = 1;
     let displayIndex =
@@ -368,6 +411,13 @@ class ScheduleEmail extends React.Component {
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
+    const {spamRating, errorCount} = this.state;
+    let spamClass = "spam-result safe";
+    if(spamRating === "DANGER") {
+      spamClass = "spam-result danger";
+    } else if (spamRating === "CAREFUL") {
+      spamClass = "spam-result careful";
+    }
 
     return (
       <div className="container" style={{display: displayIndex}}>
@@ -479,17 +529,21 @@ class ScheduleEmail extends React.Component {
                 <div id="emailContent" className="email-body" />
               </div>
               {/* Preview button */}
-              {
-                this.state.errorCount
-                  ?
-                    <div className="row r-btn-container preview-content m-lr-0">
-                      <div onClick={() => this.openPreviewModal("issues")} className="btn btn-dflt error-btn">
-                        {this.state.errorCount} Issues Found
-                      </div>
-                    </div>
-                  :
-                    ""
-              }
+              <div className="row r-btn-container m-lr-0">
+                <div className={spamClass}
+                  style={{display: spamRating ? "inline-block": "none"}}>
+                  SPAM RATING: {spamRating}
+                </div>
+                <div onClick={this.checkSpam} className="btn btn-dflt btn-blue"
+                  style={{display: spamRating ? "none": "inline-block"}}>
+                  Check Spam
+                </div>
+                <div onClick={() => this.openPreviewModal("issues")}
+                  style={{display: errorCount ? "inline-block": "none"}}
+                  className="btn btn-dflt error-btn" >
+                  {errorCount} Issues Found
+                </div>
+              </div>
               <div className="row opt-text">
                 <div className="col s12 m-lr-0">
                   <input type="checkbox" className="filled-in" id="optOutText"

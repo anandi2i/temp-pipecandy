@@ -10,7 +10,6 @@ const CampaignApi = {
   getAllEmailTemplates() {
     return api.get("api/defaultTemplates");
   },
-
   /**
    * To check campaign id is exists or not
    * @param  {integer} compaignId existing of campaign id
@@ -39,6 +38,13 @@ const CampaignApi = {
   saveCampaignTemplates(campaign) {
     return api.post(`api/campaigns/${campaign.id}/saveCampaignTemplate`,
       campaign.templates);
+  },
+  /**
+   * Get the spam score for given array
+   * @param {array} data template content
+   */
+  checkSpam(data) {
+    return api.post("api/campaignTemplates/checkSpam", data);
   }
 };
 

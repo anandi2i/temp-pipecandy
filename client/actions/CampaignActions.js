@@ -66,6 +66,16 @@ const CampaignActions = {
       actionType: Constants.SAVE_CAMPAIGN_TEMPLATES,
       campaign: campaignData
     });
+  },
+  /**
+   * Check the spam rate for given string array
+   * @param {array} data Array of strings to check spam rate
+   */
+  checkSpam(data) {
+    AppDispatcher.handleAction({
+      actionType: Constants.CHECK_SPAM,
+      data: data
+    });
   }
 };
 

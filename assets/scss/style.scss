@@ -353,6 +353,15 @@ a {
     background-color: $white;
   }
 }
+.btn-blue {
+  border: 2px solid $blue-clr;
+  background-color: $white;
+  color: $blue-clr;
+  line-height: 35px;
+  &:hover {
+    background-color: $white;
+  }
+}
 .gray-head {
   font-weight: 700;
   color: $gray-txt-clr;
@@ -1110,7 +1119,35 @@ span#autocomplete {
         }
       }
     }
-    .preview-content {}
+    .r-btn-container {
+      .btn-dflt {
+        margin-left: 10px;
+      }
+      .spam-result {
+        border-radius: 3px;
+        padding: 0 1.5rem;
+        height: 36px;
+        vertical-align: middle;
+        &.safe {
+          border: 2px solid $green-clr;
+          background-color: #FFF;
+          color: $green-clr;
+          line-height: 35px;
+        }
+        &.danger {
+          border: 2px solid $red-clr;
+          background-color: #FFF;
+          color: $red-clr;
+          line-height: 35px;
+        }
+        &.careful {
+          border: 2px solid $orange-clr;
+          background-color: #FFF;
+          color: $orange-clr;
+          line-height: 35px;
+        }
+      }
+    }
   }
   .select-wrapper {
     input {

@@ -105,7 +105,7 @@ class ListView extends React.Component {
     if(success) {
       displaySuccess(success);
     }
-    let emailList = EmailListStore.getEmailListByID();
+    const emailList = EmailListStore.getEmailListByID();
     let setFields = {
       listName: emailList.name,
       people: emailList.peoples,
