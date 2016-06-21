@@ -386,9 +386,8 @@ module.exports = function(Campaign) {
     applyOpenTrackCB) => {
     let trackerContent = email.content;
     let url =
-    `${serverUrl}/api/campaign/:campaignId/person/:personId/trackEmail.png`;
+  `${serverUrl}/api/campaign/${campaign.id}/person/${person.id}/trackEmail.png`;
     let trackerTag = `<img src='${url}'/>`;
-    console.log(trackerTag);
     trackerContent += trackerTag;
     email.content = trackerContent;
     applyOpenTrackCB(null, campaign, person, template, email);
@@ -417,8 +416,8 @@ module.exports = function(Campaign) {
             return hrefTagsCB(getOrSaveErr);
           }
           let content = email.content;
-          let proxyUrl = `${serverUrl}/api/clickedEmailLinks/${link.id}
-                  /campaign/${campaign.id}/person/${person.id}/track`;
+          let proxyUrl = `${serverUrl}/api/clickedEmailLinks/${link.id}`;
+          proxyUrl += `/campaign/${campaign.id}/person/${person.id}/track`;
           content = lodash.replace(content, linkurl, proxyUrl);
           email.content = content;
           hrefTagsCB(null);

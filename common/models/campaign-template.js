@@ -186,7 +186,6 @@ module.exports = function(CampaignTemplate) {
    */
   CampaignTemplate.getAlternateTemplate = (campaign, person, additionalValues,
     missingTagIds, getAlternateTemplateCB) => {
-    console.log(missingTagIds);
     CampaignTemplate.find({
       where: {
         and: [{

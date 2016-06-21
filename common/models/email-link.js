@@ -1,3 +1,7 @@
+"use strict";
+
+import lodash from "lodash";
+
 module.exports = function(EmailLink) {
 
   EmailLink.getOrSave = (campaign, link, getOrSaveCB) => {
@@ -25,10 +29,9 @@ module.exports = function(EmailLink) {
             }
             return getOrSaveCB(null, emailLink);
         });
+      } else {
+        return getOrSaveCB(null, emailLinks[0]);
       }
-
-      return getOrSaveCB(null, emailLinks[0]);
-
     }); //EmailQueue.find
   };
 

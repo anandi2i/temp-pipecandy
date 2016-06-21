@@ -90,7 +90,7 @@ module.exports = function(EmailQueue) {
 
       if(campaignErr | lodash.isEmpty(campaign)) {
        logger.error("Error in getting campaign for id : ",
-            {campginId: id, error: parallelErr});
+            {campginId: campaignId, error: campaignErr});
        return assembleEmailsCB(campaignErr);
       }
 
