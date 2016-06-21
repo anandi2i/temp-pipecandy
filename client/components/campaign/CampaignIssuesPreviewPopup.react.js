@@ -17,6 +17,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
       selectedPerson: 0,
       displayPerson: 1,
       initCount: 1,
+      firstPerson: 0
     };
   }
 
@@ -42,7 +43,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
       issuesCompletedList: [],
       selectedPerson: 0,
       displayPerson: 1,
-      initCount: 1,
+      initCount: 1
     }, () => {
       this.el.openModal({
         dismissible: false
@@ -106,14 +107,10 @@ class CampaignIssuesPreviewPopup extends React.Component {
     } else {
       this.setState({
         displayPerson: parseInt(initCount, 10)
+      }, () => {
+        this.applyAllSmartTags(this.state.firstPerson);
       });
-      this.loadFirstPerson;
     }
-  }
-
-  loadFirstPerson = () => {
-    let firstPerson = 0;
-    this.applyAllSmartTags(firstPerson);
   }
 
   slider(position) {
@@ -160,7 +157,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
     };
   }
 
-  saveSinglePerson = () => {
+  applySinglePerson = () => {
     let getContent = this.checkIssueTags("previewMailContent");
     let getSubject = this.checkIssueTags("previewSubContent");
     if(getContent.issueTags.length || getSubject.issueTags.length) {
@@ -181,9 +178,10 @@ class CampaignIssuesPreviewPopup extends React.Component {
       personIssues.splice(index, initCount);
       this.setState((state) => ({
         issuesCompletedList: update(state.issuesCompletedList,
-          {$push: myList})
+          {$push: myList}),
+        displayPerson: initCount
       }), () => {
-        this.handleBlur();
+        this.loadFirstPerson();
       });
     }
   }
@@ -236,8 +234,20 @@ class CampaignIssuesPreviewPopup extends React.Component {
           {$push: myList}),
         displayPerson: initCount
       }), () => {
-        this.loadFirstPerson;
+        this.loadFirstPerson();
       });
+    }
+  }
+
+  /**
+   * Loade first person after apply smart tags
+   * Close model popup after all issues solved 
+   */
+  loadFirstPerson = () => {
+    if(this.state.personIssues.length){
+      this.applyAllSmartTags(this.state.firstPerson);
+    } else {
+      this.closeModal();
     }
   }
 
@@ -310,7 +320,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
             value="Cancel" />
           <input type="button"
             className="btn blue modal-action"
-            onClick={this.saveSinglePerson}
+            onClick={this.applySinglePerson}
             value="Apply" />
           <input type="button"
             className="btn blue modal-action"
