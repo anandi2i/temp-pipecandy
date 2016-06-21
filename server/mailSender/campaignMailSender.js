@@ -4,8 +4,6 @@ var AWS = require("aws-sdk");
 
 var emptyArrayLength = 0;
 
-
-
 AWS.config.update({
   accessKeyId: "AKIAJUDP7FRPRTLTANWA",
   secretAccessKey: "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"
@@ -14,7 +12,7 @@ AWS.config.update({
 var gmailClass = google.gmail("v1");
 
 var dataSource = require(process.cwd() + "/server/server.js").dataSources
-  .psqlDs;
+                                                                  .psqlDs;
 
 var async = require("async");
 var App = dataSource.models;
@@ -121,7 +119,7 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
             credential: usercredential[0].credentials
           };
 
-          mailSender(mailContent, function(err) {
+          mailSender(emailQueueEntry, mailContent, function(err) {
             emailQueueItemCB();
           });
 
@@ -138,7 +136,7 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
           credential: userCredentialsFromCache.credentials
         };
 
-        mailSender(mailContent, function(err) {
+        mailSender(emailQueueEntry, mailContent, function(err) {
           emailQueueItemCB();
         });
 
@@ -159,10 +157,11 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
  * @return void
  */
 
-function mailSender(mailContent, mailSenderCB) {
+function mailSender(emailQueue, mailContent, mailSenderCB) {
   async.waterfall([
       buildEmail,
-      sendEmail
+      sendEmail,
+      createAudit
     ],
     function(err) {
       if (err) {
@@ -194,7 +193,6 @@ function mailSender(mailContent, mailSenderCB) {
     //oauth2Client.credentials = mailContent.userDetails.credential.credentials;
 
     var emailLines = [];
-
     emailLines.push("From: " + mailContent.userDetails.name + " <"
                           + mailContent.userDetails.email.value + ">");
     emailLines.push("To: <" + mailContent.personEmail + ">");
@@ -205,15 +203,12 @@ function mailSender(mailContent, mailSenderCB) {
     emailLines.push(mailContent.contents);
 
     var email = emailLines.join("\r\n").trim();
-
-
     var base64EncodedEmail = new Buffer(email).toString("base64");
     base64EncodedEmail = base64EncodedEmail.replace(/\+/g, "-")
       .replace(/\//g, "_");
 
-    buildEmailCB(null, base64EncodedEmail, oauth2Client,
-          mailContent.userDetails.userid, mailContent.userDetails.email.value);
-
+    buildEmailCB(null, base64EncodedEmail, oauth2Client, emailQueue,
+          mailContent);
   }
 
   /**
@@ -225,12 +220,12 @@ function mailSender(mailContent, mailSenderCB) {
    * @return void
    */
 
-  function sendEmail(base64EncodedEmail, oauth2Client, userId,
-          userEmailId, sendEmailCB) {
+  function sendEmail(base64EncodedEmail, oauth2Client, emailQueue, mailContent,
+          sendEmailCB) {
 
     gmailClass.users.messages.send({
       auth: oauth2Client,
-      userId: userEmailId,
+      userId: mailContent.userDetails.email.value,
       resource: {
         raw: base64EncodedEmail
       }
@@ -238,20 +233,37 @@ function mailSender(mailContent, mailSenderCB) {
       if (err) {
         console.log("Gmail err:", err);
       } else {
-
-        delete tempCacheUserCredentials[userId];
-
+        delete tempCacheUserCredentials[mailContent.userDetails.userid];
         App.emailQueue.destroyById(mailContent.mailId, function(err, data) {
           if (err) {
             sendEmailCB(err);
           }
           console.log(results);
 
-          sendEmailCB();
+          sendEmailCB(null, emailQueue, mailContent);
         });
       }
     });
+  }
 
+  /**
+   * Creates an audit in Campaign Audit table
+   * @param  {Object} emailQueue
+   * @param  {Object} mailContent
+   * @param  {Function} createAuditCB
+   */
+  function createAudit(emailQueue, mailContent, createAuditCB) {
+    let campaignAuditInst = {};
+    campaignAuditInst.email = mailContent.personEmail;
+    campaignAuditInst.content = mailContent.contents;
+    campaignAuditInst.sentTime = new Date();
+    campaignAuditInst.fromEmail = mailContent.userDetails.email.value;
+    campaignAuditInst.userId = emailQueue.userId;
+    campaignAuditInst.personId = emailQueue.personId;
+    campaignAuditInst.campaignId = emailQueue.campaignId;
+    App.campaignAudit.create(campaignAuditInst, function (err, response) {
+      createAuditCB(null, response);
+    });
   }
 
 }

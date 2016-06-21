@@ -63,12 +63,15 @@ function initWorkflow() {
  * @param  {[callback]} getUserCredentialsCB
  */
 function getUserCredentials(callback) {
-  App.userIdentity.getCrawlableUsers(function(usersErr, users) {
-    async.eachSeries(users, function (user , userCB) {
-      let userMailId = user.profile.emails[0].value;
-      oauth2Client.credentials.access_token = user.credentials.accessToken;
-      oauth2Client.credentials.refresh_token = user.credentials.refreshToken;
-      crawler(oauth2Client, user.id, userMailId, function(err, userMailId) {
+  App.userIdentity.getCrawlableUsers(function(usersErr, userIdentities) {
+    async.eachSeries(userIdentities, function (userCred , userCB) {
+      let userMailId = userCred.profile.emails[0].value;
+      oauth2Client.credentials.access_token =
+                        userCred.credentials.accessToken;
+      oauth2Client.credentials.refresh_token =
+                        userCred.credentials.refreshToken;
+      crawler(oauth2Client, userCred.userId, userMailId,
+                  function(err, userMailId) {
         console.log("Emails fetched for user mail id - ", userMailId);
         userCB(null, userMailId);
       });

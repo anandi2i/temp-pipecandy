@@ -191,8 +191,8 @@ module.exports = function(MailResponse) {
    * @param {maxResults} Maximum number of mails to read.
    * @param {callback} A callback function.
    */
-  const getMessageList = (gmail, auth, userId, userMailId, maxResults, qryParam,
-    nextPageToken, callback) => {
+  const getMessageList = (gmail, auth, userId, userMailId, maxResults,
+    qryParam, nextPageToken, callback) => {
     gmail.users.messages.list({
       auth: auth,
       userId: userMailId,
@@ -206,12 +206,15 @@ module.exports = function(MailResponse) {
       } else {
         logger.error("Error while Getting Message List", error);
         if (error.code = 401) {
-          MailResponse.app.models.userIdentity.findById(userId,
-                    (err, userIdentity) => {
-            googleTokenHandler.updateAccessToken(userIdentity,
+          MailResponse.app.models.userIdentity.find({
+              where: {
+                 "userId": userId
+              }
+           }, (err, userIdentity) => {
+            googleTokenHandler.updateAccessToken(userIdentity[0],
                       (tokenHandlerErr, updateUser) => {
               MailResponse.app.models.userIdentity
-                      .updateCredentials(userIdentity,
+                      .updateCredentials(userIdentity[0],
                             (userIdentityErr, userIdentityInst) => {
                 auth.credentials.access_token =
                           userIdentityInst.credentials.accessToken;
