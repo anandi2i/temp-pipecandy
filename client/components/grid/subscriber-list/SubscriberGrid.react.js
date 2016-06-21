@@ -43,7 +43,7 @@ class SubscriberGridView extends React.Component {
   }
 
   closeModal = () => {
-    this.el.find("#editSubbscriber").closeModal();
+    this.el.find("#editSubscriber").closeModal();
   }
 
   handleRowClick = (obj, eve) => {
@@ -64,7 +64,7 @@ class SubscriberGridView extends React.Component {
         eve.target.nodeName === "I" &&
         eve.target.className === "mdi mdi-pencil") {
           eve.stopPropagation();
-          this.el.find("#editSubbscriber").openModal();
+          this.el.find("#editSubscriber").openModal();
     }
   }
 
@@ -320,11 +320,11 @@ class SubscriberGridView extends React.Component {
             } />
         </div>
         {/* Edit subscriber popup starts here */}
-        <div id="editSubbscriber"
+        <div id="editSubscriber"
           className="modal modal-fixed-header modal-fixed-footer mini-modal">
           <i className="mdi mdi-close modal-close"></i>
           <div className="modal-header">
-            <div className="head">Edit Subbscriber</div>
+            <div className="head">Edit Subscriber</div>
           </div>
           <div className="modal-content">
             <div className="input-field">

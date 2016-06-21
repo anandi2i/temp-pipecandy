@@ -125,10 +125,19 @@ class ListView extends React.Component {
    * @property {Object} emailList THe email list object
    */
   onPersonChange = () => {
+    const error = EmailListStore.getError();
+    if(error) {
+      displayError(error);
+      return false;
+    }
+    const success = EmailListStore.getSuccess();
+    if(success) {
+      displaySuccess(success);
+    }
     let emailList = EmailListStore.getPeopleByListUpdated();
-    if(emailList.length) {
+    if(emailList.peoples.length) {
       this.setState({
-        people: emailList[0].peoples
+        people: emailList.peoples
       });
     }
   }
