@@ -33,7 +33,11 @@ var flash = require("express-flash");
 var config = {};
 var success = 1;
 try {
-  config = require("../providers.json");
+  if(process.env.NODE_ENV) {
+    config = require(`../providers.${process.env.NODE_ENV}.json`);
+  } else {
+    config = require("../providers.json");
+  }
 } catch (err) {
   console.trace(err);
   process.exit(success); // fatal
