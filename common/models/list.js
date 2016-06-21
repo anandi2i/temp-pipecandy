@@ -206,10 +206,14 @@ module.exports = function(List) {
               logger.error("Error in saving fields : ", reqParams);
               return savePersonWithFieldsCB(fieldValuesCreateErr);
             }
-          return savePersonWithFieldsCB(null, {
-            person: persistedPerson,
-            fieldValues: persistedFieldValues
-          });
+            //http://stackoverflow.com/questions/18359093/how-to-copy-javascript-object-to-new-variable-not-by-reference
+            let person = JSON.parse(JSON.stringify(persistedPerson));
+            person.fieldValues = JSON.parse(
+              JSON.stringify(persistedFieldValues)
+            );
+            return savePersonWithFieldsCB(null, {
+              person: person
+            });
         });
       }); //people save
     }); //list find

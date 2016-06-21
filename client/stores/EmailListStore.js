@@ -164,6 +164,7 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.SAVE_SINGLE_PERSON:
       EmailListApi.saveSinglePerson(action.data).then((response) => {
+        _getEmailList[0].people.push(response.data.person);
         _success = SuccessMessages.successSubscribe;
         EmailListStore.emitChange();
         _success = "";

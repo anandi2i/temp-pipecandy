@@ -139,6 +139,9 @@ AppDispatcher.register(function(payload) {
     case Constants.USER_UPDATE:
       UserApi.userUpdate(action.data).then((response) => {
         _user = response.data;
+        if(_user.avatar) {
+          _user.avatar = `${_user.avatar}?${new Date().getTime()}`;
+        }
         _success = SuccessMessages.successUpdate;
         UserStore.emitChange();
         _success = "";
