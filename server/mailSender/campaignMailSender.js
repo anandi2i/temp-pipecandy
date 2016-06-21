@@ -1,6 +1,8 @@
 var googleAuth = require("google-auth-library");
 var google = require("googleapis");
 var AWS = require("aws-sdk");
+var striptags = require("striptags");
+var googleTokenHandler = require("../../server/mailCrawler/googleTokenHandler");
 
 var emptyArrayLength = 0;
 
@@ -98,7 +100,7 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
       var mailContent = {
         mailId: emailQueueEntry.id,
         personEmail: emailQueueEntry.email,
-        mailSubject: emailQueueEntry.subject,
+        mailSubject: striptags(emailQueueEntry.subject),
         contents: emailQueueEntry.content
       };
 
@@ -232,6 +234,27 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
     }, function(err, results) {
       if (err) {
         console.log("Gmail err:", err);
+        const invalidCode = 401;
+        if (err.code === invalidCode) {
+          App.userIdentity.find({
+            where: {
+              "userId": mailContent.userDetails.userid
+            }
+          }, (err, userIdentity) => {
+            googleTokenHandler.updateAccessToken(userIdentity[0],
+              (tokenHandlerErr, updateUser) => {
+                App.userIdentity.updateCredentials(userIdentity[0],
+                    (userIdentityErr, userIdentityInst) => {
+                  oauth2Client.credentials.access_token =
+                    userIdentityInst.credentials.accessToken;
+                  oauth2Client.credentials.refresh_token =
+                    userIdentityInst.credentials.refreshToken;
+                  return sendEmail(base64EncodedEmail, oauth2Client,
+                    emailQueue, mailContent, sendEmailCB);
+                });
+              });
+          });
+        }
       } else {
         delete tempCacheUserCredentials[mailContent.userDetails.userid];
         App.emailQueue.destroyById(mailContent.mailId, function(err, data) {

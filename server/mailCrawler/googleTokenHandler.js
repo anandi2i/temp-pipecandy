@@ -1,5 +1,5 @@
-import refresh from "passport-oauth2-refresh";
-import {Strategy as googleStrategy} from "passport-google-oauth2";
+var refresh = require("passport-oauth2-refresh");
+var googleStrategy = require("passport-google-oauth2").Strategy;
 
 const clientSecretCredentials = {
   "web": {

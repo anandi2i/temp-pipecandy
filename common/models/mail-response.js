@@ -53,12 +53,11 @@ module.exports = function(MailResponse) {
    * @param  {Function} callback
    */
   MailResponse.updateMailClass = (mailResponse, callback) => {
-    MailResponse.update({
-      "id": mailResponse.id
-    }, {
-      NLPClass: mailResponse.NLPClass
-    }, (err, results) => {
-      return callback(err, results);
+    MailResponse.findById(mailResponse.id, (err, result) => {
+      result.updateAttribute( "NLPClass", mailResponse.NLPClass,
+              (updateErr, updatedData) => {
+          return callback(err, updatedData);
+        });
     });
   };
 
@@ -205,25 +204,26 @@ module.exports = function(MailResponse) {
         callback(response);
       } else {
         logger.error("Error while Getting Message List", error);
-        if (error.code = 401) {
+        const invalidCode = 401;
+        if (error.code === invalidCode) {
           MailResponse.app.models.userIdentity.find({
-              where: {
-                 "userId": userId
-              }
-           }, (err, userIdentity) => {
+            where: {
+              "userId": userId
+            }
+          }, (err, userIdentity) => {
             googleTokenHandler.updateAccessToken(userIdentity[0],
-                      (tokenHandlerErr, updateUser) => {
-              MailResponse.app.models.userIdentity
-                      .updateCredentials(userIdentity[0],
-                            (userIdentityErr, userIdentityInst) => {
-                auth.credentials.access_token =
-                          userIdentityInst.credentials.accessToken;
-                auth.credentials.refresh_token =
-                          userIdentityInst.credentials.refreshToken;
-                return getMessageList(gmail, auth, userId, userMailId,
-                          maxResults, qryParam, nextPageToken, callback);
+              (tokenHandlerErr, updateUser) => {
+                MailResponse.app.models.userIdentity
+                  .updateCredentials(userIdentity[0],
+                    (userIdentityErr, userIdentityInst) => {
+                      auth.credentials.access_token =
+                        userIdentityInst.credentials.accessToken;
+                      auth.credentials.refresh_token =
+                        userIdentityInst.credentials.refreshToken;
+                      return getMessageList(gmail, auth, userId, userMailId,
+                        maxResults, qryParam, nextPageToken, callback);
+                    });
               });
-            });
           });
         }
       }
