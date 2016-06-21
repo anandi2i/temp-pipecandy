@@ -1078,6 +1078,14 @@ span#autocomplete {
         margin-bottom: 0;
       }
     }
+    .error-chip {
+      background-color: $pinck-clr;
+      cursor: pointer;
+      line-height: 32px;
+      color: $white;
+      padding: 3px 10px;
+      border-radius: 2px;
+    }
     .chip {
       margin-right: 5px;
       background-color: #F7F7F7;

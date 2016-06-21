@@ -61,7 +61,7 @@ module.exports = function(CampaignTemplate) {
                                                  "localhost", spamAssassinPort);
       spamd.evaluate(mail.subject, mail.body, function(result, err) {
         if(err){
-          mailsAsyncCB(err);
+          return mailsAsyncCB(err);
         }
         response.push({mail: mail, spamResult: result});
         mailsAsyncCB(null);

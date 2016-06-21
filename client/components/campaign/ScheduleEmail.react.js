@@ -485,12 +485,12 @@ class ScheduleEmail extends React.Component {
                     }, this)
                   }
                 </div>
-                <div className="right-part m-t-5"
+                <div className="right-part"
                    style={{display: this.state.emailList.length ?
                    "none" : "block"}}>
-                   <a onClick={ () => this.props.handleClick(selectEmailListIndex)}>
-                     select email list
-                   </a>
+                   <span className="error-chip" onClick={ () => this.props.handleClick(selectEmailListIndex)}>
+                     Select your email list
+                   </span>
                 </div>
               </div>
               {/* email subject */}
