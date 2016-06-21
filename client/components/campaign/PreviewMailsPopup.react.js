@@ -95,9 +95,9 @@ class PreviewMailsPopup extends React.Component {
     let currentPerson = this.state.peopleList[--id];
     let content, emailSubject;
     let optTextContent = "";
-    let issueCompletedList = this.state.mainEmailContent.issuesCompletedList;
+    let issueCompletedList = this.state.mainEmailContent;
     let findPerson = _.find(issueCompletedList,
-      user => user.id === currentPerson.id);
+      person => person.personId === currentPerson.id);
 
     //Get optional text content
     if(this.state.isOptText || this.state.isAddress){
@@ -110,8 +110,8 @@ class PreviewMailsPopup extends React.Component {
       optTextContent = CampaignStore.setOptText(optionalText);
     }
     if(findPerson) {
-      content = findPerson.template;
-      emailSubject = findPerson.emailSubject;
+      content = findPerson.content;
+      emailSubject = findPerson.subject;
     } else {
       content = this.state.emailContent;
       emailSubject = this.state.emailSubject;
@@ -129,24 +129,21 @@ class PreviewMailsPopup extends React.Component {
       }
     });
 
-    let followupsList =[], followupEmail, followupSubject;
+    let followupsList =[], followupEmail;
     this.state.followupsEmailContent.map(followup => {
-      let findFollowups = _.filter(followup.issuesCompletedList, user => {
-        return user.id === currentPerson.id;
-      });
-      if(findFollowups.length) {
-        followupEmail = findFollowups[0].template;
-        followupSubject = findFollowups[0].emailSubject;
+      let findFollowups = _.filter(followup.issueCompleted, person => {
+        return person.personId === currentPerson.id;
+      })[0];
+      if(findFollowups) {
+        followupEmail = findFollowups.content;
       } else {
         followupEmail = followup.emailContent;
-        followupSubject = followup.emailSubject;
       }
       let followupContent =
         CampaignStore.applySmartTagsValue(followupEmail, currentPerson);
       followupContent = followupContent.concat(optTextContent);
       followupsList.push({
-        "content": followupContent,
-        "emailSubject": followupSubject
+        "content": followupContent
       });
     });
 
@@ -200,12 +197,12 @@ class PreviewMailsPopup extends React.Component {
                     <div className="col s12 mail-content content" dangerouslySetInnerHTML={{__html: listofEmails.content}} />
                   </div>
                   {
-                    this.state.followupsList.map(function(a, key) {
+                    this.state.followupsList.map(function(followup, key) {
                       return (
                         <div key={key} className="preview-mail-container">
                           <h3>followUp {++key}</h3>
                           <div className="col s12 head">Email</div>
-                          <div className="col s12 mail-content content" dangerouslySetInnerHTML={{__html: a.content}} />
+                          <div className="col s12 mail-content content" dangerouslySetInnerHTML={{__html: followup.content}} />
                         </div>
                       );
                     })

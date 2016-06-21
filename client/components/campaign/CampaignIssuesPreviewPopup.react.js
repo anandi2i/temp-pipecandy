@@ -11,8 +11,10 @@ class CampaignIssuesPreviewPopup extends React.Component {
       id: guid(),
       personIssues: this.props.personIssues,
       emailSubject: this.props.emailSubject,
+      emailContent: this.props.emailContent,
       peopleList: this.props.peopleList,
       issuesCompletedList: [],
+      previewIssuesCompleted: [],
       missingTagLen: [],
       selectedPerson: 0,
       displayPerson: 1,
@@ -71,7 +73,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
       `previewMailContent-${this.state.id}`);
     tinyMCE.execCommand("mceRemoveEditor", true,
       `previewSubContent-${this.state.id}`);
-    this.props.closeCallback(this.state.issuesCompletedList);
+    this.props.closeCallback();
   }
 
   setEmailContent = () => {
@@ -169,9 +171,11 @@ class CampaignIssuesPreviewPopup extends React.Component {
       let getPersonInfo = _.clone(personIssues[index]);
       let myList = [];
       let issuePerson = {};
+      let previewList = [];
       issuePerson.subject = getSubject.content;
       issuePerson.content = getContent.content;
       issuePerson.personId = getPersonInfo.id;
+      previewList.push(issuePerson);
       issuePerson.usedTagIds = this.state.usedTagIds;
       issuePerson.userId = getCookie("userId");
       myList.push(issuePerson);
@@ -179,6 +183,8 @@ class CampaignIssuesPreviewPopup extends React.Component {
       this.setState((state) => ({
         issuesCompletedList: update(state.issuesCompletedList,
           {$push: myList}),
+        previewIssuesCompleted: update(state.previewIssuesCompleted,
+          {$push: previewList}),
         displayPerson: initCount
       }), () => {
         this.loadFirstPerson();
@@ -199,13 +205,14 @@ class CampaignIssuesPreviewPopup extends React.Component {
       let myList = [];
       let fixedPeopleId = [];
       let count = true;
+      let previewList = [];
+      let issuePerson = {};
       _.each(personIssues, $.proxy(function(person, key) {
         let getPersonInfo = _.clone(person);
         let findIssues = this.checkSmartTags(getPersonInfo);
         let isMatch = currentIssueTags.issuesTags.equals(findIssues.issuesTags);
         if(isMatch && getPersonInfo) {
           if(count) {
-            let issuePerson = {};
             let subj = CampaignStore.constructEmailTemplate(getSubject.content);
             let mail = CampaignStore.constructEmailTemplate(getContent.content);
             let getUsedTagIds = CampaignStore.usedTagIds(subj.concat(mail));
@@ -220,6 +227,11 @@ class CampaignIssuesPreviewPopup extends React.Component {
             issuePerson.userId = getCookie("userId");
             myList.push(issuePerson);
           }
+          previewList.push({
+            subject: issuePerson.subject,
+            content: issuePerson.content,
+            personId: getPersonInfo.id
+          });
           count = false;
           fixedPeopleId.push(getPersonInfo.id);
         }
@@ -232,6 +244,8 @@ class CampaignIssuesPreviewPopup extends React.Component {
       this.setState((state) => ({
         issuesCompletedList: update(state.issuesCompletedList,
           {$push: myList}),
+        previewIssuesCompleted: update(state.previewIssuesCompleted,
+          {$push: previewList}),
         displayPerson: initCount
       }), () => {
         this.loadFirstPerson();
@@ -241,7 +255,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
 
   /**
    * Loade first person after apply smart tags
-   * Close model popup after all issues solved 
+   * Close model popup after all issues solved
    */
   loadFirstPerson = () => {
     if(this.state.personIssues.length){

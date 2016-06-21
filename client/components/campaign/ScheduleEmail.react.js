@@ -261,7 +261,21 @@ class ScheduleEmail extends React.Component {
     } else {
       // Check if all missing tags are fixed
       if(this.checkEmailContentError()) {
-        this.refs.preview.openModal();
+        let followups = [];
+        let mainTemplate = this.refs.issues.state.previewIssuesCompleted;
+        this.state.followups.map( (val, key) => {
+          let followup = this.refs[`addFollowups${val.id}`];
+          followups.push({
+            emailContent: followup.state.emailContent,
+            issueCompleted: followup.refs.issues.state.previewIssuesCompleted
+          });
+        }, this);
+        this.setState({
+          previewFollowups: followups,
+          previewMainTemplate: mainTemplate
+        }, () => {
+          this.refs.preview.openModal();
+        });
       }
     }
   }
@@ -324,7 +338,7 @@ class ScheduleEmail extends React.Component {
       this.setState((state) => ({
         mainEmailContent: mainEmailContent,
         followupsEmailContent: followups
-      }), function(){
+      }), () => {
         CampaignActions.saveCampaignTemplates({
           id: this.props.campaignId,
           templates: this.state.mainEmailContent
@@ -609,8 +623,8 @@ class ScheduleEmail extends React.Component {
         </div>
         <PreviewMailsPopup
           peopleList={this.state.getAllPeopleList}
-          mainEmailContent={this.state.mainEmailContent}
-          followupsEmailContent={this.state.followupsEmailContent}
+          mainEmailContent={this.state.previewMainTemplate}
+          followupsEmailContent={this.state.previewFollowups}
           emailSubject={this.state.emailSubject}
           emailContent={this.state.emailContent}
           getOptText={this.getOptText}

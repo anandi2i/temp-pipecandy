@@ -212,8 +212,8 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   },
 
   replaceSmartTagContent(value) {
-    let tag = "<span class='tag common' data-id='" + value.id + "' " +
-      "contenteditable='false' data-tag='" + value.field +
+    let tag = "<span class='tag common' data-tag='" + value.field + "' " +
+      "contenteditable='false' data-id='" + value.id +
       "' data-tag-name='" + value.value + "'>" + value.value + "</span>";
     return tag;
   },

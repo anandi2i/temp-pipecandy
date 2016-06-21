@@ -81,7 +81,7 @@ class CampaignOutbox extends React.Component {
   initFakeData() {
     let newCount = 10;
     let outboxData = this.createFakeData(this.state.outboxData.length,
-                                                                    newCount);
+      newCount);
     this.setState({outboxData: outboxData});
   }
 
@@ -96,7 +96,6 @@ class CampaignOutbox extends React.Component {
     const emptyCount = 0;
     let data = [];
     for (i = 0; i < counter; i++) {
-
       let fakeData = (
         <div key={startKey+i} className="camp-repo-grid">
           <div className="row">
