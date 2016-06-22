@@ -3,6 +3,7 @@
 import moment from "moment-timezone";
 import lodash from "lodash";
 import logger from "../../server/log";
+import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 
 module.exports = function(EmailQueue) {
 
@@ -132,7 +133,99 @@ module.exports = function(EmailQueue) {
 
   }; //checkEmailExists
 
-//observers
+  EmailQueue.remoteMethod(
+    "scheduledMails", {
+      description: "Get Scheduled Mails",
+      accepts: [{
+        arg: "ctx",
+        type: "object",
+        http: {
+          source: "context"
+        }
+      }, {
+        arg: "campaignId",
+        type: "number"
+      }, {
+        arg: "start",
+        type: "number"
+      }, {
+        arg: "limit",
+        type: "number"
+      }],
+      returns: {
+        arg: "CampaignAudit",
+        type: "array",
+        root: true
+      },
+      http: {
+        verb: "get",
+        path: "/scheduledMails/:campaignId/:start/:limit"
+      }
+    }
+  );
+  /**
+   * Method to return sent mails
+   * @param  {Object}   ctx
+   * @param  {Integer}   campaignId
+   * @param  {Integer}   start
+   * @param  {Integer}   limit
+   * @param  {Function} callback
+   * @return {[Object]} list of Campaign Audit
+   */
+  EmailQueue.scheduledMails = (ctx, campaignId, start, limit, callback) => {
+    let errorMessage = validateMailRequest(campaignId, start, limit);
+    if (errorMessage) {
+      return ctx.res.status(errorMessage.code).send(errorMessage.message);
+    }
+    EmailQueue.find({
+      where: {
+        campaignId: campaignId
+      },
+      order: "createdAt DESC",
+      limit: limit,
+      skip: start
+    }, (emailQueuesErr, emailQueues) => {
+      if (!lodash.isEmpty(emailQueues)) {
+        let scheduledMails = {};
+        const zero = 0;
+        if (start === zero) {
+          EmailQueue.count( (countErr, count) => {
+            scheduledMails.count = count;
+            scheduledMails.mails = emailQueues;
+            return callback(null, scheduledMails);
+          });
+        } else {
+          scheduledMails.mails = emailQueues;
+          return callback(null, scheduledMails);
+        }
+      } else {
+        const errorMessage = errorMessages.NO_EMAILS_FOUND;
+        return ctx.res.status(errorMessage.code).send(errorMessage.message);
+      }
+    });
+  };
+
+  /**
+   * Method To validate mail request
+   * @param  {Number} campaignId
+   * @param  {Number} start
+   * @param  {Number} limit
+   * @return {Object}
+   */
+  const validateMailRequest = (campaignId, start, limit) => {
+    const zero = 0;
+    let errorMessage = null;
+    if (campaignId <= zero) {
+      errorMessage = errorMessages.INVALID_CAMPAIGN_ID;
+    } else if (start < zero) {
+      errorMessage = errorMessages.INVALID_START;
+    } else if (limit <= zero) {
+      errorMessage = errorMessages.INVALID_LIMIT;
+    }
+    return errorMessage;
+  };
+
+  //observers
   /**
    * Updates the updatedAt column with current Time
    * @param ctx Context

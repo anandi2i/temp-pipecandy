@@ -262,8 +262,7 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
             sendEmailCB(err);
           }
           console.log(results);
-
-          sendEmailCB(null, emailQueue, mailContent);
+          sendEmailCB(null, emailQueue, mailContent, results);
         });
       }
     });
@@ -275,7 +274,7 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
    * @param  {Object} mailContent
    * @param  {Function} createAuditCB
    */
-  function createAudit(emailQueue, mailContent, createAuditCB) {
+  function createAudit(emailQueue, mailContent, sentMailResp, createAuditCB) {
     let campaignAuditInst = {};
     campaignAuditInst.email = mailContent.personEmail;
     campaignAuditInst.content = mailContent.contents;
@@ -284,6 +283,8 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
     campaignAuditInst.userId = emailQueue.userId;
     campaignAuditInst.personId = emailQueue.personId;
     campaignAuditInst.campaignId = emailQueue.campaignId;
+    campaignAuditInst.mailId = sentMailResp.id;
+    campaignAuditInst.threadId = sentMailResp.threadId;
     App.campaignAudit.create(campaignAuditInst, function (err, response) {
       createAuditCB(null, response);
     });

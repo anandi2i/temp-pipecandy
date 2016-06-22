@@ -1,5 +1,4 @@
 var AWS = require("aws-sdk");
-import logger from "../../server/log";
 
 AWS.config.update({
   accessKeyId: "AKIAJUDP7FRPRTLTANWA",
@@ -19,7 +18,7 @@ var sqsParams = {
 
 sqs.sendMessage(sqsParams, function(err, data) {
   if (err) {
-    logger.mailAssemblerError("Error while pushing to the AWS Queue");
+    console.log("Error while pushing to the AWS Queue");
   }
-  logger.mailAssemblerInfo(data);
+  console.log(data);
 });

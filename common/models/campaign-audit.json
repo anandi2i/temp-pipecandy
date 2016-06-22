@@ -17,6 +17,12 @@
         "dataType": "text"
       }
     },
+    "mailId": {
+      "type": "String"
+    },
+    "threadId": {
+      "type": "String"
+    },
     "sentTime": {
       "type": "date"
     },
@@ -33,7 +39,31 @@
     }
   },
   "validations": [],
-  "relations": {},
-  "acls": [],
+  "relations": {
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": "campaignId"
+    },
+    "person": {
+      "type": "belongsTo",
+      "model": "person",
+      "foreignKey": "personId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "inboxMails"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "sentMails"
+    }
+  ],
   "methods": {}
 }
