@@ -5,9 +5,76 @@ import async from "async";
 import Spamd from "node-spamd";
 import lodash from "lodash";
 import _ from "underscore";
-
+import request from "request";
 
 module.exports = function(CampaignTemplate) {
+
+  CampaignTemplate.remoteMethod(
+    "wordAI", {
+      description: "Returns multiple combinatiosnof an email contents.",
+      accepts: [{
+        arg: "ctx",
+        type: "object",
+        http: {
+          source: "context"
+        }
+      }, {
+        arg: "template",
+        type: "object",
+        required: true,
+        http: {
+          source: "body"
+        }
+      }],
+      returns: {
+        arg: "content",
+        type: "object",
+        root: true
+      },
+      http: {
+        verb: "post",
+        path: "/wordAI"
+      }
+    }
+  );
+
+  /**
+   * Integrates the WordAi api to generate the multiple combinations of
+   * an Email Templates
+   * Input:
+   * {"content": "Here is an example content"}
+   *
+   * @param  {[Context]} ctx
+   * @param  {[CampaignTemplate]} template
+   * @param  {[type]} wordAICB
+   * @return {[Object]} response.body
+   * @author Ramanavel Selvaraju
+   */
+  CampaignTemplate.wordAI = (ctx, template, wordAICB) => {
+    let options = {
+      method: "POST",
+      url: "http://wordai.com/users/turing-api.php",
+      headers: {
+     "cache-control": "no-cache",
+     "content-type": "multipart/form-data; boundary=---011000010111000001101001"
+      },
+      formData: {
+        s: template.content,
+        quality: "Very Readable",
+        email: "ashwin@pipecandy.com",
+        pass: "ashwin0302",
+        output: "json"
+      }
+    };
+
+    request(options, (wordAIErr, response, body) => {
+      if (wordAIErr) {
+        logger.error({error: wordAIErr, template: template});
+        return wordAICB(wordAIErr);
+      };
+      return wordAICB(null, JSON.parse(body));
+    });
+  };
 
   CampaignTemplate.remoteMethod(
     "checkSpam", {

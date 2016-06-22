@@ -76,6 +76,7 @@
     "react-dom": "^15.1.0",
     "react-router": "^2.4.1",
     "react-validation-mixin": "^5.3.4",
+    "request": "^2.72.0",
     "run-sequence": "^1.2.1",
     "serve-favicon": "^2.0.1",
     "sqs-consumer": "^3.1.3",

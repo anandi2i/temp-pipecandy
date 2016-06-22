@@ -50,6 +50,17 @@
       "foreignKey": "campaignId"
     }
   },
-  "acls": [],
+  "acls": [{
+    "principalType": "ROLE",
+    "principalId": "$authenticated",
+    "permission": "ALLOW",
+    "property": "wordAI"
+  },
+  {
+    "principalType": "ROLE",
+    "principalId": "$authenticated",
+    "permission": "ALLOW",
+    "property": "checkSpam"
+  }],
   "methods": {}
 }
