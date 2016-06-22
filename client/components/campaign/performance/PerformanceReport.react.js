@@ -1,6 +1,8 @@
 import React from "react";
 import Highcharts from "highcharts";
 import _ from "underscore";
+import CampaignActions from "../../../actions/CampaignActions";
+import CampaignStore from "../../../stores/CampaignStore";
 
 /**
  * Draw Graph using Highcharts library
@@ -8,10 +10,30 @@ import _ from "underscore";
 class PerformanceReport extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      count: []
+    };
   }
 
   componentDidMount() {
+    const {campaignId} = this.props;
+    CampaignStore.addPerformanceStoreListener(this.onStoreChange);
+    if(!campaignId) {
+      CampaignActions.getRecentCampaignMetrics();
+    } else{
+      CampaignActions.getCurrentCampaignMetrics(campaignId);
+    }
     this.drawGraph();
+  }
+
+  componentWillUnmount() {
+    CampaignStore.removePerformanceStoreListener(this.onStoreChange);
+  }
+
+  onStoreChange = () => {
+      this.setState({
+        count:CampaignStore.getCampaignMetrics()
+      });
   }
 
   /**
@@ -120,12 +142,15 @@ class PerformanceReport extends React.Component {
   }
 
   render() {
+    const campaignMetrics = this.state.count;
     return (
-      <div className="container">
-        <div className="row main-head">
-          Performance Report
-        </div>
-        <div id="performanceReport" className="graphSize" />
+      <div>
+          <div className="container" style={{visibility: campaignMetrics && campaignMetrics.length ? "visible" : "hidden"}}>
+            <div className="row main-head">
+              Performance Report
+            </div>
+            <div id="performanceReport" className="graphSize" />
+          </div>
       </div>
     );
   }

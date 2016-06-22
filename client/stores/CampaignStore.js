@@ -38,6 +38,36 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("change", callback);
   },
 
+  // Emit reportStoreChange event
+  reportStoreChange() {
+    this.emit("reportStoreChange");
+  },
+
+  // Add reportStoreChange listener
+  addReportStoreListener(callback) {
+    this.on("reportStoreChange", callback);
+  },
+
+  // Remove reportStoreChange listener
+  removeReportStoreListener(callback) {
+    this.removeListener("reportStoreChange", callback);
+  },
+
+  // Emit performanceStoreChange event
+  performanceStoreChange() {
+    this.emit("performanceStoreChange");
+  },
+
+  // Add performanceStoreChange listener
+  addPerformanceStoreListener(callback) {
+    this.on("performanceStoreChange", callback);
+  },
+
+  // Remove performanceStoreChange listener
+  removePerformanceStoreListener(callback) {
+    this.removeListener("performanceStoreChange", callback);
+  },
+
   // Emit Change event
   emitEmailListChange() {
     this.emit("emailListChange");
@@ -443,11 +473,11 @@ AppDispatcher.register(function(payload) {
       CampaignApi.getRecentCampaignMetrics().then((response) => {
         _campaignMetrics = response.data.recentCampaignMetrics;
         _error = "";
-        CampaignStore.emitChange();
+        CampaignStore.performanceStoreChange();
       }, (err) => {
         _campaignMetrics = [];
         _error = HandleError.evaluateError(err);
-        CampaignStore.emitChange();
+        CampaignStore.performanceStoreChange();
       });
       break;
     case Constants.GET_CURRENT_CAMPAIGN_METRICS:
@@ -455,11 +485,11 @@ AppDispatcher.register(function(payload) {
       .then((response) => {
         _campaignMetrics = response.data.currentCampaignMetrics;
         _error = "";
-        CampaignStore.emitChange();
+        CampaignStore.performanceStoreChange();
       }, (err) => {
         _campaignMetrics = [];
         _error = HandleError.evaluateError(err);
-        CampaignStore.emitChange();
+        CampaignStore.performanceStoreChange();
       });
       break;
     case Constants.SAVE_CAMPAIGN_TEMPLATES:
@@ -488,11 +518,11 @@ AppDispatcher.register(function(payload) {
       .then((response) => {
         _campaignDetails = response.data.recentCampaignDetails;
         _error = "";
-        CampaignStore.emitChange();
+        CampaignStore.reportStoreChange();
       }, (err) => {
         _campaignDetails = [];
         _error = HandleError.evaluateError(err);
-        CampaignStore.emitChange();
+        CampaignStore.reportStoreChange();
       });
       break;
     case Constants.GET_CURRENT_CAMPAIGN_DETAILS:
@@ -500,11 +530,11 @@ AppDispatcher.register(function(payload) {
       .then((response) => {
         _campaignDetails = response.data.currentCampaignDetails;
         _error = "";
-        CampaignStore.emitChange();
+        CampaignStore.reportStoreChange();
       }, (err) => {
         _campaignDetails = [];
         _error = HandleError.evaluateError(err);
-        CampaignStore.emitChange();
+        CampaignStore.reportStoreChange();
       });
       break;
     case Constants.CHECK_WORDIO_VARIATIONS:

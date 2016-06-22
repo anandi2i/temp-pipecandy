@@ -24,9 +24,9 @@ class ViewCampaign extends React.Component {
             {/* Performance Compared Menu */}
             <PerformanceCompare campaignId={campaignId}/>
             {/* Performance Chart */}
-            <PerformanceStatus />
+            <PerformanceStatus campaignId={campaignId}/>
             {/* Performance Chart */}
-            <PerformanceReport />
+            <PerformanceReport campaignId={campaignId}/>
           </div>
           <CampaignFooter campaignId={campaignId} activePage={"report"}/>
       </div>

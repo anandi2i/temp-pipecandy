@@ -506,11 +506,7 @@ module.exports = function(Campaign) {
         getRecentCampaignMetricsCB(campaignErr);
       }
       if(lodash.isEmpty(campaigns)){
-        buildCampaignMetricObject(campaignMetricArray,
-          emptyCampaignMetricsData, totalEmptyLinks,
-          (err, campaignMetricsObj) => {
-            getRecentCampaignMetricsCB(null, campaignMetricsObj);
-        });
+        getRecentCampaignMetricsCB(null);
       } else {
         campaigns[0].campaignMetrics(
           (campaignMetricsErr, campaignMetricsData) => {
@@ -703,6 +699,14 @@ module.exports = function(Campaign) {
       order: "lastrunat DESC",
       limit: 1
     }, (campaignErr, campaigns) => {
+      if(campaignErr){
+        getRecentCampaignDetailsCB(campaignErr);
+      }
+
+      if(lodash.isEmpty(campaigns)){
+        return getRecentCampaignDetailsCB(null);
+      }
+
       const recentCampaign = campaigns[0];
       recentCampaignDetailsObj.campaignName = recentCampaign.name;
       recentCampaignDetailsObj.executedAt = new Date(recentCampaign.lastRunAt);

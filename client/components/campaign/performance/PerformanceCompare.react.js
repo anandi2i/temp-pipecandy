@@ -32,7 +32,7 @@ class PerformanceCompare extends React.Component {
 
   componentDidMount() {
     const {campaignId} = this.props;
-    CampaignStore.addChangeListener(this.onStoreChange);
+    CampaignStore.addPerformanceStoreListener(this.onStoreChange);
     if(!campaignId) {
       CampaignActions.getRecentCampaignMetrics();
     } else{
@@ -41,10 +41,11 @@ class PerformanceCompare extends React.Component {
   }
 
   componentWillUnmount() {
-    CampaignStore.removeChangeListener(this.onStoreChange);
+    CampaignStore.removePerformanceStoreListener(this.onStoreChange);
   }
 
   onStoreChange = () => {
+    console.log(CampaignStore.getCampaignMetrics());
       this.setState({
         count:CampaignStore.getCampaignMetrics()
       });
@@ -60,48 +61,54 @@ class PerformanceCompare extends React.Component {
   }
 
   render() {
-    const activeTab = this.state.activeTab;
-    const tab = this.state.tab;
-    const tabs = this.state.tabs;
+    const emptyArray = 0;
+    const {activeTab, tab, tabs} = this.state;
+    const metricData = this.state.count;
     return (
-      <div className="container">
-        {/* Top tag Menu */}
-        <div className="row tag-name-menu">
-          <TagNameMenu handleClick={this.handleClick}
-            active={activeTab}
-            tab={tab} />
-        </div>
-        <div className="row camp-chip-container" style={{display: activeTab === tabs[0] ? "block" : "none"}}>
-          {
-            this.state.count.map((list, key) => {
-              return (
-                <div className="col s12 m3 s3" key={key}>
-                  <div className="camp-chip">
-                    <div className="head">
-                      {list.title}
+      <div>
+      {
+        metricData && metricData.length > emptyArray
+        ?
+        <div className="container">
+          <div className="row tag-name-menu">
+            <TagNameMenu handleClick={this.handleClick}
+              active={activeTab}
+              tab={tab} />
+          </div>
+          <div className="row camp-chip-container" style={{display: activeTab === tabs[0] ? "block" : "none"}}>
+            {
+              this.state.count.map((list, key) => {
+                return (
+                  <div className="col s12 m3 s3" key={key}>
+                    <div className="camp-chip">
+                      <div className="head">
+                        {list.title}
+                      </div>
+                      <div className="count">
+                        <div>{list.percentage}</div>
+                        <span>{list.count}</span>
+                      </div>
+                      {
+                        list.status
+                          ? <div className="status">
+                              <div className="icon"><i className="mdi mdi-menu-up"></i></div>
+                              <div className="count">{list.status}</div>
+                            </div>
+                          : ""
+                      }
                     </div>
-                    <div className="count">
-                      <div>{list.percentage}</div>
-                      <span>{list.count}</span>
-                    </div>
-                    {
-                      list.status
-                        ? <div className="status">
-                            <div className="icon"><i className="mdi mdi-menu-up"></i></div>
-                            <div className="count">{list.status}</div>
-                          </div>
-                        : ""
-                    }
                   </div>
-                </div>
-              );
-            })
-          }
+                );
+              })
+            }
+          </div>
+          <div className="row camp-chip-container" style={{display: activeTab === tabs[1] ? "block" : "none"}}>
+            {/* TODO Add UI */}
+            <h2>Sample Content Tab2</h2>
+          </div>
         </div>
-        <div className="row camp-chip-container" style={{display: activeTab === tabs[1] ? "block" : "none"}}>
-          {/* TODO Add UI */}
-          <h2>Sample Content Tab2</h2>
-        </div>
+        :""
+      }
       </div>
     );
   }
