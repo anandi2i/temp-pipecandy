@@ -60,10 +60,13 @@ module.exports = function(CampaignTemplate) {
       },
       formData: {
         s: template.content,
-        quality: "Very Readable",
+        quality: "Readable",
         email: "ashwin@pipecandy.com",
         pass: "ashwin0302",
-        output: "json"
+        output: "json",
+        nooriginal: "on",
+        sentence: "on",
+        paragraph: "on"
       }
     };
 

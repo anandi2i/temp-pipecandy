@@ -93,6 +93,15 @@ const CampaignActions = {
       actionType: Constants.GET_CURRENT_CAMPAIGN_DETAILS,
       campaignId : campaignId
     });
+  },
+  /**
+   * To get the email content Variations
+   */
+  checkWordIoVariations(content) {
+    AppDispatcher.handleAction({
+      actionType: Constants.CHECK_WORDIO_VARIATIONS,
+      content : content
+    });
   }
 };
 

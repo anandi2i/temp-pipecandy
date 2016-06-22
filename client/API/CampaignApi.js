@@ -53,10 +53,17 @@ const CampaignApi = {
   },
   /**
    * Get current campaign details
-   * * @param  {[campaignId]} campaignId
+   * @param  {[campaignId]} campaignId
    */
   getCurrentCampaignDetails(campaignId) {
     return api.get(`api/campaigns/getCurrentCampaignDetails/${campaignId}`);
+  },
+  /**
+   * Get email content variations from wordAi
+   * @param  {object} email content
+   */
+  getWordIoVariations(content) {
+    return api.post("api/campaignTemplates/wordAI", content);
   }
 };
 

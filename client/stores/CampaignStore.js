@@ -13,6 +13,7 @@ let _getAllCampaigns = {};
 let _allEmailTemplates = [];
 let _campaignMetrics = [];
 let _campaignDetails = {};
+let _WordIoVariations = "";
 let selectedEmailList = {};
 let allPeopleList = [];
 let duplicateEmailList = [];
@@ -251,6 +252,10 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
    */
   getSpamScore() {
     return spamScore;
+  },
+
+  checkWordIoVariations() {
+    return _WordIoVariations;
   }
 
 });
@@ -500,6 +505,17 @@ AppDispatcher.register(function(payload) {
         _campaignDetails = [];
         _error = HandleError.evaluateError(err);
         CampaignStore.emitChange();
+      });
+      break;
+    case Constants.CHECK_WORDIO_VARIATIONS:
+      CampaignApi.getWordIoVariations(action.content)
+      .then((response) => {
+        _WordIoVariations = response.data.text;
+        _error = "";
+        CampaignStore.emitChange();
+      }, (err) => {
+        _WordIoVariations = {};
+        displayError("Sorry, something went wrong");
       });
       break;
     default:

@@ -529,8 +529,8 @@ a {
   border-bottom: $border-1px;
   min-height: 50px;
   @include sub-nav-container;
-  .campaignDetailSection{
-    width:auto;
+  .campaignDetailSection {
+    width: auto;
   }
 }
 .sub-head-container {
@@ -917,6 +917,24 @@ $lines-to-show: 8;
 .mce-floatpanel {
   border: 0 !important;
 }
+.wordai-preview {
+  .spinner-container {
+    margin-top: 50px;
+    margin-left: calc(50% - 15px);
+    margin-right: auto;
+  }
+  h3 {
+    font-size: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
+  .wordai-txt {
+    padding: 10px;
+    background-color: $lit-gray-bg;
+    margin-bottom: 10px;
+    border-radius: 3px;
+  }
+}
 /***********************************
   campaign report
 ***********************************/
@@ -953,8 +971,8 @@ $lines-to-show: 8;
     .personName {
       color: $black-clr;
     }
-    .mailDescription{
-      .subjectLine{
+    .mailDescription {
+      .subjectLine {
         color: $black-clr;
         margin-right: 10px;
       }

@@ -4,6 +4,7 @@ import update from "react-addons-update";
 import _ from "underscore";
 import AddFollowups from "./AddFollowups.react";
 import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
+import WordaiPreviewPopup from "./WordaiPreviewPopup.react";
 import PreviewMailsPopup from "./PreviewMailsPopup.react";
 import CampaignStore from "../../stores/CampaignStore";
 import UserStore from "../../stores/UserStore";
@@ -411,6 +412,12 @@ class ScheduleEmail extends React.Component {
     );
   }
 
+  checkWordIo = () => {
+    const emailRawText = tinyMCE.get("emailContent")
+      .getContent({format : "text"});
+    this.refs.wordai.openModal(emailRawText);
+  }
+
   render() {
     let selectEmailListIndex = 1;
     let displayIndex =
@@ -552,6 +559,10 @@ class ScheduleEmail extends React.Component {
                   style={{display: spamRating ? "none": "inline-block"}}>
                   Check Spam
                 </div>
+                <div onClick={this.checkWordIo}
+                  className="btn btn-dflt btn-blue" >
+                  Check With WordAi
+                </div>
                 <div onClick={() => this.openPreviewModal("issues")}
                   style={{display: errorCount ? "inline-block": "none"}}
                   className="btn btn-dflt error-btn" >
@@ -628,7 +639,8 @@ class ScheduleEmail extends React.Component {
           emailSubject={this.state.emailSubject}
           emailContent={this.state.emailContent}
           getOptText={this.getOptText}
-          ref="preview"/>
+          ref="preview" />
+        <WordaiPreviewPopup ref="wordai" />
       </div>
     );
   }
