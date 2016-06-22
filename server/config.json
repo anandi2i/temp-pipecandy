@@ -26,5 +26,18 @@
     }
   },
   "legacyExplorer": false,
-  "cookieSecret": "246bace2-38cb-4138-85d9-0ae8160b07c8"
+  "cookieSecret": "246bace2-38cb-4138-85d9-0ae8160b07c8",
+
+  "queue": {
+    "config": {
+      "accessKeyId": "AKIAJ53GEQAAN6LWLTUQ",
+      "secretAccessKey": "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",
+      "region": "ap-southeast-1"
+    },
+    "url": {
+      "intelligenceIn": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-local-intelligence-in",
+      "intelligenceOut": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-local-intelligence-out",
+      "emailAssembler": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-local-email-assembler"
+    }
+  }
 }
