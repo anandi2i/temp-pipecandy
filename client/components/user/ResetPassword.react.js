@@ -9,7 +9,6 @@ class ResetPassword extends React.Component {
   constructor() {
     super();
     this.state = {
-      accessToken: this.props.params.accessToken,
       password: ""
     };
     this.validatorTypes = {
@@ -48,7 +47,7 @@ class ResetPassword extends React.Component {
     const onValidate = (error) => {
       if (!error) {
         UserAction.resetPassword({
-          accessToken: this.state.accessToken,
+          accessToken: this.props.params.accessToken,
           password: this.state.password
         });
       }

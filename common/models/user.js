@@ -167,7 +167,7 @@ module.exports = function(user) {
 
   //send password reset link when password reset requested
   user.on("resetPasswordRequest", function(info) {
-    var url = "http://" + config.emailHost + ":" + config.port + "/#/reset-password";
+    var url = `http://${config.emailHost}:${config.emailPort}/#/reset-password`;
     var html = "Click <a href='" + url + "/" +
       info.accessToken.id + "'>here</a> to reset your password";
     user.app.models.Email.send({
