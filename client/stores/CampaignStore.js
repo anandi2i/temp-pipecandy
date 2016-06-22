@@ -322,9 +322,9 @@ AppDispatcher.register(function(payload) {
             let newField = [];
             let newtag = {};
             if(person.firstName) {
-              fieldName.push("firstName");
+              fieldName.push("First Name");
               newtag = {
-                "field": "firstName",
+                "field": "First Name",
                 "value": person.firstName,
                 "id": 1
               };
@@ -332,9 +332,9 @@ AppDispatcher.register(function(payload) {
               newField.push(_.omit(newtag, "value"));
             }
             if(person.middleName) {
-              fieldName.push("middleName");
+              fieldName.push("Middle Name");
               newtag = {
-                "field": "middleName",
+                "field": "Middle Name",
                 "value": person.middleName,
                 "id": 2
               };
@@ -342,9 +342,9 @@ AppDispatcher.register(function(payload) {
               newField.push(_.omit(newtag, "value"));
             }
             if(person.lastName) {
-              fieldName.push("lastName");
+              fieldName.push("Last Name");
               newtag = {
-                "field": "lastName",
+                "field": "Last Name",
                 "value": person.lastName,
                 "id": 3
               };
@@ -352,9 +352,9 @@ AppDispatcher.register(function(payload) {
               newField.push(_.omit(newtag, "value"));
             }
             if(person.email) {
-              fieldName.push("email");
+              fieldName.push("Email");
               newtag = {
-                "field": "email",
+                "field": "Email",
                 "value": person.email,
                 "id": 4
               };
@@ -362,9 +362,9 @@ AppDispatcher.register(function(payload) {
               newField.push(_.omit(newtag, "value"));
             }
             if(person.salutation) {
-              fieldName.push("salutation");
+              fieldName.push("Salutation");
               newtag = {
-                "field": "salutation",
+                "field": "Salutation",
                 "value": person.salutation,
                 "id": 5
               };

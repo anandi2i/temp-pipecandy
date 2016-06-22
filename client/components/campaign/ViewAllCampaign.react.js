@@ -57,7 +57,8 @@ class CampaignListView extends React.Component {
                 <div className="row card">
                   <div className="col s12 center card-content">
                     <p>
-                      <Link to="/campaign/create">Create</Link> a new campaign!
+                      Oops! You don't seem to have any campaigns here.
+                      Do you want to add a new campaign?
                     </p>
                   </div>
                 </div>

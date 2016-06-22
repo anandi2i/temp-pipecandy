@@ -1,5 +1,6 @@
 import React from "react";
 import {Link} from "react-router";
+import _ from "underscore";
 
 class CustomGridRowComponent extends React.Component {
 
@@ -12,6 +13,7 @@ class CustomGridRowComponent extends React.Component {
 
   render() {
     const data = this.props.data;
+    data.lastRunAt = new Date(_.now()).toUTCString();
     let checkboxId = guid();
     let checkedStatus = this.props.globalData().getIsRowChecked(data);
     const {id, name, membersCount, createdBy, openPercentage,

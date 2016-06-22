@@ -141,6 +141,7 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
     auto_focus: getFocusId,
     fixed_toolbar_container: toolBar,
     toolbar: toolbar,
+    entity_encoding: "raw",
     plugins: [
       "advlist autolink lists link image charmap print preview anchor",
       "insertdatetime media table paste code",
@@ -185,6 +186,7 @@ function initTinyMCEPopUp(id, toolBar, isToolbar, cb) {
     auto_focus: getFocusId,
     fixed_toolbar_container: toolBar,
     toolbar: toolbar,
+    entity_encoding: "raw",
     init_instance_callback : function() {
       cb();
     },
