@@ -98,12 +98,12 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
         id: obj.id,
         name: obj.name || "",
         listSentTo: _.random(initialRange, endRange),
-        campaignStatus: obj.campaignStatus || "cStatus",
+        campaignStatus: obj.campaignStatus || "Sent",
         campaignReplies: _.random(initialRange, endRange),
         campaignProgressDone: _.random(initialRange, randomVal),
         campaignProgressTotal: randomVal,
-        campaignProgress: obj.campaignProgress || "cProgress",
-        campaignAction: obj.campaignAction || "cAction",
+        campaignProgress: obj.campaignProgress || "50%",
+        campaignAction: obj.campaignAction || "Pass",
         campaignRun: obj.campaignRun || "cRun"
       });
     });

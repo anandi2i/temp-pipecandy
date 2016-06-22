@@ -75,7 +75,7 @@ class ScheduleEmail extends React.Component {
     }
     initTinyMCE("#emailSubject", "", "", allTags, false, this.tinyMceSubCb);
     const mainContent = this.props.selectedTemplate;
-    const tinyMceDelayTime = 500;
+    const tinyMceDelayTime = 1000;
     //TODO need to remove setTimeout
     if(mainContent){
       this.setState({
