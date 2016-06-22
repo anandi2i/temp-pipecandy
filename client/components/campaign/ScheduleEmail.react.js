@@ -561,7 +561,7 @@ class ScheduleEmail extends React.Component {
                 </div>
                 <div onClick={this.checkWordIo}
                   className="btn btn-dflt btn-blue" >
-                  Check With WordAi
+                  Check Email Variations
                 </div>
                 <div onClick={() => this.openPreviewModal("issues")}
                   style={{display: errorCount ? "inline-block": "none"}}

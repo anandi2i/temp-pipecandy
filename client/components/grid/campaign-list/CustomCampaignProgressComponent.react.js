@@ -9,7 +9,7 @@ class CustomCampaignProgressComponent extends React.Component {
   render() {
     return (
       <div>
-        <a> Pass </a>
+        <a>Pause</a>
       </div>
     );
   }
