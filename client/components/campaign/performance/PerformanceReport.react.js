@@ -5,7 +5,8 @@ import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
 
 /**
- * Draw Graph using Highcharts library
+ * The class PerformanceReport describes Opens and Clicks of the Emails on
+ *   graph view
  */
 class PerformanceReport extends React.Component {
   constructor(props) {
@@ -30,6 +31,9 @@ class PerformanceReport extends React.Component {
     CampaignStore.removePerformanceStoreListener(this.onStoreChange);
   }
 
+  /**
+   * Get Metrics of the Campaign
+   */
   onStoreChange = () => {
       this.setState({
         count:CampaignStore.getCampaignMetrics()
@@ -39,23 +43,29 @@ class PerformanceReport extends React.Component {
   /**
    * Setup Highcharts Properties
    */
-  drawGraph() {
+  drawGraph = () => {
     //TODO - Remove static data
     //TODO - Use variable colours
-    let pointInterval = 86400000;
-    let year = 2016;
-    let month = 0;
-    let day = 1;
-    let pointStart = Date.UTC(year, month, day);
-    let seriesStart = 0;
-    let seriesEnd = 10;
-    let range = 20;
-    let series1 = [];
-    let series2 = [];
+    const pointInterval = 86400000;
+    const year = 2016;
+    const month = 0;
+    const day = 1;
+    const pointStart = Date.UTC(year, month, day);
+    const seriesStart = 0;
+    const seriesEnd = 10;
+    const range = 20;
+    const series1 = [];
+    const series2 = [];
     for(let i = seriesStart; i < seriesEnd; i++) {
       series1.push(_.random(seriesStart, range));
       series2.push(_.random(seriesStart, range));
     }
+
+    /**
+     * Setup Charts Properties
+     *
+     * ref url: http://api.highcharts.com/highcharts
+     */
     Highcharts.chart({
       chart: {
           type: "areaspline",
@@ -141,16 +151,22 @@ class PerformanceReport extends React.Component {
     });
   }
 
+  /**
+   * render
+   * @return {ReactElement} - The element which used to render the graph
+   */
   render() {
     const campaignMetrics = this.state.count;
     return (
       <div>
-          <div className="container" style={{visibility: campaignMetrics && campaignMetrics.length ? "visible" : "hidden"}}>
-            <div className="row main-head">
-              Performance Report
-            </div>
-            <div id="performanceReport" className="graphSize" />
+        <div className="container row camp-chip-container performance-report"
+          style={{visibility:
+            _.isEmpty(campaignMetrics) ? "hidden" : "visible"}}>
+          <div className="row main-head">
+            Performance Report
           </div>
+          <div id="performanceReport" className="graphSize" />
+        </div>
       </div>
     );
   }

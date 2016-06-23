@@ -2,6 +2,7 @@ import React from "react";
 import PerformanceCompare from "./performance/PerformanceCompare.react";
 import OtherPerformanceStatus from "./performance/OtherPerformanceStatus.react";
 import PerformanceReport from "./performance/PerformanceReport.react";
+import LinksClicked from "./performance/LinksClicked.react";
 import CampaignReportHead from "./CampaignReportHead.react";
 
 /**
@@ -23,6 +24,8 @@ class Dashboard extends React.Component {
         <OtherPerformanceStatus />
         {/* Performance Chart */}
         <PerformanceReport />
+        {/* Links Clicked */}
+        <LinksClicked />
       </div>
     );
   }

@@ -1608,6 +1608,21 @@ span#autocomplete {
 .add-field-model-height {
   height: 50% !important;
 }
+.links-clicked-container {
+  .links-clicked-header {
+    text-transform: uppercase;
+    color: #ababab;
+    font-weight: 700;
+  }
+  .links-clicked-data {
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+  }
+}
+.performance-report {
+  height: 500px;
+}
 /*********************
   Media Query Classes
 **********************/
