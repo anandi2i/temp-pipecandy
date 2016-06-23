@@ -1623,6 +1623,15 @@ span#autocomplete {
 .performance-report {
   height: 500px;
 }
+.subscriber_list {
+  .griddle-filter {
+    width: 320px;
+    position: absolute;
+    margin-top: -60px;
+    left: 0;
+    margin-left: 12.5%;
+  }
+}
 /*********************
   Media Query Classes
 **********************/
@@ -1657,6 +1666,9 @@ span#autocomplete {
         padding: 12px 80px;
       }
     }
+  }
+  .subscriber_list {
+    margin-top: 80px;
   }
 }
 @media only screen and (max-width: 700px) {
@@ -1733,6 +1745,35 @@ span#autocomplete {
       .btn {
         width: 100%;
         margin-top: 10px;
+      }
+    }
+  }
+  .view-single-list-containter {
+    .r-btn-container {
+      text-align: center;
+      margin-left: 0;
+      margin-right: 0;
+    }
+    .email-list-action-btn {
+      .p-1-btn {
+        width: 90%;
+        margin-bottom: 10px;
+        margin-right: 0px;
+      }
+    }
+  }
+  .subscriber_list {
+    .top-section {
+      width: 90%;
+      .griddle-filter {
+        width: 100%;
+        margin-left: 0px;
+        .filter-container {
+          width: 100%;
+          input {
+            width: 90%;
+          }
+        }
       }
     }
   }

@@ -439,14 +439,14 @@ class ListView extends React.Component {
     };
     return (
       <div>
-        <div className="container">
+        <div className="container view-single-list-containter">
           <div className="row sub-head-container m-lr-0">
             <div className="head">{this.state.listName}</div>
             <div className="sub-head">
               <Link to="/list">Back to Email Lists</Link>
             </div>
           </div>
-          <div className="row r-btn-container m-lr-0">
+          <div className="row r-btn-container m-lr-0 email-list-action-btn">
             <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" data-activates="addDropDown">
               <i className="left mdi mdi-account-plus"></i> ADD
               <i className="right mdi mdi-chevron-down"></i>
@@ -457,13 +457,13 @@ class ListView extends React.Component {
             </ul>
             <input id="fileUpload" type="file" className="hide" name="file"
               accept=".csv, .xls, .xlsx" onChange={this.fileChange} />
-            <div className="btn btn-dflt blue sm-icon-btn" onClick={this.openDialog}>
+            <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" onClick={this.openDialog}>
               <i className="left mdi mdi-upload"></i> add from file
-            </div>
+            </a>
             { people && people.length ?
-                <div className="btn btn-dflt blue sm-icon-btn delete-button-margin" onClick={this.deleteSubscriber}>
+                <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" onClick={this.deleteSubscriber}>
                   <i className="left mdi mdi-delete"></i> DELETE
-                </div>
+                </a>
               : ""
             }
           </div>

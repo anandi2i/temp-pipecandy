@@ -290,7 +290,7 @@ class SubscriberGridView extends React.Component {
 
   render() {
     return (
-      <div className="row" id="subscriber_list">
+      <div className="row subscriber_list" id="subscriber_list">
         <div className="container">
           <Griddle
             results={this.props.results}
