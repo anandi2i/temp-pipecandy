@@ -21,6 +21,10 @@
     "stopFollowUp": {
       "type": "boolean"
     },
+    "isSent": {
+      "type": "boolean",
+      "default": false
+    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"

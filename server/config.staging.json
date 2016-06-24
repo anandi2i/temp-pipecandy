@@ -2,6 +2,7 @@
   "restApiRoot": "/api",
   "host": "0.0.0.0",
   "emailHost":"staging.pipecandy.com",
+  "redirectURL": "http://staging.pipecandy.com",
   "port": 3000,
   "emailPort":"80",
   "remoting": {
