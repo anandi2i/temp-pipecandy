@@ -175,7 +175,7 @@ module.exports = function(EmailQueue) {
   EmailQueue.scheduledMails = (ctx, campaignId, start, limit, callback) => {
     let errorMessage = validateMailRequest(campaignId, start, limit);
     if (errorMessage) {
-      return ctx.res.status(errorMessage.code).send(errorMessage.message);
+      return callback(errorMessage);
     }
     EmailQueue.find({
       where: {
@@ -200,7 +200,7 @@ module.exports = function(EmailQueue) {
         }
       } else {
         const errorMessage = errorMessages.NO_EMAILS_FOUND;
-        return ctx.res.status(errorMessage.code).send(errorMessage.message);
+        return callback(errorMessage);
       }
     });
   };

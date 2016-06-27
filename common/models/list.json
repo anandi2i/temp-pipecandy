@@ -145,6 +145,18 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "listMetrics"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "removePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "updatePersonWithFields"
     }
   ],
   "methods": {}

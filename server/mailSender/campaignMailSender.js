@@ -278,6 +278,7 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
     let campaignAuditInst = {};
     campaignAuditInst.email = mailContent.personEmail;
     campaignAuditInst.content = mailContent.contents;
+    campaignAuditInst.subject = mailContent.mailSubject;
     campaignAuditInst.sentTime = new Date();
     campaignAuditInst.fromEmail = mailContent.userDetails.email.value;
     campaignAuditInst.userId = emailQueue.userId;

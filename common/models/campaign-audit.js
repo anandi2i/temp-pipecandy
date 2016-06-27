@@ -46,7 +46,7 @@ module.exports = function(CampaignAudit) {
   CampaignAudit.inboxMails = (ctx, campaignId, start, limit, callback) => {
     let errorMessage = validateMailRequest(campaignId, start, limit);
     if (errorMessage) {
-      return ctx.res.status(errorMessage.code).send(errorMessage.message);
+      return callback(errorMessage);
     }
     CampaignAudit.find({
       where: {
@@ -92,7 +92,7 @@ module.exports = function(CampaignAudit) {
         });
       } else {
         const errorMessage = errorMessages.NO_EMAILS_FOUND;
-        return ctx.res.status(errorMessage.code).send(errorMessage.message);
+        return callback(errorMessage);
       }
     });
   };
@@ -139,7 +139,7 @@ module.exports = function(CampaignAudit) {
   CampaignAudit.sentMails = (ctx, campaignId, start, limit, callback) => {
     let errorMessage = validateMailRequest(campaignId, start, limit);
     if (errorMessage) {
-      return ctx.res.status(errorMessage.code).send(errorMessage.message);
+      return callback(errorMessage);
     }
     CampaignAudit.find({
       where: {
@@ -164,7 +164,7 @@ module.exports = function(CampaignAudit) {
         }
       } else {
         const errorMessage = errorMessages.NO_EMAILS_FOUND;
-        return ctx.res.status(errorMessage.code).send(errorMessage.message);
+        return callback(errorMessage);
       }
     });
   };

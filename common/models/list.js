@@ -4,6 +4,7 @@ import logger from "../../server/log";
 import lodash from "lodash";
 import async from "async";
 import _ from "underscore";
+import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 
 module.exports = function(List) {
   /**
@@ -220,6 +221,215 @@ module.exports = function(List) {
   };
 
   List.remoteMethod(
+    "updatePersonWithFields", {
+      description: "Update person object with additional fields",
+      accepts: [{
+        arg: "ctx",
+        type: "object",
+        http: {
+          source: "context"
+        }
+      }, {
+        arg: "id",
+        type: "number",
+        required: true,
+        http: {
+          source: "path"
+        }
+      }, {
+        arg: "reqParams",
+        type: "object",
+        required: true,
+        http: {
+          source: "body"
+        }
+      }],
+      returns: {
+        arg: "person",
+        type: "person",
+        root: true
+      },
+      http: {
+        verb: "put",
+        path: "/:id/updatePersonWithFields"
+      }
+    }
+  );
+
+  /**
+   *
+   * @param  {[Context]} ctx [Context Object to get accessToken]
+   * @param  {[number]} id [listId]
+   * @param  {[Object]} reqParam [Exmaple of an reqParam shown above]
+   * @param  {[function]} savePersonWithFieldsCB [description]
+   * @return {[List]} [List with Person, Fields and values]
+   * @author Syed Sulaiman M
+   */
+  List.updatePersonWithFields = (ctx, id, reqParams, callback) => {
+    let params = {
+      userId: ctx.req.accessToken.userId,
+      listId: id,
+      reqParams: reqParams
+    };
+    async.waterfall([
+      function getReqParams(getReqParamsCB) {
+        getReqParamsCB(null, params);
+      },
+      updatePersonAndFieldValues,
+      constructResponse
+    ], (error, result) => {
+      if (error) {
+        logger.error("Error while updating Person", error);
+        return callback(error);
+      }
+      return callback(null, result);
+    });
+  };
+
+  /**
+   * Updates a Person and Associated Field Values
+   * @param  {[Object]}   params Contains Details of Person, Fields to be updated
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  const updatePersonAndFieldValues = (params, callback) => {
+    List.find({
+      where: {
+        id: params.listId,
+        createdBy: params.userId
+      }
+    }, (listsErr, lists) => {
+      if (listsErr) {
+        logger.error("Error in getting List for id : ", params.listId);
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      if (lodash.isEmpty(lists)) {
+        logger.error("Error in getting List for id : ", params.listId);
+        const errorMessage = errorMessages.LIST_NOT_FOUND;
+        return callback(errorMessage);
+      }
+      async.waterfall([
+        function getReqParams(getReqParamsCB) {
+          getReqParamsCB(null, lists[0], params);
+        },
+        updatePerson,
+        updateFieldValues
+      ], (error, result) => {
+        if (error) {
+          logger.error("Error while updating list metrics", error);
+          return callback(error);
+        }
+        return callback(null, result);
+      });
+    });
+  };
+
+  /**
+   * Method to construct Response for Update Person with Field Values
+   * @param  {[Object]}  list   List object whose Person to be updated
+   * @param  {Function} callback
+   * @return {[Object]} Object Conatins List with Person and Field Values
+   */
+  const constructResponse = (list, callback) => {
+    let res = JSON.parse(JSON.stringify(list));
+    res.people = [];
+    list.people((peopleErr, people) => {
+      if (peopleErr) {
+        logger.error("Error in getting People for List : ", list.id);
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      async.each(people, (person, personCB) => {
+        List.app.models.additionalFieldValue.find({
+          where: {
+            personId: person.id,
+            listId: list.id,
+          }
+        }, (fieldValuesErr, fieldValues) => {
+          let personRes = JSON.parse(JSON.stringify(person));
+          personRes.fieldValues = JSON.parse(JSON.stringify(fieldValues));
+          res.people.push(JSON.parse(JSON.stringify(personRes)));
+          personCB(fieldValuesErr);
+        });
+      }, (err) => {
+        if (err) {
+          logger.error("Error while constructing response ");
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        return callback(null, res);
+      });
+    });
+  };
+
+  /**
+   * Updates a Person
+   * @param  {[Object]}   list
+   * @param  {[Object]}   params Contains Details of Person, Fields to be updated
+   * @param  {Function} callback
+   */
+  const updatePerson = (list, params, callback) => {
+    let person = params.reqParams.person;
+    list.people.findById(person.id, (personErr, personInst) => {
+      if (lodash.isEmpty(personInst)) {
+        logger.error("Error getting Person: ", person.id, "in list", list.id);
+        const errorMessage = errorMessages.PERSON_NOT_FOUND;
+        return callback(errorMessage);
+      }
+      personInst.updateAttributes(person, (updatedPersonErr, updatedPerson) => {
+        if (updatedPersonErr) {
+          logger.error("Error in saving Person Object : ", personErr);
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        return callback(null, list, updatedPerson, params);
+      });
+    });
+  };
+
+
+  /**
+   * Updates Field Values
+   * @param  {[Object]}   list
+   * @param  {[Object]}   person
+   * @param  {[Object]}   params Contains Details of Person, Fields to be updated
+   * @param  {Function} callback
+   */
+  const updateFieldValues = (list, person, params, callback) => {
+    async.each(params.reqParams.fieldValues, (fieldValue, fieldValueCB) => {
+      List.app.models.additionalFieldValue.find({
+        where: {
+          fieldId: fieldValue.fieldId,
+          listId: fieldValue.listId,
+          personId: person.id
+        }
+      }, (addFieldValuesErr, addFieldValues) => {
+        if (addFieldValuesErr) {
+          fieldValueCB(addFieldValuesErr);
+        } else {
+          if (lodash.isEmpty(addFieldValues)) {
+            logger.error("Error in gettig Field Values");
+            const errorMessage = errorMessages.FIELD_VALUES_NOT_FOUND;
+            return callback(errorMessage);
+          }
+          addFieldValues[0].updateAttribute("value", fieldValue.value,
+                (updatedFieldErr, updatedField) => {
+            fieldValueCB(updatedFieldErr);
+          });
+        }
+      });
+    }, (asyncErr) => {
+      if (asyncErr) {
+        logger.error("Error in updating additional Field : ", updatedFieldErr);
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      return callback(null, list);
+    });
+  };
+
+  List.remoteMethod(
     "listMetrics", {
       description: "Get List Metrics",
       accepts: [{
@@ -311,6 +521,82 @@ module.exports = function(List) {
         });
       }, function(error, response) {
         callback(null, listResponses);
+      });
+    });
+  };
+
+  List.remoteMethod(
+    "removePeople", {
+      description: "Removes people from given list id",
+      accepts: [{
+        arg: "ctx",
+        type: "object",
+        http: {
+          source: "context"
+        }
+      }, {
+        arg: "listId",
+        type: "number",
+        required: true,
+        http: {
+          source: "path"
+        }
+      }, {
+        arg: "peopleIds",
+        type: "array",
+        required: true,
+        http: {
+          source: "body"
+        }
+      }],
+      returns: {
+        arg: "status",
+        type: "string",
+        root: true
+      },
+      http: {
+        verb: "delete",
+        path: "/removePeople/:listId"
+      }
+    }
+  );
+  /**
+   * Gets addtional fields and people with addtional field values
+   * for given list ids
+   * @param  {[Context]}      ctx   [context object to get access token]
+   * @param  {[number Array]} list  [list of list ids]
+   * @param  {[function]}     peopleWithFieldsCB
+   * @return {[Object]} {List[field], List[Person[FieldValue[Field]]]}
+   * @author Ramanavel Selvaraju
+   */
+  List.removePeople = (ctx, listId, peopleIds, callback) => {
+    List.findById(listId, (listErr, list) => {
+      if (lodash.isEmpty(list)) {
+        const errorMessage = errorMessages.LIST_NOT_FOUND;
+        return callback(errorMessage);
+      }
+      async.each(peopleIds, (peopleId, peopleCB) => {
+        list.people.findById(peopleId, (personErr, person) => {
+          if (!personErr) {
+            list.people.remove(person, (destroyPplErr) => {
+              peopleCB(destroyPplErr);
+            });
+          } else {
+            peopleCB(personErr);
+          }
+        });
+      }, (err) => {
+        if (err) {
+          logger.error("Error while removing People from list, ", err);
+          const notFound = 404;
+          if (err.statusCode === notFound) {
+            const errorMessage = errorMessages.PERSON_NOT_FOUND;
+            return callback(errorMessage);
+          }
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        return callback(null, "People Removed from List");
       });
     });
   };

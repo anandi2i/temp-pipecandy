@@ -23,6 +23,9 @@
     "threadId": {
       "type": "String"
     },
+    "subject": {
+      "type": "string"
+    },
     "sentTime": {
       "type": "date"
     },

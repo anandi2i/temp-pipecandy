@@ -9,7 +9,9 @@
   "properties": {
     "content": {
       "type": "string",
-      "length": 10000
+      "postgresql": {
+        "dataType": "text"
+      }
     },
     "NLPClass": {
       "type": "string"
