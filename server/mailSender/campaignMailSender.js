@@ -3,6 +3,8 @@ var google = require("googleapis");
 var AWS = require("aws-sdk");
 var striptags = require("striptags");
 var googleTokenHandler = require("../../server/mailCrawler/googleTokenHandler");
+var async = require("async");
+var lodash = require("lodash");
 
 var emptyArrayLength = 0;
 
@@ -163,7 +165,9 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
   async.waterfall([
       buildEmail,
       sendEmail,
-      createAudit
+      createAudit,
+      updateCampaignMetric,
+      updateListMetric
     ],
     function(err) {
       if (err) {
@@ -273,6 +277,7 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
    * @param  {Object} emailQueue
    * @param  {Object} mailContent
    * @param  {Function} createAuditCB
+   * @author Syed Sulaiman M
    */
   function createAudit(emailQueue, mailContent, sentMailResp, createAuditCB) {
     let campaignAuditInst = {};
@@ -287,7 +292,121 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
     campaignAuditInst.mailId = sentMailResp.id;
     campaignAuditInst.threadId = sentMailResp.threadId;
     App.campaignAudit.create(campaignAuditInst, function (err, response) {
-      createAuditCB(null, response);
+      createAuditCB(null, emailQueue, mailContent, sentMailResp);
+    });
+  }
+
+  /**
+   * Update Campaign Metric for sent mail
+   * @param  {Object} emailQueue     Email Queue Object
+   * @param  {Object} mailContent    Sent Mail Content
+   * @param  {Object} sentMailResp   Sent Mail Response
+   * @param  {Function} updateMetricCB callback function
+   * @author Syed Sulaiman M
+   */
+  function updateCampaignMetric(emailQueue, mailContent, sentMailResp,
+          updateMetricCB) {
+    let campaignMetricInst = {};
+    campaignMetricInst.sentEmails = 1;
+    campaignMetricInst.campaignId = emailQueue.campaignId;
+    App.campaignMetric.find({
+      where: {
+        campaignId: emailQueue.campaignId
+      }
+    }, (campaignMetricErr, campaignMetric) => {
+      if(campaignMetricErr) {
+        console.error("Error in updating Campaign Metric", campaignMetricErr);
+      }
+      if (!lodash.isEmpty(campaignMetric)) {
+        campaignMetricInst = campaignMetric[0];
+        campaignMetricInst.sentEmails = ++campaignMetric[0].sentEmails;
+      }
+      App.campaignMetric.upsert(campaignMetricInst, function (err, response) {
+        if(err) {
+          console.error("Error in updating Campaign Metric", err);
+        }
+        updateMetricCB(null, emailQueue, mailContent, sentMailResp);
+      });
+    });
+  }
+
+  /**
+   * Update List Metric for sent mail
+   * @param  {Object} emailQueue     Email Queue Object
+   * @param  {Object} mailContent    Sent Mail Content
+   * @param  {Object} sentMailResp   Sent Mail Response
+   * @param  {Function} updateMetricCB callback function
+   * @author Syed Sulaiman M
+   */
+  function updateListMetric(emailQueue, mailContent, sentMailResp,
+          updateMetricCB) {
+    getCommonList(emailQueue.campaignId, emailQueue.personId,
+        function(commonLists) {
+      async.each(commonLists, (commonList, commonListCB) => {
+        commonList.listMetrics( (listMetricsErr, listMetrics) => {
+          let listMetricInst = {};
+          listMetricInst.sentEmails = 1;
+          listMetricInst.listId = commonList.id;
+          listMetricInst.campaignId = emailQueue.campaignId;
+          if (!lodash.isEmpty(listMetrics)) {
+            listMetricInst = listMetrics[0];
+            listMetricInst.sentEmails = ++listMetrics[0].sentEmails;
+          }
+          App.listMetric.upsert(listMetricInst, function (err, response) {
+            if(err) {
+              console.error("Error in updating List Metric", err);
+            }
+            commonListCB(null, response);
+          });
+        });
+      }, function (err) {
+        if(err) {
+          console.error("Error in updating List Metric", err);
+        }
+        return updateMetricCB(null, emailQueue, mailContent, sentMailResp);
+      });
+    });
+  }
+
+  /**
+   * Method to Get common list of Campaign and Person
+   * @param  {Number}   campaignId
+   * @param  {Number}   personId
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  function getCommonList(campaignId, personId, callback) {
+    async.parallel([
+      (campaignListCB) => {
+        App.campaign.findById(campaignId, (campaignInstErr, campaignInst) => {
+          if(campaignInstErr) {
+            campaignListCB(campaignInstErr);
+          }
+          campaignInst.lists( (listsErr, lists) => {
+            campaignListCB(listsErr, lists);
+          });
+        });
+      },
+      (personListCB) => {
+        App.person.findById(personId, (personInstErr, personInst) => {
+          if(personInstErr) {
+            campaignListCB(personInstErr);
+          }
+          personInst.lists( (listsErr, lists) => {
+            personListCB(listsErr, lists);
+          });
+        });
+      }
+    ], function(err, results) {
+      if(err) {
+        console.error("Unable to get List ", err);
+        callback([]);
+      } else {
+        let campaignList = results[0];
+        let personList = results[1];
+        let commonLists = lodash.intersectionBy(campaignList, personList, "id");
+        callback(commonLists);
+      }
     });
   }
 

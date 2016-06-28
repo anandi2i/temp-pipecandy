@@ -78,17 +78,8 @@ module.exports = function(CampaignAudit) {
           skip: start
         }, (mailResponsesErr, mailResponses) => {
           let inboxMails = {};
-          const zero = 0;
-          if (start === zero) {
-            CampaignAudit.app.models.MailResponse.count( (countErr, count) => {
-              inboxMails.count = count;
-              inboxMails.mails = mailResponses;
-              return callback(null, inboxMails);
-            });
-          } else {
-            inboxMails.mails = mailResponses;
-            return callback(null, inboxMails);
-          }
+          inboxMails.mails = mailResponses;
+          return callback(null, inboxMails);
         });
       } else {
         const errorMessage = errorMessages.NO_EMAILS_FOUND;
@@ -149,23 +140,13 @@ module.exports = function(CampaignAudit) {
       limit: limit,
       skip: start
     }, (campaignAuditsErr, campaignAudits) => {
-      if (!lodash.isEmpty(campaignAudits)) {
-        let sentMails = {};
-        const zero = 0;
-        if (start === zero) {
-          CampaignAudit.count( (countErr, count) => {
-            sentMails.count = count;
-            sentMails.mails = campaignAudits;
-            return callback(null, sentMails);
-          });
-        } else {
-          sentMails.mails = campaignAudits;
-          return callback(null, sentMails);
-        }
-      } else {
+      if (lodash.isEmpty(campaignAudits)) {
         const errorMessage = errorMessages.NO_EMAILS_FOUND;
         return callback(errorMessage);
       }
+      let sentMails = {};
+      sentMails.mails = campaignAudits;
+      return callback(null, sentMails);
     });
   };
 

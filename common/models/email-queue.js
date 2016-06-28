@@ -185,23 +185,13 @@ module.exports = function(EmailQueue) {
       limit: limit,
       skip: start
     }, (emailQueuesErr, emailQueues) => {
-      if (!lodash.isEmpty(emailQueues)) {
-        let scheduledMails = {};
-        const zero = 0;
-        if (start === zero) {
-          EmailQueue.count( (countErr, count) => {
-            scheduledMails.count = count;
-            scheduledMails.mails = emailQueues;
-            return callback(null, scheduledMails);
-          });
-        } else {
-          scheduledMails.mails = emailQueues;
-          return callback(null, scheduledMails);
-        }
-      } else {
+      if (lodash.isEmpty(emailQueues)) {
         const errorMessage = errorMessages.NO_EMAILS_FOUND;
         return callback(errorMessage);
       }
+      let scheduledMails = {};
+      scheduledMails.mails = emailQueues;
+      return callback(null, scheduledMails);
     });
   };
 

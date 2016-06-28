@@ -45,7 +45,7 @@
     "people": {
       "type": "hasAndBelongsToMany",
       "model": "person",
-      "foreignKey": ""
+      "foreignKey": "personId"
     },
     "fields": {
       "type": "hasAndBelongsToMany",
