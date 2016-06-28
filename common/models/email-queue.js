@@ -37,7 +37,7 @@ module.exports = function(EmailQueue) {
         if (emailQueueErr) {
           saveEmailQueueCB(emailQueueErr);
         }
-        console.log("Pushed Email to the Queue", emailQueueObj);
+        logger.info("Pushed Email to the Queue", emailQueueObj);
         saveEmailQueueCB();
       });
     });
@@ -71,6 +71,22 @@ module.exports = function(EmailQueue) {
     }
   };
 
+  /**
+   * Delete the email queue when the campaign updates
+   * - from destroyCampaignElements process
+   * @param  {[campaign]} campaign
+   * @param  {[function]} destroyByCampaignCB
+   */
+  EmailQueue.destroyByCampaign = (campaign, destroyByCampaignCB) => {
+    campaign.emailQueues.destroyAll((emailQueueDestroyErr) => {
+      if(emailQueueDestroyErr){
+        logger.error("Error while destroying emailsQueue for campaign: ",
+        {error: emailQueueDestroyErr, stack: emailQueueDestroyErr.stack});
+        return destroyByCampaignCB(emailQueueDestroyErr);
+      }
+      return destroyByCampaignCB(null);
+    });
+  };
 
   /**
    * Constructing the individual emails and save in the email queue table

@@ -331,7 +331,50 @@ module.exports = function(CampaignTemplate) {
       return personalizeCB(spanTagsErr, template);
     });
   };
-  //observers
+
+  /**
+   * Delete the campaignTemplates when the campaign updates
+   * - from destroyCampaignElements process
+   * @param  {[campaign]} campaign
+   * @param  {[function]} destroyByCampaignCB
+   * @author Ramanavel
+   */
+  CampaignTemplate.destroyByCampaign = (campaign, destroyByCampaignCB) => {
+    campaign.campaignTemplates.destroyAll((campaignTemplatesDestroyErr) => {
+      if(campaignTemplatesDestroyErr){
+        return destroyByCampaignCB("Error while destroying campaignTemplates\
+         for campaign: ", campaignTemplatesDestroyErr);
+      }
+      return destroyByCampaignCB(null);
+    });
+  };
+
+  /**
+   * Saves the campaing templates using campgin object
+   *
+   * @param  {[Campaign]} campaign
+   * @param  {[List[campaignTemplate]]} campaignTemplates
+   * @param  {[function]} saveTemplatesCB   [callback function]
+   * @return {[List[campaignTemplate]]} [persisted campaignTemplates]
+   * @author Ramanavel Selvaraju
+   */
+  CampaignTemplate.saveTemplates = (campaign, campaignTemplates,
+    saveTemplatesCB) => {
+    campaign.campaignTemplates.create(campaignTemplates,
+      (campaignTemplatesCreateErr, persistedCampaignTemplates) => {
+        if(campaignTemplatesCreateErr) {
+          logger.error("Error on saving CampaignTemplates : ", {
+              campaign: campaign,
+              campaignTemplates: campaignTemplates,
+              error: campaignTemplatesCreateErr,
+              stack: campaignTemplatesCreateErr.stack
+            });
+            return saveTemplatesCB(campaignTemplatesCreateErr);
+        }
+        return saveTemplatesCB(campaignTemplatesCreateErr,
+          persistedCampaignTemplates);
+    });
+  };
 
   /**
    * Updates the updatedAt column with current Time

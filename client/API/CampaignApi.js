@@ -35,7 +35,7 @@ const CampaignApi = {
    * Save campaign templates
    */
   saveCampaignTemplates(campaign) {
-    return api.post(`api/campaigns/${campaign.id}/saveCampaignTemplate`,
+    return api.post(`api/campaigns/${campaign.id}/saveCampaignElements`,
       campaign.templates);
   },
   /**

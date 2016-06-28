@@ -7,13 +7,11 @@
     "validateUpsert": true
   },
   "properties": {
-    "runAfter": {
-      "type": "number",
-      "required": true
+    "daysAfter": {
+      "type": "number"
     },
     "scheduledAt": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "expression": {
       "type": "string"
@@ -25,8 +23,7 @@
       "type": "string"
     },
     "isFollowUpGenerated": {
-      "type": "boolean",
-      "default": false
+      "type": "boolean"
     },
     "createdAt": {
       "type": "date",
@@ -34,6 +31,9 @@
     },
     "updatedAt": {
       "type": "date"
+    },
+    "time":{
+      "type": "string"
     }
   },
   "validations": [],
@@ -46,6 +46,11 @@
     "campaignAudits": {
       "type": "hasMany",
       "model": "campaignAudit",
+      "foreignKey": ""
+    },
+    "campaignTemplate": {
+      "type": "hasMany",
+      "model": "campaignTemplate",
       "foreignKey": ""
     }
   },

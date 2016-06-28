@@ -25,19 +25,37 @@
       "type": "boolean",
       "default": false
     },
-    "createdAt": {
-      "type": "date",
-      "defaultFn": "now"
-    },
-    "updatedAt": {
-      "type": "date"
-    },
     "lastRunAt": {
       "type": "date",
       "postgresql": {
         "dataType": "timestamp with time zone",
         "nullable": "YES"
       }
+    },
+    "address":{
+      "type": "string"
+    },
+    "optText":{
+      "type": "string"
+    },
+    "isAddressNeeded":{
+      "type": "boolean",
+      "default": false
+    },
+    "isOptTextNeeded":{
+      "type": "boolean",
+      "default": false
+    },
+    "statusCode":{
+      "type": "number",
+      "default": 0
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
     }
   },
   "validations": [],
@@ -124,7 +142,7 @@
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "ALLOW",
-      "property": "saveCampaignTemplate"
+      "property": "saveCampaignElements"
     },
     {
       "principalType": "ROLE",

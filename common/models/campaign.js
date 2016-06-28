@@ -4,45 +4,29 @@ import logger from "../../server/log";
 import async from "async";
 import lodash from "lodash";
 import campaignMetricArray from "../../server/utils/campaign-metric-fields";
+import statusCodes from "../../server/utils/status-codes";
 import queueUtil from "../../server/mailCrawler/mailEnqueue";
+import moment from "moment-timezone";
+const systemTimeZone = moment().format("Z");
 
 const serverUrl = "http://dev.pipecandy.com";
 
 module.exports = function(Campaign) {
 
   Campaign.remoteMethod(
-    "saveCampaignTemplate",
+    "saveCampaignElements",
     {
       description: "Save the campaign tempalate and associates with list",
       accepts: [{
-        arg: "ctx",
-        type: "object",
-        http: {
-          source: "context"
-        }
+        arg: "ctx", type: "object", http: {source: "context"}
       }, {
-        arg: "id",
-        type: "any",
-        required: true,
-        http: {
-          source: "path"
-        }
+        arg: "id", type: "any", required: true, http: {source: "path"}
       }, {
-        arg: "reqParams",
-        type: "object",
-        required: true,
-        http: {
-          source: "body"
-        }
+        arg: "reqParams", type: "object", required: true, http: {source: "body"}
       }],
-      returns: {
-        arg: "campaign",
-        type: "campaign",
-        root: true
-      },
+      returns: {arg: "campaign", type: "campaign", root: true},
       http: {
-        verb: "post",
-        path: "/:id/saveCampaignTemplate"
+        verb: "post", path: "/:id/saveCampaignElements"
       }
     }
   );
@@ -52,77 +36,30 @@ module.exports = function(Campaign) {
    * missing tag is wise templates also captures what are all the
    * smart tags utilized in each templates
    * Exmple reqParams:
-   * {
-   *  "listIds": [1,2,3],
-   *  "campgin": {
-   *
-   *  },
-   *  "campaignTemplates": [
-   *    {
-   *      "subject": "Test Subject",
-   *      "content": "Test Content",
-   *      "usedTagIds": "1|2|3|4",
-   *      "userId": 1
-   *    },
-   *    {
-   *      "subject": "Test Subject",
-   *      "content": "Test Content",
-   *      "usedTagIds": "1|2|3|4",
-   *      "userId": 1,
-   *      "personId": 1
-   *    },
-   *    {
-   *      "subject": "Test Subject",
-   *      "content": "Test Content",
-   *      "missingTagIds": "1|2",
-   *      "usedTagIds": "3|4",
-   *      "userId": 1
-   *    }
-   *  ]
-   *}
+   * http://www.jsoneditoronline.org/?id=4b60a0d140c9f30fef38de693d9fa26c
    *
    * @param  {[Context]} ctx [Context object to get accessToken]
    * @param  {[number]} id [campaign id]
    * @param  {[JSON]} reqParams [example shown above]
-   * @param  {[function]} saveCampaignTemplateCB
+   * @param  {[function]} saveCampaignElementsCB
    * @return {[Campaign]} [Persisted Campaign Object]
    */
-  Campaign.saveCampaignTemplate = (ctx, id, reqParams,
-    saveCampaignTemplateCB) => {
-      validateSaveCampaignTemplate(reqParams, (validationError) => {
-        if(validationError) {
-          logger.error("Error in validation : ",
-               {campginId: id, reqParams:reqParams, error: validationError});
-          return saveCampaignTemplateCB(validationError);
+  Campaign.saveCampaignElements = (ctx, id, reqParams,
+    saveCampaignElementsCB) => {
+      async.waterfall([
+        async.apply(validateSaveCampaignTemplate, ctx, id, reqParams),
+        getCampaign,
+        updateCampaign,
+        reCreateCampaignElements,
+        enqueueToMailAssembler
+      ], (asyncErr, result) => {
+        if(asyncErr){
+          return saveCampaignElementsCB(asyncErr);
         }
-        Campaign.find({
-           where: {id: id, createdBy: ctx.req.accessToken.userId}
-         }, (campaignErr, campaign) => {
-           if(campaignErr | lodash.isEmpty(campaign)) {
-             logger.error("Error in getting campaign for id : ",
-                  {campginId: id, reqParams:reqParams, error: parallelErr});
-             return saveCampaignTemplateCB(campaignErr);
-           }
-           async.parallel({
-           saveList: associateList.bind(null, campaign[0], reqParams.listIds),
-           saveTemplates: saveTemplates.bind(null, campaign[0],
-               reqParams.campaignTemplates)
-           }, (parallelErr, response) => {
-             if(parallelErr){
-               logger.error("Error on saveCampaignTemplate : ",
-                    {campginId: id, reqParams:reqParams, error: parallelErr});
-                return saveCampaignTemplateCB(parallelErr, response);
-             }
-             let queueName = "mailAssemblerQueue";
-             queueUtil.enqueueMail(JSON.stringify(campaign[0]), queueName,
-               () => {
-                 saveCampaignTemplateCB(parallelErr, response);
-               });
-
-           });
-        });
+        return saveCampaignElementsCB(null, result);
       });
     };
+
 
     /**
      * validates the request param object
@@ -130,7 +67,8 @@ module.exports = function(Campaign) {
      * @param  {[function]} validateSaveCB [callback]
      * @return {[void]}
      */
-    let validateSaveCampaignTemplate = (reqParams, validateSaveCB) => {
+    const validateSaveCampaignTemplate = (ctx, id, reqParams,
+      validateSaveCB) => {
       if(!reqParams.hasOwnProperty("listIds")){
         let error = new Error();
         error.message = "listIds not found in the input object";
@@ -143,54 +81,187 @@ module.exports = function(Campaign) {
         error.name = "campaignTemplatesNotFound";
         return validateSaveCB(error);
       }
-      return validateSaveCB(null);
+      return validateSaveCB(null, ctx, id, reqParams);
     };
 
-  /**
-   * associating the ListIds with campgin
-   *
-   * @param  {[Campaign]} campaign
-   * @param  {List[number]} listIds
-   * @param  {[function]} associateListCB [callback function]
-   * @return {void}
-   * @author Ramanavel Selvaraju
-   */
-  let associateList = (campaign, listIds, associateListCB) => {
-   async.each(listIds, (listId, listEachCB) => {
-     campaign.lists.add(listId, (listAddErr) => {
-       if(listAddErr) {
-         logger.error("Error on associating the list : ",
-            {campaign: campaign, listId: listId, error: listAddErr});
-       }
-       listEachCB(listAddErr);
-     });
-   }, (listEachErr) => {
-      associateListCB(listEachErr);
-   });
-  };
+    /**
+     * Get the campaign for the campaign id and for the current user
+     * @param  {[ctx]} ctx
+     * @param  {[id]} id
+     * @param  {[reqParams]} reqParams
+     * @param  {[function]} getCampaignCB
+     * @return {[campaign, reqParams]}
+     */
+    const getCampaign = (ctx, id, reqParams, getCampaignCB) => {
+      Campaign.find({
+         where: {id: id, createdBy: ctx.req.accessToken.userId}
+       }, (campaignErr, campaign) => {
+         if(campaignErr | lodash.isEmpty(campaign)) {
+           logger.error("Error in getting campaign for id : ",
+           {
+               campginId: id,
+               reqParams:reqParams,
+               error: parallelErr,
+               stack: parallelErr ? parallelErr.stack : ""
+           });
+           return getCampaignCB(campaignErr);
+         }
+         return getCampaignCB(null, campaign[0], reqParams);
+      });
+    };
 
-  /**
-   * Saves the campaing templates using campgin object
-   *
-   * @param  {[Campaign]} campaign
-   * @param  {[List[campaignTemplate]]} campaignTemplates
-   * @param  {[function]} saveTemplatesCB   [callback function]
-   * @return {[List[campaignTemplate]]} [persisted campaignTemplates]
-   * @author Ramanavel Selvaraju
-   */
-  let saveTemplates = (campaign, campaignTemplates, saveTemplatesCB) => {
-    campaign.campaignTemplates.create(campaignTemplates,
-      (campaignTemplatesCreateErr, persistedCampaignTemplates) => {
-        if(campaignTemplatesCreateErr) {
-          logger.error("Error on saving CampaignTemplates : ", {
-              campaign: campaign,
-              campaignTemplates: campaignTemplates,
-              error: campaignTemplatesCreateErr
-            });
+
+    /**
+     * Update the current campaign with the scheduledAt, address, optText,
+     * isAddressNeeded and isOptTextNeeded
+     * @param  {[campaign]} campaign
+     * @param  {[reqParams]} reqParams
+     * @param  {[function]} updateCampaignCB
+     * @return {[updatedCampaign, reqParams]}
+     */
+    const updateCampaign = (campaign, reqParams, updateCampaignCB) => {
+
+      const campaignUpdateElements = {
+        "scheduledAt" : formatDate(reqParams.campaign.scheduledDate,
+          reqParams.campaign.scheduledTime),
+        "address" : reqParams.campaign.address,
+        "optText" : reqParams.campaign.optText,
+        "isAddressNeeded": reqParams.campaign.isAddressNeeded,
+        "isOptTextNeeded": reqParams.campaign.isOptTextNeeded,
+        "statusCode": statusCodes.updated
+      };
+      campaign.updateAttributes(campaignUpdateElements,
+        (campaignUpdateErr, updatedCampaign) => {
+        if(campaignUpdateErr){
+          logger.error("Error in updating campaign:", {
+              error: campaignUpdateErr,
+              stack: campaignUpdateErr.stack
+          });
+          return updateCampaignCB(campaignUpdateErr);
         }
-        saveTemplatesCB(campaignTemplatesCreateErr, persistedCampaignTemplates);
-    });
-  };
+        return updateCampaignCB(null, updatedCampaign, reqParams);
+      });
+    };
+
+
+    /**
+     * Function to convert the date string and time string into timeStamp formated Date
+     * @param  {[dateString]} dateString
+     * @param  {[timeString]} timeString
+     * @return {[formatedDate]}
+     */
+    const formatDate = (dateString, timeString) => {
+      const formatedDate = new Date(dateString + " " + timeString + " " +
+       systemTimeZone);
+      return formatedDate;
+    };
+
+
+    /**
+     * To update the campaign elements when the user does some modifications to
+     * the campaign we are deleting and recreating the campaign elements
+     * - destroy the campaign elements such as emailQueue, campaignTemplate and
+     *   followUp
+     * - create the list, campaignTemplates and followUp
+     * @param  {[campaign]} campaign
+     * @param  {[reqParams]} reqParams
+     * @param  {[function]} reCreateCampaignElementsCB
+     * @return {[campaign]}
+     */
+    const reCreateCampaignElements = (campaign, reqParams,
+      reCreateCampaignElementsCB) => {
+      async.series({
+        destroy: destroyCampaignElements.bind(null, campaign),
+        create: createCampaignElements.bind(null, campaign, reqParams)
+      }, (asyncErr, results) => {
+        if(asyncErr){
+          logger.error("Error on reCreateCampaignElements : ",
+               {campginId: campaign.id, reqParams:reqParams,
+                 error: asyncErr, stack: asyncErr.stack});
+           return reCreateCampaignElementsCB(asyncErr);
+        }
+        reCreateCampaignElementsCB(null, campaign);
+      });
+    };
+
+
+    /**
+     * In the recreation of the campaign, we need to delete the campaign
+     * elements before updating
+     * @param  {[campaign]} campaign
+     * @param  {[function]} destroyCampaignElementsCB
+     */
+    const destroyCampaignElements = (campaign, destroyCampaignElementsCB) => {
+      async.parallel({
+        emailQueue: Campaign.app.models.emailQueue.destroyByCampaign
+        .bind(null, campaign),
+        campaignTemplate: Campaign.app.models.campaignTemplate.destroyByCampaign
+        .bind(null, campaign),
+        followUp: Campaign.app.models.followUp.destroyByCampaign
+        .bind(null, campaign)
+      }, (asyncErr, results) => {
+        if(asyncErr){
+          logger.error("Error while destroying campaign elements",
+          {error: asyncErr, stack: asyncErr.stack});
+          return destroyCampaignElementsCB(asyncErr);
+        }
+        return destroyCampaignElementsCB(null);
+      });
+    };
+
+
+    /**
+     * After deleting the campaign elements we need to create the campign
+     * elements with the updated objects
+     * List, Campaign Template and FollowUp needs to be updated
+     * @param  {[campaign]} campaign
+     * @param  {[reqParams]} reqParams
+     * @param  {[type]} reCreateCampaignElementsCB
+     */
+    const createCampaignElements = (campaign, reqParams,
+      reCreateCampaignElementsCB) => {
+      async.parallel({
+      list: Campaign.app.models.list.associateList
+      .bind(null, campaign, reqParams.listIds),
+      templates: Campaign.app.models.campaignTemplate.saveTemplates
+      .bind(null, campaign, reqParams.campaignTemplates),
+      followUp: Campaign.app.models.followUp.createFollowUpElements
+      .bind(null, campaign, reqParams.followUps)
+      }, (parallelErr, response) => {
+        if(parallelErr){
+          logger.error("Error on saveCampaignTemplate : ",
+          {campginId: campaign.id, reqParams:reqParams, error: parallelErr,
+            stack: parallelErr ? parallelErr.stack : ""});
+           return reCreateCampaignElementsCB(parallelErr);
+        }
+        return reCreateCampaignElementsCB(null, response);
+      });
+    };
+
+
+    /**
+     * Once the campaign elements are created, enqueue the campaign to the
+     * mail assembler
+     * @param  {[campaign]} campaign
+     * @param  {[function]} enqueueToMailAssemblerCB
+     */
+    const enqueueToMailAssembler = (campaign, enqueueToMailAssemblerCB) => {
+      let queueName = "mailAssemblerQueue";
+      queueUtil.enqueueMail(JSON.stringify(campaign[0]), queueName,
+        () => {
+          campaign.updateAttribute("statusCode", statusCodes.enqueued,
+          (campaignUpdateErr, updatedCampaign) => {
+            if(campaignUpdateErr){
+              logger.error("Error on updating campaign : ", {campaign: campaign,
+                 error: campaignUpdateErr, stack: campaignUpdateErr.stack});
+               return enqueueToMailAssemblerCB(campaignUpdateErr);
+            }
+          });
+          return enqueueToMailAssemblerCB(null,
+            "Campaign details saved successfully!");
+        });
+    };
+
 
   /**
    * Returns Uniq People using campaignId
@@ -279,7 +350,7 @@ module.exports = function(Campaign) {
    * @return {[CampaignTemplate]}  [CampaignTemplate object]
    * @author Ramanavel Selvaraju
    */
-  let getTemplate = (campaign, person, additionalValues, getTemplateCB) => {
+  const getTemplate = (campaign, person, additionalValues, getTemplateCB) => {
     Campaign.app.models.campaignTemplate.getPersonTemplate(campaign, person,
       (getPersonTemplateErr, personTemplate)=>{
 
@@ -338,7 +409,7 @@ module.exports = function(Campaign) {
    * @param  {[function]} applySmartTagsCB [callabck]
    * @author Ramanavel Selvaraju
    */
-  let applySmartTags = (campaign, person, additionalValues, template,
+  const applySmartTags = (campaign, person, additionalValues, template,
     applySmartTagsCB) => {
     Campaign.app.models.campaignTemplate.personalize(
       template.subject, additionalValues,
@@ -382,7 +453,7 @@ module.exports = function(Campaign) {
    * @param  {[function]} applySmartTagsCB [callabck]
    * @author Ramanavel Selvaraju
    */
-  let appendOpenTracker = (campaign, person, template, email,
+  const appendOpenTracker = (campaign, person, template, email,
     applyOpenTrackCB) => {
     let trackerContent = email.content;
     let url =
@@ -404,7 +475,7 @@ module.exports = function(Campaign) {
    * @return {[type]}                          [description]
    * @author Ramanavel Selvaraju
    */
-  let appendLinkClickTracker = (campaign, person,
+  const appendLinkClickTracker = (campaign, person,
     template, email, appendLinkClickTrackerCB) => {
     let hrefTags = email.content.match(/href=("|')(.*?)("|')/g);
     async.eachSeries(hrefTags, (href, hrefTagsCB) => {
@@ -428,7 +499,7 @@ module.exports = function(Campaign) {
 
   };
 
-  let sendToEmailQueue = (campaign, person, template, email,
+  const sendToEmailQueue = (campaign, person, template, email,
     sendToEmailQueueCB) => {
 
     Campaign.app.models.emailQueue.push(campaign, person, template, email,
@@ -547,7 +618,7 @@ module.exports = function(Campaign) {
    * @return campaign metric object
    * @author Aswin Raj A
    */
-  let buildCampaignMetricObject = (campaignMetricArray,
+  const buildCampaignMetricObject = (campaignMetricArray,
     campaignMetricsData, totalLinks, buildCampaignMetricObjectCB) => {
     let campaignMetricObject = [];
     let openedRate = 0;

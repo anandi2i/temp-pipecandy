@@ -19,16 +19,16 @@ module.exports = function(EmailLink) {
         arg: "linkId",
         type: "number"
       }, {
-        arg: 'res',
-        type: 'object',
-        'http': {
-          source: 'res'
+        arg: "res",
+        type: "object",
+        "http": {
+          source: "res"
         }
       }, {
-        arg: 'req',
-        type: 'object',
-        'http': {
-          source: 'req'
+        arg: "req",
+        type: "object",
+        "http": {
+          source: "req"
         }
       }
       ],
@@ -64,18 +64,27 @@ module.exports = function(EmailLink) {
     EmailLink.findById(linkId, (linkFindErr, link) => {
       if(linkFindErr || !link) {
         reqParams.error = linkFindErr;
-        logger.error("Finding an Link Obj Error:", reqParams);
+        logger.error("Finding an Link Obj Error:", {linkId: linkId,
+          personId:personId, error: linkFindErr,
+          stack: linkFindErr.stack});
         return res.redirect(config.redirectURL);
       }
+      //If the request is from www.pipecandy.com alone process it, else just
+      //redirect it
       if(req.headers.referer !== config.emailHost){
         isCampaignSent(reqParams.campaignId,
           (isCampaignSentErr, isCampaignSentResponse) => {
+            logger.error(isCampaignSentErr, isCampaignSentResponse);
           if(isCampaignSentResponse){
             updateMetrics(reqParams, link, (updateMetricsErr) => {
               if(updateMetricsErr) {
+                logger.error("Update Metrics Error:", {error: updateMetricsErr,
+                  stack: updateMetricsErr.stack});
                 return res.redirect(config.redirectURL);
               }
+              res.redirect(link.linkurl);
             });
+          } else{
             res.redirect(link.linkurl);
           }
         });
@@ -85,12 +94,13 @@ module.exports = function(EmailLink) {
     });
   };
 
-  let isCampaignSent = (campaignId, isCampaignSentCB) => {
+  const isCampaignSent = (campaignId, isCampaignSentCB) => {
     EmailLink.app.models.campaign.findById(campaignId,
       (campaignFindErr, campaign) => {
         if(campaignFindErr || !campaign){
           reqParams.error = campaignFindErr;
-          logger.error("Error while finding campaign:", campaignFindErr);
+          logger.error("Error while finding campaign:", {error: campaignFindErr,
+            stack: campaignFindErr.stack});
           return isCampaignSentCB(campaignFindErr);
         }
         if(campaign.isSent){
@@ -101,7 +111,7 @@ module.exports = function(EmailLink) {
   };
 
 
-  let updateMetrics = (reqParams, link, updateMetricsCB) => {
+  const updateMetrics = (reqParams, link, updateMetricsCB) => {
     EmailLink.app.models.clickedEmailLink.find({
       where: {
         and: [{
@@ -112,8 +122,9 @@ module.exports = function(EmailLink) {
       }
     }, (clickedLinkErr, linkMetrics) => {
       if(clickedLinkErr) {
-        reqParams.error = clickedLinkErr;
-        logger.error("Finding an LinkMetrics Obj Error:", reqParams);
+        logger.error("Finding an LinkMetrics Obj Error:",
+        {reqParams: reqParams, link:link, error: clickedLinkErr,
+          stack: clickedLinkErr.stack});
         return updateMetricsCB(clickedLinkErr);
       }
       if(lodash.isEmpty(linkMetrics)) {
@@ -137,36 +148,37 @@ module.exports = function(EmailLink) {
     });
   };
 
-  let updateAllLinkRelatedMetrics = (reqParams, updateAllRelatedMetricsCB) => {
+  const updateAllLinkRelatedMetrics = (reqParams,
+    updateAllRelatedMetricsCB) => {
     async.parallel({
       linkRelated: updatelinkAndLinkMetrics.bind(null, reqParams),
       campaignAndList: updateListAndCampaignMetrics.bind(null, reqParams)
     }, (parallelErr, results) => {
       if(parallelErr) {
-        reqParams.error = linkFindErr;
-        logger.error("On async.parallel updateAllRelatedMetrics", reqParams);
+        logger.error("On async.parallel updateAllRelatedMetrics",
+        {reqParams: reqParams, error: parallelErr, stack: parallelErr.stack});
         return updateAllRelatedMetricsCB(parallelErr);
       }
       return updateAllRelatedMetricsCB(null);
     });
   };
 
-  let updatelinkAndLinkMetrics = (reqParams, updatelinkAndLinkMetricsCB) => {
+  const updatelinkAndLinkMetrics = (reqParams, updatelinkAndLinkMetricsCB) => {
     async.parallel({
       clickedEmailLink: EmailLink.app.models.clickedEmailLink.addMetrics.bind(
         null, reqParams),
       link: addMetrics.bind(null, reqParams)
     }, (parallelErr, results) => {
       if(parallelErr) {
-        reqParams.error = linkFindErr;
-        logger.error("On async.parallel updatelinkAndLinkMetrics", reqParams);
+        logger.error("On async.parallel updatelinkAndLinkMetrics",
+      {reqParams: reqParams, error: parallelErr, stack: parallelErr.stack});
         return updatelinkAndLinkMetricsCB(parallelErr);
       }
       return updatelinkAndLinkMetricsCB(null);
     });
   };
 
-  let updateListAndCampaignMetrics = (reqParams, updateCounterCacheCB) => {
+  const updateListAndCampaignMetrics = (reqParams, updateCounterCacheCB) => {
     async.parallel({
       campaign: EmailLink.app.models.campaignMetric.addMetrics.bind(null,
         reqParams, "Link"),
@@ -174,29 +186,31 @@ module.exports = function(EmailLink) {
         reqParams, "Link")
     }, (parallelErr, results) => {
       if(parallelErr) {
-        reqParams.error = linkFindErr;
-        logger.error("Error on async.parallel updateMetrics", reqParams);
+        logger.error("Error on async.parallel updateMetrics",
+        {reqParams: reqParams, error: parallelErr, stack: parallelErr.stack});
         return updateCounterCacheCB(parallelErr);
       }
       return updateCounterCacheCB(null);
     });
   };
 
-  let addMetrics = (reqParams, addEmailMetricsCB) => {
+  const addMetrics = (reqParams, addEmailMetricsCB) => {
     EmailLink.findById(reqParams.emailLinkId,
       (emailLinkFindErr, emailLinkData) => {
 
       if(emailLinkFindErr || !emailLinkData){
-        reqParams.error = emailLinkFindErr;
-        logger.error("Error on updating emailLink", emailLinkFindErr);
+        logger.error("Error on updating emailLink",
+        {reqParams: reqParams, error: emailLinkFindErr,
+          stack: emailLinkFindErr.stack});
         return addEmailMetricsCB(emailLinkFindErr);
       }
       emailLinkData.updateAttribute("clickedCount",
       ++emailLinkData.clickedCount,
        (emailLinkDataUpdateErr, updatedemailLink) => {
          if(emailLinkDataUpdateErr){
-           reqParams.error = emailLinkDataUpdateErr;
-           logger.error("Error on updating emailLink", emailLinkDataUpdateErr);
+           logger.error("Error on updating emailLink",
+           {error: emailLinkDataUpdateErr,
+             stack: emailLinkDataUpdateErr.stack});
            return addEmailMetricsCB(emailLinkDataUpdateErr);
          }
          addEmailMetricsCB(null, "EmailLink updated");
@@ -204,6 +218,263 @@ module.exports = function(EmailLink) {
 
     });
   };
+
+  EmailLink.remoteMethod(
+    "getRecentCampaignLinkMetrics", {
+      description: "Get clicked link metrics for current campaign",
+      accepts: [{arg: "ctx", type: "object", http: {source: "context"}}],
+      returns: {
+        arg: "recentCampaignLinkMetrics",
+        type: "object"
+      },
+      http: {
+        path: "/getRecentCampaignLinkMetrics",
+        verb: "GET"
+      }
+    }
+  );
+
+  /**
+   * Get the recent metrics for the recent campaign
+   * @param  {[ctx]} ctx
+   * @param  {[function]} getRecentCampaignLinkMetricsCB
+   * @return {[recentCampaignLinkMetrics]}
+   * @author Aswin Raj A
+   */
+  EmailLink.getRecentCampaignLinkMetrics = (ctx,
+    getRecentCampaignLinkMetricsCB) => {
+
+
+    async.waterfall([
+      async.apply(getRecentCampaign, ctx, campaignLinkMetrics),
+      getEmailLinksForCampaign,
+      getClickedCountForEmailLinks
+    ], (asyncErr, recentCampaignLinkMetrics) => {
+      if(asyncErr){
+        logger.error("Error while getting recent campaign link metrics",
+        {error: asyncErr, stack: asyncErr.stack});
+        return getRecentCampaignLinkMetricsCB(asyncErr);
+      }
+      getRecentCampaignLinkMetricsCB(null, recentCampaignLinkMetrics);
+    });
+  };
+
+
+  /**
+   * For process getRecentCampaignLinkMetrics:
+   * - Get the recent campaign for the current user
+   * @param  {[ctx]} ctx
+   * @param  {[campaignLinkMetrics]} campaignLinkMetrics
+   * @param  {[function]} getRecentCampaignCB
+   * @return {[campaign, campaignLinkMetrics]}
+   * @author Aswin Raj A
+   */
+  const getRecentCampaign = (ctx, campaignLinkMetrics, getRecentCampaignCB) => {
+    EmailLink.app.models.campaign.find({
+      where: {
+        "createdBy": ctx.req.accessToken.userId
+      },
+      order: "lastrunat DESC",
+      limit: 1
+    }, (campaignFindErr, campaigns) => {
+      if(campaignFindErr || !campaigns.length){
+        logger.error("Error while finding campaign:",
+        {ctx:ctx.req.accessToken.userId, error: campaignFindErr,
+          stack: campaignFindErr.stack});
+        return getRecentCampaignCB(campaignFindErr);
+      }
+      return getRecentCampaignCB(null, campaigns[0]);
+    });
+  };
+
+  /**
+   * For process getRecentCampaignLinkMetrics:
+   * - Get all the email Links for the current campaign
+   * @param  {[campaign]} campaign
+   * @param  {[campaignLinkMetrics]} campaignLinkMetrics
+   * @param  {[function]} getEmailLinksForCampaignCB
+   * @return {[emailLinks, campaign]}
+   * @author Aswin Raj A
+   */
+  const getEmailLinksForCampaign = (campaign, getEmailLinksForCampaignCB) => {
+    EmailLink.find({
+      where: {
+        campaignId: campaign.id
+      }
+    }, (emailLinkfinderr, emailLinks) => {
+      if(emailLinkfinderr || !emailLinks.length){
+        logger.error("Error while finding emailLinks for campaign:",
+        {campaign:campaign, error: emailLinkfinderr,
+          stack: emailLinkfinderr.stack});
+        return getEmailLinksForCampaignCB(emailLinkfinderr);
+      }
+      return getEmailLinksForCampaignCB(null, emailLinks, campaign);
+    });
+  };
+
+
+  /**
+   * For process getRecentCampaignLinkMetrics:
+   * - Get the clicked count for all the links for the recent campaign
+   * @param  {[emailLinks]} emailLinks
+   * @param  {[campaign]} campaign
+   * @param  {[campaignLinkMetrics]} campaignLinkMetrics
+   * @param  {[function]} getClickedCountForEmailLinksCB
+   * @return {[campaignLinkMetrics]}
+   * @author Aswin Raj A
+   */
+  const getClickedCountForEmailLinks = (emailLinks, campaign,
+     getClickedCountForEmailLinksCB) => {
+    let campaignLinkMetrics = [];
+    async.each(emailLinks, (emailLink, asyncEmailLinkCB) => {
+      EmailLink.app.models.clickedEmailLink.find({
+        where: {
+          and: [{
+            emailLinkId: emailLink.id
+          }, {
+            campaignId: campaign.id
+          }]
+        }
+      }, (clickedEmailLinkFindErr, clickedEmailLinks) => {
+        if(clickedEmailLinkFindErr || !clickedEmailLinks.length){
+          logger.error("Error while finding clickedEmailLinks:",
+          {emailLinks:emailLinks, campaign:campaign,
+            error: clickedEmailLinkFindErr,
+            stack: clickedEmailLinkFindErr.stack});
+          asyncEmailLinkCB(clickedEmailLinkFindErr);
+        }
+        campaignLinkMetrics.push({
+          "link" : emailLink.linkurl,
+          "uniqueueClickCount": emailLink.clickedCount,
+          "totalClickCount": clickedEmailLinks.length
+        });
+        asyncEmailLinkCB(null);
+      });
+    }, (asyncErr) => {
+      if (asyncErr) {
+        logger.error("Error on getting clickedCount for emailLink:",
+        {error: asyncErr, stack: asyncErr.stack});
+        return getClickedCountForEmailLinksCB(asyncErr);
+      }
+      return getClickedCountForEmailLinksCB(null, campaignLinkMetrics);
+    });
+  };
+
+
+
+  EmailLink.remoteMethod(
+    "getCurrentCampaignLinkMetrics", {
+      description: "Get clicked link metrics for current campaign",
+      accepts: [{arg: "campaignId", type: "any"}],
+      returns: {arg: "currentCampaignLinkMetrics", type: "object"},
+      http: {
+        verb: "get",
+        path: "/campaign/:campaignId/getCurrentCampaignLinkMetrics/"
+      }
+    }
+  );
+
+  /**
+   * Get the link metrics for the current campaign
+   * @param  {[campaignId]} campaignId
+   * @param  {[function]} getCurrentCampaignLinkMetricsCB
+   * @return {[currentCampaignLinkMetrics]}
+   * @author Aswin Raj A
+   */
+  EmailLink.getCurrentCampaignLinkMetrics = (campaignId,
+    getCurrentCampaignLinkMetricsCB) => {
+    let currentCampaignLinkMetrics = [];
+    async.waterfall([
+      async.apply(getEmailLinksForCurrentCampaign, campaignId,
+        currentCampaignLinkMetrics),
+      getClickedCountForCurrentCampaignLinks
+    ], (asyncErr, campaignLinkMetrics) => {
+      if (asyncErr) {
+        logger.error("Error on getting clickedCount for emailLink:",
+        {error: asyncErr, stack: asyncErr.stack});
+        return getCurrentCampaignLinkMetricsCB(asyncErr);
+      }
+      return getCurrentCampaignLinkMetricsCB(null, currentCampaignLinkMetrics);
+    });
+  };
+
+
+  /**
+   * For process getCurrentCampaignLinkMetrics:
+   * - Get all the email Links for the current campaign
+   * @param  {[campaignId]} campaignId
+   * @param  {[campaignLinkMetrics]} campaignLinkMetrics
+   * @param  {[function]} getEmailLinksForCampaignCB
+   * @return {[emailLinks, campaignId]}
+   * @author Aswin Raj A
+   */
+  const getEmailLinksForCurrentCampaign = (campaignId,
+    currentCampaignLinkMetrics,
+     getEmailLinksForCurrentCampaignCB) => {
+    EmailLink.find({
+      where: {
+        campaignId: campaignId
+      }
+    }, (emailLinkfinderr, emailLinks) => {
+      if(emailLinkfinderr){
+        logger.error("Error while finding emailLinks for campaign:",
+        {campaignId:campaignId, error: emailLinkfinderr,
+          stack: emailLinkfinderr.stack});
+        return getEmailLinksForCurrentCampaignCB(emailLinkfinderr);
+      }
+      return getEmailLinksForCurrentCampaignCB(null, emailLinks, campaignId,
+        currentCampaignLinkMetrics);
+    });
+  };
+
+  /**
+   * For process getCurrentCampaignLinkMetrics:
+   * - Get the clicked count for all the links for the current campaign
+   * @param  {[emailLinks]} emailLinks
+   * @param  {[campaignId]} campaignId
+   * @param  {[currentCampaignLinkMetrics]} currentCampaignLinkMetrics
+   * @param  {[function]} getClickedCountForCurrentCampaignLinksCB
+   * @return {[currentCampaignLinkMetrics]}
+   * @author Aswin Raj A
+   */
+  const getClickedCountForCurrentCampaignLinks = (emailLinks, campaignId,
+    currentCampaignLinkMetrics, getClickedCountForCurrentCampaignLinksCB) => {
+    async.each(emailLinks, (emailLink, asyncEmailLinkCB) => {
+      EmailLink.app.models.clickedEmailLink.find({
+        where: {
+          and: [{
+            emailLinkId: emailLink.id
+          }, {
+            campaignId: campaignId
+          }]
+        }
+      }, (clickedEmailLinkFindErr, clickedEmailLinks) => {
+        if(clickedEmailLinkFindErr){
+          logger.error("Error while finding clickedEmailLinks:",
+          {emailLinkid:emailLink.id, campaignId:campaignId,
+            error: clickedEmailLinkFindErr,
+            stack: clickedEmailLinkFindErr.stack});
+          asyncEmailLinkCB(clickedEmailLinkFindErr);
+        }
+        currentCampaignLinkMetrics.push({
+          "link" : emailLink.linkurl,
+          "uniqueueClickCount": emailLink.clickedCount,
+          "totalClickCount": clickedEmailLinks.length
+        });
+        asyncEmailLinkCB(null);
+      });
+    }, (asyncErr) => {
+      if (asyncErr) {
+        logger.error("Error on getting clickedCount for emailLink:",
+        {error: asyncErr, stack: asyncErr.stack});
+        return getClickedCountForCurrentCampaignLinksCB(asyncErr);
+      }
+      return getClickedCountForCurrentCampaignLinksCB(null,
+        currentCampaignLinkMetrics);
+    });
+  };
+
+
 
   //npm run methods
   EmailLink.getOrSave = (campaign, link, getOrSaveCB) => {

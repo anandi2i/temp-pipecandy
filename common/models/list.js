@@ -624,6 +624,30 @@ module.exports = function(List) {
     });
   };
 
+
+  /**
+   * Associating the ListIds with campgin
+   * @param  {[Campaign]} campaign
+   * @param  {List[number]} listIds
+   * @param  {[function]} associateListCB [callback function]
+   * @return {void}
+   * @author Ramanavel Selvaraju
+   */
+  List.associateList = (campaign, listIds, associateListCB) => {
+   async.each(listIds, (listId, listEachCB) => {
+     campaign.lists.add(listId, (listAddErr) => {
+       if(listAddErr) {
+         logger.error("Error on associating the list : ",
+            {campaign: campaign, listId: listId, error: listAddErr,
+              stack: listAddErr.stack});
+       }
+       listEachCB(listAddErr);
+     });
+   }, (listEachErr) => {
+      associateListCB(listEachErr);
+   });
+  };
+
   /**
    * Updates the updatedAt column with current Time
    * @param ctx Context
