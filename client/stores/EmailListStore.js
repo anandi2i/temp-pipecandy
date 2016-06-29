@@ -94,9 +94,10 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
     _getEmailListByID = {
       id: emailListByID.id,
       name: emailListByID.name,
-      peoples: _peopleData,
+      people: _peopleData,
       fieldsName: fieldsName,
-      listFields: emailListByID.fields
+      listFields: emailListByID.fields,
+      peopleDetails: emailListByID.people
     };
     return _getEmailListByID;
   },
@@ -176,25 +177,11 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.UPDATE_SINGLE_PERSON:
       EmailListApi.updateSinglePerson(action.data).then((response) => {
-        _success = "Subscriber details updated successfully";
-        let rowIndex = "";
-        let data = response.data;
-        let _peopleData = _getEmailListByID.peoples;
-        rowIndex = _.findIndex(_peopleData, {id: data.id});
-        let _temp = _peopleData[rowIndex];
-        let i = 1;
-        _.each(_temp, function(value, key) {
-          if(key === "addField"+i) {
-            if(data["field"+i]) {
-              _temp["addField"+i] = data["field"+i] + ": " + data["value"+i];
-            }
-            i++;
-          } else {
-            _temp[key] = data[key];
-          }
-        });
-        _getEmailListByID.peoples[rowIndex] = _temp;
-        EmailListStore.emitPersonUpdate();
+        _success = SuccessMessages.successSubscribeUpdate;
+        const index = _.findIndex(_getEmailList[0].people,
+          {id:response.data.id});
+        _getEmailList[0].people[index] = response.data;
+        EmailListStore.emitChange();
         _success = "";
       }, (err)=> {
         _error = HandleError.evaluateError(err);
