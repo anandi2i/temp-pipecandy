@@ -24,6 +24,10 @@
     "type": {
       "type": "string"
     },
+    "isFollowUpGenerated": {
+      "type": "boolean",
+      "default": false
+    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"

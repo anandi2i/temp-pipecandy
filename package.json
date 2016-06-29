@@ -14,6 +14,7 @@
     "campaignMailSender": "node server/mailSender/campaignMailSender.js",
     "mailCrawler": "node server/mailCrawler/crawl.js",
     "mailDequeue": "node server/mailCrawler/mailDequeue.js",
+    "followUpSender": "node server/followUpSender/followUpMailSender.js",
     "validate": "npm ls"
   },
   "dependencies": {
