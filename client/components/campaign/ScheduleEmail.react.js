@@ -324,47 +324,125 @@ class ScheduleEmail extends React.Component {
         template.userId = getCookie("userId");
         mainEmailContent = {
           listIds: _.pluck(this.state.emailList, "id"),
+          campaign: this.campaignDetails(),
           campaignTemplates: template
         };
       } else {
         let mainTemplate = this.refs.issues.state;
-        mainEmailContent = this.constructSavedTemplateObjects(mainTemplate);
+        mainEmailContent = this.constructTemplateObjects(mainTemplate,
+          "mainEmail");
       }
-      let followups = [];
-      this.state.followups.map(function(val, key) {
-        let followup = this.refs[`addFollowups${val.id}`].refs.issues.state;
-        let followupObj = this.constructSavedTemplateObjects(followup);
-        followups.push(followupObj);
-      }, this);
+      // Get followups details
+      mainEmailContent.followups = this.followupsDetails();
       this.setState((state) => ({
-        mainEmailContent: mainEmailContent,
-        followupsEmailContent: followups
+        mainEmailContent: mainEmailContent
       }), () => {
         CampaignActions.saveCampaignTemplates({
           id: this.props.campaignId,
           templates: this.state.mainEmailContent
         });
-        console.log(this.state.mainEmailContent);
-        console.log(this.state.followupsEmailContent);
       });
     }
   }
 
-  constructSavedTemplateObjects(mainTemplate){
+/**
+ * Construct followups object to save
+ * @return {object} followup
+ */
+  followupsDetails() {
+    let followups = [];
+    this.state.followups.map(function(val, key) {
+      let followup = this.refs[`addFollowups${val.id}`];
+      if(!followup.state.editorErrorCount){
+        let template = {};
+        // Set email subject &nbsp; to save followup subjects.
+        template.subject = " ";
+        template.content = followup.state.emailContent;
+        template.usedTagIds = CampaignStore.usedTagIds(
+          template.content).usedTagIds;
+        template.userId = getCookie(`userId`);
+        followups.push({
+          followUp: this.followupCampaignDetails(followup),
+          campaignTemplates: template
+        });
+      } else {
+        let followupIssue = followup.refs.issues.state;
+        let followupObj = this.constructTemplateObjects(followupIssue,
+          "followups");
+        let campaignDetails = {
+          followUp: this.followupCampaignDetails(followup),
+          campaignTemplates: followupObj
+        };
+        followups.push(campaignDetails);
+      }
+    }, this);
+    return followups;
+  }
+
+/**
+ * Construct followup informations
+ * @param  {object} followup - contains AddFollowups properties
+ * @return {object} followupCampaignDetails - followup informations
+ */
+  followupCampaignDetails(followup) {
+    const el = followup.el;
+    let followupCampaignDetails = {
+      daysAfter: el.find(`#dayPicker${followup.props.followupId} input`).val()
+        .split("")[0],
+      stepNo: followup.props.followUpNumber,
+      time: el.find(`.timepicker`).val()
+    };
+    return followupCampaignDetails;
+  }
+
+/**
+ * Construct main email informations
+ * @return {object} - main email informations
+ */
+  campaignDetails() {
+    const {isOptText, isAddress, optText, address} = this.state;
+    const element = this.el;
+    let campaignDetails = {
+      id: this.props.campaignId,
+      scheduledDate: element.find(`.datepicker`).val(),
+      scheduledTime: element.find(`.timepicker`).val(),
+      isOptTextNeeded: isOptText,
+      isAddressNeeded: isAddress,
+      optText: optText,
+      address: address
+    };
+    return campaignDetails;
+  }
+
+  /**
+   * Construct main template object to save
+   * @param  {object} mainTemplate
+   * @param  {string} emailType
+   * @return {object}              - email template
+   */
+  constructTemplateObjects(mainTemplate, emailType) {
     const index = 0, removed = 0;
     let listIds = _.pluck(this.state.emailList, "id");
     let template = {};
     let issuesCompletedList = [];
     issuesCompletedList = _.clone(mainTemplate.issuesCompletedList);
-    template.subject = mainTemplate.emailSubject;
+    let emailSubject = mainTemplate.emailSubject;
+    template.subject = emailSubject || " ";
     template.content = mainTemplate.emailContent;
     template.usedTagIds = mainTemplate.usedTagIds;
     template.userId = getCookie("userId");
     issuesCompletedList.splice(index, removed, template);
-    return {
-      listIds: listIds,
-      campaignTemplates: issuesCompletedList
-    };
+    let campaignDetails;
+    if(emailType === "mainEmail"){
+      campaignDetails = {
+        listIds: listIds,
+        campaign: this.campaignDetails(),
+        campaignTemplates: issuesCompletedList
+      };
+    } else {
+      campaignDetails = issuesCompletedList;
+    }
+    return campaignDetails;
   }
 
   closeCallback = () => {
@@ -616,6 +694,7 @@ class ScheduleEmail extends React.Component {
         </div>
         {
           this.state.followups.map(function (followUp, key) {
+            let followUpNumber = _.clone(key);
             return (
               <AddFollowups followupId={followUp.id}
                 content={followUp.content}
@@ -623,6 +702,7 @@ class ScheduleEmail extends React.Component {
                 deleteFollowUp={this.deleteFollowUp.bind(this, key)}
                 peopleList={this.state.getAllPeopleList}
                 id={key} key={followUp.id}
+                followUpNumber={++followUpNumber}
                 ref={`addFollowups${followUp.id}`} />
             );
           }, this)

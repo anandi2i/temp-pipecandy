@@ -9,6 +9,7 @@ class AddFollowups extends React.Component {
     this.state = {
       clicked: true,
       errorCount: 0,
+      editorErrorCount: 0,
       personIssues: [],
       emailText: "",
       emailContent: "",
@@ -52,6 +53,7 @@ class AddFollowups extends React.Component {
     this.setState({
       emailContent: content,
       errorCount: parseInt(issueTags.length, 10),
+      editorErrorCount: parseInt(issueTags.length, 10),
       issueTags: issueTags,
       personIssues: personIssues,
       emailRawText: editor.getBody().textContent
@@ -123,13 +125,13 @@ class AddFollowups extends React.Component {
         <div id={"followUps" + followupId} className="col s12 m12 l10 offset-l1 draft-template">
           <div className="row m-lr-0 schedule-time">
             <div className="col s12 m4 l3">
-              <div className="input-field">
+              <div className="input-field" id={"dayPicker" + followupId}>
                 <select>
-                  <option value="1, 'days'">1 day</option>
-                  <option value="2, 'days'">2 days</option>
-                  <option value="3, 'days'">3 days</option>
-                  <option value="4, 'days'">4 days</option>
-                  <option value="5, 'days'">5 days</option>
+                  <option value="1">1 day</option>
+                  <option value="2">2 days</option>
+                  <option value="3">3 days</option>
+                  <option value="4">4 days</option>
+                  <option value="5">5 days</option>
                 </select>
                 <label>Send if no response after</label>
               </div>

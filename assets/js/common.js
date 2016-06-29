@@ -198,73 +198,34 @@ function initTinyMCEPopUp(id, toolBar, isToolbar, cb) {
 }
 window.initTinyMCEPopUp = initTinyMCEPopUp;
 
+/**
+ * init material time picker
+ * @param  {boject} element - dom element to show time value.
+ */
 function initTimePicker(element) {
-  let timepicker = element.pickatime({
-    twelvehour: true,
-    default: 'now',
-    afterDone: function() {
-      const time = timepicker.val();
-      const index = 0;
-      const till = -2;
-      const howManyFromLast = -2;
-      // To display time in 00:00 AM format
-      timepicker.val(`${time.slice(index, till)} ${time.slice(howManyFromLast)}`);
-      validateTime();
+  const date = new Date();
+  const index = 2;
+  const defaultTime = date.getHours() + `:` + (`0${date.getMinutes()}`).slice(-index);
+  element.pickatime({
+    twelvehour: false,
+    default: "now",
+    init: function(){
+      element.val(defaultTime);
     }
   });
 }
 window.initTimePicker = initTimePicker;
 
 /**
- * Validate the time is past
- *
- * @property {String} time - Schedule email time
- * @property {String} date - Schedule email date
- * @property {Object} date - Date now
- * @property {Number} hourNow - Hour now
- * @property {Number} minuteNow - Minute now
- * @property {Number} timeSliceStartFrom - Slice time from time property starts at
- * @property {Number} timeSliceLength - Slice time from time property total length
- * @property {Number} timeSlicePeriodFromLast - Slice period from time property from last
- * @property {Number} hoursToConvert - Hours to convert from 12 hours to 24 hours
+ * init material date picker
+ * @param  {boject} element - dom element to show date value.
  */
-function validateTime() {
-  const time = $('.timepicker').val();
-  let date = $('.datepicker').val();
-  const today = new Date();
-  const hourNow = today.getHours();
-  const minuteNow = today.getMinutes();
-  const timeSliceStartFrom = 0;
-  const timeSliceLength = 5;
-  const timeSlicePeriodFromLast = -2;
-  const hoursToConvert = 12;
-  if(date && time) {
-    date = new Date(date);
-    if(date.getFullYear() === today.getFullYear() &&
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth()) {
-        let timeString = time.slice(timeSliceStartFrom, timeSliceLength);
-        let timeArray = timeString.split(':');
-        if(time.slice(timeSlicePeriodFromLast) === 'PM') {
-          timeArray[0] = parseInt(timeArray[0]) + hoursToConvert;
-        }
-        if(hourNow > parseInt(timeArray[0])) {
-          displayError('You have entered a past time');
-        } else if(hourNow == parseInt(timeArray[0])) {
-          if(minuteNow > parseInt(timeArray[1])) {
-            displayError('You have entered a past time');
-          }
-        }
-      }
-  }
-}
-
 function initDatePicker(element) {
   element.pickadate({
     selectMonths: true,
     selectYears: 15,
     min : true
-  });
+  }).pickadate("picker").set("select", new Date());
 }
 window.initDatePicker = initDatePicker;
 })();
