@@ -153,13 +153,13 @@ class Subscriber extends React.Component {
     }
     let fieldValues = [];
     listFields.map((field, key) => {
-      let fieldId = null;
+      let fieldValueId = null;
       if(this.state[field.name]){
         if(!_.isEmpty(personDetails.fieldValues)) {
           const fieldValue = _.findWhere(personDetails.fieldValues,
             {fieldId:field.id});
           if(fieldValue) {
-            fieldId = fieldValue.id;
+            fieldValueId = fieldValue.id;
           }
         }
         const fieldDetails = {
@@ -167,8 +167,8 @@ class Subscriber extends React.Component {
           value: this.state[field.name],
           listId: listId
         };
-        if(fieldId) {
-          fieldDetails.id = field.id;
+        if(fieldValueId) {
+          fieldDetails.id = fieldValueId;
         }
         fieldValues.push(fieldDetails);
       }
