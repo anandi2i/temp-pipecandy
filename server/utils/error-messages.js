@@ -26,6 +26,10 @@ const INVALID_LIMIT = new Error();
 INVALID_LIMIT.status = 400;
 INVALID_LIMIT.message = "Invalide Limit Param";
 
+const FIELD_VALUE_CONFLICT = new Error();
+FIELD_VALUE_CONFLICT.status = 409;
+FIELD_VALUE_CONFLICT.message = "Field Value Already Exists";
+
 const SERVER_ERROR = new Error();
 SERVER_ERROR.status = 500;
 SERVER_ERROR.message = "Server Error";
@@ -38,6 +42,7 @@ const errorMessage = {
   "LIST_NOT_FOUND": LIST_NOT_FOUND,
   "PERSON_NOT_FOUND": PERSON_NOT_FOUND,
   "FIELD_VALUES_NOT_FOUND": FIELD_VALUES_NOT_FOUND,
+  "FIELD_VALUE_CONFLICT": FIELD_VALUE_CONFLICT,
   "SERVER_ERROR": SERVER_ERROR
 };
 

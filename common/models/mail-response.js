@@ -149,7 +149,8 @@ module.exports = function(MailResponse) {
                 let decodedBody = striptags(mailBody.toString());
                 decodedBody = decodedBody.replace(/\r?\n|\r/g, " ");
                 // Regular expression to extract reply message alone
-                let regExBody = "On (Sun|Mon|Tue|Wed|Thu|Fri|Sat), (.*)wrote:";
+                let regExBody =
+                      "On ((Sun|Mon|Tue|Wed|Thu|Fri|Sat),|([0-3]*))(.*)wrote:";
                 let regExIndex = decodedBody.match(regExBody);
                 let replyMsg = decodedBody.trim();
                 if (regExIndex) {

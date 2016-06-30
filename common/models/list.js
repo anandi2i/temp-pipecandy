@@ -201,7 +201,7 @@ module.exports = function(List) {
           logger.error("Error in saving Person Object : ", reqParams);
           return savePersonWithFieldsCB(createPersonErr);
         }
-        persistedPerson.fieldValues.create(reqParams.fieldValues,
+        persistedPerson.fieldValues.create(reqParams.person.fieldValues,
           (fieldValuesCreateErr, persistedFieldValues) => {
             if(fieldValuesCreateErr) {
               logger.error("Error in saving fields : ", reqParams);
@@ -237,6 +237,13 @@ module.exports = function(List) {
           source: "path"
         }
       }, {
+        arg: "personId",
+        type: "number",
+        required: true,
+        http: {
+          source: "path"
+        }
+      }, {
         arg: "reqParams",
         type: "object",
         required: true,
@@ -251,7 +258,7 @@ module.exports = function(List) {
       },
       http: {
         verb: "put",
-        path: "/:id/updatePersonWithFields"
+        path: "/:id/person/:personId/updatePersonWithFields"
       }
     }
   );
@@ -265,10 +272,11 @@ module.exports = function(List) {
    * @return {[List]} [List with Person, Fields and values]
    * @author Syed Sulaiman M
    */
-  List.updatePersonWithFields = (ctx, id, reqParams, callback) => {
+  List.updatePersonWithFields = (ctx, id, personId, reqParams, callback) => {
     let params = {
       userId: ctx.req.accessToken.userId,
       listId: id,
+      personId: personId,
       reqParams: reqParams
     };
     async.waterfall([
@@ -315,12 +323,12 @@ module.exports = function(List) {
         },
         updatePerson,
         updateFieldValues
-      ], (error, result) => {
+      ], (error, list, person) => {
         if (error) {
-          logger.error("Error while updating list metrics", error);
+          logger.error("Error while updating Person & Field Values", error);
           return callback(error);
         }
-        return callback(null, result);
+        return callback(null, list, person);
       });
     });
   };
@@ -328,38 +336,23 @@ module.exports = function(List) {
   /**
    * Method to construct Response for Update Person with Field Values
    * @param  {[Object]}  list   List object whose Person to be updated
+   * @param  {[Object]}  person Person object
    * @param  {Function} callback
    * @return {[Object]} Object Conatins List with Person and Field Values
    */
-  const constructResponse = (list, callback) => {
-    let res = JSON.parse(JSON.stringify(list));
-    res.people = [];
-    list.people((peopleErr, people) => {
-      if (peopleErr) {
-        logger.error("Error in getting People for List : ", list.id);
-        const errorMessage = errorMessages.SERVER_ERROR;
-        return callback(errorMessage);
+  const constructResponse = (list, person, callback) => {
+    let personRes = JSON.parse(JSON.stringify(person));
+    List.app.models.additionalFieldValue.find({
+      where: {
+        personId: person.id,
+        listId: list.id,
       }
-      async.each(people, (person, personCB) => {
-        List.app.models.additionalFieldValue.find({
-          where: {
-            personId: person.id,
-            listId: list.id,
-          }
-        }, (fieldValuesErr, fieldValues) => {
-          let personRes = JSON.parse(JSON.stringify(person));
-          personRes.fieldValues = JSON.parse(JSON.stringify(fieldValues));
-          res.people.push(JSON.parse(JSON.stringify(personRes)));
-          personCB(fieldValuesErr);
-        });
-      }, (err) => {
-        if (err) {
-          logger.error("Error while constructing response ");
-          const errorMessage = errorMessages.SERVER_ERROR;
-          return callback(errorMessage);
-        }
-        return callback(null, res);
-      });
+    }, (fieldValuesErr, fieldValues) => {
+      if(fieldValuesErr) {
+        return callback(fieldValuesErr);
+      }
+      personRes.fieldValues = JSON.parse(JSON.stringify(fieldValues));
+      return callback(null, personRes);
     });
   };
 
@@ -397,35 +390,58 @@ module.exports = function(List) {
    * @param  {Function} callback
    */
   const updateFieldValues = (list, person, params, callback) => {
-    async.each(params.reqParams.fieldValues, (fieldValue, fieldValueCB) => {
-      List.app.models.additionalFieldValue.find({
-        where: {
-          fieldId: fieldValue.fieldId,
-          listId: fieldValue.listId,
-          personId: person.id
-        }
-      }, (addFieldValuesErr, addFieldValues) => {
-        if (addFieldValuesErr) {
-          fieldValueCB(addFieldValuesErr);
-        } else {
-          if (lodash.isEmpty(addFieldValues)) {
-            logger.error("Error in gettig Field Values");
-            const errorMessage = errorMessages.FIELD_VALUES_NOT_FOUND;
+    let fieldValues = params.reqParams.person.fieldValues;
+    let fieldIds = [];
+    async.each(fieldValues, (fieldValue, fieldValueCB) => {
+      if (!lodash.has(fieldValue, "id")) {
+        List.app.models.additionalFieldValue.find({
+          where: {
+            listId: fieldValue.listId,
+            personId: person.id,
+            fieldId: fieldValue.fieldId
+          }
+        }, (fieldErr, field) => {
+          if (!lodash.isEmpty(field)) {
+            const errorMessage = errorMessages.FIELD_VALUE_CONFLICT;
+            logger.error("Field Already Exists for User", errorMessage);
             return callback(errorMessage);
           }
-          addFieldValues[0].updateAttribute("value", fieldValue.value,
-                (updatedFieldErr, updatedField) => {
-            fieldValueCB(updatedFieldErr);
+          fieldValue.personId = person.id;
+          List.app.models.additionalFieldValue.create(fieldValue,
+              (createdFieldErr, createdField) => {
+            fieldIds.push(createdField.id);
+            fieldValueCB(createdFieldErr, createdField);
           });
-        }
-      });
+        });
+      } else {
+        List.app.models.additionalFieldValue.findById(fieldValue.id,
+            (addFieldValueErr, addFieldValue) => {
+          if (addFieldValueErr) {
+            fieldValueCB(addFieldValueErr);
+          } else {
+            if (lodash.isEmpty(addFieldValue)) {
+              logger.error("Error in gettig Field Values");
+              const errorMessage = errorMessages.FIELD_VALUES_NOT_FOUND;
+              return callback(errorMessage);
+            }
+            addFieldValue.updateAttribute("value", fieldValue.value,
+                  (updatedFieldErr, updatedField) => {
+              fieldIds.push(updatedField.id);
+              fieldValueCB(updatedFieldErr, updatedField);
+            });
+          }
+        });
+      }
     }, (asyncErr) => {
       if (asyncErr) {
-        logger.error("Error in updating additional Field : ", updatedFieldErr);
+        logger.error("Error in updating additional Field : ", asyncErr);
         const errorMessage = errorMessages.SERVER_ERROR;
         return callback(errorMessage);
       }
-      return callback(null, list);
+      List.app.models.additionalFieldValue.deleteNotInFields(
+        person.id, list.id, fieldIds, (deleteErr, result) => {
+        return callback(null, list, person);
+      });
     });
   };
 
@@ -578,8 +594,15 @@ module.exports = function(List) {
       async.each(peopleIds, (peopleId, peopleCB) => {
         list.people.findById(peopleId, (personErr, person) => {
           if (!personErr) {
-            list.people.remove(person, (destroyPplErr) => {
-              peopleCB(destroyPplErr);
+            List.app.models.additionalFieldValue.deleteFields(
+                person.id, listId, (deleteErr, result) => {
+              if (!deleteErr) {
+                list.people.remove(person, (destroyPplErr) => {
+                  peopleCB(destroyPplErr);
+                });
+              } else {
+                peopleCB(deleteErr);
+              }
             });
           } else {
             peopleCB(personErr);

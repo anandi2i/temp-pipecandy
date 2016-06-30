@@ -151,6 +151,25 @@ module.exports = function(CampaignAudit) {
   };
 
   /**
+   * Get Audit By Person And Campaign Id
+   * @param {Number} personId
+   * @param {Number} campaignId
+   * @param {Function} callback
+   * @author Syed Sulaiman M
+   */
+  CampaignAudit.getAuditByPersonAndCampaign =
+        (personId, campaignId, callback) => {
+    CampaignAudit.find({
+      where: {
+        campaignId: campaignId,
+        personId: personId
+      }
+    }, (campaignAuditsErr, campaignAudits) => {
+      return callback(campaignAuditsErr, campaignAudits[0]);
+    });
+  };
+
+  /**
    * Method To validate mail request
    * @param  {Number} campaignId
    * @param  {Number} start
