@@ -40,7 +40,17 @@
     },
     "isError": {
       "type": "boolean",
-      "default": "fasle"
+      "default": false
+    },
+    "isStopped": {
+      "type": "boolean",
+      "default": false
+    },
+    "stoppedBy": {
+      "type": "string"
+    },
+    "stoppedReson": {
+      "type": "string"
     }
   },
   "validations": [],

@@ -10,4 +10,8 @@ const statusCodes = {
 };
 
 
-export default statusCodes;
+//export default statusCodes;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = statusCodes;

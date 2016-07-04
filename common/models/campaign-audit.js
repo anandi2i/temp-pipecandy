@@ -88,68 +88,6 @@ module.exports = function(CampaignAudit) {
     });
   };
 
-  CampaignAudit.remoteMethod(
-    "sentMails", {
-      description: "Get Sent Mails",
-      accepts: [{
-        arg: "ctx",
-        type: "object",
-        http: {
-          source: "context"
-        }
-      }, {
-        arg: "campaignId",
-        type: "number"
-      }, {
-        arg: "start",
-        type: "number"
-      }, {
-        arg: "limit",
-        type: "number"
-      }],
-      returns: {
-        arg: "CampaignAudit",
-        type: "array",
-        root: true
-      },
-      http: {
-        verb: "get",
-        path: "/sentMails/:campaignId/:start/:limit"
-      }
-    }
-  );
-  /**
-   * Method to return sent mails
-   * @param  {Object}   ctx
-   * @param  {Number}   campaignId
-   * @param  {Number}   start
-   * @param  {Number}   limit
-   * @param  {Function} callback
-   * @return {[Object]} list of Campaign Audit
-   */
-  CampaignAudit.sentMails = (ctx, campaignId, start, limit, callback) => {
-    let errorMessage = validateMailRequest(campaignId, start, limit);
-    if (errorMessage) {
-      return callback(errorMessage);
-    }
-    CampaignAudit.find({
-      where: {
-        campaignId: campaignId
-      },
-      order: "createdAt DESC",
-      limit: limit,
-      skip: start
-    }, (campaignAuditsErr, campaignAudits) => {
-      if (lodash.isEmpty(campaignAudits)) {
-        const errorMessage = errorMessages.NO_EMAILS_FOUND;
-        return callback(errorMessage);
-      }
-      let sentMails = {};
-      sentMails.mails = campaignAudits;
-      return callback(null, sentMails);
-    });
-  };
-
   /**
    * Get Audit By Person And Campaign Id
    * @param {Number} personId

@@ -901,6 +901,24 @@ module.exports = function(Campaign) {
     });
   };
 
+  /**
+   * Get Campaignsfrom List of Campaign Ids
+   * @param  {[Number]} campaignId  List of Campaign Ids
+   * @param  {Function} callback
+   * @return {[Campaign]} List of Campaign Objects
+   * @author Syed Sulaiman M
+   */
+  Campaign.getCampaigns = (campaignIds, callback) => {
+    Campaign.find({
+      where: {
+        id: {
+          inq: campaignIds
+        }
+      }
+    }, (campaignsErr, campaigns) => {
+      callback(campaignsErr, campaigns);
+    });
+  };
 
     Campaign.remoteMethod(
       "getCurrentCampaignDetails", {

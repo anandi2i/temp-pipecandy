@@ -1,37 +1,38 @@
 {
-  "name": "campaignAudit",
+  "name": "sentMailBox",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "email": {
-      "type": "string",
-      "required": true
+    "toEmailId": {
+      "type": "string"
     },
-    "content": {
-      "type": "string",
-      "required": true,
-      "postgresql": {
-        "dataType": "text"
-      }
-    },
-    "mailId": {
-      "type": "String"
+    "fromEmailId": {
+      "type": "string"
     },
     "threadId": {
-      "type": "String"
+      "type": "string"
+    },
+    "mailId": {
+      "type": "string"
+    },
+    "count": {
+      "type": "number",
+      "default": "0"
     },
     "subject": {
       "type": "string"
     },
-    "sentTime": {
-      "type": "date"
-    },
-    "fromEmail": {
+    "content": {
       "type": "string",
-      "required": true
+      "postgresql": {
+        "dataType": "text"
+      }
+    },
+    "sentDate": {
+      "type": "date"
     },
     "createdAt": {
       "type": "date",
@@ -43,15 +44,20 @@
   },
   "validations": [],
   "relations": {
+    "person": {
+      "type": "belongsTo",
+      "model": "person",
+      "foreignKey": "toPersonId"
+    },
     "campaign": {
       "type": "belongsTo",
       "model": "campaign",
       "foreignKey": "campaignId"
     },
-    "person": {
+    "user": {
       "type": "belongsTo",
-      "model": "person",
-      "foreignKey": "personId"
+      "model": "user",
+      "foreignKey": "userId"
     }
   },
   "acls": [
@@ -59,7 +65,7 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "inboxMails"
+      "property": "sentMails"
     }
   ],
   "methods": {}

@@ -143,5 +143,9 @@
   "unsubscribe": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "sentMailBox": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

@@ -15,6 +15,7 @@
     "mailCrawler": "node server/mailCrawler/crawl.js",
     "mailDequeue": "node server/mailCrawler/mailDequeue.js",
     "followUpSender": "node server/followUpSender/followUpMailSender.js",
+    "emailQueuePoller": "node server/mailSender/emailQueuePoller.js",
     "validate": "npm ls"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "compression": "^1.6.2",
     "connect-redis": "^3.0.2",
     "cors": "^2.5.2",
+    "cron": "^1.1.0",
     "del": "^2.2.0",
     "emoji-strip": "0.0.3",
     "express-flash": "0.0.2",

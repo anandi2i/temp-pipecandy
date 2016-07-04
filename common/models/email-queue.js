@@ -231,6 +231,36 @@ module.exports = function(EmailQueue) {
     return errorMessage;
   };
 
+  /**
+   * Method to get Mails that are scheduled to be sent
+   * 		and is not in Error and not Stopped
+   *
+   * @param  {Function} callback [description]
+   * @return {Object} Email Queue Objects
+   * @author Syed Sulaiman M
+   */
+  EmailQueue.getMailsToSent = (callback) => {
+    EmailQueue.find({
+      where: {
+        scheduledAt: {
+          lte: Date.now()
+        },
+        isError: false,
+        isStopped: false
+      },
+      limit: 100
+    }, (queuedMailsErr, queuedMails) => {
+      return callback(queuedMailsErr, queuedMails);
+    });
+  };
+
+  EmailQueue.updateInst = (emailQueue, emailQueueUpdateElements, callback) => {
+    emailQueue.updateAttributes(emailQueueUpdateElements,
+          (updateErr, updatedInst) => {
+      return callback(updateErr, updatedInst);
+    });
+  };
+
   //observers
   /**
    * Updates the updatedAt column with current Time
