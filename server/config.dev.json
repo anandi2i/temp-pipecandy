@@ -40,5 +40,7 @@
       "intelligenceOut": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-dev-intelligence-out",
       "emailAssembler": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-dev-email-assembler"
     }
-  }
+  },
+
+  "appUrl": "http://dev.pipecandy.com"
 }

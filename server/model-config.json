@@ -139,5 +139,9 @@
   "MailResponse": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "unsubscribe": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

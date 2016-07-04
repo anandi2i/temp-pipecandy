@@ -40,5 +40,7 @@
       "intelligenceOut": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-local-intelligence-out",
       "emailAssembler": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-local-email-assembler"
     }
-  }
+  },
+
+  "appUrl": "http://localhost:3000"
 }

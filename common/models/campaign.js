@@ -7,9 +7,10 @@ import campaignMetricArray from "../../server/utils/campaign-metric-fields";
 import statusCodes from "../../server/utils/status-codes";
 import queueUtil from "../../server/mailCrawler/mailEnqueue";
 import moment from "moment-timezone";
-const systemTimeZone = moment().format("Z");
+import config from "../../server/config.json";
 
-const serverUrl = "http://dev.pipecandy.com";
+const systemTimeZone = moment().format("Z");
+const serverUrl = config.appUrl;
 
 module.exports = function(Campaign) {
 
@@ -247,7 +248,7 @@ module.exports = function(Campaign) {
      */
     const enqueueToMailAssembler = (campaign, enqueueToMailAssemblerCB) => {
       let queueName = "mailAssemblerQueue";
-      queueUtil.enqueueMail(JSON.stringify(campaign[0]), queueName,
+      queueUtil.enqueueMail(JSON.stringify(campaign), queueName,
         () => {
           campaign.updateAttribute("statusCode", statusCodes.enqueued,
           (campaignUpdateErr, updatedCampaign) => {
@@ -311,6 +312,7 @@ module.exports = function(Campaign) {
       applySmartTags,
       appendOpenTracker,
       appendLinkClickTracker,
+      appendUnsubscribeLink,
       sendToEmailQueue
     ], (waterfallError) => {
       generateEmailCB(waterfallError);
@@ -441,6 +443,33 @@ module.exports = function(Campaign) {
             return applySmartTagsCB(null, campaign, person, template, email);
           });
       });
+  };
+
+  /**
+   * Appends an Unsubscribe Link URL
+   * Based on isOptTextNeeded flag Unsubscribe Link will be appended
+   * 	 to the email to be sent
+   *
+   * @param  {[campaign]} campaign         [current campign object]
+   * @param  {[person]} person           [current person for that campign]
+   * @param  {[Array]} additionalValues [extra field values for that person]
+   * @param  {[CampaignTemplate]} template [template which suites person object]
+   * @param  {[function]} applyUnsubscribeLinkCB Callback function
+   * @author Syed Sulaiman M
+   */
+  const appendUnsubscribeLink = (campaign, person, template, email,
+        appendUnsubscribeLinkCB) => {
+    if(campaign.isOptTextNeeded) {
+      let trackerContent = email.content;
+      let url = `${serverUrl}/api/`;
+      url += `people/${person.id}/`;
+      url += `user/${campaign.createdBy}/`;
+      url += `campaign/${campaign.id}/unsubscribe`;
+      let trackerTag = `<a href='${url}'>${campaign.optText}</a>`;
+      trackerContent += trackerTag;
+      email.content = trackerContent;
+    }
+    appendUnsubscribeLinkCB(null, campaign, person, template, email);
   };
 
   /**

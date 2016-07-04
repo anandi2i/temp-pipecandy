@@ -3,6 +3,7 @@
 import logger from "../../server/log";
 import async from "async";
 import lodash from "lodash";
+import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 
 module.exports = function(Person) {
 
@@ -159,6 +160,140 @@ module.exports = function(Person) {
       });
     });
   });
+
+  Person.remoteMethod(
+    "unsubscribe", {
+      description: "Unsubscribe Person from User",
+      accepts: [{
+        arg: "ctx",
+        type: "object",
+        http: {
+          source: "context"
+        }
+      }, {
+        arg: "id",
+        type: "number",
+        required: true,
+        http: {
+          source: "path"
+        }
+      }, {
+        arg: "userId",
+        type: "number",
+        required: true,
+        http: {
+          source: "path"
+        }
+      }, {
+        arg: "campaignId",
+        type: "number",
+        required: true,
+        http: {
+          source: "path"
+        }
+      }],
+      returns: {
+        arg: "person",
+        type: "person",
+        root: true
+      },
+      http: {
+        verb: "get",
+        path: "/:id/user/:userId/campaign/:campaignId/unsubscribe"
+      }
+    }
+  );
+  /**
+   * Method to unsubscribe Person from User
+   *
+   * @param  {context}   ctx        [description]
+   * @param  {Number}   personId   [description]
+   * @param  {Number}   userId     [description]
+   * @param  {Number}   campaignId [description]
+   * @param  {Function} callback   [description]
+   * @author Syed Sulaiman M
+   */
+  Person.unsubscribe = function(ctx, personId, userId, campaignId, callback) {
+    async.waterfall([
+      function getReqParams(getReqParamsCB) {
+        getReqParamsCB(null, userId, personId, campaignId);
+      },
+      getCampaignAudit,
+      getOrSaveUnsubscribe
+    ], (error, result) => {
+      if (error) {
+        logger.error("Error while Unsubscribing Person ", personId,
+              "for User", userId, error);
+        return callback(error);
+      }
+      return callback(null, result);
+    });
+  };
+
+  /**
+   * Method to get Campaign Audit By UserId and CampaignId
+   *
+   * @param  {Number}  userId
+   * @param  {Number}  personId
+   * @param  {Number}  campaignId
+   * @param  {Function} callback
+   * @return {[Object]} Object with UserId, PersonId, CampaignId and Audit Obj
+   */
+  const getCampaignAudit = (userId, personId, campaignId, campaignAuditCB) => {
+    Person.app.models.campaignAudit.getAuditByPersonAndCampaign(
+        userId, campaignId, (auditErr, audit) => {
+      if(auditErr || !audit) {
+        logger.error("Error in getting audit for campaign Id: ",
+            campaignId, auditErr);
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return campaignAuditCB(errorMessage);
+      }
+      return campaignAuditCB(null, userId, personId, campaignId, audit);
+    });
+  };
+
+  /**
+   * Method to get Unsubscribe By UserId PersonId and CampaignId
+   * 		If not available a new entry will be created
+   *
+   * @param  {Number}  userId
+   * @param  {Number}  personId
+   * @param  {Number}  campaignId
+   * @param  {Object}  audit
+   * @param  {Function} callback
+   * @return {[Object]} Object with UserId, PersonId, CampaignId and Audit Obj
+   */
+  const getOrSaveUnsubscribe = (userId, personId, campaignId, audit,
+        getOrSaveUnsubscribeCB) => {
+    Person.app.models.unsubscribe.get(userId, personId, campaignId,
+            (unsubErr, unsub) => {
+      if(unsubErr) {
+        logger.error("Error in getting subscription for user: ",
+            userId, unsubErr);
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return getOrSaveUnsubscribeCB(errorMessage);
+      }
+      if(unsub) {
+        return getOrSaveUnsubscribeCB(null, unsub);
+      }
+      let unsubscribe = {
+        personId: personId,
+        userId: userId,
+        campaignId: campaignId,
+        campaignAuditId: audit.id
+      };
+      Person.app.models.unsubscribe.create(unsubscribe,
+        (createErr, unsubscribeInst) => {
+          if(createErr) {
+            logger.error("Error while unsubscribe person : ", personId,
+                  "for user", userId, createErr);
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return getOrSaveUnsubscribeCB(errorMessage);
+          }
+          return getOrSaveUnsubscribeCB(null, unsubscribeInst);
+        });
+    });
+  };
 
   // Person.observe("after save", function(ctx, next) {
   //   let person = ctx.instance;
