@@ -2,34 +2,38 @@
 
 var Consumer = require("sqs-consumer");
 var AWS = require("aws-sdk");
-var queueConfig = require("../../server/utils/queue-config");
+var async = require("async");
 
 const dataSource = require(process.cwd() + "/server/server.js").dataSources
                                                                   .psqlDs;
 
 const App = dataSource.models;
+const queue= require(process.cwd() + "/server/server.js").settings.queue;
 
 AWS.config.update({
-  region: queueConfig.region,
-  accessKeyId: queueConfig.accessKeyId,
-  secretAccessKey: queueConfig.secretAccessKey
+  region: queue.config.region,
+  accessKeyId: queue.config.accessKeyId,
+  secretAccessKey: queue.config.secretAccessKey
 });
 
-const queueName = "mailAssemblerQueue";
+const queueName = "emailAssembler";
 
 /**
  * Consumer process for mail dequeue
  */
 const app = Consumer.create({
-  queueUrl: queueConfig.queueUrl[queueName],
+  queueUrl: queue.url[queueName],
   handleMessage: function(message, done) {
     let campaign = JSON.parse(message.Body);
-    App.emailQueue.assembleEmails(campaign.id, (assembleEmailsErr, messgae) => {
-      if(assembleEmailsErr) {
-        console.error(assembleEmailsErr);
+    async.parallel({
+      emailQueue: App.emailQueue.assembleEmails.bind(null, campaign.id),
+      followup: App.followUp.prepareScheduledAt.bind(null, campaign.id)
+    }, (parallelErr, results) => {
+      if(parallelErr) {
+        console.error(parallelErr);
         return;
       }
-      console.log(messgae);
+      console.log("Assembled Emails Successfully campaignId: ", campaign.id);
     });
     done();
   },

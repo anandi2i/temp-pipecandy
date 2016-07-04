@@ -127,6 +127,34 @@ module.exports = function(CampaignAudit) {
     return errorMessage;
   };
 
+//npm run calls
+  /**
+   * Checks whether the person is valid to generating followup or not
+   *
+   * @param  {[type]}  campaign                [description]
+   * @param  {[type]}  person                  [description]
+   * @param  {[type]}  followup                [description]
+   * @param  {Boolean} isEligibleForFollowupCB [description]
+   * @return {[type]}                          [description]
+   * @author Ramanavel Selvaraju
+   */
+  CampaignAudit.isEligibleForFollowup = (campaign, person, followup,
+     isEligibleForFollowupCB) => {
+    CampaignAudit.find({where: {and: [
+      {personId: person.id}, {campaignId: campaign.id}, {followUpId: null},
+      {isEligibleToFollowUp: true}
+      ]}
+    }, (auditFindErr, audits) => {
+      if(auditFindErr) {
+        logger.error({error: auditFindErr, stack: auditFindErr.stack,
+          campaign: campaign, person: person, followup: followup});
+        return isEligibleForFollowupCB(auditFindErr, false);
+      }
+      return isEligibleForFollowupCB(null, !lodash.isEmpty(audits));
+    });
+  };
+
+//observers
   /**
    * Updates the updatedAt column with current Time
    * @param ctx Context

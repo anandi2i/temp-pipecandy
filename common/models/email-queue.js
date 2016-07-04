@@ -1,82 +1,19 @@
 "use strict";
 
 import async from "async";
-import moment from "moment-timezone";
 import lodash from "lodash";
 import logger from "../../server/log";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
+import statusCodes from "../../server/utils/status-codes";
 
 module.exports = function(EmailQueue) {
-
-  /**
-   * builds the Email Queue Object and saving in the Email Queue table
-   * @param  person
-   * @param  campaign
-   * @param  campaignTemplate
-   * @param  function saveEmailQueueCB
-   * @return void
-   */
-  EmailQueue.push = (campaign, person, campaignTemplate, email,
-     saveEmailQueueCB) => {
-    prepareScheduledAt(campaign, person, (prepareScheduledAtErr,
-                                                          scheduledAt) => {
-      if (prepareScheduledAtErr) {
-        saveEmailQueueCB(prepareScheduledAtErr);
-      }
-      let emailQueue = {
-        email: person.email,
-        content: email.content,
-        subject: email.subject,
-        campaignTemplateId: campaignTemplate.id,
-        campaignId: campaignTemplate.campaignId,
-        userId: campaign.createdBy,
-        personId: person.id,
-        scheduledAt: scheduledAt
-      };
-
-      EmailQueue.create(emailQueue, (emailQueueErr, emailQueueObj) => {
-        if (emailQueueErr) {
-          saveEmailQueueCB(emailQueueErr);
-        }
-        logger.info("Pushed Email to the Queue", emailQueueObj);
-        saveEmailQueueCB();
-      });
-    });
-  };
-
-  /**
-   * Preparering ScheduledAt for Individual
-   *
-   * @param campaign
-   * @param person
-   * @param function prepare ScheduledAt Callback
-   * @return void
-   */
-  let prepareScheduledAt = (campaign, person, prepareScheduledAtCB) => {
-    let scheduledAt = new Date();
-    try {
-      if (campaign.scheduledAt) {
-        if (person.time_zone) {
-          var personZoneTime = moment(campaign.scheduledAt)
-                            .tz(person.time_zone).format("YYYY-MM-DDTHH:mm:ss");
-          var systemTimeZone = moment().format("Z");
-          personZoneTime += systemTimeZone;
-          scheduledAt = new Date(personZoneTime);
-        } else {
-          scheduledAt = campaign.scheduledAt;
-        }
-      }
-      prepareScheduledAtCB(null, scheduledAt);
-    } catch (prepareScheduledAtERR) {
-      prepareScheduledAtCB(prepareScheduledAtERR);
-    }
-  };
 
   /**
    * Delete the email queue when the campaign updates
    * - from destroyCampaignElements process
    * @param  {[campaign]} campaign
    * @param  {[function]} destroyByCampaignCB
+   * @author Aswin Raj
    */
   EmailQueue.destroyByCampaign = (campaign, destroyByCampaignCB) => {
     campaign.emailQueues.destroyAll((emailQueueDestroyErr) => {
@@ -89,95 +26,17 @@ module.exports = function(EmailQueue) {
     });
   };
 
-  /**
-   * Constructing the individual emails and save in the email queue table
-   * This will take care of common templates,
-   * person wise templates and missing tag wise templates
-   * and also support the multiple common templates.
-   * Multiple common templates will be taken as round robin order
-   *
-   * @param  {[number]} campaignId [description]
-   * @param  {[function]} assembleEmailsCB [callback function]
-   * @return {[string]} [success message]
-   * @author Ramanavel Selvaraju
-   */
-  EmailQueue.assembleEmails = (campaignId, assembleEmailsCB) => {
-
-    EmailQueue.app.models.campaign.findById(campaignId,
-      (campaignErr, campaign) => {
-
-      if(campaignErr | lodash.isEmpty(campaign)) {
-       logger.error("Error in getting campaign for id : ",
-            {campginId: campaignId, error: campaignErr});
-       return assembleEmailsCB(campaignErr);
-      }
-
-      EmailQueue.app.models.list.getListAndSaveEmail(campaign,
-      (getPoepleAndGenerateEmailErr) => {
-        return assembleEmailsCB(getPoepleAndGenerateEmailErr,
-          "Generated emails for campginId:" + campaignId);
-      });//list.getListAndSaveEmail
-
-    });//campaign.findById
-
-  };
-
-  /**
-   * Checks the email is already generated or not. for that we have to find
-   * EmailQueue model with campaignId and personId
-   * @param  {[Campaign]} campaign           [current campaign Object]
-   * @param  {[Person]} person
-   * @param  {[function]} checkEmailExistsCB [callback]
-   * @return {[boolean]}[if email Exists return true else it will return false]
-   * @author Ramanavel Selvaraju
-   */
-  EmailQueue.checkEmailExists = (campaign, person, checkEmailExistsCB) => {
-
-    EmailQueue.find({where: {and: [{campaignId: campaign.id},
-      {personId: person.id}]}}, (checkEmailExistsFindErr, emails)=>{
-
-      if(checkEmailExistsFindErr) {
-        logger.error("Check Email Exists in EmailQueue Find Error", {
-          error: checkEmailExistsFindErr,
-          campaign: campaign,
-          person: person
-        });
-        return checkEmailExistsCB(checkEmailExistsFindErr);
-      }
-    return checkEmailExistsCB(null, lodash.isEmpty(emails) ? false : true);
-
-    }); //EmailQueue.find
-
-  }; //checkEmailExists
-
   EmailQueue.remoteMethod(
     "scheduledMails", {
       description: "Get Scheduled Mails",
-      accepts: [{
-        arg: "ctx",
-        type: "object",
-        http: {
-          source: "context"
-        }
-      }, {
-        arg: "campaignId",
-        type: "number"
-      }, {
-        arg: "start",
-        type: "number"
-      }, {
-        arg: "limit",
-        type: "number"
-      }],
-      returns: {
-        arg: "CampaignAudit",
-        type: "array",
-        root: true
-      },
-      http: {
-        verb: "get",
-        path: "/scheduledMails/campaign/:campaignId"
-      }
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "campaignId", type: "number"},
+        {arg: "start", type: "number"},
+        {arg: "limit", type: "number"}
+      ],
+      returns: {arg: "CampaignAudit", type: "array", root: true},
+      http: {verb: "get", path: "/scheduledMails/campaign/:campaignId"}
     }
   );
   /**
@@ -188,6 +47,7 @@ module.exports = function(EmailQueue) {
    * @param  {Integer}   limit
    * @param  {Function} callback
    * @return {[Object]} list of Campaign Audit
+   * @author Syed Sulaiman M
    */
   EmailQueue.scheduledMails = (ctx, campaignId, start, limit, callback) => {
     let errorMessage = validateMailRequest(campaignId, start, limit);
@@ -233,6 +93,7 @@ module.exports = function(EmailQueue) {
    * @param  {Number} start
    * @param  {Number} limit
    * @return {Object}
+   * @author Syed Sulaiman M
    */
   const validateMailRequest = (campaignId, start, limit) => {
     const zero = 0;
@@ -277,7 +138,77 @@ module.exports = function(EmailQueue) {
     });
   };
 
-  //observers
+//npm run calls
+/**
+ * Constructing the individual emails and save in the email queue table
+ * This will take care of common templates,
+ * person wise templates and missing tag wise templates
+ * and also support the multiple common templates.
+ * Multiple common templates will be taken as round robin order
+ *
+ * @param  {[number]} campaignId [description]
+ * @param  {[function]} assembleEmailsCB [callback function]
+ * @return {[string]} [success message]
+ * @author Ramanavel Selvaraju
+ */
+EmailQueue.assembleEmails = (campaignId, assembleEmailsCB) => {
+
+  EmailQueue.app.models.campaign.findById(campaignId,
+    (campaignErr, campaign) => {
+
+    if(campaignErr | lodash.isEmpty(campaign)) {
+     logger.error("Error in getting campaign for id : ",
+          {campginId: campaignId, error: campaignErr});
+    const notFound = "Campaign not Found";
+     return assembleEmailsCB(campaignErr ? campaignErr : new Error(notFound));
+    }
+    async.series([
+      async.apply(EmailQueue.destroyByCampaign, campaign),
+      async.apply(EmailQueue.app.models.campaign.updateStatusCode,
+                    campaign, statusCodes.processing),
+      async.apply(EmailQueue.app.models.list.getListAndSaveEmail,
+                    campaign, null),
+      async.apply(EmailQueue.app.models.campaign.updateStatusCode,
+                   campaign, statusCodes.readyToSend),
+    ], (getPoepleAndGenerateEmailErr, results) => {
+      return assembleEmailsCB(getPoepleAndGenerateEmailErr,
+        "Generated emails for campginId:" + campaignId);
+    });
+
+  });//campaign.findById
+
+};
+
+/**
+ * Checks the email is already generated or not. for that we have to find
+ * EmailQueue model with campaignId and personId and followUpId
+ *
+ * @param  {[Campaign]} campaign           [current campaign Object]
+ * @param  {[Person]} person
+ * @param  {[function]} checkEmailExistsCB [callback]
+ * @return {[boolean]}[if email Exists return true else it will return false]
+ * @author Ramanavel Selvaraju
+ */
+EmailQueue.checkEmailExists = (campaign, followup, person, emailExistsCB) => {
+
+  EmailQueue.find({where: {and: [{campaignId: campaign.id},
+    {personId: person.id}, {followUpId: followup ? followup.id : null}]}
+  }, (checkEmailExistsFindErr, emails)=>{
+    if(checkEmailExistsFindErr) {
+      logger.error("Check Email Exists in EmailQueue Find Error", {
+        error: checkEmailExistsFindErr,
+        campaign: campaign,
+        person: person
+      });
+      return emailExistsCB(checkEmailExistsFindErr);
+    }
+  return emailExistsCB(null, lodash.isEmpty(emails));
+  }); //EmailQueue.find
+}; //checkEmailExists
+
+
+
+//observers
   /**
    * Updates the updatedAt column with current Time
    * @param ctx Context

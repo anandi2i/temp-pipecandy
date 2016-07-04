@@ -242,7 +242,7 @@ function filterUnsubscribePerson(emailQueue, callback) {
         });
       });
     } else {
-      return callback(null, emailsToSent);
+      return callback(null, emailQueue);
     }
   });
 }
@@ -318,12 +318,16 @@ function buildEmail(emailQueue, mailContent, buildEmailCB) {
 function sendEmail(base64EncodedEmail, oauth2Client, emailQueue, mailContent,
   sendEmailCB) {
 
+  let resource = {
+    raw: base64EncodedEmail
+  };
+  if(emailQueue.threadId) {
+    resource.threadId = emailQueue.threadId;
+  }
   gmailClass.users.messages.send({
     auth: oauth2Client,
     userId: mailContent.userDetails.email.value,
-    resource: {
-      raw: base64EncodedEmail
-    }
+    resource: resource
   }, function(err, results) {
     if (err) {
       console.log("Gmail err:", err);

@@ -3,10 +3,10 @@
 import logger from "../../server/log";
 import async from "async";
 import lodash from "lodash";
+import moment from "moment-timezone";
 import campaignMetricArray from "../../server/utils/campaign-metric-fields";
 import statusCodes from "../../server/utils/status-codes";
 import queueUtil from "../../server/mailCrawler/mailEnqueue";
-import moment from "moment-timezone";
 import config from "../../server/config.json";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 
@@ -303,10 +303,11 @@ module.exports = function(Campaign) {
    * @param  {[function]} generateEmailCB [callback]
    * @author Ramanavel Selvaraju
    */
-  Campaign.generateEmail = (campaign, person, listIds, generateEmailCB) => {
+  Campaign.generateEmail = (campaign, person, listIds, followup,
+     generateEmailCB) => {
     async.waterfall([
       function(setArgs) {
-        setArgs(null, campaign, person, listIds);
+        setArgs(null, campaign, person, listIds, followup);
       },
       preaprePersonObject,
       getTemplate,
@@ -314,6 +315,8 @@ module.exports = function(Campaign) {
       appendOpenTracker,
       appendLinkClickTracker,
       appendUnsubscribeLink,
+      prepareScheduledAt,
+      preapreFollowUp,
       sendToEmailQueue
     ], (waterfallError) => {
       generateEmailCB(waterfallError);
@@ -329,10 +332,12 @@ module.exports = function(Campaign) {
    * @return {List[additionalFieldValue]} [list of uniq field values]
    * @author Ramanavel Selvaraju
    */
-  let preaprePersonObject = (campaign, person, listIds, preaprePersonCB) => {
+  const preaprePersonObject = (campaign, person, listIds, followup,
+    preaprePersonCB) => {
     Campaign.app.models.person.preparePersonWithExtraFields(
       campaign, person, listIds, (preparePersonErr, fieldValues) => {
-        return preaprePersonCB(preparePersonErr, campaign, person, fieldValues);
+        return preaprePersonCB(preparePersonErr, campaign, person, fieldValues,
+          followup);
     });
   };
 
@@ -353,9 +358,10 @@ module.exports = function(Campaign) {
    * @return {[CampaignTemplate]}  [CampaignTemplate object]
    * @author Ramanavel Selvaraju
    */
-  const getTemplate = (campaign, person, additionalValues, getTemplateCB) => {
+  const getTemplate = (campaign, person, additionalValues, followup,
+     getTemplateCB) => {
     Campaign.app.models.campaignTemplate.getPersonTemplate(campaign, person,
-      (getPersonTemplateErr, personTemplate)=>{
+      followup, (getPersonTemplateErr, personTemplate)=>{
 
       if(getPersonTemplateErr) {
         return getTemplateCB(getPersonTemplateErr);
@@ -363,11 +369,11 @@ module.exports = function(Campaign) {
 
       if(personTemplate) {
         return getTemplateCB(null, campaign, person, additionalValues,
-                                                              personTemplate);
+                                                  personTemplate, followup);
       }
 
       Campaign.app.models.campaignTemplate.getCommonTemplates(campaign, person,
-        additionalValues, (getCommonTemplatesErr, commonTemplate,
+        additionalValues, followup, (getCommonTemplatesErr, commonTemplate,
           missingTagIds) => {
           if(getCommonTemplatesErr) {
             return getTemplateCB(getCommonTemplatesErr);
@@ -375,11 +381,11 @@ module.exports = function(Campaign) {
 
           if(!missingTagIds) {
             return getTemplateCB(null, campaign, person, additionalValues,
-                                                                commonTemplate);
+                                                    commonTemplate, followup);
           }
 
           Campaign.app.models.campaignTemplate.getAlternateTemplate(campaign,
-            person, additionalValues, missingTagIds,
+            person, additionalValues, missingTagIds, followup,
             (getAlternateTemplateErr, template) => {
               if(getAlternateTemplateErr) {
               if(getAlternateTemplateErr.name !== "alternateTemplateNotFound") {
@@ -389,11 +395,11 @@ module.exports = function(Campaign) {
 
               if(getAlternateTemplateErr) {
                 return getTemplateCB(null, campaign, person, additionalValues,
-                                                                commonTemplate);
+                                                commonTemplate, followup);
               }
 
               return getTemplateCB(null, campaign, person, additionalValues,
-                                                                  template);
+                                                  template, followup);
 
             });//campaignTemplate.getAlternateTemplate
 
@@ -413,43 +419,31 @@ module.exports = function(Campaign) {
    * @author Ramanavel Selvaraju
    */
   const applySmartTags = (campaign, person, additionalValues, template,
-    applySmartTagsCB) => {
-    Campaign.app.models.campaignTemplate.personalize(
-      template.subject, additionalValues,
-      (subjectPersonalizeError, subject) => {
-        if(subjectPersonalizeError) {
-          let email = {
-            subject: subject,
-            content: template.content,
-            isError: true
-          };
-          return applySmartTagsCB(null, campaign, person, template, email);
-        }
-        Campaign.app.models.campaignTemplate.personalize(
-          template.content, additionalValues,
-          (contentPersonalizeError, content) => {
-            if(contentPersonalizeError) {
-              let email = {
-                subject: subject,
-                content: template.content,
-                isError: true
-              };
-              return applySmartTagsCB(null, campaign, person, template, email);
-            }
-            let email = {
-              subject: subject,
-              content: content,
-              isError: false
-            };
-            return applySmartTagsCB(null, campaign, person, template, email);
-          });
-      });
+    followup, applySmartTagsCB) => {
+    let email = {
+      subject: template.subject, content: template.content, isError: false,
+      email: person.email, campaignTemplateId: template.id,
+      campaignId: campaign.id, userId: campaign.createdBy, personId: person.id
+    };
+    async.parallel({
+      subject: Campaign.app.models.campaignTemplate.personalize.bind(null,
+        email.subject, additionalValues),
+      content: Campaign.app.models.campaignTemplate.personalize.bind(null,
+        email.content, additionalValues)
+    }, (parallelErr, result) => {
+      email.isError = parallelErr? true : email.isError;
+      if(result){
+        email.subject = result.subject ? result.subject : email.subject;
+        email.content = result.content ? result.content : email.content;
+      }
+      return applySmartTagsCB(null, campaign, followup, person, email);
+    });
   };
 
   /**
    * Appends an Unsubscribe Link URL
    * Based on isOptTextNeeded flag Unsubscribe Link will be appended
-   * 	 to the email to be sent
+   * to the email to be sent
    *
    * @param  {[campaign]} campaign         [current campign object]
    * @param  {[person]} person           [current person for that campign]
@@ -458,8 +452,11 @@ module.exports = function(Campaign) {
    * @param  {[function]} applyUnsubscribeLinkCB Callback function
    * @author Syed Sulaiman M
    */
-  const appendUnsubscribeLink = (campaign, person, template, email,
+  const appendUnsubscribeLink = (campaign, followup, person, email,
         appendUnsubscribeLinkCB) => {
+    if(followup){
+      return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
+    }
     if(campaign.isOptTextNeeded) {
       let trackerContent = email.content;
       let url = `${serverUrl}/api/`;
@@ -470,28 +467,30 @@ module.exports = function(Campaign) {
       trackerContent += trackerTag;
       email.content = trackerContent;
     }
-    appendUnsubscribeLinkCB(null, campaign, person, template, email);
+    return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
   };
 
   /**
-   * Appends an image url
+   * Appends an image url to track the person whether he opens our email or not
    *
    * @param  {[campaign]} campaign         [current campign object]
    * @param  {[person]} person           [current person for that campign]
    * @param  {[Array]} additionalValues [extra field values for that person]
-   * @param  {[CampaignTemplate]} template [template which suites person object]
    * @param  {[function]} applySmartTagsCB [callabck]
    * @author Ramanavel Selvaraju
    */
-  const appendOpenTracker = (campaign, person, template, email,
+  const appendOpenTracker = (campaign, followup, person, email,
     applyOpenTrackCB) => {
     let trackerContent = email.content;
     let url =
   `${serverUrl}/api/campaign/${campaign.id}/person/${person.id}/trackEmail.png`;
+    if(followup) {
+      url += `?followUpId=${followup.id}`;
+    }
     let trackerTag = `<img src='${url}'/>`;
     trackerContent += trackerTag;
     email.content = trackerContent;
-    applyOpenTrackCB(null, campaign, person, template, email);
+    applyOpenTrackCB(null, campaign, followup, person, email);
   };
 
   /**
@@ -505,40 +504,155 @@ module.exports = function(Campaign) {
    * @return {[type]}                          [description]
    * @author Ramanavel Selvaraju
    */
-  const appendLinkClickTracker = (campaign, person,
-    template, email, appendLinkClickTrackerCB) => {
+  const appendLinkClickTracker = (campaign, followup, person, email,
+     appendLinkClickTrackerCB) => {
     let hrefTags = email.content.match(/href=("|')(.*?)("|')/g);
     async.eachSeries(hrefTags, (href, hrefTagsCB) => {
       href = lodash.replace(href, /("|')/g, `"`);
       let linkurl = href.split(/"/)[1];
-      Campaign.app.models.emailLink.getOrSave(campaign, linkurl,
+      Campaign.app.models.emailLink.getOrSave(campaign, linkurl, followup,
         (getOrSaveErr, link) => {
-          if(getOrSaveErr) {
-            return hrefTagsCB(getOrSaveErr);
-          }
-          let content = email.content;
-          let proxyUrl = `${serverUrl}/api/clickedEmailLinks/${link.id}`;
-          proxyUrl += `/campaign/${campaign.id}/person/${person.id}/track`;
-          content = lodash.replace(content, linkurl, proxyUrl);
-          email.content = content;
-          hrefTagsCB(null);
+        if(getOrSaveErr) {
+          return hrefTagsCB(getOrSaveErr);
+        }
+        let content = email.content;
+        let proxyUrl = `${serverUrl}/api/clickedEmailLinks/${link.id}`;
+        proxyUrl += `/campaign/${campaign.id}/person/${person.id}/track`;
+        if(followup) {
+          proxyUrl += `?followUpId=${followup.id}`;
+        }
+        content = lodash.replace(content, linkurl, proxyUrl);
+        email.content = content;
+        hrefTagsCB(null);
       });
     }, (eachSeriesErr) => {
-      return appendLinkClickTrackerCB(null, campaign, person, template, email);
+      email.isError = eachSeriesErr? true : email.isError;
+      return appendLinkClickTrackerCB(null, campaign, followup, person, email);
     });
 
   };
 
-  const sendToEmailQueue = (campaign, person, template, email,
+  /**
+   * Preparering ScheduledAt for Individual
+   * Assuming followup object will have scheduledAt always
+   *
+   * @param campaign
+   * @param followUp
+   * @param person
+   * @param function prepare ScheduledAt Callback
+   * @author Ramanavel Selvaraju
+   */
+  const prepareScheduledAt = (campaign, followup, person, email,
+    prepareScheduledAtCB) => {
+    const scheduledAtFromUser = followup ? followup.scheduledAt
+                                       : campaign.scheduledAt;
+    let scheduledAt = new Date();
+    try {
+      if (scheduledAtFromUser) {
+        if (person.time_zone) {
+          const personZoneTime = moment(scheduledAtFromUser)
+                            .tz(person.time_zone).format("YYYY-MM-DDTHH:mm:ss");
+          scheduledAt = new Date(personZoneTime + moment().format("Z"));
+          const ten = -10;
+          const diff = scheduledAt
+                            - new Date(moment(new Date()).add(ten, "minutes"));
+          const zero = 0;
+          const one = 1;
+          if(!lodash.gt(diff, zero)) {
+            scheduledAt = new Date(moment(scheduledAt).add(one, "days").format);
+          }
+        } else {
+          scheduledAt = new Date(scheduledAtFromUser);
+        }
+      }
+      email.scheduledAt = scheduledAt;
+      prepareScheduledAtCB(null, campaign, followup, person, email);
+    } catch (prepareScheduledAtERR) {
+      logger.error({
+        error: prepareScheduledAtERR,
+        email: email,
+        stack: prepareScheduledAtERR.stack
+      });
+      email.isError = true;
+      prepareScheduledAtCB(null, campaign, followup, person, email);
+    }
+  };
+
+  /**
+   * Prepares the FollowUp email subject and the content
+   * Followup Subject will be the same as the previous mail which we sent
+   *
+   * @param  {[Campaign]} campaign
+   * @param  {[FollowUp]} followup
+   * @param  {[Person]} person
+   * @param  {[CampaignTemplate]} template
+   * @param  {[Object]} email
+   * @param  {[function]} sendToEmailQueueCB
+   * @return void
+   * @author Ramanavel Selvaraju
+   */
+  const preapreFollowUp = (campaign, followup, person, email,
+    preapreFollowUpCB) => {
+      if(!followup) {
+        return preapreFollowUpCB(null, campaign, followup, person, email);
+      }
+      async.parallel({
+        campaignAudit: Campaign.app.models.followUp.preapreSubject.bind(null,
+          campaign, person, email, followup),
+        content: Campaign.app.models.followUp.preapreContent.bind(null,
+          campaign, person, email, followup)
+      }, (parallelErr, result) => {
+        email.isError = parallelErr ? true : email.isError;
+        if(result){
+          const audit = result.campaignAudit;
+          email.subject = audit ? audit.subject : email.subject;
+          email.content = result.content ? email.content + result.content
+                                         : email.content;
+          email.threadId = audit ? audit.threadId : null;
+        }
+        return preapreFollowUpCB(null, campaign, followup, person, email);
+      });
+  };
+
+  /**
+   * send the email to the sending Queue
+   *
+   * @param  {[Campaign]} campaign
+   * @param  {[FollowUp]} followup
+   * @param  {[Person]} person
+   * @param  {[CampaignTemplate]} template
+   * @param  {[Object]} email
+   * @param  {[function]} sendToEmailQueueCB
+   * @return void
+   * @author Ramanavel Selvaraju
+   */
+  const sendToEmailQueue = (campaign, followup, person, email,
     sendToEmailQueueCB) => {
-
-    Campaign.app.models.emailQueue.push(campaign, person, template, email,
-      (pushErr) => {
-        sendToEmailQueueCB(pushErr);
+    Campaign.app.models.emailQueue.create(email,
+      (emailQueueErr, emailQueueObj) => {
+      if (emailQueueErr) {
+        return sendToEmailQueueCB(emailQueueErr);
+      }
+      logger.info("Pushed Email to the Queue", emailQueueObj);
+      sendToEmailQueueCB();
     });
 
   };
 
+  /**
+   * updates given status code in give campaign object
+   *
+   * @param  {[type]} campaign       [description]
+   * @param  {[type]} code           [description]
+   * @param  {[function]} updateStatusCB [callback]
+   * @return {[campaign]}                [campaignUpdated]
+   * @author Ramanavel Selvaraju
+   */
+  Campaign.updateStatusCode = (campaign, code, updateStatusCB) => {
+    campaign.updateAttribute("statusCode", code, (err, campaignUpdated) => {
+        return updateStatusCB(err, campaignUpdated);
+    });
+  };
 
   /**
    * Get the campaign metrics for the current campaign
@@ -1046,6 +1160,7 @@ module.exports = function(Campaign) {
       }
     );
 
+//observers
   /**
    * Updates the updatedAt column with current Time
    * @param ctx Context

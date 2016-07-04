@@ -144,6 +144,8 @@ module.exports = function(CampaignTemplate) {
 //npm run calls
   /**
    * gets peronalized templates for the current campaign using personId
+   * If its selecting template for a folloup means that will pass followupId
+   * else the followupId will be null
    *
    * @param  {[campaign]} campaign       [current campign object]
    * @param  {[person]} person           [current person for that campign]
@@ -152,7 +154,7 @@ module.exports = function(CampaignTemplate) {
    * @author Ramanavel Selvaraju
    */
   CampaignTemplate.getPersonTemplate = (campaign, person,
-    getPersonTemplateCB) => {
+    followup, getPersonTemplateCB) => {
 
     CampaignTemplate.find({
       where: {
@@ -160,6 +162,8 @@ module.exports = function(CampaignTemplate) {
           campaignId: campaign.id
         }, {
           personId: person.id
+        }, {
+          followUpId: followup ? followup.id : null
         }]
       }
     }, function(campaignTemplatesErr, campaignTemplates) {
@@ -196,7 +200,7 @@ module.exports = function(CampaignTemplate) {
    * @author Ramanavel Selvaraju
    */
   CampaignTemplate.getCommonTemplates = (campaign, person, additionalValues,
-    getCommonTemplatesCB) => {
+    followup, getCommonTemplatesCB) => {
 
     CampaignTemplate.find({
       where: {
@@ -206,6 +210,8 @@ module.exports = function(CampaignTemplate) {
           personId: null
         }, {
           missingTagIds: null
+        }, {
+          followUpId: followup ? followup.id : null
         }]
       }
     }, (getCommonTemplateErr, campaignTemplates) => {
@@ -218,27 +224,39 @@ module.exports = function(CampaignTemplate) {
         error.name = "templateNotFound";
         logger.error({
           error: error,
-          input: {
-            campign: campaign,
-            person: person
+          stack: error.stack,
+          input: {campign: campaign, person: person,
+            additionalValues: additionalValues, followup: followup
           }
         });
         return getCommonTemplatesCB(error);
       }
-
+      //selecting the template logic
       let one = 1;
       let randomIndex = lodash.random(campaignTemplates.length - one);
       let tempalate = campaignTemplates[randomIndex];
-
+      //checks whether common template is fit for the prospect or not
       if(tempalate.usedTagIds) {
-        let tagIdsArray = _.pluck(additionalValues, "fieldId");
-        let personTagIds = lodash.sortedUniq(tagIdsArray);
-        let usedTagIds =
-        lodash.map(lodash.split(tempalate.usedTagIds, "|"), lodash.parseInt);
-        let missingTagIds = lodash.difference(usedTagIds, personTagIds);
-        return getCommonTemplatesCB(null, tempalate,
-          lodash.join(missingTagIds, "|"));
-      }
+        try{
+          let tagIdsArray = _.pluck(additionalValues, "fieldId");
+          let personTagIds = lodash.sortedUniq(tagIdsArray);
+          let usedTagIds =
+          lodash.map(lodash.split(tempalate.usedTagIds, "|"), lodash.parseInt);
+          let missingTagIds = lodash.difference(usedTagIds, personTagIds);
+          return getCommonTemplatesCB(null, tempalate,
+            lodash.join(missingTagIds, "|"));
+        } catch (chooseCommonTempErr) {
+          logger.error({
+            error: chooseCommonTempErr,
+            stack: chooseCommonTempErr.stack,
+            input: {campign: campaign, person: person,
+              additionalValues: additionalValues, followup: followup
+            }
+          });
+          return getCommonTemplatesCB(chooseCommonTempErr);
+        } //catch
+      } //if(tempalate.usedTagIds)
+
       return getCommonTemplatesCB(null, tempalate);
     });
   };
@@ -255,7 +273,7 @@ module.exports = function(CampaignTemplate) {
    * @author Ramanavel Selvaraju
    */
   CampaignTemplate.getAlternateTemplate = (campaign, person, additionalValues,
-    missingTagIds, getAlternateTemplateCB) => {
+    missingTagIds, followup, getAlternateTemplateCB) => {
     CampaignTemplate.find({
       where: {
         and: [{
@@ -264,15 +282,20 @@ module.exports = function(CampaignTemplate) {
           personId: null
         }, {
           missingTagIds: missingTagIds
+        }, {
+          followUpId: followup ? followup.id : null
         }]
       }
-    }, function(campaignTemplatesErr, campaignTemplates) {
+    }, (campaignTemplatesErr, campaignTemplates) => {
 
       if (campaignTemplatesErr) {
         logger.error("Error Occured on getAlternateTemplate", {
-          campaign: campaign,
-          person: person,
-          error: campaignTemplatesErr
+          stack: campaignTemplatesErr.stack,
+          error: campaignTemplatesErr,
+          input: {
+            campign: campaign, person: person, followup: followup,
+            additionalValues: additionalValues, missingTagIds: missingTagIds
+          }
         });
         return getAlternateTemplateCB(campaignTemplatesErr);
       }
@@ -283,11 +306,10 @@ module.exports = function(CampaignTemplate) {
         error.name = "alternateTemplateNotFound";
         logger.error({
           error: error,
+          stack: error.stack,
           input: {
-            campign: campaign,
-            person: person,
-            additionalValues: additionalValues,
-            missingTagIds: missingTagIds
+            campign: campaign, person: person, followup: followup,
+            additionalValues: additionalValues, missingTagIds: missingTagIds
           }
         });
         return getAlternateTemplateCB(error);
@@ -306,30 +328,40 @@ module.exports = function(CampaignTemplate) {
    * @author Ramanavel Selvaraju
    */
   CampaignTemplate.personalize = (template, fieldValues, personalizeCB) => {
-    let spanTags = template.match(/<span class=("|')(tag)(.*?)(<\/span>)/g);
-    async.eachSeries(spanTags, (spanTag, spanTagsCB) => {
-      let spanDataId = spanTag.match(/data-id=("|')(\d*)("|')/g);
-      spanDataId = lodash.replace(spanDataId, /("|')/g, `"`);
-      let fieldId = spanDataId.split(/"/)[1];
-      let fieldValue = lodash.find(fieldValues,
-                lodash.matchesProperty("fieldId", lodash.toInteger(fieldId)));
-      if(fieldValue) {
-        template = lodash.replace(template, spanTag, fieldValue.value);
-        spanTagsCB(null);
-      } else {
-        let error = new Error();
-        error.message = `Tag id: ${fieldId} not found in fieldvalues :
-                                                              ${fieldValues}`;
-        error.name = "smartTagNotFound";
-        return spanTagsCB(error);
-      }
-    }, (spanTagsErr) => {
-      if(spanTagsErr){
-        logger.error("Error on CampaignTemplate.personalize",
+    try {
+      let spanTags = template.match(/<span class=("|')(tag)(.*?)(<\/span>)/g);
+      async.eachSeries(spanTags, (spanTag, spanTagsCB) => {
+        let spanDataId = spanTag.match(/data-id=("|')(\d*)("|')/g);
+        spanDataId = lodash.replace(spanDataId, /("|')/g, `"`);
+        let fieldId = spanDataId.split(/"/)[1];
+        let fieldValue = lodash.find(fieldValues,
+                  lodash.matchesProperty("fieldId", lodash.toInteger(fieldId)));
+        if(fieldValue) {
+          template = lodash.replace(template, spanTag, fieldValue.value);
+          spanTagsCB(null);
+        } else {
+          let error = new Error();
+          error.message = `Tag id: ${fieldId} not found in fieldvalues :
+                                                                ${fieldValues}`;
+          error.name = "smartTagNotFound";
+          return spanTagsCB(error);
+        }
+      }, (spanTagsErr) => {
+        if(spanTagsErr){
+          logger.error("Error on CampaignTemplate.personalize",
                                                           {error: spanTagsErr});
-      }
-      return personalizeCB(spanTagsErr, template);
-    });
+        }
+        return personalizeCB(spanTagsErr, template);
+      });
+    } catch(personalizeCatchErr) {
+      logger.error({
+        error: personalizeCatchErr,
+        stack: personalizeCatchErr.stack,
+        input: {template: template, fieldValues: fieldValues}
+      });
+      return personalizeCB(personalizeCatchErr);
+    }
+
   };
 
   /**

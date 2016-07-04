@@ -8,44 +8,38 @@ import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 module.exports = function(Person) {
 
   /**
-   * Gets people using list object and checks if email is already
-   * generated or not if not it generates the email
+   * Gets people using list object and checks for the eligibility to generate
+   * the email or a followup email and pushing to the sending queue
    *
    * @param  {[campaign]} campaign
    * @param  {[list]} list
    * @param  {[List]} listIds
+   * @param  {[followup]} followup
    * @param  {[function]} getPoepleAndGenerateEmailCB [callback]
    * @author Ramanavel Selvaraju
    */
-  Person.getPoepleAndGenerateEmail = (campaign, list, listIds,
+  Person.getPoepleAndGenerateEmail = (campaign, list, listIds, followup,
     getPoepleAndGenerateEmailCB) => {
 
     list.people((peopleFindErr, people) => {
 
       if (peopleFindErr) {
         logger.error("Error on fing the people using list", {
-          list: list,
-          error: peopleFindErr
+          list: list, listIds: listIds, followup: followup,
+          error: peopleFindErr, stack: peopleFindErr.stack
         });
         return getPoepleAndGenerateEmailCB(peopleFindErr);
       }
 
       async.eachSeries(people, (person, peopleEachCB) => {
 
-        Person.app.models.emailQueue.checkEmailExists(campaign, person,
-          (checkEmailExistsErr, isEmailgenerated) => {
-            if (checkEmailExistsErr || isEmailgenerated) {
+        validatePersonToGenerate(campaign, person,
+          followup, (checkEmailExistsErr, isEligible) => {
+            if (checkEmailExistsErr || !isEligible) {
               return peopleEachCB(checkEmailExistsErr);
             }
-            //return peopleEachCB(null);
             Person.app.models.campaign.generateEmail(campaign, person,
-              listIds, (generateEmailErr) => {
-                if (generateEmailErr) {
-                  logger.error({
-                    person: person,
-                    error: generateEmailErr
-                  });
-                }
+              listIds, followup, (generateEmailErr) => {
                 peopleEachCB(generateEmailErr);
               }); //campaign.generateEmail
 
@@ -57,6 +51,67 @@ module.exports = function(Person) {
     }); //list.people
   };
 
+  /**
+   * checks in the unsubscribe model before generating the email
+   * checks wether the person is eligible to generate email or a followup email
+   * first checks wheter the email is already generated or not
+   * then if followup object is there means it goes further to check the eligibility
+   * of person using the campaignAudit table
+   * returns true if eligible to generate
+   * @param  {[type]}  campaign
+   * @param  {[type]}  person
+   * @param  {[type]}  followup
+   * @param  {function} validateCB [callback]
+   * @return {[Boolean]}
+   * @author Ramanavel Selvaraju
+   */
+  const validatePersonToGenerate = (campaign, person, followup, validateCB) => {
+    async.series({
+      eligible: isEligibleToGenerate.bind(null, campaign, person, followup)
+    }, (seriesErr, results) => {
+      if(seriesErr) {
+        return validateCB(seriesErr);
+      }
+      return validateCB(null, results.eligible);
+    });
+  };
+
+  /**
+   * checks wether the person is eligible to generate email or a followup email
+   * first checks wheter the email is already generated or not
+   * then if followup object is there means it goes further to check the eligibility
+   * of person using the campaignAudit table
+   * returns true if eligible to generate
+   * @param  {[type]}  campaign
+   * @param  {[type]}  person
+   * @param  {[type]}  followup
+   * @param  {function} isEligibleCB [callback]
+   * @return {[Boolean]}
+   * @author Ramanavel Selvaraju
+   */
+  const isEligibleToGenerate = (campaign, person, followup, isEligibleCB) => {
+    //Todo : check for unsubscribe
+    Person.app.models.emailQueue.checkEmailExists(campaign, followup, person,
+      (checkEmailExistsErr, isEligible) => {
+        if(checkEmailExistsErr || !followup || !isEligible){
+          return isEligibleCB(checkEmailExistsErr, isEligible);
+        }
+        Person.app.models.campaignAudit.isEligibleForFollowup(campaign,
+          person, followup, (isFollowupEligibleErr, isFollowupEligible) => {
+            return isEligibleCB(isFollowupEligibleErr, isFollowupEligible);
+        });
+      });
+  };
+
+  /**
+   * prepares person object with latest field values
+   * @param  {[Campaign]} campaign
+   * @param  {[Person]} person
+   * @param  {[Array]} listIds
+   * @param  {[type]} preparePersonWithExtraFieldsCB [callback]
+   * @return {List[AdditionalFieldValue]}
+   * @author Ramanavel Selvaraju
+   */
   Person.preparePersonWithExtraFields = (campaign, person, listIds,
     preparePersonWithExtraFieldsCB) => {
     Person.app.models.additionalFieldValue.find({

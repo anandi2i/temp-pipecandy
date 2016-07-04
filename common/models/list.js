@@ -12,22 +12,25 @@ module.exports = function(List) {
    * corresponding person
    *
    * @param  {[campaign]} campaignObject
+   * @param  {[followup]} followupObject
    * @param  {[function]} getPoepleAndGenerateEmailCB [callback]
    * @return {[void]}
    * @author Ramanavel Selvaraju
    */
-  List.getListAndSaveEmail = (campaign, getListAndSaveEmailCB) => {
+  List.getListAndSaveEmail = (campaign, followup, getListAndSaveEmailCB) => {
     campaign.lists((listErr, lists) => {
       if(listErr) {
-        logger.error("Error on getting the lists for a  campaign",
-          {campaign: campaign, error: listErr});
-          return getListAndSaveEmailCB(listErr);
+        logger.error("Error on getting the lists for a  campaign", {
+          campaign: campaign, followup:followup,
+          error: listErr, stack: listErr.stack
+        });
+        return getListAndSaveEmailCB(listErr);
       }
 
-      let listIds = _.pluck(lists, "id");
+      const listIds = _.pluck(lists, "id");
       async.eachSeries(lists, (list, listsCB) => {
         List.app.models.person.getPoepleAndGenerateEmail(campaign, list,
-          listIds, (getPoepleByListForEmailErr) => {
+          listIds, followup, (getPoepleByListForEmailErr) => {
             listsCB(getPoepleByListForEmailErr);
           });
       }, (asyncEachErr) => {

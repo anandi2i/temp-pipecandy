@@ -70,7 +70,7 @@ module.exports = function(EmailLink) {
           stack: linkFindErr.stack});
         return res.redirect(config.redirectURL);
       }
-      //If the request is from www.pipecandy.com alone process it, else just
+      //If the request is not from www.pipecandy.com alone process it, else just
       //redirect it
       if(req.headers.referer !== config.emailHost){
         isCampaignSent(reqParams.campaignId,
@@ -488,10 +488,11 @@ module.exports = function(EmailLink) {
 
 
 
-  //npm run methods
-  EmailLink.getOrSave = (campaign, link, getOrSaveCB) => {
+//npm run methods
+  EmailLink.getOrSave = (campaign, link, followup, getOrSaveCB) => {
     EmailLink.find({where: {and: [{campaignId: campaign.id},
-      {linkurl: link}]}}, (emailLinkExistsFindErr, emailLinks)=>{
+      {linkurl: link}, {followUpId: followup ? followup.id : null}]
+    }}, (emailLinkExistsFindErr, emailLinks)=>{
       if(emailLinkExistsFindErr) {
         logger.error("Check link Exists in emailLinks Find Error", {
           error: emailLinkExistsFindErr,
@@ -501,13 +502,16 @@ module.exports = function(EmailLink) {
         return getOrSaveCB(emailLinkExistsFindErr);
       }
       if(lodash.isEmpty(emailLinks)) {
-        EmailLink.create({linkurl: link, clickedCount: 0,
-           campaignId: campaign.id
-        }, (emailLinkEntryDataErr, emailLink) => {
+        let linkObj = {linkurl: link, clickedCount: 0, campaignId: campaign.id};
+        if(followup) {
+          linkObj.followUpId = followup.id;
+        }
+        EmailLink.create(linkObj, (emailLinkEntryDataErr, emailLink) => {
             if(emailLinkEntryDataErr) {
-              logger.error("Check link Exists in emailLinks Find Error", {
+              logger.error("Create emailLinks Error", {
                 error: emailLinkEntryDataErr,
                 campaign: campaign,
+                followup: followup,
                 link: link
               });
               return getOrSaveCB(emailLinkExistsFindErr);

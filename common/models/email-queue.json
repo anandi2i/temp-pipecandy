@@ -51,6 +51,9 @@
     },
     "stoppedReason": {
       "type": "string"
+    },
+    "threadId": {
+      "type": "String"
     }
   },
   "validations": [],

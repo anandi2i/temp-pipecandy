@@ -50,7 +50,7 @@
     "followUp": {
       "type": "belongsTo",
       "model": "followUp",
-      "foreignKey": "followupId"
+      "foreignKey": "followUpId"
     }
   },
   "acls": [{

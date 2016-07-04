@@ -1,6 +1,7 @@
 "use strict";
 
 import async from "async";
+import lodash from "lodash";
 import logger from "../../server/log";
 import moment from "moment-timezone";
 
@@ -14,16 +15,18 @@ module.exports = function(FollowUp) {
  * @author Aswin Raj A
  */
 FollowUp.prepareScheduledAt = (campaignId, prepareScheduledAtCB) => {
-  FollowUp.app.models.find({
+  FollowUp.find({
     where : {
       campaignId : campaignId
     },
     order: "stepNo ASC",
   }, (followUpsFindErr, followUps) => {
-    if(followUpsFindErr || !followUps.length){
+    if(followUpsFindErr || lodash.isEmpty(followUps)){
       logger.error("Error while finding followups", {error: followUpsFindErr,
-        stack: followUpsFindErr.stack});
-      return prepareScheduledAtCB(followUpsFindErr);
+        stack: followUpsFindErr ? followUpsFindErr.stack : null});
+      const notFound = "Campaign not Found";
+      return prepareScheduledAtCB(followUpsFindErr ? followUpsFindErr
+         : new Error(notFound));
     }
     let previousScheduledDate = null;
     async.eachSeries(followUps, (followUp, followUpCB) => {
@@ -34,12 +37,13 @@ FollowUp.prepareScheduledAt = (campaignId, prepareScheduledAtCB) => {
         getPreviousScheduledDate,
         calculateNextFollowupdate,
         updateFollowUp
-      ], (asyncErr, result) => {
+      ], (asyncErr, newFollowupDate) => {
         if(asyncErr){
           logger.error("Error while updating followups", {error: asyncErr,
             stack: asyncErr.stack});
           return followUpCB(asyncErr);
         }
+        previousScheduledDate = newFollowupDate;
         followUpCB(null);
       });
     }, (asyncErr) => {
@@ -117,20 +121,18 @@ const calculateNextFollowupdate = (scheduledDate, followUp,
   const systemTimeZone = moment().format("Z");
   try {
     const one = 1;
-
+    scheduledDate = scheduledDate ? scheduledDate : new Date();
     const formatedDate = new Date(scheduledDate);
     const newDate = moment([formatedDate.getFullYear(),
-      formatedDate.getMonth()+one, formatedDate.getDate()])
-                    .add(followUp.days, 'days').format();
+      formatedDate.getMonth(), formatedDate.getDate()])
+                .add(followUp.daysAfter, "days").format("YYYY-MM-DDTHH:mm:ss");
     const newformatedDate = new Date(newDate);
     const dateString = (newformatedDate.getMonth()+one) + " " +
     newformatedDate.getDate() + " " + newformatedDate.getFullYear();
     const newFollowupDate = new Date(dateString + " " + followUp.time +
     " " + systemTimeZone);
 
-    previousScheduledDate = newFollowupDate;
-    calculateNextFollowupdateCB(null, followUp, previousScheduledDate);
-
+    calculateNextFollowupdateCB(null, followUp, newFollowupDate);
   } catch (err) {
     logger.error("FollowUp date calculation error", {error: err,
       stack: err.stack});
@@ -147,14 +149,14 @@ const calculateNextFollowupdate = (scheduledDate, followUp,
  * @author Aswin Raj A
  */
 const updateFollowUp = (followUp, followUpScheduledDate, updateFollowUpCB) => {
-  followUp.updateAttribute(scheduledAt, followUpScheduledDate,
+  followUp.updateAttribute("scheduledAt", followUpScheduledDate,
     (followUpUpdateErr, updatedFollowup) => {
       if(followUpUpdateErr){
         logger.error("Error while updating followUps",
         {error: followUpUpdateErr, stack: followUpUpdateErr.stack});
         return updateFollowUpCB(followUpUpdateErr);
       }
-      updateFollowUpCB(null);
+      updateFollowUpCB(null, followUpScheduledDate);
   });
 };
 
@@ -163,6 +165,7 @@ const updateFollowUp = (followUp, followUpScheduledDate, updateFollowUpCB) => {
  * - from destroyCampaignElements process
  * @param  {[campaign]} campaign
  * @param  {[function]} destroyByCampaignCB
+ * @author Aswin Raj A
  */
 FollowUp.destroyByCampaign = (campaign, destroyByCampaignCB) => {
   campaign.followUps.destroyAll((followUpsDestroyErr) => {
@@ -181,6 +184,7 @@ FollowUp.destroyByCampaign = (campaign, destroyByCampaignCB) => {
  * @param  {[campaign]} campaign
  * @param  {[followUpObjects]} followUpObjects
  * @param  {[function]} createFollowUpsCB
+ * @author Aswin Raj A
  */
 FollowUp.createFollowUpElements = (campaign, followUpObjects,
   createFollowUpsCB) => {
@@ -255,6 +259,113 @@ const createCampaignTemplate = (createdFollowUp, campaign,
   });
 };
 
+//npm run calls
+  /**
+   * Constructing the followup emails and save in the email queue table
+   * This will take care of common templates,
+   * person wise templates and missing tag wise templates
+   * and also support the multiple common templates.
+   * checks wether the person is eligible for followup using campaignAudit model
+   * isFollowupEligible property
+   *
+   * @param  {[number]} campaignId [description]
+   * @param  {[function]} assembleEmailsCB [callback function]
+   * @return {[string]} [success message]
+   * @author Ramanavel Selvaraju
+   */
+  FollowUp.assembleEmails = (followup, assembleEmailsCB) => {
+
+    followup.campaign((campaignErr, campaign) => {
+
+      if(campaignErr) {
+       logger.error("Error on FollowUp.assembleEmails : ",
+          {followup: followup, error: campaignErr, stack: campaignErr.stack});
+       return assembleEmailsCB(campaignErr);
+      }
+
+      FollowUp.app.models.list.getListAndSaveEmail(campaign, followup,
+      (getPoepleAndGenerateEmailErr) => {
+        return assembleEmailsCB(getPoepleAndGenerateEmailErr,
+          "Generated emails for followup:" + followup);
+      });//list.getListAndSaveEmail
+
+    });//followup.campaign
+
+  };
+
+  /**
+   * get the campaign email to get the subject from the campagin audit
+   * inorder to get the thread view gmail and other mail clients are using same
+   * subject. We are returning the complete campaign audit object
+   * Here we are assuming campaignAudit will have one object peruser percampaign
+   *
+   * @param  {[Campaign]} campaign
+   * @param  {[Person]} person
+   * @param  {[FollowUp]} followup
+   * @param  {[EmailQueue]} email        [emailQueue Object]
+   * @param  {[fucntion]} preapreSubjectCB [callback]
+   * @return {[CampaignAudit]}        [campaignAudit[0]]
+   * @author Ramanavel Selvaraju
+   */
+  FollowUp.preapreSubject = (campaign, person, followup, email,
+    preapreSubjectCB) => {
+      FollowUp.app.models.campaignAudit.find({where: {and: [
+        {personId: person.id}, {campaignId: campaign.id}, {followUpId: null}
+      ]}
+      }, (campaignAuditErr, campaignAudit) => {
+        if(campaignAuditErr || lodash.isEmpty(campaignAudit)) {
+          logger.error({
+            error: campaignAuditErr ? campaignAuditErr : "Audit not found",
+            stack: campaignAuditErr ? campaignAuditErr.stack : "",
+            email: email
+          });
+          return preapreSubjectCB(campaignAuditErr);
+        }
+        return preapreSubjectCB(null, campaignAudit[0]);
+      });
+    };
+
+  /**
+   * Constructs the reply email using old emails like gmail threaded view
+   *
+   * @param  {[campaign]} campaign
+   * @param  {[person]} person
+   * @param  {[followup]} followup
+   * @param  {[EmailQueue]} email
+   * @param  {[function]} preapreContentCB
+   * @author Ramanavel Selvaraju
+   */
+  FollowUp.preapreContent = (campaign, person, followup, email,
+    preapreContentCB) => {
+      FollowUp.app.models.campaignAudit.find({where: {and: [
+        {personId: person.id}, {campaignId: campaign.id}
+      ]},
+      order: "createdAt DESC",
+      limit: 1
+      }, (campaignAuditErr, campaignAudit) => {
+        if(campaignAuditErr || lodash.isEmpty(campaignAudit)) {
+          logger.error({
+            error: campaignAuditErr ? campaignAuditErr : "Audit not found",
+            stack: campaignAuditErr ? campaignAuditErr.stack : "",
+            email: email
+          });
+          return preapreContentCB(campaignAuditErr);
+        }
+        const sentAt = moment(campaignAudit[0].createdAt);
+        let content = "";
+        content += `<div>On ${sentAt.format(("ddd, MMM DD, YYYY"))} `;
+        content += `at ${sentAt.format(("h:mm A"))}, `;
+        content += `&lt;${campaignAudit[0].fromEmail}&gt; wrote:</div>`;
+        const blackQuote = `<blockquote class="gmail_quote"
+        style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">`;
+        content += blackQuote;
+        content += campaignAudit[0].content;
+        content += "</blockquote>";
+        return preapreContentCB(null, content);
+      });
+  };
+
+//observers
   /**
    * Updates the updatedAt column with current Time
    * @param ctx Context

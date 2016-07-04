@@ -26,7 +26,7 @@ dataSource.autoupdate(function(err) {
           console.error("Error on default values : ", parallelErr);
         }
         console.log("Data migrated: \n", response);
-        process.exit(1);
+        process.exit(0);
     });
 
   });

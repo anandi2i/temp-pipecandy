@@ -73,8 +73,15 @@ function getFollowUpIds(callback) {
  */
 function sendFollowUpMail(followUps, callback) {
   async.eachSeries(followUps, function(followUp, followUpCB) {
-    // TODO: Call Assembler to send Follow Up Mail
-    followUpCB(null);
+    App.followUp.assembleEmails(followUp, (emailErr, result) => {
+      if(emailErr) {
+        console.error("Error while assembleEmails", emailErr);
+        followUpCB(emailErr);
+      }
+      console.log(result);
+      followUpCB(null);
+    });
+
   }, function done() {
     callback(null, followUps);
   });

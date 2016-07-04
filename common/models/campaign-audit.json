@@ -33,6 +33,10 @@
       "type": "string",
       "required": true
     },
+    "isEligibleToFollowUp": {
+      "type": "boolean",
+      "default": true
+    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"
