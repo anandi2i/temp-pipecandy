@@ -4,6 +4,7 @@ import logger from "../../server/log";
 import lodash from "lodash";
 import async from "async";
 import config from "../../server/config.json";
+import constants from "../../server/utils/constants";
 
 module.exports = function(EmailLink) {
 
@@ -243,33 +244,36 @@ module.exports = function(EmailLink) {
    */
   EmailLink.getRecentCampaignLinkMetrics = (ctx,
     getRecentCampaignLinkMetricsCB) => {
-
-
     async.waterfall([
-      async.apply(getRecentCampaign, ctx, campaignLinkMetrics),
+      async.apply(getRecentCampaign, ctx),
       getEmailLinksForCampaign,
       getClickedCountForEmailLinks
     ], (asyncErr, recentCampaignLinkMetrics) => {
-      if(asyncErr){
-        logger.error("Error while getting recent campaign link metrics",
-        {error: asyncErr, stack: asyncErr.stack});
-        return getRecentCampaignLinkMetricsCB(asyncErr);
-      }
-      getRecentCampaignLinkMetricsCB(null, recentCampaignLinkMetrics);
-    });
-  };
+       if(asyncErr){
+         if(asyncErr === constants.EMPTYOBJECT){
+          logger.info("No campaign for the user");
+          return getRecentCampaignLinkMetricsCB(null, {});
+         }
+         logger.error("Error while getting recent campaign link metrics",
+         {error: asyncErr, stack: asyncErr.stack});
+         return getRecentCampaignLinkMetricsCB(asyncErr);
+       }
+       getRecentCampaignLinkMetricsCB(null, recentCampaignLinkMetrics);
+     });
+   };
 
 
   /**
    * For process getRecentCampaignLinkMetrics:
    * - Get the recent campaign for the current user
+   * @todo Need to handle if there is no campaign for the user, as of now empty
+   * object is returned
    * @param  {[ctx]} ctx
-   * @param  {[campaignLinkMetrics]} campaignLinkMetrics
    * @param  {[function]} getRecentCampaignCB
-   * @return {[campaign, campaignLinkMetrics]}
+   * @return {[campaign]}
    * @author Aswin Raj A
    */
-  const getRecentCampaign = (ctx, campaignLinkMetrics, getRecentCampaignCB) => {
+  const getRecentCampaign = (ctx, getRecentCampaignCB) => {
     EmailLink.app.models.campaign.find({
       where: {
         "createdBy": ctx.req.accessToken.userId
@@ -277,11 +281,15 @@ module.exports = function(EmailLink) {
       order: "lastrunat DESC",
       limit: 1
     }, (campaignFindErr, campaigns) => {
-      if(campaignFindErr || !campaigns.length){
+      if(campaignFindErr){
         logger.error("Error while finding campaign:",
         {ctx:ctx.req.accessToken.userId, error: campaignFindErr,
           stack: campaignFindErr.stack});
         return getRecentCampaignCB(campaignFindErr);
+      }
+      if(!campaigns.length){
+        logger.info("No campaign for the user");
+        return getRecentCampaignCB(constants.EMPTYOBJECT);
       }
       return getRecentCampaignCB(null, campaigns[0]);
     });
@@ -302,11 +310,15 @@ module.exports = function(EmailLink) {
         campaignId: campaign.id
       }
     }, (emailLinkfinderr, emailLinks) => {
-      if(emailLinkfinderr || !emailLinks.length){
+      if(emailLinkfinderr){
         logger.error("Error while finding emailLinks for campaign:",
         {campaign:campaign, error: emailLinkfinderr,
           stack: emailLinkfinderr.stack});
         return getEmailLinksForCampaignCB(emailLinkfinderr);
+      }
+      if(!emailLinks.length){
+        logger.info("No email links for the campaign");
+        return getEmailLinksForCampaignCB(constants.EMPTYOBJECT);
       }
       return getEmailLinksForCampaignCB(null, emailLinks, campaign);
     });
@@ -336,7 +348,7 @@ module.exports = function(EmailLink) {
           }]
         }
       }, (clickedEmailLinkFindErr, clickedEmailLinks) => {
-        if(clickedEmailLinkFindErr || !clickedEmailLinks.length){
+        if(clickedEmailLinkFindErr){
           logger.error("Error while finding clickedEmailLinks:",
           {emailLinks:emailLinks, campaign:campaign,
             error: clickedEmailLinkFindErr,

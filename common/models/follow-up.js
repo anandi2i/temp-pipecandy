@@ -149,7 +149,7 @@ FollowUp.destroyByCampaign = (campaign, destroyByCampaignCB) => {
        {error: followUpsDestroyErr, stack: followUpsDestroyErr.stack});
       return destroyByCampaignCB(followUpsDestroyErr);
     }
-    return destroyByCampaignCB(null);
+    return destroyByCampaignCB(null, "Deleted successfully!");
   });
 };
 
@@ -192,6 +192,7 @@ FollowUp.createFollowUpElements = (campaign, followUpObjects,
  * @return {[createdFollowUp, campaign, followUpObj]}
  */
 const createFollowup = (campaign, followUpObj, createFollowupCB) => {
+  followUpObj.followUp.campaignId = campaign.id;
   FollowUp.create(followUpObj.followUp,
     (followUpCreateErr, createdFollowUp) => {
     if(followUpCreateErr){

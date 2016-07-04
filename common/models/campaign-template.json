@@ -8,12 +8,10 @@
   },
   "properties": {
     "subject": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "content": {
       "type": "string",
-      "required": true,
       "postgresql": {
         "dataType": "text"
       }

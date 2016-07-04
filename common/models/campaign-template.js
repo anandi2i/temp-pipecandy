@@ -345,7 +345,7 @@ module.exports = function(CampaignTemplate) {
         return destroyByCampaignCB("Error while destroying campaignTemplates\
          for campaign: ", campaignTemplatesDestroyErr);
       }
-      return destroyByCampaignCB(null);
+      return destroyByCampaignCB(null, "Deleted successfully!");
     });
   };
 

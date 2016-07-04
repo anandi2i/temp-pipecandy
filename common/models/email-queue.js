@@ -84,7 +84,7 @@ module.exports = function(EmailQueue) {
         {error: emailQueueDestroyErr, stack: emailQueueDestroyErr.stack});
         return destroyByCampaignCB(emailQueueDestroyErr);
       }
-      return destroyByCampaignCB(null);
+      return destroyByCampaignCB(null, "Deleted successfully!");
     });
   };
 
