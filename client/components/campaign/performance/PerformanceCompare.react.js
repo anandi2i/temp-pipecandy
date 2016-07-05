@@ -1,5 +1,4 @@
 import React from "react";
-import TagNameMenu from "../../TagNameMenu.react";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
 /**
@@ -8,25 +7,8 @@ import CampaignStore from "../../../stores/CampaignStore";
 class PerformanceCompare extends React.Component {
   constructor(props) {
     super(props);
-    // TODO remove static data
     this.state = {
       count: [],
-      tab: [
-        {
-          name: "Performance compared with",
-          class: "menu"
-        },
-        {
-          name: "Previous run",
-          class: "menu"
-        },
-        {
-          name: "Industry average",
-          class: "menu"
-        }
-      ],
-      tabs: ["1", "2"],
-      activeTab: "1"
     };
   }
 
@@ -45,24 +27,13 @@ class PerformanceCompare extends React.Component {
   }
 
   onStoreChange = () => {
-    console.log(CampaignStore.getCampaignMetrics());
-      this.setState({
-        count:CampaignStore.getCampaignMetrics()
-      });
-  }
-  /**
-   * handle tab navigations
-   * @param {string} index active-tab
-   */
-  handleClick = (index) => {
     this.setState({
-      activeTab: index
+      count:CampaignStore.getCampaignMetrics()
     });
   }
 
   render() {
     const emptyArray = 0;
-    const {activeTab, tab, tabs} = this.state;
     const metricData = this.state.count;
     return (
       <div>
@@ -70,12 +41,8 @@ class PerformanceCompare extends React.Component {
         metricData && metricData.length > emptyArray
         ?
         <div className="container">
-          <div className="row tag-name-menu">
-            <TagNameMenu handleClick={this.handleClick}
-              active={activeTab}
-              tab={tab} />
-          </div>
-          <div className="row camp-chip-container" style={{display: activeTab === tabs[0] ? "block" : "none"}}>
+          <div className="row main-head">Campaign stats</div>
+          <div className="row camp-chip-container">
             {
               this.state.count.map((list, key) => {
                 return (
@@ -88,26 +55,23 @@ class PerformanceCompare extends React.Component {
                         <div>{list.percentage}</div>
                         <span>{list.count}</span>
                       </div>
-                      {
+                      {/*
+                        TODO This comparison part comes under RUN concepts
                         list.status
                           ? <div className="status">
                               <div className="icon"><i className="mdi mdi-menu-up"></i></div>
                               <div className="count">{list.status}</div>
                             </div>
                           : ""
-                      }
+                      */}
                     </div>
                   </div>
                 );
               })
             }
           </div>
-          <div className="row camp-chip-container" style={{display: activeTab === tabs[1] ? "block" : "none"}}>
-            {/* TODO Add UI */}
-            <h2>Sample Content Tab2</h2>
-          </div>
         </div>
-        :""
+        : ""
       }
       </div>
     );

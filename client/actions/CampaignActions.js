@@ -102,6 +102,24 @@ const CampaignActions = {
       actionType: Constants.CHECK_WORDIO_VARIATIONS,
       content : content
     });
+  },
+  /**
+   * To get campaign other stats metrics
+   */
+  getOtherStatsMetrics(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_OTHER_STATS_METRICS,
+      id : campaignId
+    });
+  },
+  /**
+   * To get is campaign metrics is available
+   */
+  getIsExistingCampaign(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_IS_EXISTING_CAMPAIGN,
+      id : campaignId
+    });
   }
 };
 

@@ -64,6 +64,35 @@ const CampaignApi = {
    */
   getWordIoVariations(content) {
     return api.post("api/campaignTemplates/wordAI", content);
+  },
+  /**
+   * Get other campaignMetrics details
+   * @param  {number|boolean} campaignId - check if campaign id
+   * @return {object}                    - campaignMetrics
+   */
+  getOtherCampaignMetrics(campaignId) {
+    let campaignReportURL;
+    if(campaignId){
+      campaignReportURL = `api/campaigns/${campaignId}/campaignReport`;
+    } else {
+      campaignReportURL = "api/campaigns/recentCampaignReport";
+    }
+    return api.get(campaignReportURL);
+  },
+  /**
+   * Get is campaignMetrics is available
+   * @param  {number|boolean} campaignId - check if campaign id
+   * @return {boolean}                   - is available
+   */
+  getIsExistingCampaign(campaignId) {
+    let campaignReportURL;
+    if(campaignId){
+      campaignReportURL = `api/campaigns/${campaignId}/exists`;
+    } else {
+      //TODO need to change API
+      campaignReportURL = `api/campaigns/${campaignId}/exists`;
+    }
+    return api.get(campaignReportURL);
   }
 };
 

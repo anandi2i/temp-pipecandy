@@ -131,7 +131,7 @@ a {
     }
     i {
       float: right;
-      margin-top: 80px;
+      margin-top: -40px;
       font-size: 25px;
       cursor: pointer;
       margin-left: 5px;
@@ -139,7 +139,6 @@ a {
       @include rotate(0deg);
       transition: transform 0.5s;
       &.active {
-        margin-top: 80px;
         @include rotate(-180deg);
         transition: transform 0.5s;
       }
@@ -910,9 +909,12 @@ $lines-to-show: 8;
 .inline-tiny-mce {
   border: $border-1px;
   outline: 0 !important;
-  min-height: 40px;
+  min-height: 43px;
   padding: 10px;
   border-radius: 3px;
+}
+.tinymce-placeholder {
+  color: $modal-bg;
 }
 .mce-floatpanel {
   border: 0 !important;

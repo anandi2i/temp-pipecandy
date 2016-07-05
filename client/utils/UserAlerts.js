@@ -24,7 +24,9 @@ export const ErrorMessages = {
   "MinFileSize": "Select file size more the 10kb",
   "PasswordFields": "Please enter both password fields",
   "InValidFileType": "Please upload file of type csv/xls",
-  "SamePasswordUpdate": "Please update new different password"
+  "SamePasswordUpdate": "Please update new different password",
+  "EmptyEmailList": "Email list should not be empty",
+  "SmartTagIssues": "Fix all smart tag issues"
 };
 
 /**

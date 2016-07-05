@@ -151,18 +151,46 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
       source: allTags,
       delimiter: "#",
       items: 100,
-      insert: function(item) {
+      insert: (item) => {
         return constructSmartTags(item.classname, item.name, item.id);
       }
     },
-    setup : function(editor) {
-      editor.on("change", function(e) {
+    setup : (editor) => {
+      const editorId = editor.getElement().id;
+      editor.on("change", (e) => {
         changeCb(editor);
+      }).on("focus", (e) => {
+        const editorDom =  document.getElementById(editorId);
+        $(editorDom).find("a.tinymce-placeholder").remove();
+      }).on("blur", (e) => {
+        if(!editor.getContent()) {
+          let content = tinymcePlaceholder("content");
+          if(editorId === "emailSubject") {
+            content = tinymcePlaceholder("subject");
+          }
+          editor.setContent(content);
+        }
       });
     }
   });
 }
 window.initTinyMCE = initTinyMCE;
+
+/**
+ * Tinymce placeholder text for all editor
+ * @param  {string} holder - editor type
+ * @return {string}        - placeholder content
+ */
+function tinymcePlaceholder(holder) {
+  let placeHolder;
+  if(holder === "content"){
+    placeHolder = "<a class='tinymce-placeholder'>Click here to edit</a>";
+  } else {
+    placeHolder = "<a class='tinymce-placeholder'>Subject</a>";
+  }
+  return placeHolder;
+}
+window.tinymcePlaceholder = tinymcePlaceholder;
 
 function constructSmartTags(className, tagText, id) {
   return "<span data-tag='"+tagText+"' data-id='"+id+"' data-tag-name='"+tagText+"' class='tag "+className+"' contenteditable='false'>&lt;" +

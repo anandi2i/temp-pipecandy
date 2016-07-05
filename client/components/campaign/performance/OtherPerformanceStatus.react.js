@@ -1,7 +1,7 @@
 import React from "react";
 import TagNameMenu from "../../TagNameMenu.react";
 import CampaignActions from "../../../actions/CampaignActions";
-import CampaignStore from "../../../stores/CampaignStore";
+import CampaignReportStore from "../../../stores/CampaignReportStore";
 
 /**
  * Other Performance status dashboard component
@@ -9,8 +9,22 @@ import CampaignStore from "../../../stores/CampaignStore";
 class OtherPerformanceStatus extends React.Component {
   constructor(props) {
     super(props);
-    // TODO remove static data
-    this.state={
+    /**
+     * TODO remove static data
+     * Add new menu
+     *  {
+          name: "Last Month",
+          class: "menu"
+        },
+        {
+          name: "Last 3 Month",
+          class: "menu hide-on-700" // This tab will hide below 700px
+        },
+        tabs: ["new index"],
+     * @type {Object}
+     *
+     */
+    this.state = {
       count :[],
       tab: [
         {
@@ -18,74 +32,51 @@ class OtherPerformanceStatus extends React.Component {
           class: "menu"
         },
         {
-          name: "Today",
+          name: "Last 1 Month",
           class: "menu"
-        },
-        {
-          name: "Last Week",
-          class: "menu"
-        },
-        {
-          name: "Last Month",
-          class: "menu"
-        },
-        {
-          name: "Last 3 Month",
-          class: "menu hide-on-700"
-        },
-        {
-          name: "Specify Timeline",
-          class: "menu hide-on-700"
         }
       ],
       activeTab: "1",
-      tabs: ["1", "2", "3", "4", "5"],
-      otherStatusCount: [
-        {
-          "title": "emails sent",
-          "percentage": "1507",
-          "class": ""
-        },
-        {
-          "title": "actionable responses",
-          "percentage": "34",
-          "class": "text-blue"
-        },
-        {
-          "title": "avg. actionable responses per day",
-          "percentage": "6.8",
-          "class": ""
-        },
-        {
-          "title": "email ids found",
-          "percentage": "132456",
-          "class": "text-blue"
-        }
-      ]
+      tabs: ["1"],
+      otherStatsMetrics: []
     };
   }
 
 
   componentDidMount() {
-    const {campaignId} = this.props;
-    CampaignStore.addPerformanceStoreListener(this.onStoreChange);
-    if(!campaignId) {
-      CampaignActions.getRecentCampaignMetrics();
-    } else{
-      CampaignActions.getCurrentCampaignMetrics(campaignId);
-    }
+    CampaignReportStore.addOtherStatsChangeListener(this.onStoreChange);
+    CampaignActions.getOtherStatsMetrics(this.props.campaignId || false);
   }
 
   componentWillUnmount() {
-    CampaignStore.removePerformanceStoreListener(this.onStoreChange);
+    CampaignReportStore.removeOtherStatsChangeListener(this.onStoreChange);
   }
 
   onStoreChange = () => {
-      this.setState({
-        count:CampaignStore.getCampaignMetrics()
-      });
+    let otherStatsMetrics = CampaignReportStore.getOtherStatsMetrics();
+    this.setState({
+      otherStatsMetrics: [{
+          "title": "emails sent",
+          "percentage": otherStatsMetrics.sentEmails,
+          "class": ""
+        },
+        {
+          "title": "emails delivered",
+          "percentage": otherStatsMetrics.warmResponses,
+          "class": ""
+        },
+        {
+          "title": "warm responses",
+          "percentage": otherStatsMetrics.deliveredEmails,
+          "class": ""
+        },
+        {
+          "title": "followups done",
+          "percentage": otherStatsMetrics.followUpsSent,
+          "class": ""
+        }]
+    });
   }
-
 
 /**
  * handle tab navigations
@@ -109,7 +100,7 @@ class OtherPerformanceStatus extends React.Component {
           ?
           <div>
           <div className="row main-head">
-            Other status
+            Other stats
           </div>
           <div className="row tag-name-menu">
             <TagNameMenu handleClick={this.handleClick}
@@ -118,7 +109,7 @@ class OtherPerformanceStatus extends React.Component {
           </div>
           <div className="row camp-chip-container" style={{display: activeTab === tabs[0] ? "block" : "none"}}>
             {
-              this.state.otherStatusCount.map((list, key) => {
+              this.state.otherStatsMetrics.map((list, key) => {
                 return (
                   <div className="col s12 m3 s3" key={key}>
                     <div className="other-status">
@@ -136,22 +127,11 @@ class OtherPerformanceStatus extends React.Component {
               })
             }
           </div>
-          <div className="row camp-chip-container" style={{display: activeTab === tabs[1] ? "block" : "none"}}>
-            {/* TODO Add UI */}
-            <h2>Sample Content Tab2</h2>
-          </div>
-          <div className="row camp-chip-container" style={{display: activeTab === tabs[2] ? "block" : "none"}}>
-            {/* TODO Add UI */}
-            <h2>Sample Content Tab3</h2>
-          </div>
-          <div className="row camp-chip-container" style={{display: activeTab === tabs[3] ? "block" : "none"}}>
-            {/* TODO Add UI */}
-            <h2>Sample Content Tab4</h2>
-          </div>
-          <div className="row camp-chip-container" style={{display: activeTab === tabs[4] ? "block" : "none"}}>
-            {/* TODO Add UI */}
-            <h2>Sample Content Tab5</h2>
-          </div>
+          {/* New Tab Content
+            <div className="row camp-chip-container" style={{display: activeTab === tabs[1] ? "block" : "none"}}>
+              <h2>Sample Content Tab2</h2>
+            </div>
+          */}
           </div>
           : ""
         }

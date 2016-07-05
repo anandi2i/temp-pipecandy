@@ -10,6 +10,7 @@ import CampaignStore from "../../stores/CampaignStore";
 import UserStore from "../../stores/UserStore";
 import UserAction from "../../actions/UserAction";
 import CampaignActions from "../../actions/CampaignActions";
+import {ErrorMessages} from "../../utils/UserAlerts";
 
 class ScheduleEmail extends React.Component {
   constructor(props) {
@@ -74,18 +75,20 @@ class ScheduleEmail extends React.Component {
       tinyMCE.execCommand("mceRemoveEditor", true, "emailSubject");
     }
     initTinyMCE("#emailSubject", "", "", allTags, false, this.tinyMceSubCb);
-    const mainContent = this.props.selectedTemplate;
+    let mainContent = this.props.selectedTemplate;
     const tinyMceDelayTime = 1000;
     //TODO need to remove setTimeout
     if(mainContent){
       this.setState({
         emailContent: mainContent
-      }, () => {
-        setTimeout(function(){
-          tinyMCE.get("emailContent").setContent(mainContent);
-        }, tinyMceDelayTime);
       });
+    } else {
+      mainContent = tinymcePlaceholder("content");
     }
+    setTimeout(function() {
+      tinyMCE.get("emailContent").setContent(mainContent);
+      tinyMCE.get("emailSubject").setContent(tinymcePlaceholder("subject"));
+    }, tinyMceDelayTime);
   }
 
   tinyMceCb = (editor) => {
@@ -201,7 +204,7 @@ class ScheduleEmail extends React.Component {
       this.setState({
         followups: followups.concat({
           id: guid(),
-          content: "click here to edit",
+          content: tinymcePlaceholder("content"),
         })
       });
     }
@@ -287,6 +290,7 @@ class ScheduleEmail extends React.Component {
   */
   checkEmailContentError() {
     let followupsError = true;
+    let isValid = false;
     this.state.followups.map((val, key) => {
       let content = this.refs[`addFollowups${val.id}`].refs.issues;
       if(content.props.personIssues.length){
@@ -295,11 +299,15 @@ class ScheduleEmail extends React.Component {
     }, this);
     let mainEmailErr = this.refs.issues.state.personIssues.length;
     if(!this.state.errorCount && !mainEmailErr && followupsError){
-        return true;
+      if(this.state.emailList.length){
+        isValid = true;
+      } else {
+        displayError(ErrorMessages.EmptyEmailList);
+      }
+    } else {
+      displayError(ErrorMessages.SmartTagIssues);
     }
-    displayError("Fix all smart tag values");
-    console.log("Fix all smart tag values");
-    return false;
+    return isValid;
   }
 
   saveCampaignInfo = () => {
@@ -333,7 +341,7 @@ class ScheduleEmail extends React.Component {
           "mainEmail");
       }
       // Get followups details
-      mainEmailContent.followups = this.followupsDetails();
+      mainEmailContent.followUps = this.followupsDetails();
       this.setState((state) => ({
         mainEmailContent: mainEmailContent
       }), () => {

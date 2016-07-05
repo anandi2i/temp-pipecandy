@@ -9,7 +9,6 @@ import _ from "underscore";
 class CampaignReportHead extends React.Component {
   constructor(props) {
     super(props);
-    // TODO remove static data
     this.state = {
       campaignDetails: {}
     };
