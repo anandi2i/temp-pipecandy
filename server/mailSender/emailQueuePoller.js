@@ -1,16 +1,19 @@
-'use strict';
+"use strict";
 
-var CronJob = require('cron').CronJob;
+var CronJob = require("cron").CronJob;
 var campaignMailSender = require("../../server/mailSender/campaignMailSender");
 
 let isJobInProgress = false;
 
+/**
+ *  Registering Job To Poll Email Queue Table and initiates
+ *  Mail Sender to sent Emails
+ */
 var job = new CronJob({
-  cronTime: '* */2 * * * *',
+  cronTime: "*/2 * * * *", // Cron Expression to Run for every 2 minutes
   onTick: function() {
     if (!isJobInProgress) {
       isJobInProgress = true;
-      console.log("Cron is executing--", new Date().getTime());
       campaignMailSender.getEmailQueue( function (queuedMailsErr, queuedMails) {
         if (queuedMailsErr) {
           console.log("Error while getting queued Mails", queuedMailsErr);

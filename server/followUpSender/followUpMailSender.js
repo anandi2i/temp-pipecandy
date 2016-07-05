@@ -1,31 +1,48 @@
+"use strict";
+
 var async = require("async");
+var CronJob = require("cron").CronJob;
+var lodash = require("lodash");
 
-const dataSource = require(process.cwd() + "/server/server.js").dataSources
-  .psqlDs;
+const appConfig = process.cwd() + "/server/server.js";
+const dataSource = require(appConfig).dataSources.psqlDs;
 const App = dataSource.models;
-const interval = 10000;
 
-initFollowUp();
+let isJobInProgress = false;
 
 /**
- * Initiate Workflow for every interval
+ *  Registering Job To Poll Follow Up Table and initiates
+ *  Follow Up Sender to sent Follow Up Emails
  */
-function initFollowUp() {
-  setTimeout(initFollowUpWorkflow, interval);
-}
+var job = new CronJob({
+  cronTime: "*/2 * * * *", // Cron Expression to Run for every 2 minutes
+  onTick: function() {
+    if (!isJobInProgress) {
+      isJobInProgress = true;
+      initFollowUpWorkflow( function (err, result) {
+        isJobInProgress = false;
+        return;
+      });
+    }
+  },
+  start: false
+});
+
+job.start();
 
 /**
  * Workflow initiator Send Follow Up Mail
  */
-function initFollowUpWorkflow() {
+function initFollowUpWorkflow(callback) {
   async.waterfall([
     getFollowUpIds,
     sendFollowUpMail
-  ], function(waterFallErr, result) {
-    if(waterFallErr) {
-        console.error("Error while polling folloUp table", waterFallErr);
+  ], function(err, result) {
+    if(err) {
+        console.error("Error while polling folloUp table", err);
     }
-    initFollowUp();
+    console.log("Follow Ups Processed");
+    callback(err, result);
   });
 };
 
@@ -34,12 +51,10 @@ function initFollowUpWorkflow() {
  * @param  {Function} callback
  */
 function getFollowUpIds(callback) {
-  App.followUp.find({
-    where: {
-      isFollowUpGenerated: false
-    },
-    limit: 100
-  }, function(followUpsErr, followUps) {
+  App.followUp.getFolloUpsToSent( function(followUpsErr, followUps) {
+    if(lodash.isEmpty(followUps)) {
+      console.log("No Follow Ups to Sent");
+    }
     async.each(followUps, (followUp, followUpCB) => {
       followUp.updateAttribute("isFollowUpGenerated", true,
           (updateErr, updatedInst) => {

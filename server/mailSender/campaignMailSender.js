@@ -8,6 +8,7 @@ var async = require("async");
 var lodash = require("lodash");
 var config = require("../../server/config.json");
 var statusCodes = require("../../server/utils/status-codes");
+var constants = require("../../server/utils/constants");
 
 var gmailClass = google.gmail("v1");
 
@@ -76,8 +77,11 @@ function filterEmailQueue(emailQueue, filterEmailCB) {
           return (o.statusCode !== statusCodes.default.readyToSend)
               && (o.statusCode !== statusCodes.default.executingCampaign);
         });
-        updateErrorFlag(campaignsNotToRun, groupedEmailQueue,
-              function(error) {
+        const emailQueueToStop = lodash.flatMap(campaignsNotToRun, function(o) {
+          return groupedEmailQueue[o.id];
+        });
+        const reason = constants.default.STATUS_NOT_SUPPORTED;
+        updateErrorFlag(emailQueueToStop, reason, function(error) {
           updateErrorFlagCB(error, campaignsNotToRun);
         });
       },
@@ -91,10 +95,18 @@ function filterEmailQueue(emailQueue, filterEmailCB) {
           return groupedEmailQueue[o.id];
         });
         emailQueueCB(null, emailQueue);
+      },
+      function(unsubscribeCB) {
+        filterUnsubscribePerson(emailQueue, (error, filteredEmailQueue) => {
+          unsubscribeCB(null, filteredEmailQueue);
+        });
       }
     ],
     function(err, results) {
-      let emailQueue = results[1]; // Contains filtered Emails
+      const emailQueueCampSt = results[1]; // Contains filtered Emails By Campaign Status
+      const emailQueueUnsub = results[2]; // Contains filtered Emails By Unsubscription
+      const emailQueue = lodash.intersectionBy(
+            emailQueueCampSt, emailQueueUnsub, "id");
       filterEmailCB(null, emailQueue);
     });
   });
@@ -158,17 +170,21 @@ function getUserCredentialsFromCache(userId, callback) {
   }
 }
 
-function updateErrorFlag(campaignsNotToRun, groupedEmailQueue, callback) {
-  let emailQueueToStop = lodash.flatMap(campaignsNotToRun, function(o) {
-    return groupedEmailQueue[o.id];
-  });
+/**
+ * Method to Update Error And Stopped Flag for EmailQueue
+ * @param  {[Object]}   campaignsNotToRun
+ * @param  {[Object]}   groupedEmailQueue
+ * @param  {Function} callback
+ * @author Syed Sulaiman M
+ */
+function updateErrorFlag(emailQueueToStop, reason, callback) {
   async.each(emailQueueToStop,
         function(emailQueueInst, emailQueueInstCB) {
     let emailQueueUpdateElements = {
       isStopped: true,
       isError: true,
       stoppedBy: "SYSTEM",
-      stoppedReson: "Status Not Supported while Sending"
+      stoppedReason: reason
     };
     App.emailQueue.updateInst(emailQueueInst, emailQueueUpdateElements,
           function (error, updatedInst) {
@@ -179,6 +195,55 @@ function updateErrorFlag(campaignsNotToRun, groupedEmailQueue, callback) {
       console.log("Error while Updating Email Queue", error);
     }
     callback(error);
+  });
+}
+
+/**
+ * Method to Filter Out Unsubscribed Persons From Email List
+ * @param  {[Object]}   emailQueue
+ * @param  {Function} callback
+ * @author Syed Sulaiman M
+ */
+function filterUnsubscribePerson(emailQueue, callback) {
+  const emailQueueGroupByUser = lodash.groupBy(emailQueue, "userId");
+  const userIds = lodash.keys(emailQueueGroupByUser);
+  App.unsubscribe.getByUserIds(userIds,
+        function (unsubscribesErr, unsubscribes) {
+    if(unsubscribesErr) {
+        unsubscribeCB(unsubscribesErr);
+    }
+    const emailsToSent = [];
+    if(!lodash.isEmpty(unsubscribes)) {
+      const unsubscribeGroupByUser = lodash.groupBy(unsubscribes, "userId");
+      async.each(userIds, (userId, userIdCB) => {
+        const emailQueueForUser = emailQueueGroupByUser[userId];
+        const unsubscribeForUser = unsubscribeGroupByUser[userId];
+        const personIdsForUser = lodash.map(unsubscribeForUser, "personId");
+        const emailsToSentForUser = lodash.filter(emailQueueForUser,
+            function(o) {
+          return !lodash.includes(personIdsForUser, o.personId);
+        });
+        lodash(emailsToSentForUser).forEach(function(emailToSentForUser) {
+          emailsToSent.push(emailToSentForUser);
+        });
+        userIdCB(null);
+      }, (error) => {
+        if(error) {
+          console.log("Error while Filtering Unsubscribed Person", error);
+        }
+        const emailQueueNotToSent = lodash.differenceBy(
+              emailQueue, emailsToSent, "id");
+        const reason = constants.default.PERSON_UNSUBSCRIBED;
+        updateErrorFlag(emailQueueNotToSent, reason, function(error) {
+          if(error) {
+            console.log("Error while Update Unsubscribed Emails", error);
+          }
+          return callback(null, emailsToSent);
+        });
+      });
+    } else {
+      return callback(null, emailsToSent);
+    }
   });
 }
 

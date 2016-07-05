@@ -23,7 +23,12 @@
       "type": "string"
     },
     "isFollowUpGenerated": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": false
+    },
+    "isStopped": {
+      "type": "boolean",
+      "default": false
     },
     "createdAt": {
       "type": "date",

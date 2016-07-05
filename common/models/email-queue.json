@@ -49,7 +49,7 @@
     "stoppedBy": {
       "type": "string"
     },
-    "stoppedReson": {
+    "stoppedReason": {
       "type": "string"
     }
   },

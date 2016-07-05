@@ -54,6 +54,28 @@ FollowUp.prepareScheduledAt = (campaignId, prepareScheduledAtCB) => {
 };
 
 /**
+ * Method to get Follows To Be Sent
+ *
+ * @param  {Function} callback
+ * @return {[FollowUp]}   List of Follow Ups to Sent
+ * @author Syed Sulaiman M
+ */
+FollowUp.getFolloUpsToSent = (callback) => {
+  FollowUp.find({
+    where: {
+      scheduledAt: {
+        lte: Date.now()
+      },
+      isFollowUpGenerated: false,
+      isStopped: false
+    },
+    limit: 100
+  }, function(followUpsErr, followUps) {
+    callback(followUpsErr, followUps);
+  });
+};
+
+/**
  * To get the previousScheduledDate for the current follow up,
  * if previousScheduledDate is not empty, use it
  * if previousScheduledDate is empty, use the campaign's scheduled date

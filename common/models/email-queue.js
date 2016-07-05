@@ -1,5 +1,6 @@
 "use strict";
 
+import async from "async";
 import moment from "moment-timezone";
 import lodash from "lodash";
 import logger from "../../server/log";
@@ -175,7 +176,7 @@ module.exports = function(EmailQueue) {
       },
       http: {
         verb: "get",
-        path: "/scheduledMails/:campaignId/:start/:limit"
+        path: "/scheduledMails/campaign/:campaignId"
       }
     }
   );
@@ -205,9 +206,24 @@ module.exports = function(EmailQueue) {
         const errorMessage = errorMessages.NO_EMAILS_FOUND;
         return callback(errorMessage);
       }
-      let scheduledMails = {};
-      scheduledMails.mails = emailQueues;
-      return callback(null, scheduledMails);
+
+      let responses = [];
+      async.each(emailQueues, (emailQueue, emailQueueCB) => {
+        emailQueue.person((personErr, person) => {
+          let response = JSON.parse(JSON.stringify(emailQueue));
+          response.person = {
+            firstName: person.firstName,
+            middleName: person.middleName,
+            lastName: person.lastName,
+            email: person.email,
+            timeZone: person.time_zone
+          };
+          responses.push(response);
+          emailQueueCB(null);
+        });
+      }, (error) => {
+        return callback(null, responses);
+      });
     });
   };
 

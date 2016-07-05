@@ -24,6 +24,25 @@ module.exports = function(Unsubscribe) {
   };
 
   /**
+   * Get Unsubscribed Persons for List of User Ids
+   * @param  {[type]}   userId   [description]
+   * @param  {Function} callback [description]
+   * @return {[type]}            [description]
+   * @author Syed Sulaiman M
+   */
+  Unsubscribe.getByUserIds = (userIds, callback) => {
+    Unsubscribe.find({
+      where: {
+        userId: {
+          inq: userIds
+        }
+      }
+    }, (unsubscribesErr, unsubscribes) => {
+      return callback(unsubscribesErr, unsubscribes);
+    });
+  };
+
+  /**
    * Updates the updatedAt column with current Time
    * @param ctx Context
    * @param next (Callback)

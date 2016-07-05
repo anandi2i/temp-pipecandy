@@ -52,7 +52,7 @@ module.exports = function(SentMailBox) {
         {arg: "CampaignAudit", type: "array", root: true},
       http: {
         verb: "get",
-        path: "/sentMails/:campaignId"
+        path: "/sentMails/campaign/:campaignId"
       }
     }
   );
