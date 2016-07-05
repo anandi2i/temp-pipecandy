@@ -8,6 +8,7 @@ import statusCodes from "../../server/utils/status-codes";
 import queueUtil from "../../server/mailCrawler/mailEnqueue";
 import moment from "moment-timezone";
 import config from "../../server/config.json";
+import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 
 const systemTimeZone = moment().format("Z");
 const serverUrl = config.appUrl;
@@ -917,6 +918,113 @@ module.exports = function(Campaign) {
       }
     }, (campaignsErr, campaigns) => {
       callback(campaignsErr, campaigns);
+    });
+  };
+
+  Campaign.remoteMethod(
+    "campaignReport",
+    {
+      description: "Get Campaign Report",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "id", type: "number", required: true, http: {source: "path"}}
+      ],
+      returns: {arg: "campaignReport", type: "object", root: true},
+      http: {verb: "get", path: "/:id/campaignReport"}
+    }
+  );
+
+  /**
+   * Get the Campaign Report for the given Campaign Id
+   *
+   * @param  {Context} ctx Context object to get accessToken
+   * @param  {Number} id [campaign id]
+   * @param  {function} callback
+   * @return {Object} Capaign Report
+   * @author Syed Sulaiman M
+   */
+  Campaign.campaignReport = (ctx, id, callback) => {
+    let campaignReport = {
+      sentEmails: 0,
+      warmResponses: 0,
+      deliveredEmails: 0,
+      followUpsSent: 0
+    };
+    Campaign.findById(id, (campaignErr, campaign) => {
+      if(campaignErr) {
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      if(!campaign) {
+        const errorMessage = errorMessages.INVALID_CAMPAIGN_ID;
+        return callback(errorMessage);
+      }
+      Campaign.app.models.campaignMetric.getMetricByCampaignId(campaign.id,
+          (metricErr, metric) => {
+        if(metricErr) {
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        if(metric) {
+          campaignReport.sentEmails = metric.sentEmails;
+          campaignReport.deliveredEmails = metric.sentEmails - metric.bounced;
+        }
+        return callback(null, campaignReport);
+      });
+    });
+  };
+
+  Campaign.remoteMethod(
+    "recentCampaignReport",
+    {
+      description: "Get Campaign Report",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}}
+      ],
+      returns: {arg: "campaignReport", type: "object", root: true},
+      http: {verb: "get", path: "/recentCampaignReport"}
+    }
+  );
+
+  /**
+   * Get the Campaign Report for the given Campaign Id
+   *
+   * @param  {Context} ctx Context object to get accessToken
+   * @param  {Number} id [campaign id]
+   * @param  {function} callback
+   * @return {Object} Capaign Report
+   * @author Syed Sulaiman M
+   */
+  Campaign.recentCampaignReport = (ctx, callback) => {
+    let campaignReport = {
+      sentEmails: 0,
+      warmResponses: 0,
+      deliveredEmails: 0,
+      followUpsSent: 0
+    };
+    Campaign.find({
+      where: {
+        "createdBy": ctx.req.accessToken.userId
+      },
+      order: "lastrunat DESC",
+      limit: 1
+    }, (campaignErr, campaigns) => {
+      if(campaignErr) {
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      Campaign.app.models.campaignMetric.getMetricByCampaignId(campaigns[0].id,
+          (metricErr, metric) => {
+        if(metricErr) {
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        if(metric) {
+          campaignReport.sentEmails = metric.sentEmails;
+          campaignReport.deliveredEmails = metric.sentEmails - metric.bounced;
+        }
+        return callback(null, campaignReport);
+      });
     });
   };
 

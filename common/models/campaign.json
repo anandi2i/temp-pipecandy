@@ -173,6 +173,18 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "getCurrentCampaignDetails"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "campaignReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "recentCampaignReport"
     }
   ],
   "methods": {}

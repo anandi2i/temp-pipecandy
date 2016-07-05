@@ -46,6 +46,26 @@ module.exports = function(CampaignMetric) {
   };
 
   /**
+   * Method to get Metric by Campaign Id
+   * @param  {Number}   campaignId [description]
+   * @param  {Function} callback   [description]
+   * @return {CampaignMetric}              [description]
+   * @author Syed Sulaiman M
+   */
+  CampaignMetric.getMetricByCampaignId = (campaignId, callback) => {
+    CampaignMetric.find({
+      where: {
+        campaignId: campaignId
+      }
+    }, (metricsErr, metrics) => {
+      if(metricsErr) {
+        return callback(metricsErr);
+      }
+      return callback(null, metrics[0]);
+    });
+  };
+
+  /**
    * Updates the updatedAt column with current Time
    * @param ctx Context
    * @param next (Callback)
