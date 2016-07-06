@@ -185,6 +185,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "recentCampaignReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "hasRecentCampaign"
     }
   ],
   "methods": {}

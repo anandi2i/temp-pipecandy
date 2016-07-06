@@ -671,6 +671,7 @@ module.exports = function(Campaign) {
       Campaigns.campaignMetrics(
         (campaignMetricsErr, campaignMetricsData) => {
           if (campaignMetricsErr) {
+            logger.error("Error while finding campaign merics");
             getCurrentCampaignMetricsCB(campaignMetricsErr);
           }
           Campaign.app.models.emailLink.find({
@@ -688,6 +689,56 @@ module.exports = function(Campaign) {
         });
     });
   };
+
+
+  Campaign.remoteMethod(
+    "hasRecentCampaign",
+    {
+      description: "To check if there is any recent campaign for the user",
+      accepts: [{
+        arg: "ctx", type: "object", http: {source: "context"}
+      }],
+      returns: {arg: "hasRecentCampaign", type: "boolean"},
+      http: {
+        verb: "get", path: "/hasRecentCampaign"
+      }
+    }
+  );
+
+  /**
+   * To check if there is any recent campaign for the current user
+   * @param  {[ctx]}  ctx
+   * @param  {function} hasRecentCampaignCB
+   * @return {[boolean]} hasRecentCampaign
+   * @author Aswin Raj A
+   */
+  Campaign.hasRecentCampaign = (ctx, hasRecentCampaignCB) => {
+    Campaign.find({
+      where: {
+        and:[
+          {"createdBy": ctx.req.accessToken.userId},
+          {"lastRunAt": {neq: null}}
+        ]
+      },
+      order: "lastRunAt DESC",
+      limit: 1
+    }, (campaignErr, campaigns) => {
+      if(campaignErr){
+        logger.error(campaignErr, {
+            user: ctx.req.accessToken.userId,
+            error: campaignErr,
+            stack: campaignErr ? campaignErr.stack : ""
+        });
+        const errorMessage = errorMessages.SERVER_ERROR;
+        hasRecentCampaignCB(errorMessage);
+      }
+      if(lodash.isEmpty(campaigns)){
+        return hasRecentCampaignCB(null, false);
+      }
+      return hasRecentCampaignCB(null, true);
+    });
+  };
+
 
 
   /**
@@ -711,9 +762,12 @@ module.exports = function(Campaign) {
     const totalEmptyLinks = 0;
     Campaign.find({
       where: {
-        "createdBy": ctx.req.accessToken.userId
+        and:[
+          {"createdBy": ctx.req.accessToken.userId},
+          {"lastRunAt": {neq: null}}
+        ]
       },
-      order: "lastrunat DESC",
+      order: "lastRunAt DESC",
       limit: 1
     }, (campaignErr, campaigns) => {
       if(campaignErr){
@@ -909,9 +963,12 @@ module.exports = function(Campaign) {
     let peopleArray = [];
     Campaign.find({
       where: {
-        "createdBy": ctx.req.accessToken.userId
+        and:[
+          {"createdBy": ctx.req.accessToken.userId},
+          {"lastRunAt": {neq: null}}
+        ]
       },
-      order: "lastrunat DESC",
+      order: "lastRunAt DESC",
       limit: 1
     }, (campaignErr, campaigns) => {
       if(campaignErr){
@@ -1117,14 +1174,21 @@ module.exports = function(Campaign) {
       followUpsSent: 0
     };
     Campaign.find({
-      where: {
-        "createdBy": ctx.req.accessToken.userId
-      },
-      order: "lastrunat DESC",
-      limit: 1
-    }, (campaignErr, campaigns) => {
+     where: {
+       and:[
+         {"createdBy": ctx.req.accessToken.userId},
+         {"lastRunAt": {neq: null}}
+       ]
+     },
+     order: "lastRunAt DESC",
+     limit: 1
+   }, (campaignErr, campaigns) => {
       if(campaignErr) {
         const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      if(lodash.isEmpty(campaigns)) {
+        const errorMessage = errorMessages.CAMPAIGN_NOT_FOUND;
         return callback(errorMessage);
       }
       Campaign.app.models.campaignMetric.getMetricByCampaignId(campaigns[0].id,
