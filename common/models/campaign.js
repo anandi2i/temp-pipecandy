@@ -691,6 +691,7 @@ module.exports = function(Campaign) {
   };
 
 
+
   Campaign.remoteMethod(
     "hasRecentCampaign",
     {
@@ -736,6 +737,54 @@ module.exports = function(Campaign) {
         return hasRecentCampaignCB(null, false);
       }
       return hasRecentCampaignCB(null, true);
+    });
+  };
+
+
+
+  Campaign.remoteMethod(
+    "doesCampaignExist",
+    {
+      description: "To check if there is any campaign for the campaign id",
+      accepts: [{
+        arg: "campaignId", type: "any"
+      }],
+      returns: {arg: "doesCampaignExist", type: "boolean"},
+      http: {
+        verb: "get", path: "/:campaignId/doesCampaignExist"
+      }
+    }
+  );
+
+  /**
+   * To check if there is any recent campaign for the current user
+   * @param  {[campaignId]}  campaignId
+   * @param  {function} doesCampaignExistCB
+   * @return {[boolean]} doesCampaignExist
+   * @author Aswin Raj A
+   */
+  Campaign.doesCampaignExist = (campaignId, doesCampaignExistCB) => {
+    Campaign.find({
+      where: {
+        and:[
+          {"id": campaignId},
+          {"lastRunAt": {neq: null}}
+        ]
+      }
+    }, (campaignErr, campaigns) => {
+      if(campaignErr){
+        logger.error("Error while finding campaign", {
+            user: ctx.req.accessToken.userId,
+            error: campaignErr,
+            stack: campaignErr ? campaignErr.stack : ""
+        });
+        const errorMessage = errorMessages.SERVER_ERROR;
+        doesCampaignExistCB(errorMessage);
+      }
+      if(lodash.isEmpty(campaigns)){
+        return doesCampaignExistCB(null, false);
+      }
+      return doesCampaignExistCB(null, true);
     });
   };
 
