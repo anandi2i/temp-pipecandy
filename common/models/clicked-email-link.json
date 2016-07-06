@@ -33,11 +33,13 @@
       "foreignKey": "campaignId"
     }
   },
-  "acls": [{
-    "principalType": "ROLE",
-    "principalId": "$everyone",
-    "permission": "ALLOW",
-    "property": "track"
-  }],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "track"
+    }
+  ],
   "methods": {}
 }

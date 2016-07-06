@@ -147,5 +147,9 @@
   "sentMailBox": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "personAudit": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

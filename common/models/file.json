@@ -27,6 +27,13 @@
   },
   "validations": [],
   "relations": {},
-  "acls": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "downloadCSV"
+    }
+  ],
   "methods": {}
 }

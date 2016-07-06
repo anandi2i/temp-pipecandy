@@ -1,0 +1,43 @@
+{
+  "name": "personAudit",
+  "plural": "personAudits",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "firstName": {
+      "type": "string"
+    },
+    "middleName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "salutation": {
+      "type": "string"
+    },
+    "time_zone": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "person": {
+      "type": "belongsTo",
+      "model": "person",
+      "foreignKey": "personId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

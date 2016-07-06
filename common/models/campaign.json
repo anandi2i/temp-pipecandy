@@ -32,21 +32,21 @@
         "nullable": "YES"
       }
     },
-    "address":{
+    "address": {
       "type": "string"
     },
-    "optText":{
+    "optText": {
       "type": "string"
     },
-    "isAddressNeeded":{
+    "isAddressNeeded": {
       "type": "boolean",
       "default": false
     },
-    "isOptTextNeeded":{
+    "isOptTextNeeded": {
       "type": "boolean",
       "default": false
     },
-    "statusCode":{
+    "statusCode": {
       "type": "number",
       "default": 0
     },

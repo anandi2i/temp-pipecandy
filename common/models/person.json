@@ -71,6 +71,11 @@
       "type": "hasMany",
       "model": "openedEmail",
       "foreignKey": ""
+    },
+    "personAudit": {
+      "type": "hasMany",
+      "model": "personAudit",
+      "foreignKey": ""
     }
   },
   "acls": [
