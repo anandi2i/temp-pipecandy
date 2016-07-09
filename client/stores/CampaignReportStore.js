@@ -46,7 +46,7 @@ const CampaignReportStore = _.extend({}, EventEmitter.prototype, {
     return _otherCampaignMetrics;
   },
 
-  // check is campaign is existing 
+  // check is campaign is existing
   getIsExistCampaign() {
     return _isExistCampaign;
   },
@@ -74,7 +74,7 @@ AppDispatcher.register(function(payload) {
     case Constants.GET_IS_EXISTING_CAMPAIGN:
       CampaignApi.getIsExistingCampaign(action.id).then((response) => {
         _error = "";
-        _isExistCampaign = response.data.exists;
+        _isExistCampaign = response.data.hasCampaign;
         CampaignReportStore.emitReportViewChange();
       }, (err) => {
         _error = err.message;

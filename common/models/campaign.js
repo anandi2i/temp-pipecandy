@@ -941,8 +941,8 @@ module.exports = function(Campaign) {
             break;
           case "ACTIONABLE RESPONSES":
             campaignMetricObj.title = "actionable responses";
-            campaignMetricObj.percentage = "06";
-            campaignMetricObj.count = "100";
+            campaignMetricObj.percentage = "1";
+            campaignMetricObj.count = "1";
             campaignMetricObj.class = "";
             campaignMetricObj.status = "";
             campaignMetricObject.push(campaignMetricObj);

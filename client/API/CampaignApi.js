@@ -87,10 +87,9 @@ const CampaignApi = {
   getIsExistingCampaign(campaignId) {
     let campaignReportURL;
     if(campaignId){
-      campaignReportURL = `api/campaigns/${campaignId}/exists`;
+      campaignReportURL = `api/campaigns/${campaignId}/doesCampaignExist`;
     } else {
-      //TODO need to change API
-      campaignReportURL = `api/campaigns/${campaignId}/exists`;
+      campaignReportURL = "api/campaigns/hasRecentCampaign";
     }
     return api.get(campaignReportURL);
   },

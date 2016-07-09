@@ -3,9 +3,10 @@ import PerformanceCompare from "./performance/PerformanceCompare.react";
 import OtherPerformanceStatus from "./performance/OtherPerformanceStatus.react";
 import PerformanceReport from "./performance/PerformanceReport.react";
 import LinksClicked from "./performance/LinksClicked.react";
+import CampaignInfoMsg from "./performance/CampaignInfoMsg.react";
 import CampaignReportHead from "./CampaignReportHead.react";
-// import CampaignActions from "../../../actions/CampaignActions";
-// import CampaignReportStore from "../../../stores/CampaignReportStore";
+import CampaignActions from "../../actions/CampaignActions";
+import CampaignReportStore from "../../stores/CampaignReportStore";
 
 /**
  * Dashboard component to display campaign performance and other status
@@ -14,16 +15,13 @@ class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isRecentCampaign: true
+      isRecentCampaign: false
     };
   }
 
-/**
- * TODO Need API to check if resent campaign is available or not
- *
   componentDidMount() {
     CampaignReportStore.addReportViewChangeListener(this.onStoreChange);
-    CampaignActions.getIsExistingCampaign(this.props.params.id);
+    CampaignActions.getIsExistingCampaign(false);
   }
 
   componentWillUnmount() {
@@ -35,8 +33,6 @@ class Dashboard extends React.Component {
       isRecentCampaign: CampaignReportStore.getIsExistCampaign()
     });
   }
- *
-*/
 
   render() {
     return (
@@ -54,7 +50,7 @@ class Dashboard extends React.Component {
               {/* Links Clicked */}
               <LinksClicked />
             </div>
-          : ""
+          : <CampaignInfoMsg displayPage="dashboard" />
         }
       </div>
     );

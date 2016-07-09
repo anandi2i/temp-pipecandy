@@ -1640,6 +1640,29 @@ span#autocomplete {
     margin-left: 12.5%;
   }
 }
+.meditation {
+  width: 60px;
+  opacity: 0.7;
+  margin-left: calc(50% - 30px);
+  margin-top: 75px;
+}
+.empty-campaign {
+  text-align: center;
+  .quotes {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 14pt;
+  }
+  img {
+    opacity: 0.8;
+    margin-top: 75px;
+  }
+  .content {
+    margin-top: 1rem;
+    font-size: 16pt;
+    font-weight: 500;
+  }
+}
 /*********************
   Media Query Classes
 **********************/

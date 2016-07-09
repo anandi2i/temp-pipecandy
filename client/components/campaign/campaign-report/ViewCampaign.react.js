@@ -5,6 +5,8 @@ import OtherPerformanceStatus from
 import PerformanceReport from "../performance/PerformanceReport.react";
 import CampaignFooter from "./CampaignFooter.react";
 import CampaignReportHead from "../CampaignReportHead.react";
+import CampaignInfoMsg from "../performance/CampaignInfoMsg.react";
+import LinksClicked from "../performance/LinksClicked.react";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignReportStore from "../../../stores/CampaignReportStore";
 
@@ -50,10 +52,13 @@ class ViewCampaign extends React.Component {
                 <OtherPerformanceStatus campaignId={campaignId}/>
                 {/* Performance Chart */}
                 <PerformanceReport campaignId={campaignId}/>
+                {/* Links Clicked */}
+                <LinksClicked />
               </div>
               <CampaignFooter campaignId={campaignId} activePage={"report"}/>
             </div>
-          : ""
+          :
+          <CampaignInfoMsg displayPage="report" />
         }
       </div>
     );

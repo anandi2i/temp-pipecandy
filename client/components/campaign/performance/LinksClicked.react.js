@@ -19,18 +19,18 @@ class LinksClicked extends React.Component {
     const linksData = [
       {
         link: "http://www.highcharts.com/docs/getting-started/installation",
-        clicks: 286,
+        clicks: 6,
         rate: "50%"
       },
       {
         link: "http://www.highcharts.com/docs/getting-started/installation",
-        clicks: 36,
+        clicks: 3,
         rate: "12%"
       },
       {
         link: "http://www.highcharts.com/docs/getting-started/installation",
-        clicks: 938,
-        rate: "100%"
+        clicks: 9,
+        rate: "73%"
       }
     ];
     const linksDetails = linksData.map((link, key) => {

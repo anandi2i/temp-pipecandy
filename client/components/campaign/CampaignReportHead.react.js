@@ -66,14 +66,7 @@ class CampaignReportHead extends React.Component {
                 : ""
               }
             </div>
-            :
-            <div className="row card m-t-50">
-              <div className="col s12 center card-content">
-                <p>
-                  Oops please add a campaign!
-                </p>
-              </div>
-            </div>
+            : ""
         }
       </div>
     );
