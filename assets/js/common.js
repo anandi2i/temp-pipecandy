@@ -164,11 +164,15 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
         $(editorDom).find("a.tinymce-placeholder").remove();
       }).on("blur", (e) => {
         if(!editor.getContent()) {
-          let content = tinymcePlaceholder("content");
+          let content = "";
           if(editorId === "emailSubject") {
-            content = tinymcePlaceholder("subject");
+            content = "Subject";
+          } else if (editorId === "optOutAddress") {
+            content = "Address";
+          } else {
+            content = "content";
           }
-          editor.setContent(content);
+          editor.setContent(tinymcePlaceholder(content));
         }
       });
     }
@@ -186,7 +190,7 @@ function tinymcePlaceholder(holder) {
   if(holder === "content"){
     placeHolder = "<a class='tinymce-placeholder'>Click here to edit</a>";
   } else {
-    placeHolder = "<a class='tinymce-placeholder'>Subject</a>";
+    placeHolder = `<a class='tinymce-placeholder'>${holder}</a>`;
   }
   return placeHolder;
 }

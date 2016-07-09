@@ -65,16 +65,21 @@ class ScheduleEmail extends React.Component {
  *
  * @param  {object} allTags - It contains collection of unique smart-tags based on selected list
  */
-  initTinyMCE(allTags) {
+  initTinyMCE = () => {
+    const {getAllTags, address} = this.state;
     if(tinymce.get("emailContent")) {
       tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
     }
-    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", allTags, true,
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", getAllTags, true,
       this.tinyMceCb);
     if(tinymce.get("emailSubject")) {
       tinyMCE.execCommand("mceRemoveEditor", true, "emailSubject");
     }
-    initTinyMCE("#emailSubject", "", "", allTags, false, this.tinyMceSubCb);
+    initTinyMCE("#emailSubject", "", "", getAllTags, false, this.tinyMceSubCb);
+    if(tinymce.get("optOutAddress")) {
+      tinyMCE.execCommand("mceRemoveEditor", true, "optOutAddress");
+    }
+    initTinyMCE("#optOutAddress", "", "", "", false, this.tinyMceAddressCb);
     let mainContent = this.props.selectedTemplate;
     const tinyMceDelayTime = 1000;
     //TODO need to remove setTimeout
@@ -87,7 +92,9 @@ class ScheduleEmail extends React.Component {
     }
     setTimeout(function() {
       tinyMCE.get("emailContent").setContent(mainContent);
-      tinyMCE.get("emailSubject").setContent(tinymcePlaceholder("subject"));
+      tinyMCE.get("emailSubject").setContent(tinymcePlaceholder("Subject"));
+      tinyMCE.get("optOutAddress").setContent(address ||
+        tinymcePlaceholder("Address"));
     }, tinyMceDelayTime);
   }
 
@@ -123,6 +130,13 @@ class ScheduleEmail extends React.Component {
     });
   }
 
+  tinyMceAddressCb = (editor) => {
+    const content = editor.getContent();
+    this.setState({
+      address: content
+    });
+  }
+
   getErrorCount(){
     return parseInt(this.state.subjectIssueTags.length, 10) +
       parseInt(this.state.contentIssueTags.length, 10);
@@ -152,7 +166,7 @@ class ScheduleEmail extends React.Component {
       this.setState({
         getAllTags: CampaignStore.constructSmartTags(allTags)
       }, () => {
-        this.initTinyMCE(this.state.getAllTags);
+        this.initTinyMCE();
       });
     });
   }
@@ -673,17 +687,12 @@ class ScheduleEmail extends React.Component {
               </div>
               <div className="row opt-text">
                 <div className="col s12 m-lr-0">
-                  <input type="checkbox" className="filled-in" id="optOutAddress"
+                  <input type="checkbox" className="filled-in" id="optOutAddrs"
                     defaultChecked="checked"
                     onChange={() => this.toggleSetState("isAddress")} />
-                  <label htmlFor="optOutAddress">Address</label>
-                  <div className="input-field" style={{display: isAddress}}>
-                    <textarea id="optOutAddress" placeholder="Address"
-                      type="text"
-                      value={this.state.address}
-                      name="Address"
-                      onChange={(e) => this.onChange(e, "address")}
-                      className="border-input materialize-textarea" />
+                  <label htmlFor="optOutAddrs">Address</label>
+                  <div className="row m-lr-0" style={{display: isAddress}}>
+                    <div id="optOutAddress" className="inline-tiny-mce opt-out-address" />
                   </div>
                 </div>
               </div>

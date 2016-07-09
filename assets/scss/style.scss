@@ -1279,6 +1279,12 @@ span#autocomplete {
     padding-bottom: 25px;
   }
 }
+.opt-out-address {
+  margin-top: 1rem;
+  p {
+    margin: 0;
+  }
+}
 /*********************
   Modal header
 **********************/
@@ -1760,7 +1766,7 @@ span#autocomplete {
       .p-1-btn {
         width: 90%;
         margin-bottom: 10px;
-        margin-right: 0px;
+        margin-right: 0;
       }
     }
   }
@@ -1769,7 +1775,7 @@ span#autocomplete {
       width: 90%;
       .griddle-filter {
         width: 100%;
-        margin-left: 0px;
+        margin-left: 0;
         .filter-container {
           width: 100%;
           input {
