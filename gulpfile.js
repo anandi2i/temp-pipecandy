@@ -1,10 +1,10 @@
 /**
  * Gulp to run automated tasks and bundling the files for dev/prod to use.
  *
- * @ref http://codyburleson.com/2015/09/11/better-error-messages-from-gulp-using-gulp-util/
- * @ref http://andrewhathaway.net/environment-based-configuration-for-javascript-applications/
- * @ref https://knpuniversity.com/screencast/gulp/minify-only-production
- * @ref https://css-tricks.com/gulp-for-beginners/
+ * @see http://codyburleson.com/2015/09/11/better-error-messages-from-gulp-using-gulp-util/
+ * @see http://andrewhathaway.net/environment-based-configuration-for-javascript-applications/
+ * @see https://knpuniversity.com/screencast/gulp/minify-only-production
+ * @see https://css-tricks.com/gulp-for-beginners/
  */
 
 var gulp = require("gulp");

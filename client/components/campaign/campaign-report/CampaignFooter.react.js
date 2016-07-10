@@ -21,7 +21,7 @@ class CampaignFooter extends React.Component {
         <div className="container footer-tabs">
           <Link to={`/campaign/${id}`} className={active === "report" ? "active" : ""}>Report</Link>
           <Link to={`/campaign/${id}/inbox`} className={active === "inbox" ? "active" : ""}>Inbox</Link>
-          <Link to={`/campaign/${id}/outbox`} className={active === "outbox" ? "active" : ""}>Outbox</Link>
+          <Link to={`/campaign/${id}/scheduled`} className={active === "scheduled" ? "active" : ""}>Scheduled</Link>
         </div>
       </div>
     );

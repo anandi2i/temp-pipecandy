@@ -15,11 +15,12 @@ class TabsMenu extends React.Component {
 
   render() {
     const _tabs = this.props.tabNames;
-    let li = _tabs.map((item, i) => {
+    let li = _tabs.map((item, key) => {
+      key = key.toString();
       return (
-        <li key={i}>
-          <a onClick={() => this.handleClick(i.toString())}
-            className={this.props.activeTab === i.toString() ? "active" : {}}>
+        <li key={key}>
+          <a onClick={() => this.handleClick(key)}
+            className={this.props.activeTab === key ? "active" : ""}>
             {item.name}
           </a>
         </li>

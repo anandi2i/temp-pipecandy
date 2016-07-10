@@ -25,9 +25,24 @@ const CampaignActions = {
       data: emailListIds
     });
   },
-  getAllInboxReport() {
+  /**
+   * Get the inbox mails for a campaign
+   * @param  {object} data The data includes campaign id, start, limit
+   */
+  getAllInboxReport(data) {
     AppDispatcher.handleAction({
-      actionType: Constants.GET_ALL_INBOX_REPORT
+      actionType: Constants.GET_ALL_INBOX_REPORT,
+      data: data
+    });
+  },
+  /**
+   * Get the scheduled mails for a campaign
+   * @param  {object} data The data includes campaign id, start, limit
+   */
+  getScheduledMails(data) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_SCHEDULED_EMAILS,
+      data: data
     });
   },
   /**

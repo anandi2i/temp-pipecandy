@@ -210,7 +210,7 @@ module.exports = function(List) {
               logger.error("Error in saving fields : ", reqParams);
               return savePersonWithFieldsCB(fieldValuesCreateErr);
             }
-            //http://stackoverflow.com/questions/18359093/how-to-copy-javascript-object-to-new-variable-not-by-reference
+            //@see http://stackoverflow.com/questions/18359093/how-to-copy-javascript-object-to-new-variable-not-by-reference
             let person = JSON.parse(JSON.stringify(persistedPerson));
             person.fieldValues = JSON.parse(
               JSON.stringify(persistedFieldValues)

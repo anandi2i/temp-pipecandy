@@ -27,6 +27,7 @@ class AddFollowups extends React.Component {
   }
 
   componentWillUnmount() {
+    this.el.find("select").material_select("destroy");
     CampaignStore.removeEmailListChangeListener(this.onStoreChange);
   }
 

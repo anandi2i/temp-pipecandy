@@ -18,6 +18,8 @@ let selectedEmailList = {};
 let allPeopleList = [];
 let duplicateEmailList = [];
 let fieldIds = [];
+let inboxMails = [];
+let scheduledMails = [];
 let spamScore;
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
@@ -105,6 +107,22 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   removeSpamScoreChangeListener(callback) {
     this.removeListener("spamScoreChange", callback);
   },
+
+  // Emit Change event
+  emitMailboxChange() {
+    this.emit("MailboxChange");
+  },
+
+  // Add change listener
+  addMailboxChangeListener(callback) {
+    this.on("MailboxChange", callback);
+  },
+
+  // Remove change listener
+  removeMailboxChangeListener(callback) {
+    this.removeListener("MailboxChange", callback);
+  },
+
 
   getError() {
     return _error;
@@ -286,8 +304,20 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
 
   checkWordIoVariations() {
     return _WordIoVariations;
-  }
+  },
 
+  /**
+   * @return {object} scheduledMails
+   */
+  getScheduledMails() {
+    return scheduledMails;
+  },
+  /**
+   * @return {object} inboxMails
+   */
+  getInboxMails() {
+    return inboxMails;
+  }
 });
 
 // Register callback with AppDispatcher
@@ -445,15 +475,25 @@ AppDispatcher.register(function(payload) {
       });
       break;
     case Constants.GET_ALL_INBOX_REPORT:
-      //TODO need to change API
-      CampaignApi.getAllEmailTemplates().then((response) => {
-        _allEmailTemplates = response.data;
+      CampaignApi.getInboxMails(action.data).then((response) => {
+        inboxMails = response.data;
         _error = "";
         CampaignStore.emitChange();
       }, (err) => {
-        _allEmailTemplates = [];
+        inboxMails = [];
         _error = HandleError.evaluateError(err);
         CampaignStore.emitChange();
+      });
+      break;
+    case Constants.GET_SCHEDULED_EMAILS:
+      CampaignApi.getScheduledMails(action.data).then((response) => {
+        scheduledMails = response.data;
+        _error = "";
+        CampaignStore.emitMailboxChange();
+      }, (err) => {
+        scheduledMails = [];
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitMailboxChange();
       });
       break;
     case Constants.CHECK_EXISTING_CAMPAIGN:

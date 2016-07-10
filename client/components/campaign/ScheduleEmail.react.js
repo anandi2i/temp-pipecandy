@@ -56,6 +56,7 @@ class ScheduleEmail extends React.Component {
   }
 
   componentWillUnmount() {
+    this.el.find("select").material_select("destroy");
     CampaignStore.removeEmailListChangeListener(this.onStoreChange);
     CampaignStore.removeSpamScoreChangeListener(this.onSpamScoreChange);
   }

@@ -2,7 +2,6 @@ import keyMirror from "keymirror";
 
 // Define action constants
 export default keyMirror({
-  COFFEE_SHOP_LIST: null,
   ALL_EMAIL_LIST: null,
   CREATE_NEW_LIST: null,
   GET_LIST_BY_ID: null,
@@ -33,5 +32,6 @@ export default keyMirror({
   GET_CURRENT_CAMPAIGN_DETAILS: null,
   CHECK_WORDIO_VARIATIONS: null,
   GET_OTHER_STATS_METRICS: null,
-  GET_IS_EXISTING_CAMPAIGN: null
+  GET_IS_EXISTING_CAMPAIGN: null,
+  GET_SCHEDULED_EMAILS: null
 });

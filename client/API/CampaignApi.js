@@ -93,6 +93,25 @@ const CampaignApi = {
       campaignReportURL = `api/campaigns/${campaignId}/exists`;
     }
     return api.get(campaignReportURL);
+  },
+  /**
+   * Get inbox mails
+   * @param  {object} data - The data includes campaign id, start and end count
+   * @return {object} Promise
+   */
+  getInboxMails(data) {
+    const {id, start, end} = data;
+    return api.get(`api/campaignAudits/inboxMails/${id}/${start}/${end}`);
+  },
+  /**
+   * Get scheduled mails
+   * @param  {object} data - The data includes campaign id, start and end count
+   * @return {object} Promise
+   */
+  getScheduledMails(data) {
+    const {id, start, end} = data;
+    return api.get(`api/emailsQueue/scheduledMails/campaign/${id}?` +
+      `start=${start}&limit=${end}`);
   }
 };
 

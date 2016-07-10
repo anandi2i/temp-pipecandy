@@ -64,7 +64,7 @@ class PerformanceReport extends React.Component {
     /**
      * Setup Charts Properties
      *
-     * ref url: http://api.highcharts.com/highcharts
+     * @see http://api.highcharts.com/highcharts
      */
     Highcharts.chart({
       chart: {

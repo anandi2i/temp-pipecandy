@@ -77,7 +77,12 @@
       "type": "belongsTo",
       "model": "person",
       "foreignKey": "personId"
-    }
+    },
+    "followUp": {
+      "type": "belongsTo",
+      "model": "followUp",
+      "foreignKey": "followUpId"
+    }    
   },
   "acls": [],
   "methods": {}

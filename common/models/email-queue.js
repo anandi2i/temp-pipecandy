@@ -198,7 +198,8 @@ EmailQueue.checkEmailExists = (campaign, followup, person, emailExistsCB) => {
       logger.error("Check Email Exists in EmailQueue Find Error", {
         error: checkEmailExistsFindErr,
         campaign: campaign,
-        person: person
+        person: person,
+        stack: checkEmailExistsFindErr.stack
       });
       return emailExistsCB(checkEmailExistsFindErr);
     }

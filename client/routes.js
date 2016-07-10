@@ -32,8 +32,8 @@ import ViewCampaign from
   "./components/campaign/campaign-report/ViewCampaign.react";
 import CampaignInbox from
   "./components/campaign/campaign-report/CampaignInbox.react";
-import CampaignOutbox from
-  "./components/campaign/campaign-report/CampaignOutbox.react";
+import CampaignSchedulebox from
+  "./components/campaign/campaign-report/CampaignSchedulebox.react";
 
 //Dashboard
 import Dashboard from "./components/campaign/Dashboard.react";
@@ -72,7 +72,7 @@ const routes = (
       <Route path=":id/run" component={RunCampaign} />
       <Route path=":id" component={ViewCampaign} />
       <Route path=":id/inbox" component={CampaignInbox} />
-      <Route path=":id/outbox" component={CampaignOutbox} />
+      <Route path=":id/scheduled" component={CampaignSchedulebox} />
     </Route>
     <Route path="dashboard" component={Dashboard} />
     <Route path="response" component={Response} />

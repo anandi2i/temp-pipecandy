@@ -34,8 +34,8 @@ const EmailListApi = {
    * @return {Object} updated person
    */
   updateSinglePerson(data) {
-    return api.put(`api/lists/${data.listId}/person/${data.person.person.id}`+
-      `/updatePersonWithFields`, data.person);
+    return api.put(`api/lists/${data.listId}/person/${data.person.person.id}` +
+      "/updatePersonWithFields", data.person);
   },
   /**
    * Delete list of persons from the email list
