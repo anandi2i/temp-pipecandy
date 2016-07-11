@@ -422,20 +422,23 @@ class ScheduleEmail extends React.Component {
  * Construct main email informations
  * @return {object} - main email informations
  */
-  campaignDetails() {
-    const {isOptText, isAddress, optText, address} = this.state;
-    const element = this.el;
-    let campaignDetails = {
-      id: this.props.campaignId,
-      scheduledDate: element.find(`.datepicker`).val(),
-      scheduledTime: element.find(`.timepicker`).val(),
-      isOptTextNeeded: isOptText,
-      isAddressNeeded: isAddress,
-      optText: optText,
-      address: address
-    };
-    return campaignDetails;
+ campaignDetails() {
+  const {isOptText, isAddress, optText, address,
+    displayScheduleCampaign} = this.state;
+  const element = this.el;
+  let campaignDetails = {
+    id: this.props.campaignId,
+    isOptTextNeeded: isOptText,
+    isAddressNeeded: isAddress,
+    optText: optText,
+    address: address
+  };
+  if(displayScheduleCampaign) {
+    campaignDetails.scheduledDate = element.find(`.datepicker`).val();
+    campaignDetails.scheduledTime = element.find(`.timepicker`).val();
   }
+  return campaignDetails;
+}
 
   /**
    * Construct main template object to save

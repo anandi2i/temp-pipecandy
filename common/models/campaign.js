@@ -124,14 +124,16 @@ module.exports = function(Campaign) {
     const updateCampaign = (campaign, reqParams, updateCampaignCB) => {
 
       const campaignUpdateElements = {
-        "scheduledAt" : formatDate(reqParams.campaign.scheduledDate,
-          reqParams.campaign.scheduledTime),
         "address" : reqParams.campaign.address,
         "optText" : reqParams.campaign.optText,
         "isAddressNeeded": reqParams.campaign.isAddressNeeded,
         "isOptTextNeeded": reqParams.campaign.isOptTextNeeded,
         "statusCode": statusCodes.updated
       };
+      if(reqParams.campaign.scheduledTime || reqParams.campaign.scheduledDate) {
+        campaignUpdateElements.scheduledAt = formatDate(
+          reqParams.campaign.scheduledDate, reqParams.campaign.scheduledTime);
+      }
       campaign.updateAttributes(campaignUpdateElements,
         (campaignUpdateErr, updatedCampaign) => {
         if(campaignUpdateErr){
