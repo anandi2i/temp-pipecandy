@@ -121,6 +121,17 @@ gulp.task("copy:tinymce", function() {
 });
 
 /**
+ * Copy index.html to public
+ * Not for local
+ */
+gulp.task("copy:html", function() {
+ return gulp.src(["./client/index.html"], {
+     base: "client"
+   })
+   .pipe(gulp.dest("./public/assets"));
+});
+
+/**
  * Start the server if it is in development environment
  */
 gulp.task("server", function() {
@@ -207,6 +218,7 @@ gulp.task("build", function(cb) {
     "copy:fonts",
     "copy:images",
     "copy:tinymce",
+    "copy:html",
     "buildJsxInProd"
   ], cb);
 });
