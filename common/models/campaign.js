@@ -699,7 +699,7 @@ module.exports = function(Campaign) {
       accepts: [{
         arg: "ctx", type: "object", http: {source: "context"}
       }],
-      returns: {arg: "hasRecentCampaign", type: "boolean"},
+      returns: {arg: "hasCampaign", type: "boolean"},
       http: {
         verb: "get", path: "/hasRecentCampaign"
       }
@@ -749,7 +749,7 @@ module.exports = function(Campaign) {
       accepts: [{
         arg: "campaignId", type: "any"
       }],
-      returns: {arg: "doesCampaignExist", type: "boolean"},
+      returns: {arg: "hasCampaign", type: "boolean"},
       http: {
         verb: "get", path: "/:campaignId/doesCampaignExist"
       }
