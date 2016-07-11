@@ -1632,6 +1632,7 @@ span#autocomplete {
   height: 500px;
 }
 .subscriber_list {
+  margin-top: 80px;
   .griddle-filter {
     width: 320px;
     position: absolute;
@@ -1697,9 +1698,6 @@ span#autocomplete {
         padding: 12px 80px;
       }
     }
-  }
-  .subscriber_list {
-    margin-top: 80px;
   }
 }
 @media only screen and (max-width: 700px) {

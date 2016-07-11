@@ -538,13 +538,14 @@ class ScheduleEmail extends React.Component {
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
-    const {spamRating, errorCount} = this.state;
-    let spamClass = "spam-result safe";
-    if(spamRating === "DANGER") {
-      spamClass = "spam-result danger";
-    } else if (spamRating === "CAREFUL") {
-      spamClass = "spam-result careful";
-    }
+    // TODO hide for Demo
+    // const {spamRating, errorCount} = this.state;
+    // let spamClass = "spam-result safe";
+    // if(spamRating === "DANGER") {
+    //   spamClass = "spam-result danger";
+    // } else if (spamRating === "CAREFUL") {
+    //   spamClass = "spam-result careful";
+    // }
 
     return (
       <div className="container" style={{display: displayIndex}}>
@@ -657,7 +658,8 @@ class ScheduleEmail extends React.Component {
               </div>
               {/* Preview button */}
               <div className="row r-btn-container m-lr-0">
-                <div className={spamClass}
+                {/* TODO hide for demo
+                  <div className={spamClass}
                   style={{display: spamRating ? "inline-block": "none"}}>
                   SPAM RATING: {spamRating}
                 </div>
@@ -668,7 +670,7 @@ class ScheduleEmail extends React.Component {
                 <div onClick={this.checkWordIo}
                   className="btn btn-dflt btn-blue" >
                   Check Email Variations
-                </div>
+                </div> */}
                 <div onClick={() => this.openPreviewModal("issues")}
                   style={{display: errorCount ? "inline-block": "none"}}
                   className="btn btn-dflt error-btn" >
