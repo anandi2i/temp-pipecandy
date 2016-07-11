@@ -1,5 +1,8 @@
 "use strict";
 
+import lodash from "lodash";
+import logger from "../../server/log";
+
 module.exports = function(Unsubscribe) {
 
   /**
@@ -41,7 +44,32 @@ module.exports = function(Unsubscribe) {
       return callback(unsubscribesErr, unsubscribes);
     });
   };
+//npm run calls
+  /**
+   * if a prospect is unsubscribed for a user mean we should not generate the email
+   * for the prospect. So this mehtod allows us to wether the prospect is in
+   * user's Unsubscribers list or not
+   * @param  {[campaign]} campaign
+   * @param  {[person]} person
+   * @param  {[Function]} eligibleCheckCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  Unsubscribe.eligibleCheck = (campaign, person, eligibleCheckCB) => {
+    Unsubscribe.find({where: {and:
+      [{userId: campaign.createdBy}, {personId: person.id}]
+    }}, (unsubscribesErr, unsubscribes) => {
+      if(unsubscribesErr) {
+        logger.error("Error on finding the Unsubscribe", {
+          error: unsubscribesErr, stack: unsubscribesErr.stack,
+          input: {campaign: campaign, person: person}
+        });
+        return eligibleCheckCB(unsubscribesErr, false);
+      }//if err
+      return eligibleCheckCB(null, lodash.isEmpty(unsubscribes));
+    });
+  };
 
+//observers
   /**
    * Updates the updatedAt column with current Time
    * @param ctx Context

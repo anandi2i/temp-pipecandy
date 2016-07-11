@@ -25,8 +25,8 @@ FollowUp.prepareScheduledAt = (campaignId, prepareScheduledAtCB) => {
       logger.error("Error while finding followups", {error: followUpsFindErr,
         stack: followUpsFindErr ? followUpsFindErr.stack : null});
       const notFound = "Campaign not Found";
-      return prepareScheduledAtCB(followUpsFindErr ? followUpsFindErr
-         : new Error(notFound));
+      return prepareScheduledAtCB(followUpsFindErr,
+          new Error(notFound));
     }
     let previousScheduledDate = null;
     async.eachSeries(followUps, (followUp, followUpCB) => {
@@ -242,11 +242,17 @@ const createFollowup = (campaign, followUpObj, createFollowupCB) => {
  */
 const createCampaignTemplate = (createdFollowUp, campaign,
   campaignTemplatesObject, createCampaignTemplateCB) => {
-  let updatedCampaignTemplate = campaignTemplatesObject
-  .map((campaignTemplate) => {
-    campaignTemplate.campaignId = campaign.id;
-    return campaignTemplate;
-  });
+  let updatedCampaignTemplate;
+  if(Array.isArray(campaignTemplatesObject)) {
+    updatedCampaignTemplate = campaignTemplatesObject.map(
+        (campaignTemplate) => {
+          campaignTemplate.campaignId = campaign.id;
+          return campaignTemplate;
+    });
+  } else {
+    campaignTemplatesObject.campaignId = campaign.id;
+    updatedCampaignTemplate = campaignTemplatesObject;
+  }
   createdFollowUp.campaignTemplate.create(updatedCampaignTemplate,
     (campaignTemplatesCreateErr, createdCampaignTemplate) => {
       if(campaignTemplatesCreateErr){

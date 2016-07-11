@@ -655,6 +655,31 @@ module.exports = function(Campaign) {
   };
 
   /**
+   * validates status codes before generating a campaign or a followup
+   *
+   * @param  {[campaign]} campaign
+   * @param  {[followup]} followup
+   * @param  {[function]} statusCheckCB [callabck]
+   * @return {[type]}               [description]
+   * @author Ramanavel Selvaraju
+   */
+  Campaign.validateStatus = (campaign, followup, statusCheckCB) => {
+    const msg = `Status not Matching Aborting! CampaignId : ${campaign.id}`;
+    let error = new Error(msg);
+    error.name = "StatusMismatchError";
+    if(followup) {
+      if(campaign.statusCode < statusCodes.readyToSend){
+        return statusCheckCB(error);
+      }
+    } else {
+      if(campaign.statusCode !== statusCodes.processing){
+        return statusCheckCB(error);
+      }
+    }
+    return statusCheckCB(null, true);
+  }; 
+
+  /**
    * Get the campaign metrics for the current campaign
    * @param  {[campaignId]} campaignId
    * @param  {[callback]} getCurrentCampaignMetricsCB

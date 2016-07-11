@@ -25,17 +25,18 @@ const app = Consumer.create({
   queueUrl: queue.url[queueName],
   handleMessage: function(message, done) {
     let campaign = JSON.parse(message.Body);
+    console.log("Recived Message : ", campaign);
     async.parallel({
       emailQueue: App.emailQueue.assembleEmails.bind(null, campaign.id),
       followup: App.followUp.prepareScheduledAt.bind(null, campaign.id)
     }, (parallelErr, results) => {
+      done();
       if(parallelErr) {
         console.error(parallelErr);
         return;
       }
       console.log("Assembled Emails Successfully campaignId: ", campaign.id);
     });
-    done();
   },
   sqs: new AWS.SQS()
 });

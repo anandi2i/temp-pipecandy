@@ -31,7 +31,12 @@ module.exports = function(List) {
       async.eachSeries(lists, (list, listsCB) => {
         List.app.models.person.getPoepleAndGenerateEmail(campaign, list,
           listIds, followup, (getPoepleByListForEmailErr) => {
-            listsCB(getPoepleByListForEmailErr);
+            if(getPoepleByListForEmailErr) {
+              if(getPoepleByListForEmailErr.name === `StatusMismatchError`) {
+                  return getListAndSaveEmailCB(getPoepleByListForEmailErr);
+              }
+            }
+            return listsCB(getPoepleByListForEmailErr);
           });
       }, (asyncEachErr) => {
         return getListAndSaveEmailCB(asyncEachErr);

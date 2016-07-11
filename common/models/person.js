@@ -32,11 +32,16 @@ module.exports = function(Person) {
       }
 
       async.eachSeries(people, (person, peopleEachCB) => {
-
         validatePersonToGenerate(campaign, person,
           followup, (checkEmailExistsErr, isEligible) => {
-            if (checkEmailExistsErr || !isEligible) {
+            if (checkEmailExistsErr) {
+              if(checkEmailExistsErr.name === `StatusMismatchError`) {
+                return getPoepleAndGenerateEmailCB(checkEmailExistsErr);
+              }
               return peopleEachCB(checkEmailExistsErr);
+            }
+            if(!isEligible){
+              return peopleEachCB(null);
             }
             Person.app.models.campaign.generateEmail(campaign, person,
               listIds, followup, (generateEmailErr) => {
@@ -52,6 +57,8 @@ module.exports = function(Person) {
   };
 
   /**
+   * Check the status code of campaign or a followup. If its not matching
+   * the status code it will stop thecontent generation
    * checks in the unsubscribe model before generating the email
    * checks wether the person is eligible to generate email or a followup email
    * first checks wheter the email is already generated or not
@@ -67,12 +74,16 @@ module.exports = function(Person) {
    */
   const validatePersonToGenerate = (campaign, person, followup, validateCB) => {
     async.series({
+      validateStatus: Person.app.models.campaign.validateStatus.bind(null,
+                      campaign, followup),
+      unsubscribed: Person.app.models.unsubscribe.eligibleCheck.bind(null,
+                      campaign, person),
       eligible: isEligibleToGenerate.bind(null, campaign, person, followup)
     }, (seriesErr, results) => {
       if(seriesErr) {
         return validateCB(seriesErr);
       }
-      return validateCB(null, results.eligible);
+      return validateCB(seriesErr, results.unsubscribed && results.eligible);
     });
   };
 
