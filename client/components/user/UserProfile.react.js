@@ -25,7 +25,6 @@ class Profile extends React.Component {
       "firstName" : user.firstName,
       "lastName" : user.lastName,
       "email" : user.email,
-      "address" : user.address || "",
       "cropperOpen": false,
       "img": null,
       "croppedImg": user.avatar || "",
@@ -70,7 +69,6 @@ class Profile extends React.Component {
       "firstName" : user.firstName,
       "lastName" : user.lastName,
       "email" : user.email,
-      "address" : user.address,
       "cropperOpen": false,
       "img": null,
       "croppedImg": this.state.img || user.avatar,
@@ -198,15 +196,17 @@ class Profile extends React.Component {
                     className="validate" name="email" />
                   <label className="active" htmlFor="email">Email</label>
                 </div>
-                <div className="input-field">
-                  <textarea id="address" placeholder="Address"
-                    type="text"
-                    value={this.state.address}
-                    name="Address"
-                    className="materialize-textarea"
-                    onChange={(e) => this.onChange(e, "address")} />
-                    <label className="active" htmlFor="address">Address</label>
-                </div>
+                {/* TODO need to change tinyMCE editor
+                  <div className="input-field">
+                    <textarea id="address" placeholder="Address"
+                      type="text"
+                      value={this.state.address}
+                      name="Address"
+                      className="materialize-textarea"
+                      onChange={(e) => this.onChange(e, "address")} />
+                      <label className="active" htmlFor="address">Address</label>
+                  </div>
+                */}
                 { !this.state.isSocialAuth
                   ? <div>
                       <div className="input-field">

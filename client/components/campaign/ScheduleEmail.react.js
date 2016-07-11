@@ -68,11 +68,6 @@ class ScheduleEmail extends React.Component {
  */
   initTinyMCE = () => {
     const {getAllTags, address} = this.state;
-    if(tinymce.get("emailContent")) {
-      tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
-    }
-    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", getAllTags, true,
-      this.tinyMceCb);
     if(tinymce.get("emailSubject")) {
       tinyMCE.execCommand("mceRemoveEditor", true, "emailSubject");
     }
@@ -81,6 +76,11 @@ class ScheduleEmail extends React.Component {
       tinyMCE.execCommand("mceRemoveEditor", true, "optOutAddress");
     }
     initTinyMCE("#optOutAddress", "", "", "", false, this.tinyMceAddressCb);
+    if(tinymce.get("emailContent")) {
+      tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
+    }
+    initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", getAllTags, true,
+      this.tinyMceCb);
     let mainContent = this.props.selectedTemplate;
     const tinyMceDelayTime = 1000;
     //TODO need to remove setTimeout
@@ -97,6 +97,8 @@ class ScheduleEmail extends React.Component {
       tinyMCE.get("optOutAddress").setContent(address ||
         tinymcePlaceholder("Address"));
     }, tinyMceDelayTime);
+
+    // tinyMCE.get('id_of_textarea').focus()
   }
 
   tinyMceCb = (editor) => {
