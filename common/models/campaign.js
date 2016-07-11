@@ -9,6 +9,7 @@ import statusCodes from "../../server/utils/status-codes";
 import queueUtil from "../../server/emailReader/mailEnqueue";
 import config from "../../server/config.json";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
+import striptags from "striptags";
 
 const systemTimeZone = moment().format("Z");
 const serverUrl = config.appUrl;
@@ -630,6 +631,7 @@ module.exports = function(Campaign) {
    */
   const sendToEmailQueue = (campaign, followup, person, email,
     sendToEmailQueueCB) => {
+    email.subject = lodash.trim(striptags(email.subject));
     Campaign.app.models.emailQueue.create(email,
       (emailQueueErr, emailQueueObj) => {
       if (emailQueueErr) {

@@ -2,7 +2,7 @@ var googleAuth = require("google-auth-library");
 var google = require("googleapis");
 var AWS = require("aws-sdk");
 var striptags = require("striptags");
-var googleTokenHandler = require("../../server/mailCrawler/googleTokenHandler");
+var googleTokenHandler = require("../../server/utils/googleTokenHandler");
 
 var emptyArrayLength = 0;
 
@@ -40,7 +40,7 @@ var clientSecretCredentials = {
 /**
  * Watch the emailQueue Table at the interval of 1 minute
  */
-var oneMinute = 60000;
+var oneMinute = 5000;
 setInterval(function() {
 
   async.waterfall([
