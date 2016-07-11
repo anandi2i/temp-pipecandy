@@ -538,6 +538,7 @@ class ScheduleEmail extends React.Component {
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
+    const {errorCount} = this.state;
     // TODO hide for Demo
     // const {spamRating, errorCount} = this.state;
     // let spamClass = "spam-result safe";
