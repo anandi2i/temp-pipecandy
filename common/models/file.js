@@ -334,7 +334,7 @@ module.exports = function(File) {
      * @return {[people]}
      * @author Aswin Raj A
      */
-    let emailExistCheck = (personEmail, emailExistCheckCB) =>{
+    /*let emailExistCheck = (personEmail, emailExistCheckCB) =>{
       File.app.models.person.find({
         where : {
           email : personEmail
@@ -347,8 +347,51 @@ module.exports = function(File) {
         }
         return emailExistCheckCB(null, people);
       });
-    };
+    };*/
 
+    let emailExistCheck = (personEmail, listId, emailExistCheckCB) =>{
+      let response = {};
+      File.app.models.person.find({
+        where : {
+          email : personEmail,
+        }
+      }, (emailFindErr, people) => {
+        if(emailFindErr){
+          logger.error("Error while finding email",
+           {error: emailFindErr, stack: emailFindErr ? err.stack : ""});
+          return emailExistCheckCB(emailFindErr);
+        }
+        if(lodash.isEmpty(people)){
+          response = {
+            msg : "doesnotExist",
+            people : people
+          };
+          return emailExistCheckCB(null, response);
+        }
+        people[0].lists((listfindErr, lists) => {
+          if(listfindErr){
+            logger.error("Error while finding list for person",
+             {error: listfindErr, stack: listfindErr ? err.stack : ""});
+            return emailExistCheckCB(listfindErr);
+          }
+          async.eachSeries(lists, (list, listCB) => {
+            if(list.id === listId){
+              response = {
+                msg : "exist",
+                people : people
+              };
+              emailExistCheckCB(null, response);
+            } else {
+              response = {
+                msg : "existInDiffList",
+                people : people
+              };
+              emailExistCheckCB(null, response);
+            }
+          });
+        });
+      });
+    };
 
     /**
      * To get all the additionalFields for the list
@@ -358,7 +401,8 @@ module.exports = function(File) {
      * @return {[additionalFields, list, people]}
      * @author Aswin Raj A
      */
-    let getAdditionalfield = (list, people, getAdditionalfieldCB) => {
+    let getAdditionalfield = (list, people,
+      getAdditionalfieldCB) => {
         list.fields((fieldErr, fields) => {
           let additionalFields = fields.map((field) => {
             const fieldObj = {
@@ -367,7 +411,8 @@ module.exports = function(File) {
             };
             return fieldObj;
           });
-          return getAdditionalfieldCB(null, additionalFields, list, people);
+          return getAdditionalfieldCB(null, additionalFields, list,
+            people);
         });
     };
 
@@ -381,52 +426,121 @@ module.exports = function(File) {
      * @param  {[function]} populateFieldsForPersonCB
      * @author Aswin Raj A
      */
-    let populateFieldsForPerson = (additionalFields, list, people,
+    let populateFieldsForPerson = (additionalFields, list, peoples,
       populateFieldsForPersonCB) => {
-        async.eachSeries(people, (person, personCB) => {
-          emailExistCheck(person.Email, (emailExistCheckErr, peopleObj) => {
-            if(emailExistCheckErr){
-              logger.error("Error while checking if emailId already exist",
-               {error: emailExistCheckErr,
-                 stack: emailExistCheckErr ? err.stack : ""});
-               return populateFieldsForPersonCB(emailExistCheckErr);
-            }
-            if(lodash.isEmpty(peopleObj)){
-              let personObject = {
-                  firstName: person["First Name"],
-                  middleName: person["Middle Name"],
-                  lastName: person["Last Name"],
-                  salutation: person.Salutation,
-                  email: person.Email
-                };
-              createPersonAndAdditionalFieldValue(personObject,
-                additionalFields, list, person, (creatErr, response) => {
-                  if(creatErr){
-                    logger.error(creatErr,
-                      {error: creatErr, stack: creatErr ? creatErr.stack : ""});
-                    return populateFieldsForPersonCB(creatErr);
-                  }
-                  personCB(null);
-                });
-            } else{
-              updatePersonAndAdditionalFieldValues(peopleObj[0],
-                additionalFields, list, person, (updateErr, response) => {
+      async.eachSeries(peoples, (person, personCB) => {
+      emailExistCheck(person.Email, list.id, (emailExistCheckErr,
+        response) => {
+      if(emailExistCheckErr){
+        logger.error("Error while checking if emailId already exist",
+        {error: emailExistCheckErr,
+        stack: emailExistCheckErr ? err.stack : ""});
+        return populateFieldsForPersonCB(emailExistCheckErr);
+      }
+      if(response.msg === "exist"){
+        updatePersonAndAdditionalFieldValues(response.people[0],
+        additionalFields, list, person, (updateErr, response) => {
+        if(updateErr){
+          logger.error(updateErr,
+          {error: updateErr,
+          stack: updateErr ? updateErr.stack : ""});
+          return populateFieldsForPersonCB(updateErr);
+        }
+        personCB(null);
+        });
+      } else if(response.msg === "existInDiffList"){
+        let personObject = {
+        firstName: person["First Name"],
+        middleName: person["Middle Name"],
+        lastName: person["Last Name"],
+        salutation: person.Salutation,
+        email: person.Email
+        };
+
+        list.people.add(response.people[0].id,
+        (peopleCreateErr, people) => {
+
+          if(peopleCreateErr){
+          logger.error("Error while associating person",
+          {error: peopleCreateErr,
+            stack: peopleCreateErr ? peopleCreateErr.stack : ""});
+          return populateFieldsForPersonCB(peopleCreateErr);
+
+          }
+
+          let auditPersonObj = {};
+          if(response.people[0].firstName !== person["First Name"]){
+            auditPersonObj.firstName = response.people[0].firstName;
+          }
+          if(response.people[0].middleName !== person["Middle Name"]){
+            auditPersonObj.middleName = response.people[0].middleName;
+          }
+          if(response.people[0].lastName !== person["Last Name"]){
+            auditPersonObj.lastName = response.people[0].lastName;
+          }
+          if(response.people[0].salutation !== person.Salutation){
+            auditPersonObj.salutation = response.people[0].salutation;
+          }
+
+
+            if(Object.getOwnPropertyNames(auditPersonObj)
+            .length !== emptycount){
+            auditPersonObj.personId = response.people[0].id;
+            File.app.models.personAudit.create(auditPersonObj,
+            (auditCreateErr, createdPersonAudit) => {
+              if(auditCreateErr){
+                logger.error("auditCreateErr",
+                {error: auditCreateErr,
+                stack: auditCreateErr ? auditCreateErr.stack : ""});
+                return populateFieldsForPersonCB(auditCreateErr);
+              }
+              File.app.models.person.findById(response.people[0].id,
+                 (findErr, person) => {
+                person.updateAttributes(personObject,
+                  (updateErr, updatedperson) => {
                   if(updateErr){
-                    logger.error(updateErr,
-                      {error: updateErr,
-                        stack: updateErr ? updateErr.stack : ""});
+                    logger.error("person update err",
+                    {error: updateErr,
+                    stack: updateErr ? updateErr.stack : ""});
                     return populateFieldsForPersonCB(updateErr);
                   }
-                  personCB(null);
+                  return populateFieldsForPersonCB(null,
+                    updatedperson, response.people[0].id, list,
+                    additionalFields);
+                });
               });
-            }
-          });
-        }, (err) => {
-          if(err){
-            return populateFieldsForPersonCB(err);
+            });
+          } else{
+            return populateFieldsForPersonCB(null, newPerson,
+              oldPerson.id, list, additionalFields);
           }
-          return populateFieldsForPersonCB(null);
         });
+      } else {
+        let personObject = {
+          firstName: person["First Name"],
+          middleName: person["Middle Name"],
+          lastName: person["Last Name"],
+          salutation: person.Salutation,
+          email: person.Email
+        };
+        createPersonAndAdditionalFieldValue(personObject,
+        additionalFields, list, person, (creatErr, response) => {
+          if(creatErr){
+            logger.error(creatErr, {error: creatErr,
+              stack: creatErr ? creatErr.stack : ""});
+            return populateFieldsForPersonCB(creatErr);
+            }
+          personCB(null);
+        });
+      }
+
+      });
+      }, (err) => {
+      if(err){
+      return populateFieldsForPersonCB(err);
+      }
+      return populateFieldsForPersonCB(null);
+      });
     };
 
 
@@ -439,16 +553,18 @@ module.exports = function(File) {
      * @param  {[function]} createPersonAndAdditionalFieldValueCB
      * @author Aswin Raj A
      */
-    let createPersonAndAdditionalFieldValue = (personObject, additionalFields,
-      list, person, createPersonAndAdditionalFieldValueCB) => {
+    let createPersonAndAdditionalFieldValue = (personObject,
+      additionalFields, list, person,
+      createPersonAndAdditionalFieldValueCB) => {
         async.waterfall([
-            async.apply(createPerson, personObject, additionalFields, list,
-              person),
+            async.apply(createPerson, personObject,
+              additionalFields, list, person),
             createAdditionalFields
         ], function (asyncErr, result) {
           if(asyncErr){
-            logger.error("Error while creating person and field values",
-             {error: asyncErr, stack: asyncErr ? asyncErr.stack : ""});
+            logger.error("Error while creating person and field\
+             values", {error: asyncErr,
+               stack: asyncErr ? asyncErr.stack : ""});
              return createPersonAndAdditionalFieldValueCB(asyncErr);
           }
             return createPersonAndAdditionalFieldValueCB(null);
@@ -474,8 +590,8 @@ module.exports = function(File) {
           listid, " ", err.message);
           return createPersonCB(err);
         }
-        return createPersonCB(null, createdPerson, additionalFields, list,
-          person);
+        return createPersonCB(null, createdPerson, additionalFields,
+           list, person);
       });
     };
 
@@ -489,21 +605,23 @@ module.exports = function(File) {
      * @param  {[type]} createAdditionalFieldsCB
      * @author Aswin Raj A
      */
-    let createAdditionalFields = (createdPerson, additionalFields, list, person,
-       createAdditionalFieldsCB) => {
-      async.each(additionalFields, (additionalField, additionalFieldsCB) => {
+    let createAdditionalFields = (createdPerson, additionalFields,
+      list, person, createAdditionalFieldsCB) => {
+      async.each(additionalFields, (additionalField,
+        additionalFieldsCB) => {
         let additionalFieldValueObj = {
           "fieldId":additionalField.id,
           "listId": list.id,
           "personId":createdPerson.id,
           "value": person[additionalField.name]
         };
-        File.app.models.additionalFieldValue.create(additionalFieldValueObj,
+        File.app.models.additionalFieldValue
+        .create(additionalFieldValueObj,
           (fieldValueCreateErr, createdFields) => {
             if(fieldValueCreateErr){
-              logger.error("Error in creating fields for the person:",
-              createdPerson.id, " ", err.message);
-              return createAdditionalFieldsCB(err);
+              logger.error("Error in creating fields for the person",
+              createdPerson.id, " ", fieldValueCreateErr.message);
+              return createAdditionalFieldsCB(fieldValueCreateErr);
             }
             additionalFieldsCB(null);
         });
@@ -511,7 +629,8 @@ module.exports = function(File) {
         if(err){
           return createAdditionalFieldsCB(err);
         }
-        logger.info("File uploaded successfully for the list:", listid);
+        logger.info("File uploaded successfully for the list:",
+        listid);
         return createAdditionalFieldsCB(null);
       });
     };
@@ -527,19 +646,20 @@ module.exports = function(File) {
      * @param  {[function]} updatePersonAndAdditionalFieldValuesCB
      * @author Aswin Raj A
      */
-    let updatePersonAndAdditionalFieldValues = (oldPerson, additionalFields,
-      list, person, updatePersonAndAdditionalFieldValuesCB) => {
+    let updatePersonAndAdditionalFieldValues = (oldPerson,
+      additionalFields, list, person,
+      updatePersonAndAdditionalFieldValuesCB) => {
         async.waterfall([
-          async.apply(createPersonAudit, oldPerson, additionalFields, list,
-            person),
+          async.apply(createPersonAudit, oldPerson,
+            additionalFields, list, person),
           updatePerson,
           updateAdditionalFieldValues
         ], (asyncErr, result) => {
           if(asyncErr){
-            logger.error("Error while updating person and person audit and\
-             additionalFields", {error: asyncErr,
+            logger.error("Error while updating person and person\
+            audit and additionalFields", {error: asyncErr,
                stack: asyncErr ? asyncErr.stack : ""});
-             return updatePersonAndAdditionalFieldValuesCB(creatErr);
+             return updatePersonAndAdditionalFieldValuesCB(asyncErr);
            }
            return updatePersonAndAdditionalFieldValuesCB(null);
         });
@@ -557,8 +677,8 @@ module.exports = function(File) {
      * @return {[newPerson, oldPersonId, list, additionalFields]}
      * @author Aswin Raj A
      */
-    let createPersonAudit = (oldPerson, additionalFields, list, newPerson,
-      createPersonAuditCB) => {
+    let createPersonAudit = (oldPerson, additionalFields, list,
+      newPerson, createPersonAuditCB) => {
       let auditPersonObj = {};
       if(oldPerson.firstName !== newPerson["First Name"]){
         auditPersonObj.firstName = oldPerson.firstName;
@@ -572,7 +692,8 @@ module.exports = function(File) {
       if(oldPerson.salutation !== newPerson.Salutation){
         auditPersonObj.salutation = oldPerson.salutation;
       }
-      if(Object.getOwnPropertyNames(auditPersonObj).length !== emptycount){
+if(Object.getOwnPropertyNames(auditPersonObj)
+.length !== emptycount){
         auditPersonObj.personId = oldPerson.id;
         File.app.models.personAudit.create(auditPersonObj,
           (auditCreateErr, createdPersonAudit) => {
@@ -582,8 +703,8 @@ module.exports = function(File) {
               stack: auditCreateErr ? auditCreateErr.stack : ""});
             return createPersonAuditCB(auditCreateErr);
           }
-          return createPersonAuditCB(null, newPerson, oldPerson.id, list,
-            additionalFields);
+          return createPersonAuditCB(null, newPerson, oldPerson.id,
+            list, additionalFields);
         });
       } else{
       return createPersonAuditCB(null, newPerson, oldPerson.id, list,
@@ -612,7 +733,8 @@ module.exports = function(File) {
         salutation: newPerson.Salutation,
         email: newPerson.Email
       };
-      File.app.models.person.findById(personId, (personFindErr, person) => {
+      File.app.models.person.findById(personId,
+        (personFindErr, person) => {
         if(personFindErr){
           logger.error("Error while finding person",
            {error: personFindErr,
@@ -658,12 +780,13 @@ module.exports = function(File) {
           }
         }, (fieldFindErr, fieldData) => {
           fieldData[0].updateAttribute("value",
-            newPerson[additionalField.name], (fieldUpdateErr, updatedField) => {
+            newPerson[additionalField.name],
+            (fieldUpdateErr, updatedField) => {
             if(fieldUpdateErr){
-              logger.error("Error while updating additionalField value",
-               {error: fieldUpdateErr,
-                 stack: fieldUpdateErr ? fieldUpdateErr.stack : ""});
-                 return updateAdditionalFieldValuesCB(fieldUpdateErr);
+              logger.error("Error while updating additionalField\
+               value", {error: fieldUpdateErr,
+               stack: fieldUpdateErr ? fieldUpdateErr.stack : ""});
+               return updateAdditionalFieldValuesCB(fieldUpdateErr);
             }
             additionalFieldsCB(null);
           });
@@ -711,14 +834,16 @@ module.exports = function(File) {
       }
     }, (fieldsFindErr, defaultFields) => {
       if(fieldsFindErr){
-        logger.error("Error while finding default fields for the list", {
+        logger.error("Error while finding default fields for the\
+         list", {
           error: fieldsFindErr,
           stack: fieldsFindErr ? fieldsFindErr.stack : ""
         });
         return getAllDefaultFieldsCB(fieldsFindErr);
       }
       let defaultAdditionalFields = _.pluck(defaultFields, "name");
-      return getAllDefaultFieldsCB(null, defaultAdditionalFields, listid);
+      return getAllDefaultFieldsCB(null, defaultAdditionalFields,
+         listid);
     });
   };
 
@@ -731,8 +856,8 @@ module.exports = function(File) {
    * @return {[type]}                                 [description]
    * @author Aswin Raj A
    */
-  let getAllAdditionalFieldsForList = (defaultAdditionalFields, listid,
-    getAllAdditionalFieldsForListCB) => {
+  let getAllAdditionalFieldsForList = (defaultAdditionalFields,
+     listid, getAllAdditionalFieldsForListCB) => {
     File.app.models.list.findById(listid, (listFindErr, list) => {
       if(listFindErr){
         logger.error("Error while finding list", {
@@ -749,9 +874,10 @@ module.exports = function(File) {
           });
           return getAllAdditionalFieldsForListCB(fieldErr);
         }
-        let allAdditionalFields = lodash.concat(defaultAdditionalFields,
-          _.pluck(fields, "name"));
-        return getAllAdditionalFieldsForListCB(null, allAdditionalFields);
+        let allAdditionalFields = lodash
+        .concat(defaultAdditionalFields, _.pluck(fields, "name"));
+        return getAllAdditionalFieldsForListCB(null,
+          allAdditionalFields);
       });
     });
   };

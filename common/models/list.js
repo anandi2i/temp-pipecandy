@@ -204,8 +204,60 @@ module.exports = function(List) {
          logger.error("Error in getting List for id : ", id);
          return savePersonWithFieldsCB(listErr);
       }
-      emailExistCheck(reqParams.person.email, (checkErr, person) => {
-        if(lodash.isEmpty(person)){
+      emailExistCheck(reqParams.person.email, id, (checkErr, response) => {
+
+        if(response.msg === "exist"){
+          let newPersonObject = {
+             firstName: reqParams.person.firstName,
+             middleName: reqParams.person.middleName,
+             lastName: reqParams.person.lastName,
+             email: reqParams.person.email
+          };
+          updatePersonAuditAndAdditionalFields(list[0], response.people[0],
+            newPersonObject, reqParams.person.fieldValues,
+            (createErr, createdPerson) => {
+          if(createErr){
+           logger.error("Error while creating person and fieldValues",
+            {error: createErr, stack: createErr ? createErr.stack : ""});
+           savePersonWithFieldsCB(createErr);
+          }
+          savePersonWithFieldsCB(null, createdPerson);
+          });
+        } else if(response.msg === "existInDiffList"){
+          let auditPersonObj = {};
+          if(response.people[0].firstName !== reqParams.person.firstName){
+            auditPersonObj.firstName = response.people[0].firstName;
+          }
+          if(response.people[0].middleName !== reqParams.person.middleName){
+            auditPersonObj.middleName = response.people[0].middleName;
+          }
+          if(response.people[0].lastName !== reqParams.person.lastName){
+            auditPersonObj.lastName = response.people[0].lastName;
+          }
+          if(response.people[0].salutation !== reqParams.person.salutation){
+            auditPersonObj.salutation = response.people[0].salutation;
+          }
+
+          if(Object.getOwnPropertyNames(auditPersonObj).length !== emptycount){
+            auditPersonObj.personId = response.people[0].id;
+            List.app.models.personAudit.create(auditPersonObj,
+              (auditCreateErr, createdPersonAudit) => {
+            if(auditCreateErr){
+              logger.error("Error while creating Person Audit",
+              {error: auditCreateErr,
+              stack: auditCreateErr ? auditCreateErr.stack : ""});
+              return savePersonWithFieldsCB(auditCreateErr);
+            }
+              return savePersonWithFieldsCB(null, newPerson, oldPerson.id, list,
+              additionalFields);
+            });
+          } else{
+            savePersonWithFieldsCB(null, newPerson, oldPerson.id, list,
+              additionalFields);
+          }
+
+
+        } else{
           let personObject = {
              firstName: reqParams.person.firstName,
              middleName: reqParams.person.middleName,
@@ -221,27 +273,12 @@ module.exports = function(List) {
              }
              savePersonWithFieldsCB(null, createdPerson);
            });
-        } else{
-          let newPersonObject = {
-             firstName: reqParams.person.firstName,
-             middleName: reqParams.person.middleName,
-             lastName: reqParams.person.lastName,
-             email: reqParams.person.email
-          };
-          updatePersonAuditAndAdditionalFields(list[0], person[0],
-            newPersonObject, reqParams.person.fieldValues,
-            (createErr, createdPerson) => {
-          if(createErr){
-           logger.error("Error while creating person and fieldValues",
-            {error: createErr, stack: createErr ? createErr.stack : ""});
-           savePersonWithFieldsCB(createErr);
-          }
-          savePersonWithFieldsCB(null, createdPerson);
-          });
         }
       });
     });
   };
+
+
 
   /**
    * While creating new recepient, if there is no person saved with recepient's
@@ -502,10 +539,76 @@ module.exports = function(List) {
    * @return {[people]}
    * @author Aswin Raj A
    */
-  let emailExistCheck = (personEmail, emailExistCheckCB) =>{
+  let emailExistCheck = (personEmail, listId, emailExistCheckCB) =>{
+    let response = {};
     List.app.models.person.find({
       where : {
-        email : personEmail
+        email : personEmail,
+      }
+    }, (emailFindErr, people) => {
+      if(emailFindErr){
+        logger.error("Error while finding email",
+         {error: emailFindErr, stack: emailFindErr ? err.stack : ""});
+        return emailExistCheckCB(emailFindErr);
+      }
+      if(lodash.isEmpty(people)){
+        response = {
+          msg : "doesnotExist",
+          people : people
+        };
+        return emailExistCheckCB(null, response);
+      }
+      people[0].lists((listfindErr, lists) => {
+        if(listfindErr){
+          logger.error("Error while finding list for person",
+           {error: listfindErr, stack: listfindErr ? err.stack : ""});
+          return emailExistCheckCB(listfindErr);
+        }
+        async.eachSeries(lists, (list, listCB) => {
+          if(list.id === listId){
+            response = {
+              msg : "exist",
+              people : people
+            };
+            emailExistCheckCB(null, response);
+          } else {
+            response = {
+              msg : "existInDiffList",
+              people : people
+            };
+            emailExistCheckCB(null, response);
+          }
+        });
+      });
+    });
+  };
+
+    /*List.findById(listId, (listFindErr, list) => {
+      if(listFindErr){
+        logger.error("Error while finding list for id:"+listId,
+         {error: listFindErr, stack: listFindErr ? listFindErr.stack : ""});
+        emailExistCheckCB(listFindErr);
+      }
+      list.people((peopleFindErr, people) => {
+        if(peopleFindErr){
+          logger.error("Error while finding person for list:"+listId,
+           {error: peopleFindErr, stack: peopleFindErr ? peopleFindErr.stack : ""});
+          emailExistCheckCB(peopleFindErr);
+        }
+        return emailExistCheckCB(null, people);
+      });
+    });*/
+
+
+
+
+
+    /*List.app.models.person.find({
+      where : {
+        and : [
+          {email : personEmail},
+          {}
+        ]
       }
     }, (emailFindErr, people) => {
       if(emailFindErr){
@@ -514,8 +617,8 @@ module.exports = function(List) {
         return emailExistCheckCB(emailFindErr);
       }
       return emailExistCheckCB(null, people);
-    });
-  };
+    });*/
+
 
 
   List.remoteMethod(
