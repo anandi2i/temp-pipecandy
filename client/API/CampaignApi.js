@@ -100,7 +100,7 @@ const CampaignApi = {
    */
   getInboxMails(data) {
     const {id, start, end, actionable} = data;
-    return api.get(`api/inboxMails/inboxMails/${id}?` +
+    return api.get(`api/inboxMails/campaign/${id}?` +
       `start=${start}&limit=${end}&actionable=${actionable}`);
   },
   /**

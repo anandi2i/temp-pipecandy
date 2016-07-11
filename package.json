@@ -14,7 +14,7 @@
     "campaignConsumer": "node server/mailSender/campaignConsumer.js",
     "campaignMailSender": "node server/mailSender/oldMailSender.js",
     "mailCrawler": "node server/mailCrawler/crawl.js",
-    "mailDequeue": "node server/mailCrawler/mailDequeue.js",
+    "mailDequeue": "node server/emailReader/mailDequeue.js",
     "followUpSender": "node server/followUpSender/followUpMailSender.js",
     "emailQueuePoller": "node server/mailSender/emailQueuePoller.js",
     "validate": "npm ls"

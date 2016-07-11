@@ -379,7 +379,8 @@ function updateRelatedTables(emailQueue, mailContent, sentMailResp,
     createAudit.bind(null, emailQueue, mailContent, sentMailResp),
     updateCampaignMetric.bind(null, emailQueue, mailContent, sentMailResp),
     updateListMetric.bind(null, emailQueue, mailContent, sentMailResp),
-    updateSentMailBox.bind(null, emailQueue, mailContent, sentMailResp)
+    updateSentMailBox.bind(null, emailQueue, mailContent, sentMailResp),
+    updateCampaignLastRunAt.bind(null, emailQueue, mailContent, sentMailResp)
   ],
   function(err, results) {
     if (err) {
@@ -513,6 +514,25 @@ function updateSentMailBox(emailQueue, mailContent, sentMailResp,
   };
   App.sentMailBox.saveOrUpdate(sentMailBoxInst, function(err, response) {
     updateSentMailBoxCB(null, emailQueue, mailContent, sentMailResp);
+  });
+}
+
+/**
+ * Update Campaign Last Run At
+ *
+ * @param  {Object} emailQueue
+ * @param  {Object} mailContent
+ * @param  {Object} sentMailResp
+ * @param  {Function} createAuditCB
+ * @author Syed Sulaiman M
+ */
+function updateCampaignLastRunAt(emailQueue, mailContent, sentMailResp,
+    updateCampaignCB) {
+  App.campaign.findById(emailQueue.campaignId, function(err, campaign) {
+    campaign.updateAttribute("lastRunAt", new Date(),
+        function(err, updatedCampaign) {
+      updateCampaignCB(null, emailQueue, mailContent, sentMailResp);
+    });
   });
 }
 
