@@ -269,9 +269,10 @@ module.exports = function(File) {
       });
     }
 
-    function createCompanies(companies, people, invalidData, responseMessage,
+    function createCompanies(companies, newPeople, invalidData, responseMessage,
       createCompaniesCB) {
-      companies = _.uniq(companies).map((company) => {
+      companies = _.uniq(companies);
+      async.eachSeries(companies, (company, companyCB) => {
         File.app.models.company.findOrCreate({
           where: {
             name: company
@@ -286,8 +287,16 @@ module.exports = function(File) {
                stack: companyCreateErr ? companyCreateErr.stack : ""});
                return createCompaniesCB(companyCreateErr);
           }
-          return createCompaniesCB(null, people, invalidData, responseMessage);
+          companyCB(null);
+
         });
+      }, (asyncErr) => {
+        if(asyncErr){
+          logger.error("Error while creating companie",
+           {error: asyncErr, stack: asyncErr ? asyncErr.stack : ""});
+          return createCompaniesCB(asyncErr);
+        }
+        return createCompaniesCB(null, newPeople, invalidData, responseMessage);
       });
     }
 
@@ -301,15 +310,15 @@ module.exports = function(File) {
      * @return {[uploadResponse]} Has invalid data if any and the responseMessage
      * @author Aswin Raj A
      */
-    let populatePeopleAndFields = (people, invalidData,
-      responseMessage, populatePeopleAndFieldsCB) => {
+    let populatePeopleAndField = (newPeople, invalidData, responseMessage,
+      populatePeopleAndFieldsCB) => {
       File.app.models.List.findById(listid, (err, list) => {
         if(err) {
           logger.error("Error in finding list:", listid, " ", err.message);
           return populatePeopleAndFieldsCB(err);
         }
         async.waterfall([
-          async.apply(getAdditionalfield, list, people),
+          async.apply(getAdditionalfield, list, newPeople),
           populateFieldsForPerson
         ], (asyncErr, result) => {
           if(asyncErr){
@@ -334,21 +343,6 @@ module.exports = function(File) {
      * @return {[people]}
      * @author Aswin Raj A
      */
-    /*let emailExistCheck = (personEmail, emailExistCheckCB) =>{
-      File.app.models.person.find({
-        where : {
-          email : personEmail
-        }
-      }, (emailFindErr, people) => {
-        if(emailFindErr){
-          logger.error("Error while finding email",
-           {error: emailFindErr, stack: emailFindErr ? err.stack : ""});
-          return emailExistCheckCB(emailFindErr);
-        }
-        return emailExistCheckCB(null, people);
-      });
-    };*/
-
     let emailExistCheck = (personEmail, listId, emailExistCheckCB) =>{
       let response = {};
       File.app.models.person.find({
@@ -401,8 +395,7 @@ module.exports = function(File) {
      * @return {[additionalFields, list, people]}
      * @author Aswin Raj A
      */
-    let getAdditionalfield = (list, people,
-      getAdditionalfieldCB) => {
+    let getAdditionalfield = (list, newPeople, getAdditionalfieldCB) => {
         list.fields((fieldErr, fields) => {
           let additionalFields = fields.map((field) => {
             const fieldObj = {
@@ -411,8 +404,7 @@ module.exports = function(File) {
             };
             return fieldObj;
           });
-          return getAdditionalfieldCB(null, additionalFields, list,
-            people);
+          return getAdditionalfieldCB(null, additionalFields, list, newPeople);
         });
     };
 
@@ -426,114 +418,135 @@ module.exports = function(File) {
      * @param  {[function]} populateFieldsForPersonCB
      * @author Aswin Raj A
      */
-    let populateFieldsForPerson = (additionalFields, list, peoples,
+    let populateFieldsForPerson = (additionalFields, list, newPeople,
       populateFieldsForPersonCB) => {
-      async.eachSeries(peoples, (person, personCB) => {
-      emailExistCheck(person.Email, list.id, (emailExistCheckErr,
-        response) => {
-      if(emailExistCheckErr){
-        logger.error("Error while checking if emailId already exist",
-        {error: emailExistCheckErr,
-        stack: emailExistCheckErr ? err.stack : ""});
-        return populateFieldsForPersonCB(emailExistCheckErr);
-      }
-      if(response.msg === "exist"){
-        updatePersonAndAdditionalFieldValues(response.people[0],
-        additionalFields, list, person, (updateErr, response) => {
-        if(updateErr){
-          logger.error(updateErr,
-          {error: updateErr,
-          stack: updateErr ? updateErr.stack : ""});
-          return populateFieldsForPersonCB(updateErr);
+      async.eachSeries(newPeople, (newPerson, newPersonCB) => {
+      emailExistCheck(newPerson.Email, list.id,
+        (emailExistCheckErr, response) => {
+        if(emailExistCheckErr){
+          logger.error("Error while checking if emailId already exist",
+          {error: emailExistCheckErr,
+          stack: emailExistCheckErr ? err.stack : ""});
+          return populateFieldsForPersonCB(emailExistCheckErr);
         }
-        personCB(null);
-        });
-      } else if(response.msg === "existInDiffList"){
-        let personObject = {
-        firstName: person["First Name"],
-        middleName: person["Middle Name"],
-        lastName: person["Last Name"],
-        salutation: person.Salutation,
-        email: person.Email
-        };
-
-        list.people.add(response.people[0].id,
-        (peopleCreateErr, people) => {
-
-          if(peopleCreateErr){
-          logger.error("Error while associating person",
-          {error: peopleCreateErr,
-            stack: peopleCreateErr ? peopleCreateErr.stack : ""});
-          return populateFieldsForPersonCB(peopleCreateErr);
-
-          }
-
-          let auditPersonObj = {};
-          if(response.people[0].firstName !== person["First Name"]){
-            auditPersonObj.firstName = response.people[0].firstName;
-          }
-          if(response.people[0].middleName !== person["Middle Name"]){
-            auditPersonObj.middleName = response.people[0].middleName;
-          }
-          if(response.people[0].lastName !== person["Last Name"]){
-            auditPersonObj.lastName = response.people[0].lastName;
-          }
-          if(response.people[0].salutation !== person.Salutation){
-            auditPersonObj.salutation = response.people[0].salutation;
-          }
-
-
-            if(Object.getOwnPropertyNames(auditPersonObj)
-            .length !== emptycount){
-            auditPersonObj.personId = response.people[0].id;
-            File.app.models.personAudit.create(auditPersonObj,
-            (auditCreateErr, createdPersonAudit) => {
-              if(auditCreateErr){
-                logger.error("auditCreateErr",
-                {error: auditCreateErr,
-                stack: auditCreateErr ? auditCreateErr.stack : ""});
-                return populateFieldsForPersonCB(auditCreateErr);
+        if(response.msg === "doesnotExist"){
+          let newPersonObject = {
+            firstName: newPerson["First Name"],
+            middleName: newPerson["Middle Name"],
+            lastName: newPerson["Last Name"],
+            salutation: newPerson.Salutation,
+            email: newPerson.Email
+          };
+          createPersonAndAdditionalFieldValue(newPersonObject, additionalFields,
+             list, newPerson,
+            (creatErr, response) => {
+            if(creatErr){
+              logger.error(creatErr, {error: creatErr,
+                stack: creatErr ? creatErr.stack : ""});
+              return populateFieldsForPersonCB(creatErr);
               }
-              File.app.models.person.findById(response.people[0].id,
-                 (findErr, person) => {
-                person.updateAttributes(personObject,
-                  (updateErr, updatedperson) => {
-                  if(updateErr){
-                    logger.error("person update err",
-                    {error: updateErr,
-                    stack: updateErr ? updateErr.stack : ""});
-                    return populateFieldsForPersonCB(updateErr);
-                  }
-                  return populateFieldsForPersonCB(null,
-                    updatedperson, response.people[0].id, list,
-                    additionalFields);
+            newPersonCB(null);
+          });
+        } else if(response.msg === "exist"){
+          updatePersonAndAdditionalFieldValues(response.people[0],
+            additionalFields, list, newPerson, (updateErr, response) => {
+          if(updateErr){
+            logger.error(updateErr,
+            {error: updateErr,
+            stack: updateErr ? updateErr.stack : ""});
+            return populateFieldsForPersonCB(updateErr);
+          }
+          newPersonCB(null);
+          });
+        } else if(response.msg === "existInDiffList"){
+          let personObject = {
+            firstName: newPerson["First Name"],
+            middleName: newPerson["Middle Name"],
+            lastName: newPerson["Last Name"],
+            salutation: newPerson.Salutation,
+            email: newPerson.Email
+          };
+          list.people.add(response.people[0].id,
+          (peopleCreateErr, people) => {
+            if(peopleCreateErr){
+              logger.error("Error while associating person",
+              {error: peopleCreateErr,
+                stack: peopleCreateErr ? peopleCreateErr.stack : ""});
+              return populateFieldsForPersonCB(peopleCreateErr);
+            }
+            let auditPersonObj = {};
+            if(response.people[0].firstName !== newPerson["First Name"]){
+              auditPersonObj.firstName = response.people[0].firstName;
+            }
+            if(response.people[0].middleName !== newPerson["Middle Name"]){
+              auditPersonObj.middleName = response.people[0].middleName;
+            }
+            if(response.people[0].lastName !== newPerson["Last Name"]){
+              auditPersonObj.lastName = response.people[0].lastName;
+            }
+            if(response.people[0].salutation !== newPerson.Salutation){
+              auditPersonObj.salutation = response.people[0].salutation;
+            }
+            let objLength = Object.getOwnPropertyNames(auditPersonObj).length;
+            if(objLength!== emptycount){
+              auditPersonObj.personId = response.people[0].id;
+              File.app.models.personAudit.create(auditPersonObj,
+                (auditCreateErr, createdPersonAudit) => {
+                if(auditCreateErr){
+                  logger.error("auditCreateErr",
+                  {error: auditCreateErr,
+                  stack: auditCreateErr ? auditCreateErr.stack : ""});
+                  return populateFieldsForPersonCB(auditCreateErr);
+                }
+                File.app.models.person.findById(response.people[0].id,
+                  (findErr, person) => {
+                  person.updateAttributes(personObject,
+                    (updateErr, updatedperson) => {
+                    if(updateErr){
+                      logger.error("person update err",
+                      {error: updateErr,
+                      stack: updateErr ? updateErr.stack : ""});
+                      return populateFieldsForPersonCB(updateErr);
+                    }
+                    async.each(additionalFields, (additionalField,
+                      additionalFieldsCB) => {
+                      let additionalFieldValueObj = {
+                        "fieldId":additionalField.id,
+                        "listId": list.id,
+                        "personId":person.id,
+                        "value": newPerson[additionalField.name]
+                      };
+                      if(additionalFieldValueObj.value!==''){
+                        File.app.models.additionalFieldValue
+                        .create(additionalFieldValueObj,
+                          (fieldValueCreateErr, createdFields) => {
+                        if(fieldValueCreateErr){
+                          logger.error("Error in creating fields for\
+                           the person", createdPerson.id, " ",
+                           fieldValueCreateErr.message);
+                        return populateFieldsForPersonCB(fieldValueCreateErr);
+                        }
+                        additionalFieldsCB(null);
+                        });
+                      } else{
+                        additionalFieldsCB(null);
+                      }
+                    }, (err) => {
+                      if(err){
+                        return populateFieldsForPersonCB(err);
+                      }
+                      logger.info("File uploaded successfully for the list:",
+                      listid);
+                      return newPersonCB(null);
+                    });
+                  });
                 });
               });
-            });
-          } else{
-            return populateFieldsForPersonCB(null, newPerson,
-              oldPerson.id, list, additionalFields);
-          }
-        });
-      } else {
-        let personObject = {
-          firstName: person["First Name"],
-          middleName: person["Middle Name"],
-          lastName: person["Last Name"],
-          salutation: person.Salutation,
-          email: person.Email
-        };
-        createPersonAndAdditionalFieldValue(personObject,
-        additionalFields, list, person, (creatErr, response) => {
-          if(creatErr){
-            logger.error(creatErr, {error: creatErr,
-              stack: creatErr ? creatErr.stack : ""});
-            return populateFieldsForPersonCB(creatErr);
+            } else{
+              return newPersonCB(null);
             }
-          personCB(null);
-        });
-      }
-
+          });
+        }
       });
       }, (err) => {
       if(err){
@@ -607,24 +620,26 @@ module.exports = function(File) {
      */
     let createAdditionalFields = (createdPerson, additionalFields,
       list, person, createAdditionalFieldsCB) => {
-      async.each(additionalFields, (additionalField,
-        additionalFieldsCB) => {
+      async.each(additionalFields, (additionalField, additionalFieldsCB) => {
         let additionalFieldValueObj = {
           "fieldId":additionalField.id,
           "listId": list.id,
           "personId":createdPerson.id,
           "value": person[additionalField.name]
         };
-        File.app.models.additionalFieldValue
-        .create(additionalFieldValueObj,
-          (fieldValueCreateErr, createdFields) => {
-            if(fieldValueCreateErr){
-              logger.error("Error in creating fields for the person",
-              createdPerson.id, " ", fieldValueCreateErr.message);
-              return createAdditionalFieldsCB(fieldValueCreateErr);
-            }
-            additionalFieldsCB(null);
-        });
+        if(additionalFieldValueObj.value!==''){
+          File.app.models.additionalFieldValue.create(additionalFieldValueObj,
+            (fieldValueCreateErr, createdFields) => {
+              if(fieldValueCreateErr){
+                logger.error("Error in creating fields for the person",
+                createdPerson.id, " ", fieldValueCreateErr.message);
+                return createAdditionalFieldsCB(fieldValueCreateErr);
+              }
+              additionalFieldsCB(null);
+          });
+        }else{
+          additionalFieldsCB(null);
+        }
       }, (err) => {
         if(err){
           return createAdditionalFieldsCB(err);
@@ -646,12 +661,12 @@ module.exports = function(File) {
      * @param  {[function]} updatePersonAndAdditionalFieldValuesCB
      * @author Aswin Raj A
      */
-    let updatePersonAndAdditionalFieldValues = (oldPerson,
-      additionalFields, list, person,
+    let updatePersonAndAdditionalFieldValues = (oldPerson, additionalFields,
+      list, newperson,
       updatePersonAndAdditionalFieldValuesCB) => {
         async.waterfall([
-          async.apply(createPersonAudit, oldPerson,
-            additionalFields, list, person),
+          async.apply(createPersonAudit, oldPerson, additionalFields, list,
+            newperson),
           updatePerson,
           updateAdditionalFieldValues
         ], (asyncErr, result) => {
@@ -677,8 +692,8 @@ module.exports = function(File) {
      * @return {[newPerson, oldPersonId, list, additionalFields]}
      * @author Aswin Raj A
      */
-    let createPersonAudit = (oldPerson, additionalFields, list,
-      newPerson, createPersonAuditCB) => {
+    let createPersonAudit = (oldPerson, additionalFields, list, newPerson,
+      createPersonAuditCB) => {
       let auditPersonObj = {};
       if(oldPerson.firstName !== newPerson["First Name"]){
         auditPersonObj.firstName = oldPerson.firstName;
@@ -692,8 +707,8 @@ module.exports = function(File) {
       if(oldPerson.salutation !== newPerson.Salutation){
         auditPersonObj.salutation = oldPerson.salutation;
       }
-if(Object.getOwnPropertyNames(auditPersonObj)
-.length !== emptycount){
+      let objectLenth = Object.getOwnPropertyNames(auditPersonObj).length;
+      if(objectLenth!== emptycount){
         auditPersonObj.personId = oldPerson.id;
         File.app.models.personAudit.create(auditPersonObj,
           (auditCreateErr, createdPersonAudit) => {
@@ -703,8 +718,8 @@ if(Object.getOwnPropertyNames(auditPersonObj)
               stack: auditCreateErr ? auditCreateErr.stack : ""});
             return createPersonAuditCB(auditCreateErr);
           }
-          return createPersonAuditCB(null, newPerson, oldPerson.id,
-            list, additionalFields);
+          return createPersonAuditCB(null, newPerson, oldPerson.id, list,
+            additionalFields);
         });
       } else{
       return createPersonAuditCB(null, newPerson, oldPerson.id, list,
@@ -779,17 +794,41 @@ if(Object.getOwnPropertyNames(auditPersonObj)
             ]
           }
         }, (fieldFindErr, fieldData) => {
-          fieldData[0].updateAttribute("value",
+          if(fieldFindErr){
+            logger.error("Error while finding field", {error: fieldFindErr,
+              stack: fieldFindErr ? fieldFindErr.stack : ""});
+            return updateAdditionalFieldValuesCB(fieldFindErr);
+          }
+          if(lodash.isEmpty(fieldData)){
+            let addFieldValueObj = {
+              personId : personId,
+              listId: list.id,
+              fieldId: additionalField.id,
+              value: newPerson[additionalField.name]
+            };
+            File.app.models.additionalFieldValue.create(addFieldValueObj,
+              (fieldCreateErr, createdField) => {
+                if(fieldCreateErr){
+                  logger.error("Error while creating fields",
+                   {error: fieldCreateErr,
+                     stack: fieldCreateErr ? fieldCreateErr.stack : ""});
+                  return updateAdditionalFieldValuesCB(fieldCreateErr);
+                }
+               additionalFieldsCB(null);
+            });
+          } else{
+            fieldData[0].updateAttribute("value",
             newPerson[additionalField.name],
-            (fieldUpdateErr, updatedField) => {
-            if(fieldUpdateErr){
-              logger.error("Error while updating additionalField\
-               value", {error: fieldUpdateErr,
-               stack: fieldUpdateErr ? fieldUpdateErr.stack : ""});
-               return updateAdditionalFieldValuesCB(fieldUpdateErr);
-            }
-            additionalFieldsCB(null);
-          });
+              (fieldUpdateErr, updatedField) => {
+              if(fieldUpdateErr){
+                logger.error("Error while updating additionalField\
+                 value", {error: fieldUpdateErr,
+                 stack: fieldUpdateErr ? fieldUpdateErr.stack : ""});
+                 return updateAdditionalFieldValuesCB(fieldUpdateErr);
+              }
+              additionalFieldsCB(null);
+            });
+          }
         });
       }, (err) => {
         if(err){
@@ -803,13 +842,12 @@ if(Object.getOwnPropertyNames(auditPersonObj)
     };
 
 
-
     async.waterfall([
       saveFile,
       getAllFieldsForList,
       parseUploadedFile,
       createCompanies,
-      populatePeopleAndFields
+      populatePeopleAndField
     ], (asyncErr, asyncResult) => {
       if(asyncErr){
         uploadCB(asyncErr);
