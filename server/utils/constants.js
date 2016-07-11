@@ -1,7 +1,8 @@
 const constants = {
   "EMPTYOBJECT" : "10",
   "STATUS_NOT_SUPPORTED" : "Status Not Supported while Sending",
-  "PERSON_UNSUBSCRIBED" : "Person Unsubscribed Current User"
+  "PERSON_UNSUBSCRIBED" : "Person Unsubscribed Current User",
+  "ONE": 1
 };
 
 //export default constants;

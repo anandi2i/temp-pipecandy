@@ -39,6 +39,40 @@ module.exports = function(SentMailBox) {
     });
   };
 
+  /**
+   * Find Sent Mail By User Id and Thread Id
+   * @param  {Number}   userId
+   * @param  {Number}   threadId
+   * @param  {Function} callback
+   * @return {SentMailBox}
+   * @author Syed Sulaiman M
+   */
+  SentMailBox.findByUserIdAndThreadId = (userId, threadId, callback) => {
+    SentMailBox.find({
+      where: {
+        userId: userId,
+        threadId: threadId
+      }
+    }, (sentMailBoxesErr, sentMailBoxes) => {
+      return callback(sentMailBoxesErr, sentMailBoxes[0]);
+    });
+  };
+
+  /**
+   * Update count of SentMailBox
+   *
+   * @param  {SentMailBox}   sentMailBoxInst
+   * @param  {Function} callback
+   * @return {SentMailBox}
+   * @author Syed Sulaiman M
+   */
+  SentMailBox.updateAttr = (sentMailBoxInst, attrToUpdate, callback) => {
+    sentMailBoxInst.updateAttributes(attrToUpdate,
+        (updateErr, updatedData) => {
+      return callback(updateErr, updatedData);
+    });
+  };
+
   SentMailBox.remoteMethod(
     "sentMails", {
       description: "Get Sent Mails",

@@ -58,13 +58,6 @@
       "foreignKey": "personId"
     }
   },
-  "acls": [
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "inboxMails"
-    }
-  ],
+  "acls": [],
   "methods": {}
 }

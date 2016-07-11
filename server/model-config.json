@@ -151,5 +151,9 @@
   "personAudit": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "inboxMail": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

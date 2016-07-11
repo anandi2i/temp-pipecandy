@@ -1,0 +1,76 @@
+{
+  "name": "inboxMail",
+  "plural": "inboxMails",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "fromEmailId": {
+      "type": "string"
+    },
+    "toEmailId": {
+      "type": "string"
+    },
+    "threadId": {
+      "type": "string"
+    },
+    "mailId": {
+      "type": "string"
+    },
+    "count": {
+      "type": "number",
+      "default": 0
+    },
+    "subject": {
+      "type": "string"
+    },
+    "actionable": {
+      "type": "boolean",
+      "default": false
+    },
+    "content": {
+      "type": "string",
+      "postgresql": {
+        "dataType": "text"
+      }
+    },
+    "receivedDate": {
+      "type": "date"
+    },
+    "createdAt": {
+      "type": "date"
+    },
+    "updatedAt": {
+      "type": "date"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "person": {
+      "type": "belongsTo",
+      "model": "person",
+      "foreignKey": "personId"
+    },
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": "campaignId"
+    },
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "userId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "inboxMails"
+    }
+  ],
+  "methods": {}
+}

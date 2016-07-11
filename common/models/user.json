@@ -20,6 +20,14 @@
     "address": {
       "type": "string"
     },
+    "isMailReadEnabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "isMailReaded": {
+      "type": "boolean",
+      "default": false
+    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"
@@ -35,10 +43,10 @@
       "model": "accessToken",
       "foreignKey": ""
     },
-    "identities": {
-      "type": "hasMany",
+    "identity": {
+      "type": "hasOne",
       "model": "userIdentity",
-      "foreignKey": ""
+      "foreignKey": "userId"
     },
     "credentials": {
       "type": "hasMany",

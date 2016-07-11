@@ -36,7 +36,8 @@ job.start();
 function initFollowUpWorkflow(callback) {
   async.waterfall([
     getFollowUpIds,
-    sendFollowUpMail
+    sendFollowUpMail,
+    updateFollowUps
   ], function(err, result) {
     if(err) {
         console.error("Error while polling folloUp table", err);
@@ -55,14 +56,7 @@ function getFollowUpIds(callback) {
     if(lodash.isEmpty(followUps)) {
       console.log("No Follow Ups to Sent");
     }
-    async.each(followUps, (followUp, followUpCB) => {
-      followUp.updateAttribute("isFollowUpGenerated", true,
-          (updateErr, updatedInst) => {
-            followUpCB(updateErr, updatedInst);
-      });
-    }, (asyncError) => {
-      callback(asyncError, followUps);
-    });
+    callback(followUpsErr, followUps);
   });
 }
 
@@ -84,5 +78,23 @@ function sendFollowUpMail(followUps, callback) {
 
   }, function done() {
     callback(null, followUps);
+  });
+}
+
+/**
+ * Update FollowUp to set isFollowUpGenerated flag to true
+ *
+ * @param  {[FollowUp]}   followUps
+ * @param  {Function} callback
+ * @author Syed Sulaiman M
+ */
+function updateFollowUps(followUps, callback) {
+  async.each(followUps, (followUp, followUpCB) => {
+    followUp.updateAttribute("isFollowUpGenerated", true, 
+        (updateErr, updatedInst) => {
+      followUpCB(updateErr, updatedInst);
+    });
+  }, (asyncError) => {
+    callback(asyncError, followUps);
   });
 }

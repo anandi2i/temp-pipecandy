@@ -6,7 +6,7 @@ import lodash from "lodash";
 import moment from "moment-timezone";
 import campaignMetricArray from "../../server/utils/campaign-metric-fields";
 import statusCodes from "../../server/utils/status-codes";
-import queueUtil from "../../server/mailCrawler/mailEnqueue";
+import queueUtil from "../../server/emailReader/mailEnqueue";
 import config from "../../server/config.json";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 
@@ -250,7 +250,7 @@ module.exports = function(Campaign) {
      * @param  {[function]} enqueueToMailAssemblerCB
      */
     const enqueueToMailAssembler = (campaign, enqueueToMailAssemblerCB) => {
-      let queueName = "mailAssemblerQueue";
+      let queueName = "emailAssembler";
       queueUtil.enqueueMail(JSON.stringify(campaign), queueName,
         () => {
           campaign.updateAttribute("statusCode", statusCodes.enqueued,
@@ -316,7 +316,7 @@ module.exports = function(Campaign) {
       applySmartTags,
       appendOpenTracker,
       appendLinkClickTracker,
-      appendUnsubscribeLink,
+      // appendUnsubscribeLink,
       prepareScheduledAt,
       preapreFollowUp,
       sendToEmailQueue
@@ -454,23 +454,23 @@ module.exports = function(Campaign) {
    * @param  {[function]} applyUnsubscribeLinkCB Callback function
    * @author Syed Sulaiman M
    */
-  const appendUnsubscribeLink = (campaign, followup, person, email,
-        appendUnsubscribeLinkCB) => {
-    if(followup){
-      return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
-    }
-    if(campaign.isOptTextNeeded) {
-      let trackerContent = email.content;
-      let url = `${serverUrl}/api/`;
-      url += `people/${person.id}/`;
-      url += `user/${campaign.createdBy}/`;
-      url += `campaign/${campaign.id}/unsubscribe`;
-      let trackerTag = `<a href='${url}'>${campaign.optText}</a>`;
-      trackerContent += trackerTag;
-      email.content = trackerContent;
-    }
-    return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
-  };
+  // const appendUnsubscribeLink = (campaign, followup, person, email,
+  //       appendUnsubscribeLinkCB) => {
+  //   if(followup){
+  //     return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
+  //   }
+  //   if(campaign.isOptTextNeeded) {
+  //     let trackerContent = email.content;
+  //     let url = `${serverUrl}/api/`;
+  //     url += `people/${person.id}/`;
+  //     url += `user/${campaign.createdBy}/`;
+  //     url += `campaign/${campaign.id}/unsubscribe`;
+  //     let trackerTag = `<a href='${url}'>${campaign.optText}</a>`;
+  //     trackerContent += trackerTag;
+  //     email.content = trackerContent;
+  //   }
+  //   return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
+  // };
 
   /**
    * Appends an image url to track the person whether he opens our email or not
@@ -679,7 +679,7 @@ module.exports = function(Campaign) {
       }
     }
     return statusCheckCB(null, true);
-  }; 
+  };
 
   /**
    * Get the campaign metrics for the current campaign

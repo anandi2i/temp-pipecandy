@@ -8,6 +8,43 @@ import config from "../../server/config.json";
 
 module.exports = function(user) {
   const milliSec = 1000;
+
+  /**
+   * Returns users who allows mail box to reas
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  user.getUsersToReadMail = (callback) => {
+    user.find({
+      include: {relation: "identity"},
+      where: {
+        and: [
+          {"isMailReadEnabled": true},
+          {"isMailReaded": false}
+        ]
+      },
+      limit: 100
+    }, (usersErr, users) => {
+      if (usersErr) {
+        logger.error("Error while getting Users ", usersErr);
+        return callback(usersErr);
+      }
+      return callback(null, users);
+    });
+  };
+
+  /**
+   * Update User to set isMailReaded flag to false
+   *
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  user.resetMailReadFlag = (callback) => {
+    user.updateAll({"isMailReaded": false}, (err, info) => {
+      callback(err, info);
+    });
+  };
+
   user.afterRemote("login", function(context, accessToken, next) {
     let res = context.res;
     let req = context.req;

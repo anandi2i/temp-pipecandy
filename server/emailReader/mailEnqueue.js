@@ -1,14 +1,17 @@
-import AWS from "aws-sdk";
-import logger from "../../server/log";
-import queueConfig from "../../server/utils/queue-config";
+"use strict";
+
+var AWS = require("aws-sdk");
+
+const appConfig = process.cwd() + "/server/server.js";
+const queue = require(appConfig).settings.queue;
 
 AWS.config.update({
-  accessKeyId: queueConfig.accessKeyId,
-  secretAccessKey: queueConfig.secretAccessKey
+  accessKeyId: queue.config.accessKeyId,
+  secretAccessKey: queue.config.secretAccessKey
 });
 
 const sqs = new AWS.SQS({
-  region: queueConfig.region
+  region: queue.config.region
 });
 
 /**
@@ -18,14 +21,14 @@ const sqs = new AWS.SQS({
  */
 const enqueueMail = (data, queueName, callback) => {
   let sqsParams = {
-    QueueUrl: queueConfig.queueUrl[queueName],
+    QueueUrl: queue.url[queueName],
     MessageBody: data
   };
   sqs.sendMessage(sqsParams, (err, data) => {
     if (err) {
-      logger.error("Error while pushing to the AWS Queue", err);
+      console.error("Error while pushing to the AWS Queue", err);
     }
-    callback();
+    callback(err, data);
   });
 };
 

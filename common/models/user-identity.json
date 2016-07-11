@@ -11,10 +11,6 @@
         "dataLength": 10000
       }
     },
-    "isCrawlEnabled": {
-      "type": "boolean",
-      "default": false
-    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"
