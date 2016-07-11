@@ -22,6 +22,7 @@ class CampaignFooter extends React.Component {
           <Link to={`/campaign/${id}`} className={active === "report" ? "active" : ""}>Report</Link>
           <Link to={`/campaign/${id}/inbox`} className={active === "inbox" ? "active" : ""}>Inbox</Link>
           <Link to={`/campaign/${id}/scheduled`} className={active === "scheduled" ? "active" : ""}>Scheduled</Link>
+          <Link to={`/campaign/${id}/sent`} className={active === "sent" ? "active" : ""}>Sent</Link>
         </div>
       </div>
     );

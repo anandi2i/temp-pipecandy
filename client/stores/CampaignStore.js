@@ -20,6 +20,7 @@ let duplicateEmailList = [];
 let fieldIds = [];
 let inboxMails = [];
 let scheduledMails = [];
+let sentMails = [];
 let spamScore;
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
@@ -317,6 +318,12 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
    */
   getInboxMails() {
     return inboxMails;
+  },
+  /**
+   * @return {object} inboxMails
+   */
+  getSentMails() {
+    return sentMails;
   }
 });
 
@@ -474,15 +481,15 @@ AppDispatcher.register(function(payload) {
         CampaignStore.emitEmailListChange();
       });
       break;
-    case Constants.GET_ALL_INBOX_REPORT:
+    case Constants.GET_INBOX_MAILS:
       CampaignApi.getInboxMails(action.data).then((response) => {
         inboxMails = response.data;
         _error = "";
-        CampaignStore.emitChange();
+        CampaignStore.emitMailboxChange();
       }, (err) => {
         inboxMails = [];
         _error = HandleError.evaluateError(err);
-        CampaignStore.emitChange();
+        CampaignStore.emitMailboxChange();
       });
       break;
     case Constants.GET_SCHEDULED_EMAILS:
@@ -492,6 +499,17 @@ AppDispatcher.register(function(payload) {
         CampaignStore.emitMailboxChange();
       }, (err) => {
         scheduledMails = [];
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitMailboxChange();
+      });
+      break;
+    case Constants.GET_SENT_EMAILS:
+      CampaignApi.getSentMails(action.data).then((response) => {
+        sentMails = response.data;
+        _error = "";
+        CampaignStore.emitMailboxChange();
+      }, (err) => {
+        sentMails = [];
         _error = HandleError.evaluateError(err);
         CampaignStore.emitMailboxChange();
       });

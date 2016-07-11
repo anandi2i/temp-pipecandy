@@ -26,8 +26,7 @@ echo "Application has been stopped"
 echo "-------------------------------------------------------------------------"
 
 #http://unix.stackexchange.com/questions/37313/how-do-i-grep-for-multiple-patterns
-SERVICES='campaignConsumer\|followUpSender\|emailQueuePoller'
-
+SERVICES='campaignConsumer\|followUpSender\|emailQueuePoller\|campaignMailSender\|mailDequeue\|initEmailReader'
 #http://stackoverflow.com/questions/13910087/shell-script-to-capture-process-id-and-kill-it-if-exist
 PID=`ps -eaf | grep $SERVICES | grep -v grep | awk '{print $2}'`
 if [ "" !=  "$PID" ];
@@ -71,11 +70,16 @@ npm run build
 echo "Successfully bundled the front end code"
 echo "-------------------------------------------------------------------------"
 
+export NODE_ENV = "dev"
+
 #Start the services/process
 #http://stackoverflow.com/questions/23024850/nohup-as-background-task-does-not-return-prompt
 echo "Starting the campaign sending services campaignConsumer, followUpSender, emailQueuePoller"
 nohup npm run campaignConsumer > log/campaignConsumer.out 2>&1 &
-nohup npm run followUpSender > log/followUpSender.out 2>&1 &
+#nohup npm run campaignMailSender > log/campaignMailSender.out 2>&1 &
+nohup npm run mailDequeue > log/mailDequeue.out 2>&1 &
+nohup npm run initEmailReader > log/initEmailReader.out 2>&1 &
+#nohup npm run followUpSender > log/followUpSender.out 2>&1 &
 nohup npm run emailQueuePoller > log/emailQueuePoller.out 2>&1 &
 echo "Successfully started the process"
 echo "-------------------------------------------------------------------------"

@@ -1,184 +1,157 @@
 import React from "react";
+import ReactDOM from "react-dom";
+import moment from "moment";
 import CampaignFooter from "./CampaignFooter.react";
 import CampaignReportHead from "../CampaignReportHead.react";
 import Spinner from "../../Spinner.react";
 import TagMenu from "../../TagMenu.react";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
-import inboxDataObject from "../../../staticData/inboxData";
 
 /**
  * Display selected campaign inbox report
- * TODO Remove static data and replace with dynamic data from mail response
  */
 class CampaignInbox extends React.Component {
   constructor(props) {
     super(props);
+    /**
+     * Initial state values
+     * @property {object} inboxMails
+     * @property {boolean} requestSent
+     * @property {string} activeTab
+     * @property {array} tabs
+     * @property {array} tabContent
+     */
     this.state = {
-      data: [],
-      inboxData : [],
+      inboxMails : {
+        data: []
+      },
       requestSent: false,
-      count: 1,
       activeTab: "0",
       tabs: ["0", "1", "2"],
       tabContent: [{
-          name: "ALL",
-        },
-        {
-          name: "ACTIONABLE",
-        },
-        {
-          name: "OUT OF OFFICE",
-        }]
+        name: "ALL",
+      },
+      {
+        name: "ACTIONABLE",
+      }]
     };
   }
 
-  componentDidMount() {
-    CampaignStore.addChangeListener(this.onStoreChange);
-    // Add scrool event listener
-    window.addEventListener("scroll", () => this.handleOnScroll());
-    // Loade fake data for first time
-    this.initFakeData();
-  }
-
-  componentWillUnmount() {
-    CampaignStore.removeChangeListener(this.onStoreChange);
-    // Remove scrool event listener
-    window.removeEventListener("scroll", () => this.handleOnScroll());
-  }
-
   /**
-   * Enabel select option property
-   * TODO need to move in common.js
+   * Instantiate material_select
+   * Add listener to listen Inbox mails Update
+   * Add listener to listen if mouse is scrolled to bottom
+   * Call initial set of inbox mails
    */
-  componentDidUpdate() {
-    $("select").material_select();
+  componentDidMount() {
+    const start = 0;
+    const limit = 10;
+    this.el = $(ReactDOM.findDOMNode(this));
+    this.el.find("select").material_select();
+    CampaignStore.addMailboxChangeListener(this.onStoreChange);
+    window.addEventListener("scroll", this.handleOnScroll);
+    CampaignActions.getInboxMails({
+      id: this.props.params.id,
+      start: start,
+      end: limit,
+      actionable: false
+    });
   }
 
   /**
-   * Get data from store and append fake data
-   * TODO get real data
+   * Destory material select
+   * Remove the added listeners for Inbox mails and scroll
+   */
+  componentWillUnmount() {
+    this.el.find("select").material_select("destroy");
+    CampaignStore.removeMailboxChangeListener(this.onStoreChange);
+    window.removeEventListener("scroll", this.handleOnScroll);
+  }
+
+  /**
+   * Update the inbox data from store on change
    */
   onStoreChange = () => {
+    const inboxMails = CampaignStore.getInboxMails();
     this.setState({
-      temp: CampaignStore.getAllEmailTemplates()
-    }, () =>{
-      this.appendData();
+      inboxMails: {
+        data: this.state.inboxMails.data.concat(inboxMails)
+      },
+      requestSent: false
     });
     displayError(CampaignStore.getError());
   }
 
   /**
-   * Append fake data
+   * EventListener for scroll
+   * Call to load the next range of Inbox emails if scroll bar is hitting
+   * bottom of the page
    */
-  appendData() {
-    let fakeData = this.createFakeData(this.state.inboxData.length,
-      this.state.temp.length);
-    let newData = this.state.inboxData.concat(fakeData);
-    this.setState({inboxData: newData, requestSent: false});
-  }
-
-  /**
-   * Create fake data
-   */
-  initFakeData() {
-    let newCount = 20;
-    let inboxData = this.createFakeData(this.state.inboxData.length, newCount);
-    this.setState({inboxData: inboxData});
-  }
-
-  /**
-   * TODO rename this function
-   * @param  {integer} startKey new data start id
-   * @param  {integer} counter  new setof data count
-   * @return {object}           react dom object
-   */
-  createFakeData(startKey, counter) {
-    const emptyCount = 0;
-    let i = 0;
-    let data = [];
-    for (i = 0; i < counter; i++) {
-      let fakeData = (
-        <div key={startKey+i} className="camp-repo-grid">
-          <div className="row">
-            <div className="content">
-              <span className="drag-container">
-                <i className="mdi mdi-drag-vertical"></i>
-              </span>
-              <input type="checkbox" className="filled-in"
-                id={startKey+i} defaultChecked="" />
-              <label htmlFor={startKey+i} className="full-w">
-                <div className="data-info col s8 m3 l3 personName">
-                  <b>
-                    <span>{inboxDataObject[i].person}</span>, <span>{inboxDataObject[i].replyTo}</span>
-                    {
-                      (inboxDataObject[i].replyCount > emptyCount)
-                      ?
-                      <span> ({inboxDataObject[i].replyCount}) </span> : ""
-                    }
-
-                  </b>
-                </div>
-                <div className="data-info col s4 m6 l6 hide-on-600">
-                  <div className="mailDescription">
-                    <span className="subjectLine">{inboxDataObject[i].subject}</span>
-                    <span className="mailContentLine">{inboxDataObject[i].content}</span>
-                  </div>
-                </div>
-                <div className="data-info col s4 m3 l3 rit-txt">
-                  {inboxDataObject[i].replyDate}
-                </div>
-              </label>
-            </div>
-          </div>
-        </div>
-      );
-      data.push(fakeData);
-    }
-    return data;
-  }
-
-  /**
-   * EventListener for scroll,
-   * It call an API when scroll bar hitting bottom of the page.
-   */
-  handleOnScroll(){
-    let docEl = document.documentElement;
-    let docBody = document.body;
-    let scrollTop = (docEl && docEl.scrollTop) || docBody.scrollTop;
-    let scrollHeight = (docEl && docEl.scrollHeight) || docBody.scrollHeight;
-    let clientHeight = docEl.clientHeight || window.innerHeight;
-    let scrolledToBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
-
+  handleOnScroll = () => {
+    const {inboxMails, requestSent, activeTab, tabs} = this.state;
+    const docEl = document.documentElement;
+    const docBody = document.body;
+    const scrollTop = (docEl && docEl.scrollTop) || docBody.scrollTop;
+    const scrollHeight = (docEl && docEl.scrollHeight) || docBody.scrollHeight;
+    const clientHeight = docEl.clientHeight || window.innerHeight;
+    const scrolledToBottom = Math.ceil(scrollTop+clientHeight) >= scrollHeight;
+    const next = 1;
+    const nextStartRange = inboxMails.data.length + next;
+    const limit = 10;
     if (scrolledToBottom) {
-      if (this.state.requestSent) {
+      if (requestSent) {
         return;
       }
-      // enumerate a slow query
-      let timeDelay = 2000;
-      setTimeout(CampaignActions.getAllInboxReport(), timeDelay);
+      let actionable = false;
+      if(activeTab === tabs[1]) {
+        actionable = true;
+      }
+      CampaignActions.getInboxMails({
+        id: this.props.params.id,
+        start: nextStartRange,
+        end: limit,
+        actionable: actionable
+      });
       this.setState({requestSent: true});
     }
   }
 
   /**
    * Handle tabs navigations
-   * @param  {string} index set activeTab
+   * Call to load the Inbox mails
+   * @param {string} index
    */
   handleClick = (index) => {
     this.setState({
       activeTab: index
+    });
+    let actionable = false;
+    if(index === this.state.tabs[1]) {
+      actionable = true;
+    }
+    CampaignActions.getInboxMails({
+      id: this.props.params.id,
+      start: 0,
+      end: 10,
+      actionable: actionable
     });
   }
 
   /**
    * server side search API
    */
-  handleChange(){
+  handleChange() {
     //TODO server side search API
   }
 
-  render(){
+  /**
+   * render
+   * @ref http://stackoverflow.com/questions/28320438/react-js-create-loop-through-array
+   * @return {ReactElement} markup
+   */
+  render() {
+    const {inboxMails, requestSent, activeTab, tabContent} = this.state;
     return (
       <div>
         <div className="m-b-120">
@@ -207,30 +180,59 @@ class CampaignInbox extends React.Component {
               </div>
             </div>
           </div>
-          <TagMenu activeTab={this.state.activeTab}
-            handleClick={this.handleClick} tabNames={this.state.tabContent}
+          <TagMenu activeTab={activeTab}
+            handleClick={this.handleClick} tabNames={tabContent}
             mainClass={"container"} />
-          <div style={{display: this.state.activeTab === this.state.tabs[0] ? "block" : "none"}}>
+          <div>
             <div className="container">
-              {this.state.inboxData}
+              {
+                inboxMails.data.map((inbox, key) => {
+                  const subject = $(`<div>${inbox.subject}</div>`).text();
+                  const content = $(`<div>${inbox.content}</div>`).text();
+                  const receivedDate = moment(inbox.receivedDate)
+                    .format("DD MMM YYYY");
+                  return (
+                    <div key={key} className="camp-repo-grid">
+                      <div className="row">
+                        <div className="content">
+                          <span className="drag-container">
+                            <i className="mdi mdi-drag-vertical"></i>
+                          </span>
+                          <input type="checkbox" className="filled-in"
+                            id={key} defaultChecked="" />
+                          <label htmlFor={key} className="full-w">
+                            <div className="data-info col s8 m3 l3 personName">
+                              <b>
+                                <span>{inbox.person.firstName}</span>, <span>Me</span>
+                                  <span> ({inbox.count}) </span>
+                              </b>
+                            </div>
+                            <div className="data-info col s4 m6 l6 hide-on-600">
+                              <div className="mailDescription">
+                                <span className="subjectLine">{subject}</span>
+                                <span className="mailContentLine">{content}</span>
+                              </div>
+                            </div>
+                            <div className="data-info col s4 m3 l3 rit-txt">
+                              {receivedDate}
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }, this)
+              }
             </div>
-            {
-              this.state.requestSent ?
-              <div className="container">
-                <div className="infinity-spinner">
-                  <Spinner />
-                </div>
+            <div className="container"
+              style={{display: requestSent ? "block" : "none"}} >
+              <div className="infinity-spinner">
+                <Spinner />
               </div>
-              : ""
-            }
-          </div>
-          <div style={{display: this.state.activeTab === this.state.tabs[1] ? "block" : "none"}}>
-            <div className="container">
-              <div className="container">
-                <div className="infinity-spinner">
-                  <Spinner />
-                </div>
-              </div>
+            </div>
+            <div className="container center-align m-t-20"
+              style={{display: inboxMails.data.length ? "none" : "block"}} >
+              Inbox seems to be empty!
             </div>
           </div>
         </div>

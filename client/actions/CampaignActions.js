@@ -29,9 +29,9 @@ const CampaignActions = {
    * Get the inbox mails for a campaign
    * @param  {object} data The data includes campaign id, start, limit
    */
-  getAllInboxReport(data) {
+  getInboxMails(data) {
     AppDispatcher.handleAction({
-      actionType: Constants.GET_ALL_INBOX_REPORT,
+      actionType: Constants.GET_INBOX_MAILS,
       data: data
     });
   },
@@ -42,6 +42,16 @@ const CampaignActions = {
   getScheduledMails(data) {
     AppDispatcher.handleAction({
       actionType: Constants.GET_SCHEDULED_EMAILS,
+      data: data
+    });
+  },
+  /**
+   * Get the sent mails for a campaign
+   * @param  {object} data The data includes campaign id, start, limit
+   */
+  getSentMails(data) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_SENT_EMAILS,
       data: data
     });
   },

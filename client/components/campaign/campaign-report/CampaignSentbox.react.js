@@ -8,20 +8,20 @@ import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
 
 /**
- * Display scheduled mails of a campaign
+ * Display sent mails of a campaign
  * @author Dinesh R <dinesh.r@ideas2it.com>
  */
-class CampaignSchedulebox extends React.Component {
+class CampaignSentbox extends React.Component {
   constructor(props) {
     super(props);
     /**
      * Initial state values
-     * @property {object} scheduledMails
+     * @property {object} sentMails
      * @property {boolean} requestSent
      */
     this.state = {
       requestSent: false,
-      scheduledMails : {
+      sentMails : {
         data: []
       }
     };
@@ -29,9 +29,9 @@ class CampaignSchedulebox extends React.Component {
 
   /**
    * Instantiate material_select
-   * Add listener to listen schedule mails Update
+   * Add listener to listen sent mails Update
    * Add listener to listen if mouse is scrolled to bottom
-   * Call initial set of scheduled mails
+   * Call initial set of sent mails
    */
   componentDidMount() {
     const start = 0;
@@ -40,7 +40,7 @@ class CampaignSchedulebox extends React.Component {
     this.el.find("select").material_select();
     CampaignStore.addMailboxChangeListener(this.onStoreChange);
     window.addEventListener("scroll", this.handleOnScroll);
-    CampaignActions.getScheduledMails({
+    CampaignActions.getSentMails({
       id: this.props.params.id,
       start: start,
       end: limit
@@ -49,7 +49,7 @@ class CampaignSchedulebox extends React.Component {
 
   /**
    * Destory material select
-   * Remove the added listeners for scheduled mails and scroll
+   * Remove the added listeners for sent mails and scroll
    */
   componentWillUnmount() {
     this.el.find("select").material_select("destroy");
@@ -58,13 +58,13 @@ class CampaignSchedulebox extends React.Component {
   }
 
   /**
-   * Update the scheduled mails data on an emit from store
+   * Update the sent mails data on an emit from store
    */
   onStoreChange = () => {
-    const scheduledMails = CampaignStore.getScheduledMails();
+    const sentMails = CampaignStore.getSentMails();
     this.setState({
-      scheduledMails: {
-        data: this.state.scheduledMails.data.concat(scheduledMails)
+      sentMails: {
+        data: this.state.sentMails.data.concat(sentMails)
       },
       requestSent: false
     });
@@ -73,11 +73,11 @@ class CampaignSchedulebox extends React.Component {
 
   /**
    * EventListener for scroll
-   * Call to load the next range of scheduled emails if scroll bar is hitting
+   * Call to load the next range of sent emails if scroll bar is hitting
    * bottom of the page
    */
   handleOnScroll = () => {
-    const {scheduledMails, requestSent} = this.state;
+    const {sentMails, requestSent} = this.state;
     const docEl = document.documentElement;
     const docBody = document.body;
     const scrollTop = (docEl && docEl.scrollTop) || docBody.scrollTop;
@@ -85,13 +85,13 @@ class CampaignSchedulebox extends React.Component {
     const clientHeight = docEl.clientHeight || window.innerHeight;
     const scrolledToBtm = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     const next = 1;
-    const nextStartRange = scheduledMails.data.length + next;
+    const nextStartRange = sentMails.data.length + next;
     const limit = 10;
     if(scrolledToBtm) {
       if (requestSent) {
         return;
       }
-      CampaignActions.getScheduledMails({
+      CampaignActions.getSentMails({
         id: this.props.params.id,
         start: nextStartRange,
         end: limit
@@ -113,7 +113,7 @@ class CampaignSchedulebox extends React.Component {
    * @return {ReactElement} markup
    */
   render() {
-    const {scheduledMails, requestSent} = this.state;
+    const {sentMails, requestSent} = this.state;
     const campaignId = this.props.params.id;
     return (
       <div>
@@ -126,7 +126,7 @@ class CampaignSchedulebox extends React.Component {
                 <input
                   type="search"
                   name="search"
-                  placeholder="SEARCH SCHEDULED"
+                  placeholder="SEARCH SENT"
                   className="col s12 m8"
                   onChange={this.handleChange} />
               </div>
@@ -134,10 +134,10 @@ class CampaignSchedulebox extends React.Component {
           </div>
           <div className="container">
             {
-              scheduledMails.data.map((scheduled, key) => {
-                const subject = $(`<div>${scheduled.subject}</div>`).text();
-                const content = $(`<div>${scheduled.content}</div>`).text();
-                const scheduledAt = moment(scheduled.scheduledAt)
+              sentMails.data.map((sentMail, key) => {
+                const subject = $(`<div>${sentMail.subject}</div>`).text();
+                const content = $(`<div>${sentMail.content}</div>`).text();
+                const scheduledAt = moment(sentMail.scheduledAt)
                   .format("DD MMM YYYY");
                 return (
                   <div key={key} className="camp-repo-grid">
@@ -151,7 +151,7 @@ class CampaignSchedulebox extends React.Component {
                         <label htmlFor={key} className="full-w">
                           <div className="data-info col s8 m3 l2 personName">
                             <b>
-                              <span>{scheduled.person.firstName}</span>
+                              <span>{sentMail.person.firstName}</span>
                             </b>
                           </div>
                           <div className="data-info col s4 m6 l7 hide-on-600">
@@ -178,14 +178,14 @@ class CampaignSchedulebox extends React.Component {
             </div>
           </div>
           <div className="container center-align m-t-20"
-            style={{display: scheduledMails.data.length ? "none" : "block"}} >
-            Scheduled mails seems to be empty!
+            style={{display: sentMails.data.length ? "none" : "block"}} >
+            Sent mails seems to be empty!
           </div>
         </div>
-        <CampaignFooter campaignId={campaignId} activePage={"scheduled"}/>
+        <CampaignFooter campaignId={campaignId} activePage={"sent"}/>
       </div>
     );
   }
 }
 
-export default CampaignSchedulebox;
+export default CampaignSentbox;

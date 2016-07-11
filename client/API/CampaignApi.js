@@ -99,8 +99,9 @@ const CampaignApi = {
    * @return {object} Promise
    */
   getInboxMails(data) {
-    const {id, start, end} = data;
-    return api.get(`api/campaignAudits/inboxMails/${id}/${start}/${end}`);
+    const {id, start, end, actionable} = data;
+    return api.get(`api/inboxMails/inboxMails/${id}?` +
+      `start=${start}&limit=${end}&actionable=${actionable}`);
   },
   /**
    * Get scheduled mails
@@ -110,6 +111,16 @@ const CampaignApi = {
   getScheduledMails(data) {
     const {id, start, end} = data;
     return api.get(`api/emailsQueue/scheduledMails/campaign/${id}?` +
+      `start=${start}&limit=${end}`);
+  },
+  /**
+   * Get sent mails
+   * @param  {object} data - The data includes campaign id, start and end count
+   * @return {object} Promise
+   */
+  getSentMails(data) {
+    const {id, start, end} = data;
+    return api.get(`api/sentMailBoxes/sentMails/campaign/${id}?` +
       `start=${start}&limit=${end}`);
   }
 };

@@ -1,6 +1,8 @@
 var loopback = require("loopback");
 var boot = require("loopback-boot");
-var RedisStore = require("connect-redis")(loopback.session);
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var RedisStore = require("connect-redis")(session);
 
 require("babel-core/register");
 
@@ -107,8 +109,8 @@ app.middleware("auth", loopback.token({
 }));
 
 app.middleware("session:before",
-  loopback.cookieParser(app.get("cookieSecret")));
-app.middleware("session", loopback.session({
+  cookieParser(app.get("cookieSecret")));
+app.middleware("session", session({
   store: new RedisStore({
     host: "127.0.0.1",
     port: 6379
