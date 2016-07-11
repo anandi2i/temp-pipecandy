@@ -92,10 +92,10 @@ class ScheduleEmail extends React.Component {
       mainContent = tinymcePlaceholder("content");
     }
     setTimeout(function() {
-      tinyMCE.get("emailContent").setContent(mainContent);
       tinyMCE.get("emailSubject").setContent(tinymcePlaceholder("Subject"));
       tinyMCE.get("optOutAddress").setContent(address ||
         tinymcePlaceholder("Address"));
+      tinyMCE.get("emailContent").setContent(mainContent);
     }, tinyMceDelayTime);
 
     // tinyMCE.get('id_of_textarea').focus()

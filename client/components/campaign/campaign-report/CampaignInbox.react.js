@@ -136,6 +136,12 @@ class CampaignInbox extends React.Component {
       end: 10,
       actionable: actionable
     });
+    this.setState({
+      inboxMails : {
+        data: []
+      },
+      requestSent: true
+    });
   }
 
   /**
