@@ -711,7 +711,7 @@ module.exports = function(Campaign) {
           }, (err, emailLinks) => {
             const totalLinks = emailLinks.length;
             buildCampaignMetricObject(campaignMetricArray,
-              campaignMetricsData, totalLinks,
+              campaignMetricsData[0], totalLinks,
               (err, campaignMetricsObj) => {
                 getCurrentCampaignMetricsCB(null, campaignMetricsObj);
               });
@@ -913,18 +913,22 @@ module.exports = function(Campaign) {
             openedRate = (campaignMetricsData.opened /
               (campaignMetricsData.sentEmails - campaignMetricsData.bounced))
               * hundredPercent;
-            campaignMetricObj.percentage = openedRate || "0";
+            let roundOpenRate = Math.round(parseFloat(openedRate)*
+            hundredPercent)/hundredPercent;
+            campaignMetricObj.percentage = roundOpenRate || "0";
             campaignMetricObj.count = campaignMetricsData.opened || "0";
             campaignMetricObj.class = "green";
             campaignMetricObj.status = "7";
             campaignMetricObject.push(campaignMetricObj);
             break;
           case "UNOPENED":
+          let unOpenedRate = hundredPercent - (campaignMetricsData.opened /
+            (campaignMetricsData.sentEmails - campaignMetricsData.bounced)
+          ) * hundredPercent;
+          let roundUnopened = Math.round(parseFloat(unOpenedRate)*
+          hundredPercent)/hundredPercent;
             campaignMetricObj.title = "unopened";
-            campaignMetricObj.percentage = hundredPercent -
-              (campaignMetricsData.opened /
-                (campaignMetricsData.sentEmails - campaignMetricsData.bounced)
-              ) * hundredPercent || "0";
+            campaignMetricObj.percentage = roundUnopened || "0";
             campaignMetricObj.count =
               (campaignMetricsData.sentEmails - campaignMetricsData.bounced)
               - campaignMetricsData.opened || "0";
@@ -934,9 +938,11 @@ module.exports = function(Campaign) {
             break;
           case "CLICKED":
             campaignMetricObj.title = "clicked";
-            campaignMetricObj.percentage = (totalLinks < emptycount) ? "0" :
-            (campaignMetricsData.clicked
-              / totalLinks) * hundredPercent || "0";
+            let clickRate = (totalLinks < emptycount) ? "0" :
+            (campaignMetricsData.clicked / totalLinks) * hundredPercent;
+            let roundClickRate = Math.round(parseFloat(clickRate)*
+            hundredPercent)/hundredPercent;
+            campaignMetricObj.percentage = roundClickRate || "0";
             campaignMetricObj.count = campaignMetricsData.clicked || "0";
             campaignMetricObj.class = "green";
             campaignMetricObj.status = "3";
