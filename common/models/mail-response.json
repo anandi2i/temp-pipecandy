@@ -69,6 +69,11 @@
       "type": "belongsTo",
       "model": "user",
       "foreignKey": "userId"
+    },
+    "person": {
+      "type": "belongsTo",
+      "model": "person",
+      "foreignKey": "personId"
     }
   },
   "acls": [],

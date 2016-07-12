@@ -62,11 +62,6 @@ module.exports = function(EmailQueue) {
       limit: limit,
       skip: start
     }, (emailQueuesErr, emailQueues) => {
-      if (lodash.isEmpty(emailQueues)) {
-        const errorMessage = errorMessages.NO_EMAILS_FOUND;
-        return callback(errorMessage);
-      }
-
       let responses = [];
       async.each(emailQueues, (emailQueue, emailQueueCB) => {
         emailQueue.person((personErr, person) => {

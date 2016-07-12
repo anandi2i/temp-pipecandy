@@ -339,8 +339,8 @@ function sendEmail(base64EncodedEmail, oauth2Client, emailQueue, mailContent,
           }
         }, (err, userIdentity) => {
           googleTokenHandler.updateAccessToken(userIdentity[0],
-            (tokenHandlerErr, updateUser) => {
-              App.userIdentity.updateCredentials(userIdentity[0],
+            (tokenHandlerErr, userIdentity) => {
+              App.userIdentity.updateCredentials(userIdentity,
                 (userIdentityErr, userIdentityInst) => {
                   oauth2Client.credentials.access_token =
                     userIdentityInst.credentials.accessToken;

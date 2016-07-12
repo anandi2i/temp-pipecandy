@@ -52,11 +52,12 @@ function readUserMails(App, gmail, auth, param, callback) {
               let payload = response.payload;
               if (payload) {
                 let mailResponse =
-                    constructResponse(param.userId, payload, response);
+                  constructResponse(param.userId, sentMail, payload, response);
                 if (mailResponse.receivedDate) {
                   if (!messageFound && param.lastMsgDate) {
-                    messageFound = (mailResponse.receivedDate < lastMsgDate)
-                          ? true : false;
+                    messageFound =
+                      (mailResponse.receivedDate < param.lastMsgDate)
+                      ? true : false;
                     if (messageFound) return callbackMessage(true);
                   }
                 }
@@ -115,7 +116,7 @@ function getMessageList(App, gmail, auth, param, callback) {
       return callback(null, response);
     }
   });
-};
+}
 
 /**
  * Get Message List for the particular user id
@@ -139,7 +140,7 @@ function getMessage(gmail, auth, userMailId, messageId, callback) {
       callback(null, response);
     }
   });
-};
+}
 
 /**
  * get Message Body from response parts tag
@@ -152,7 +153,7 @@ function getMessageBody(parts) {
     getMessageBody(part);
   }
   return parts.body.data;
-};
+}
 
 /**
  * Method to Construct mailResponse model
@@ -162,9 +163,10 @@ function getMessageBody(parts) {
  * @param  {Object} response Inbox Response
  * @author Syed Sulaiman M
  */
-function constructResponse(userId, payload, response) {
+function constructResponse(userId, sentMail, payload, response) {
   let mailResponse = {};
   mailResponse.userId = userId;
+  mailResponse.personId = sentMail.toPersonId;
   let headers = payload.headers;
   let date = lodash.find(headers,
     lodash.matchesProperty("name", "Date"));
@@ -236,8 +238,8 @@ function constructResponse(userId, payload, response) {
 function updateUserCredentials(App, auth, param, callback) {
   App.userIdentity.findByUserId(param.userId, (err, userIdentity) => {
     googleTokenHandler.updateAccessToken(userIdentity[0],
-        (tokenHandlerErr, updateUser) => {
-      App.userIdentity.updateCredentials(userIdentity[0],
+        (tokenHandlerErr, userIdentity) => {
+      App.userIdentity.updateCredentials(userIdentity,
           (userIdentityErr, userIdentityInst) => {
         auth.credentials.access_token =
           userIdentityInst.credentials.accessToken;
@@ -301,22 +303,18 @@ function updateRelatedTables(App, param, mailResponse, sentMail, callback) {
  * @author Syed Sulaiman M
  */
 function updateSentMailBox(App, param, mailResponse, sentMail, callback) {
-  let isSentItem = mailResponse.labels.includes("SENT");
-  if(isSentItem) {
-    App.sentMailBox.findByUserIdAndThreadId(param.userId, mailResponse.threadId,
-          (err, sentMailBoxInst) => {
-      const two = 2;
-      let attrToUpdate = {
-        count: sentMailBoxInst.count + two,
-        sentDate: mailResponse.receivedDate
-      };
-      App.sentMailBox.updateAttr(sentMailBoxInst, attrToUpdate, (err, res) => {
-        callback(null, param, mailResponse, sentMail);
-      });
+  App.sentMailBox.findByUserIdAndThreadId(param.userId, mailResponse.threadId,
+        (err, sentMailBoxInst) => {
+    const one = 1;
+    let attrToUpdate = {
+      content: mailResponse.content,
+      count: sentMailBoxInst.count + one,
+      sentDate: mailResponse.receivedDate
+    };
+    App.sentMailBox.updateAttr(sentMailBoxInst, attrToUpdate, (err, res) => {
+      callback(null, param, mailResponse, sentMail);
     });
-  } else {
-    callback(null, param, mailResponse, sentMail);
-  }
+  });
 }
 
 /**
