@@ -58,6 +58,10 @@ function getUsers(callback) {
 function initiateEmailRead(users, callback) {
   async.eachSeries(users, (user, userCB) => {
     var userJson = user.toJSON();
+    if(!userJson.identity || !userJson.identity.profile) {
+      console.log(`Profile not found ${user}`);
+      return callback("Profile not found");
+    }
     let userMailId = userJson.identity.profile.emails[0].value;
     let userId = user.id;
     oauth2Client.credentials.access_token =
@@ -69,6 +73,10 @@ function initiateEmailRead(users, callback) {
       userCB(null, userMailId);
     });
   }, (err, result) => {
+    if(err){
+      console.log("Error in init email reader");
+      callback(err);
+    }
     callback(null, users);
   });
 }

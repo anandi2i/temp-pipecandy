@@ -48,6 +48,9 @@ module.exports = function(MailResponse) {
    */
   MailResponse.updateMailClass = (mailResponse, callback) => {
     MailResponse.findById(mailResponse.id, (err, result) => {
+      if(err || !result) {
+        return callback(err || "Mail response object seems to be empty");
+      }
       result.updateAttribute("NLPClass", mailResponse.NLPClass,
           (updateErr, updatedData) => {
         return callback(updateErr, updatedData);

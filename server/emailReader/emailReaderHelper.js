@@ -271,7 +271,7 @@ function processMailResponse(App, param, mailResponse, sentMail, callback) {
         });
       },
       function(mailEnqueueCB) {
-        let queueName = "mailNLPIdentification";
+        let queueName = "intelligenceIn";
         mailEnqueue.enqueueMail(JSON.stringify(response), queueName,
             (err, data) => {
           mailEnqueueCB(null);
