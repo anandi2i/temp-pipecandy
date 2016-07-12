@@ -108,9 +108,18 @@ module.exports = function(InboxMail) {
     }
     let whereQry = {};
     if(actionable) {
-      whereQry={campaignId: campaignId, actionable: true};
+      whereQry = {
+        and: [
+          {campaignId: campaignId},
+          {count: {gt: 1}},
+          {actionable: true}
+        ]};
     } else {
-      whereQry={campaignId: campaignId};
+      whereQry = {
+        and: [
+          {campaignId: campaignId},
+          {count: {gt: 1}}
+        ]};
     }
     InboxMail.find({
       include: "person",
