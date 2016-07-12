@@ -394,7 +394,7 @@ class ListView extends React.Component {
             <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" onClick={this.openDialog}>
               <i className="left mdi mdi-upload"></i> Add From File
             </a>
-            <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button"
+            <a className="btn btn-dflt blue sm-icon-btn p-1-btn"
               href={`/api/file/list/${this.props.params.listId}/downloadCSV`}
               download>
               <i className="left mdi mdi-download"></i> Sample CSV

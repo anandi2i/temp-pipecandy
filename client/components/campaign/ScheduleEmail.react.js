@@ -82,7 +82,7 @@ class ScheduleEmail extends React.Component {
     initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", getAllTags, true,
       this.tinyMceCb);
     let mainContent = this.props.selectedTemplate;
-    const tinyMceDelayTime = 1000;
+    const tinyMceDelayTime = 2000;
     //TODO need to remove setTimeout
     if(mainContent){
       this.setState({
@@ -97,8 +97,6 @@ class ScheduleEmail extends React.Component {
         tinymcePlaceholder("Address"));
       tinyMCE.get("emailContent").setContent(mainContent);
     }, tinyMceDelayTime);
-
-    // tinyMCE.get('id_of_textarea').focus()
   }
 
   tinyMceCb = (editor) => {
@@ -554,7 +552,7 @@ class ScheduleEmail extends React.Component {
           <div className="head">Let's Draft an Email</div>
           <div className="sub-head">
             <a className="btn blue m-r-20" onClick={() => this.openPreviewModal("preview")}>Preview</a>
-            <a className="btn blue" onClick={this.saveCampaignInfo}>Save & continue</a>
+            <a className="btn blue" onClick={this.saveCampaignInfo}>Save & Send</a>
           </div>
         </div>
         {/* Draft Email starts here*/}
@@ -628,7 +626,7 @@ class ScheduleEmail extends React.Component {
               </div>
               <div className="row email-content m-lr-0">
                 <div className="tiny-toolbar" id="mytoolbar">
-                  <div className="right smart-tag-container">
+                  {/*<div className="right smart-tag-container">
                     <div id="insertSmartTags" className="btn btn-dflt dropdown-button sm-icon-btn" data-activates="dropdown">
                       <i className="left mdi mdi-code-tags"></i>
                       <span>Insert Smart Tags</span>
@@ -653,7 +651,7 @@ class ScheduleEmail extends React.Component {
                           })
                         }
                       </ul>
-                  </div>
+                  </div> */}
                 </div>
                 <div id="emailContent" className="email-body" />
               </div>

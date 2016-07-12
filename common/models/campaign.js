@@ -631,6 +631,7 @@ module.exports = function(Campaign) {
    */
   const sendToEmailQueue = (campaign, followup, person, email,
     sendToEmailQueueCB) => {
+    email.subject = email.subject.replace(/&nbsp;/g, " ");
     email.subject = lodash.trim(striptags(email.subject));
     Campaign.app.models.emailQueue.create(email,
       (emailQueueErr, emailQueueObj) => {
