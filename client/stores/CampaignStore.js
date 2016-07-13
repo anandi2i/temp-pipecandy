@@ -5,7 +5,7 @@ import AppDispatcher from "../dispatcher/AppDispatcher";
 import {HandleError} from "../utils/ErrorMessageHandler";
 import CampaignApi from "../API/CampaignApi";
 import EmailListApi from "../API/EmailListApi";
-import appHistory from "../RouteContainer";
+import {browserHistory} from "react-router";
 
 let _error = "";
 let _isExistCampaignId = false;
@@ -334,7 +334,7 @@ AppDispatcher.register(function(payload) {
     case Constants.CREATE_NEW_CAMPAIGN:
       CampaignApi.createCampaign(action.data).then((response) => {
         _error = "";
-        appHistory.push(`campaign/${response.data.id}/run`);
+        browserHistory.push(`campaign/${response.data.id}/run`);
       }, (err) => {
         _error = HandleError.evaluateError(err);
         CampaignStore.emitChange();
@@ -519,12 +519,12 @@ AppDispatcher.register(function(payload) {
         _isExistCampaignId = response.data.exists;
         CampaignStore.emitChange();
         if (response.data.exists) {
-          appHistory.push(`/campaign/${action.campaignId}/run`);
+          browserHistory.push(`/campaign/${action.campaignId}/run`);
         } else {
-          appHistory.push("/campaign");
+          browserHistory.push("/campaign");
         }
       }, (err) => {
-        appHistory.push("/campaign");
+        browserHistory.push("/campaign");
       });
       break;
     case Constants.GET_RECENT_CAMPAIGN_METRICS:
@@ -554,7 +554,7 @@ AppDispatcher.register(function(payload) {
       //TODO need to clean
       CampaignApi.saveCampaignTemplates(action.campaign)
       .then((response) => {
-        appHistory.push("/campaign");
+        browserHistory.push("/campaign");
         displaySuccess("Campaign saved successfully");
       }, (err) => {
         console.log(err);

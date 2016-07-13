@@ -6,7 +6,7 @@ import lodash from "lodash";
 module.exports = function(app) {
   //verified
   app.get("/verified", function(req, res) {
-    res.redirect("/#/email-verified");
+    res.redirect("/email-verified");
   });
 
   /**
@@ -44,7 +44,7 @@ module.exports = function(app) {
   app.get("/auth/success", function(req, res) {
     if(!req.accessToken) {
       logger.error("No accessToken");
-      return res.redirect("/#/register");
+      return res.redirect("/register");
     }
     const milliSec = 1000;
     let redirect = () => {
@@ -52,7 +52,7 @@ module.exports = function(app) {
         signed: !req.signedCookies ? true : false,
         maxAge: milliSec * req.accessToken.ttl
       });
-      return res.redirect("/#/");
+      return res.redirect("/");
     };
     app.models.user.findById(
       req.accessToken.userId,
@@ -61,7 +61,7 @@ module.exports = function(app) {
       if(err) {
         logger.error(`error in fetching user details for the userId::
           ${req.accessToken.userId} err:: ${err}`);
-        return res.redirect("/#/register");
+        return res.redirect("/register");
       }
       let userData = user.toJSON();
       updateUserName(user, userData, (error, user) => {

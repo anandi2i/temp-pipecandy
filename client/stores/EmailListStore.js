@@ -5,7 +5,7 @@ import AppDispatcher from "../dispatcher/AppDispatcher";
 import EmailListApi from "../API/EmailListApi";
 import {HandleError} from "../utils/ErrorMessageHandler";
 import {SuccessMessages} from "../utils/UserAlerts";
-import appHistory from "../RouteContainer";
+import {browserHistory} from "react-router";
 
 let _allEmailList = {};
 let _getEmailList = {};
@@ -134,7 +134,7 @@ AppDispatcher.register(function(payload) {
     case Constants.CREATE_NEW_LIST:
       EmailListApi.createList(action.data).then((response) => {
         _allEmailList = {};
-        appHistory.push("list/"+response.data.id);
+        browserHistory.push("/list/"+response.data.id);
       }, (err)=> {
         _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();

@@ -13,10 +13,10 @@ const EmailListApi = {
     return api.post("/api/users/createEmailList", data);
   },
   getSelectedList(data) {
-    return api.post("api/lists/peopleWithFields", data);
+    return api.post("/api/lists/peopleWithFields", data);
   },
   uploadFile(data) {
-    return api.post(`api/file/upload?listid=${data.listId}`, data.fileObj);
+    return api.post(`/api/file/upload?listid=${data.listId}`, data.fileObj);
   },
   /**
    * Api to save person with additional fields
@@ -24,7 +24,7 @@ const EmailListApi = {
    * @return {object} Promise
    */
   saveSinglePerson(data) {
-    return api.post(`api/lists/${data.listId}/savePersonWithFields`,
+    return api.post(`/api/lists/${data.listId}/savePersonWithFields`,
       data.person);
   },
   /**
@@ -34,7 +34,7 @@ const EmailListApi = {
    * @return {Object} updated person
    */
   updateSinglePerson(data) {
-    return api.put(`api/lists/${data.listId}/person/${data.person.person.id}` +
+    return api.put(`/api/lists/${data.listId}/person/${data.person.person.id}` +
       "/updatePersonWithFields", data.person);
   },
   /**

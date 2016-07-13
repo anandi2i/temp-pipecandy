@@ -5,7 +5,7 @@ import Constants from "../constants/Constants";
 import UserApi from "../API/UserApi";
 import {SuccessMessages} from "../utils/UserAlerts";
 import {HandleError} from "../utils/ErrorMessageHandler";
-import appHistory from "../RouteContainer";
+import {browserHistory} from "react-router";
 
 let _user = {};
 let _prevLocation = "";
@@ -94,7 +94,7 @@ AppDispatcher.register(function(payload) {
         response.data.avatar = "/images/photo.png";
         _user = response.data;
         _error = "";
-        appHistory.push("response");
+        browserHistory.push("/response");
       }, (err)=> {
         _user = {};
         _error = HandleError.evaluateError(err);
@@ -105,7 +105,7 @@ AppDispatcher.register(function(payload) {
       UserApi.login(action.data).then((response) => {
         _user = response.data.userData;
         _error = "";
-        appHistory.push(_prevLocation);
+        browserHistory.push(_prevLocation);
         enabledropDownBtn();
       }, (err)=> {
         _user = {};
@@ -133,7 +133,7 @@ AppDispatcher.register(function(payload) {
         _user = "";
         isSocialAuth = false;
         _prevLocation = "/";
-        appHistory.push("/login");
+        browserHistory.push("/login");
       });
       break;
     case Constants.USER_UPDATE:
@@ -152,7 +152,7 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.FORGOT_PASSSWORD:
       UserApi.forgotPassword(action.data).then((response) => {
-        appHistory.push("/forgot-password-response");
+        browserHistory.push("/forgot-password-response");
       }, (err) => {
         _error = HandleError.evaluateError(err);
         UserStore.emitChange();
@@ -160,7 +160,7 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.RESET_PASSSWORD:
       UserApi.resetPassword(action.data).then((response) => {
-        appHistory.push("/reset-password-response");
+        browserHistory.push("/reset-password-response");
       }, (err) => {
         _error = HandleError.evaluateError(err);
         UserStore.emitChange();
