@@ -80,6 +80,29 @@ FollowUp.getFolloUpsToSent = (callback) => {
 };
 
 /**
+ * Update the followUp isStopped flag value
+ * @param  {[followUp]} followUp
+ * @param  {[followUpScheduledDate]} followUpScheduledDate
+ * @param  {[function]} updateFollowUpCB
+ * @author Syed Sulaiman M
+ */
+FollowUp.updateStoppedByCampaignId = (campaignId, isStopped, callback) => {
+  FollowUp.updateAll({
+    campaignId : campaignId
+  }, {
+    isStopped : isStopped
+  }, (updateErr, info) => {
+    if(updateErr) {
+      logger.error("Error while updating followUps",
+        {error: updateErr, stack: updateErr.stack,
+          input: {campaignId: campaignId}});
+      return callback(updateErr);
+    }
+    return callback(null, info);
+  });
+};
+
+/**
  * To get the previousScheduledDate for the current follow up,
  * if previousScheduledDate is not empty, use it
  * if previousScheduledDate is empty, use the campaign's scheduled date

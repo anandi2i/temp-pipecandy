@@ -10,7 +10,7 @@ let isJobInProgress = false;
  *  Mail Sender to sent Emails
  */
 var job = new CronJob({
-  cronTime: "*/2 * * * *", // Cron Expression to Run for every 2 minutes
+  cronTime: "* * * * *", // Cron Expression to Run for every 1 minutes
   onTick: function() {
     if (!isJobInProgress) {
       isJobInProgress = true;

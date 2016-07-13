@@ -6,6 +6,7 @@ const statusCodes = {
   "metricsAdded" : 49,
   "readyToSend" : 50,
   "executingCampaign" : 60,
+  "campaignStopped" : 62,
   "campaignExecuted" : 65
 };
 

@@ -63,6 +63,62 @@ module.exports = function(Campaign) {
       });
     };
 
+    Campaign.remoteMethod(
+      "stop",
+      {
+        description: "Save the campaign tempalate and associates with list",
+        accepts: [
+          {arg: "ctx", type: "object", http: {source: "context"}},
+          {arg: "id", type: "number", required: true, http: {source: "path"}}
+        ],
+        returns: {arg: "campaign", type: "campaign", root: true},
+        http: {verb: "put", path: "/:id/stop"}
+      }
+    );
+
+    /**
+     * Stops the Campaign
+     * Campaign Status will be updated to Stop
+     *
+     * @param  {Context} ctx [Context object to get accessToken]
+     * @param  {number} id [campaign id]
+     * @param  {Function} callback
+     * @return {Campaign} [Persisted Campaign Object]
+     * @author Syed Sulaiman M
+     */
+    Campaign.stop = (ctx, id, callback) => {
+      Campaign.find({
+        where: {
+          and: [
+            {createdBy:ctx.req.accessToken.userId},
+            {id:id}
+          ]
+        }
+      }, (campaignsErr, campaigns) => {
+        if(campaignsErr || lodash.isEmpty(campaigns)) {
+          const errorMessage = lodash.isEmpty(campaigns) ?
+              errorMessages.INVALID_CAMPAIGN_ID : errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        let campaign = campaigns[0];
+        campaign.updateAttribute("statusCode", statusCodes.campaignStopped,
+            (updateErr, updatedCampaign) => {
+          if(updateErr) {
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return callback(errorMessage);
+          }
+          Campaign.app.models.followUp
+              .updateStoppedByCampaignId(updatedCampaign.id, true,
+              (updateErr, result) => {
+            if(updateErr) {
+              const errorMessage = errorMessages.SERVER_ERROR;
+              return callback(errorMessage);
+            }
+            return callback(null, updatedCampaign);
+          });
+        });
+      });
+    };
 
     /**
      * validates the request param object

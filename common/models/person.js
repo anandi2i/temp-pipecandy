@@ -307,10 +307,13 @@ module.exports = function(Person) {
    */
   const getCampaignAudit = (userId, personId, campaignId, campaignAuditCB) => {
     Person.app.models.campaignAudit.getAuditByPersonAndCampaign(
-        userId, campaignId, (auditErr, audit) => {
+        personId, campaignId, (auditErr, audit) => {
       if(auditErr || !audit) {
-        logger.error("Error in getting audit for campaign Id: ",
-            campaignId, auditErr);
+        const errorMsg = auditErr ? "Error getting audit" : "Audit not Found";
+        const stack = auditErr ? auditErr.stack : null;
+        logger.error(errorMsg,
+          {error: auditErr, stack: stack, input: {
+            campaignId: campaignId, personId: personId}});
         const errorMessage = errorMessages.SERVER_ERROR;
         return campaignAuditCB(errorMessage);
       }
