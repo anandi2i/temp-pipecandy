@@ -7,6 +7,7 @@ import CampaignApi from "../API/CampaignApi";
 let _error = "";
 let _otherCampaignMetrics = {};
 let _isExistCampaign;
+let emailThread = [];
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignReportStore = _.extend({}, EventEmitter.prototype, {
@@ -41,6 +42,21 @@ const CampaignReportStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("reportView", callback);
   },
 
+  // Emit Change event to chek Email Thread
+  emitThreadViewChange() {
+    this.emit("threadView");
+  },
+
+  // Add change listener for Email Thread
+  addThreadViewChangeListener(callback) {
+    this.on("threadView", callback);
+  },
+
+  // Remove change listener for Email Thread
+  removeThreadViewChangeListener(callback) {
+    this.removeListener("threadView", callback);
+  },
+
   // get other stats metrics data
   getOtherStatsMetrics() {
     return _otherCampaignMetrics;
@@ -49,6 +65,11 @@ const CampaignReportStore = _.extend({}, EventEmitter.prototype, {
   // check is campaign is existing
   getIsExistCampaign() {
     return _isExistCampaign;
+  },
+
+  // get email thread's
+  getEmailThread() {
+    return emailThread;
   },
 
   getError() {
@@ -85,6 +106,16 @@ AppDispatcher.register(function(payload) {
         CampaignReportStore.emitReportViewChange();
       });
       break;
+      case Constants.GET_EMAIL_THREAD:
+        CampaignApi.getEmailThread(action.id).then((response) => {
+          _error = "";
+          emailThread = response.data;
+          console.log("---------------------222---", emailThread);
+          CampaignReportStore.emitThreadViewChange();
+        }, (err) => {
+          _error = err.message;
+        });
+        break;
     default:
       return true;
   }

@@ -15,9 +15,10 @@ html {
   .footer-tabs {
     a {
       cursor: pointer;
-      padding: 12px 90px;
+      padding: 12px 0px;
       color: $white;
       display: inline-block;
+      width: 25%;
       &.active {
         border-top: 3px solid $footer-tab-color;
         color: $footer-tab-color;
@@ -950,35 +951,52 @@ $lines-to-show: 8;
     margin-bottom: 0;
     padding: 17px 0 7px;
   }
-  .drag-container {
-    cursor: move;
-    margin-top: 25px;
-    position: absolute;
-    i {
-      font-size: 20px;
-      margin-top: -24px;
-      position: absolute;
-    }
-  }
-  .content {
-    width: calc(100% - 20px);
-  }
   label {
+    width: 10px;
+    float: left;
+    margin-right: -10px;
+  }
+  .mail-sub-content {
+    cursor: pointer;
     margin-left: 25px;
-    div {
+    min-height: 25px;
+    .person-name {
+      color: $black-clr;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-    .personName {
-      color: $black-clr;
+      font-weight: 700;
     }
     .mailDescription {
       .subjectLine {
         color: $black-clr;
         margin-right: 10px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 70%;
+        display: inline-block;
+      }
+      .mailContentLine {
+        color: $gray-txt-clr;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 25%;
+        display: inline-block;
       }
     }
+    .date {
+      max-width: 75px;
+      float: right;
+      padding: 0;
+    }
+  }
+  &:hover {
+    background-color: $light-bg-clr;
+  }
+  &.waves-effect{
+    display: block;
   }
 }
 .spinner-container {
@@ -1691,15 +1709,6 @@ span#autocomplete {
     display: block;
   }
 }
-@media only screen and (max-width: 800px) {
-  .footer {
-    .footer-tabs {
-      a {
-        padding: 12px 80px;
-      }
-    }
-  }
-}
 @media only screen and (max-width: 700px) {
   .hide-on-700 {
     display: none !important;
@@ -1714,13 +1723,6 @@ span#autocomplete {
             content: "";
           }
         }
-      }
-    }
-  }
-  .footer {
-    .footer-tabs {
-      a {
-        padding: 12px 10%;
       }
     }
   }
@@ -1857,14 +1859,5 @@ span#autocomplete {
   }
   .lg-btn-dflt {
     width: 300px;
-  }
-}
-@media only screen and (max-width: 370px) {
-  .footer {
-    .footer-tabs {
-      a {
-        padding: 12px 7%;
-      }
-    }
   }
 }

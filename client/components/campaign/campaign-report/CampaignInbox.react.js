@@ -204,31 +204,27 @@ class CampaignInbox extends React.Component {
                   const receivedDate = moment(inbox.receivedDate)
                     .format("DD MMM YYYY");
                   return (
-                    <div key={key} className="camp-repo-grid">
+                    <div key={key} className="camp-repo-grid waves-effect">
                       <div className="row">
                         <div className="content">
-                          <span className="drag-container">
-                            <i className="mdi mdi-drag-vertical"></i>
-                          </span>
                           <input type="checkbox" className="filled-in"
                             id={key} defaultChecked="" />
-                          <label htmlFor={key} className="full-w">
-                            <div className="data-info col s8 m3 l3 personName">
-                              <b>
-                                <span>{inbox.person.firstName}</span>, <span>Me</span>
-                                  <span> ({inbox.count}) </span>
-                              </b>
+                          <label htmlFor={key} className="full-w" />
+                          <div className="mail-sub-content">
+                            <div className="data-info col s8 m3 l3 person-name">
+                              <span>{inbox.person.firstName}</span>, <span>Me</span>
+                              <span> ({inbox.count}) </span>
                             </div>
                             <div className="data-info col s4 m6 l6 hide-on-600">
                               <div className="mailDescription">
-                                <span className="subjectLine">{subject}</span>
-                                <span className="mailContentLine">{content}</span>
+                                <div className="subjectLine">{subject}</div>
+                                <div className="mailContentLine">{content}</div>
                               </div>
                             </div>
-                            <div className="data-info col s4 m3 l3 rit-txt">
+                            <div className="data-info col s4 m3 l3 rit-txt date">
                               {receivedDate}
                             </div>
-                          </label>
+                          </div>
                         </div>
                       </div>
                     </div>

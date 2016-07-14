@@ -145,6 +145,15 @@ const CampaignActions = {
       actionType: Constants.GET_IS_EXISTING_CAMPAIGN,
       id : campaignId
     });
+  },
+  /**
+   * To get is campaign email thread
+   */
+  getEmailThread(threadId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_EMAIL_THREAD,
+      id : threadId
+    });
   }
 };
 

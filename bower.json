@@ -29,6 +29,7 @@
     "tinymce": "tinymce-dist#^4.3.8",
     "jquery": "2.1.4",
     "materialize-clockpicker": "https://github.com/chingyawhao/materialize-clockpicker.git",
-    "tinymce-mention": "^4.0.1"
+    "tinymce-mention": "^4.0.1",
+    "animate.css": "^3.5.2"
   }
 }

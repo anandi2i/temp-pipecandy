@@ -139,30 +139,26 @@ class CampaignSchedulebox extends React.Component {
                 const scheduledAt = moment(scheduled.scheduledAt)
                   .format("DD MMM YYYY");
                 return (
-                  <div key={key} className="camp-repo-grid">
+                  <div key={key} className="camp-repo-grid waves-effect">
                     <div className="row">
                       <div className="content">
-                        <span className="drag-container">
-                          <i className="mdi mdi-drag-vertical"></i>
-                        </span>
                         <input type="checkbox" className="filled-in"
                           id={key} defaultChecked="" />
-                        <label htmlFor={key} className="full-w">
-                          <div className="data-info col s8 m3 l2 personName">
-                            <b>
-                              <span>{scheduled.person.firstName}</span>
-                            </b>
+                        <label htmlFor={key} className="full-w" />
+                        <div className="mail-sub-content">
+                          <div className="data-info col s8 m3 l2 person-name">
+                            <span>{scheduled.person.firstName}</span>
                           </div>
                           <div className="data-info col s4 m6 l7 hide-on-600">
                             <div className="mailDescription">
-                              <span className="subjectLine">{subject}</span>
-                              <span className="mailContentLine">{content}</span>
+                              <div className="subjectLine">{subject}</div>
+                              <div className="mailContentLine">{content}</div>
                             </div>
                           </div>
-                          <div className="data-info col s4 m3 l3 rit-txt">
+                          <div className="data-info col s4 m3 l3 rit-txt date">
                             {scheduledAt}
                           </div>
-                        </label>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -34,5 +34,6 @@ export default keyMirror({
   GET_OTHER_STATS_METRICS: null,
   GET_IS_EXISTING_CAMPAIGN: null,
   GET_SCHEDULED_EMAILS: null,
-  GET_SENT_EMAILS: null
+  GET_SENT_EMAILS: null,
+  GET_EMAIL_THREAD: null
 });

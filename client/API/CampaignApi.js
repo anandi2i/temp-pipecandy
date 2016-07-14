@@ -120,8 +120,11 @@ const CampaignApi = {
    */
   getSentMails(data) {
     const {id, start, end} = data;
-    return api.get(`/api/sentMailBoxes/sentMails/campaign/${id}?\
-      start=${start}&limit=${end}`);
+    return api.get(`/api/sentMailBoxes/sentMails/campaign/${id}?` +
+      `start=${start}&limit=${end}`);
+  },
+  getEmailThread(id) {
+    return api.get(`/api/MailResponses/threadId/${id}`);
   }
 };
 

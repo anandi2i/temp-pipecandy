@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import CampaignFooter from "./CampaignFooter.react";
 import CampaignReportHead from "../CampaignReportHead.react";
+import EmailThreadView from "./EmailThreadView.react";
 import Spinner from "../../Spinner.react";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
@@ -107,6 +108,14 @@ class CampaignSentbox extends React.Component {
   }
 
   /**
+   * get email thread API
+   */
+  getEmailThread(id) {
+    CampaignActions.getEmailThread(id);
+    this.refs.emailthread.openModal();
+  }
+
+  /**
    * render
    * @see http://stackoverflow.com/questions/28320438/react-js-create-loop-through-array
    * @return {ReactElement} markup
@@ -139,30 +148,27 @@ class CampaignSentbox extends React.Component {
                 const scheduledAt = moment(sentMail.scheduledAt)
                   .format("DD MMM YYYY");
                 return (
-                  <div key={key} className="camp-repo-grid">
+                  <div key={key} className="camp-repo-grid waves-effect animated flipInX">
                     <div className="row">
                       <div className="content">
-                        <span className="drag-container">
-                          <i className="mdi mdi-drag-vertical"></i>
-                        </span>
                         <input type="checkbox" className="filled-in"
                           id={key} defaultChecked="" />
-                        <label htmlFor={key} className="full-w">
-                          <div className="data-info col s8 m3 l2 personName">
-                            <b>
-                              <span>{sentMail.person.firstName}</span>
-                            </b>
+                        <label htmlFor={key} className="full-w" />
+                        <div className="mail-sub-content" onClick={() => this.getEmailThread(sentMail.threadId)} data-id={sentMail.threadId}>
+                          <div className="data-info col s8 m3 l2 person-name">
+                            <span>Me</span>, <span>{sentMail.person.firstName}</span>
+                            <span> ({sentMail.count}) </span>
                           </div>
                           <div className="data-info col s4 m6 l7 hide-on-600">
                             <div className="mailDescription">
-                              <span className="subjectLine">{subject}</span>
-                              <span className="mailContentLine">{content}</span>
+                              <div className="subjectLine">{subject}</div>
+                              <div className="mailContentLine">{content}</div>
                             </div>
                           </div>
-                          <div className="data-info col s4 m3 l3 rit-txt">
+                          <div className="data-info col s4 m3 l3 rit-txt date">
                             {scheduledAt}
                           </div>
-                        </label>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -181,6 +187,7 @@ class CampaignSentbox extends React.Component {
             Sent mails seems to be empty!
           </div>
         </div>
+        <EmailThreadView ref="emailthread" />
         <CampaignFooter campaignId={campaignId} activePage={"sent"}/>
       </div>
     );
