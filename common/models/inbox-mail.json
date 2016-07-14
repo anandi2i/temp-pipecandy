@@ -26,9 +26,8 @@
     "subject": {
       "type": "string"
     },
-    "actionable": {
-      "type": "boolean",
-      "default": false
+    "class": {
+      "type": "string"
     },
     "content": {
       "type": "string",

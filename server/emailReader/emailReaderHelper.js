@@ -7,6 +7,9 @@ var mailEnqueue = require("../../server/emailReader/mailEnqueue");
 var emojiStrip = require("emoji-strip");
 var googleTokenHandler = require("../../server/utils/googleTokenHandler");
 
+// Regular expression to extract reply message alone
+const regExBody = "On ((Sun|Mon|Tue|Wed|Thu|Fri|Sat),|([0-3]*))(.*)wrote:";
+
 /**
  * Method which reads mail id from user;s mail box
  *
@@ -170,7 +173,9 @@ function constructResponse(userId, sentMail, payload, response) {
   let headers = payload.headers;
   let date = lodash.find(headers,
     lodash.matchesProperty("name", "Date"));
-  mailResponse.receivedDate = new Date(date.value);
+  if (date) {
+    mailResponse.receivedDate = new Date(date.value);
+  }
   mailResponse.mailId = response.id;
   mailResponse.threadId = response.threadId;
   mailResponse.labels = response.labelIds;
@@ -208,18 +213,13 @@ function constructResponse(userId, sentMail, payload, response) {
   }
   if (body) {
     let mailBody = new Buffer(body, "base64");
-    let decodedBody = striptags(mailBody.toString());
-    decodedBody = decodedBody.replace(/\r?\n|\r/g, " ");
-    // Regular expression to extract reply message alone
-    let regExBody =
-          "On ((Sun|Mon|Tue|Wed|Thu|Fri|Sat),|([0-3]*))(.*)wrote:";
-    let regExIndex = decodedBody.match(regExBody);
-    let replyMsg = decodedBody.trim();
+    mailBody = mailBody.toString();
+    let regExIndex = mailBody.match(regExBody);
+    let replyMsg = mailBody.trim();
     if (regExIndex) {
       const zero = 0;
-      replyMsg = decodedBody.substr(zero, regExIndex.index).trim();
+      replyMsg = mailBody.substr(zero, regExIndex.index).trim();
     }
-    replyMsg = emojiStrip(replyMsg);
     mailResponse.content = replyMsg;
   }
   return mailResponse;
@@ -273,11 +273,18 @@ function processMailResponse(App, param, mailResponse, sentMail, callback) {
         });
       },
       function(mailEnqueueCB) {
-        let queueName = "intelligenceIn";
-        mailEnqueue.enqueueMail(JSON.stringify(response), queueName,
-            (err, data) => {
+        let isSent = response.labels.includes("SENT");
+        if(!isSent) {
+          let queueName = "intelligenceIn";
+          let replyMsg = getPlainTextFromBody(mailResponse.content);
+          mailResponse.content = replyMsg;
+          mailEnqueue.enqueueMail(JSON.stringify(response), queueName,
+              (err, data) => {
+            mailEnqueueCB(null);
+          });
+        } else {
           mailEnqueueCB(null);
-        });
+        }
       }
     ], function(err, results) {
       callback(err, results);
@@ -342,6 +349,26 @@ function updateInboxMail(App, param, mailResponse, sentMail, callback) {
   App.inboxMail.saveOrUpdate(inboxMailInst, function(err, response) {
     callback(null, param, mailResponse, sentMail);
   });
+}
+
+/**
+ * Method to extract Text alone from Reply Message
+ *
+ * @param  {Object} content Email Body
+ * @return {Object} Reply Text Alone
+ * @author Syed Sulaiman M
+ */
+function getPlainTextFromBody(content) {
+  let decodedBody = striptags(content);
+  decodedBody = decodedBody.replace(/\r?\n|\r/g, " ");
+  let regExIndex = decodedBody.match(regExBody);
+  let replyMsg = decodedBody.trim();
+  if (regExIndex) {
+    const zero = 0;
+    replyMsg = decodedBody.substr(zero, regExIndex.index).trim();
+  }
+  replyMsg = emojiStrip(replyMsg);
+  return replyMsg;
 }
 
 module.exports = {

@@ -17,9 +17,6 @@ AWS.config.update({
 
 const queueName = "intelligenceOut";
 
-const neutralNLPClasses = ["Interested", "Interested, schedule meeting",
-  "mail chain", "need details", "random"];
-
 /**
  * Consumer process for mail dequeue
  */
@@ -29,28 +26,26 @@ const app = Consumer.create({
     let mailData = JSON.parse(message.Body);
     App.MailResponse.updateMailClass(mailData, function (err, result) {
       if(err) {
-        console.error("Eror while update NLP Class for mail");
+        console.error("Error while updating Class for mail", mailData.id, err);
       }
     });
-    if(neutralNLPClasses.includes(mailData.NLPClass)) {
-      App.inboxMail.findByUserIdAndThreadId(mailData.userId, mailData.threadId,
-          function (err, inboxMail) {
-        if(err) {
-          console.error("Eror while getting inboxMail for userId and threadId",
-            mailData.userId, mailData.threadId, err);
-        } else {
-          if(inboxMail) {
-            App.inboxMail.updateActionable(inboxMail, true,
-                function (err, inboxMail) {
-              if(err) {
-                console.error("Eror updating inboxMail for userId and threadId",
-                  mailData.userId, mailData.threadId, err);
-              }
-            });
-          }
+    App.inboxMail.findByUserIdAndThreadId(mailData.userId, mailData.threadId,
+        function (err, inboxMail) {
+      if(err) {
+        console.error("Error while getting inboxMail for userId and threadId",
+          mailData.userId, mailData.threadId, err);
+      } else {
+        if(inboxMail) {
+          App.inboxMail.updateClass(inboxMail, mailData.NLPClass,
+              function (err, inboxMail) {
+            if(err) {
+              console.error("Error updating inboxMail for userId and threadId",
+                mailData.userId, mailData.threadId, err);
+            }
+          });
         }
-      });
-    }
+      }
+    });
     done();
   },
   sqs: new AWS.SQS()

@@ -12,9 +12,7 @@
     "campaignEnqueue": "node server/mailSender/campaignEnqueue.js",
     "initEmailReader": "node server/emailReader/initEmailReader.js",
     "campaignConsumer": "node server/mailSender/campaignConsumer.js",
-    "campaignMailSender": "node server/mailSender/oldMailSender.js",
-    "mailCrawler": "node server/mailCrawler/crawl.js",
-    "mailDequeue": "node server/emailReader/mailDequeue.js",
+    "emailClassUpdater": "node server/emailReader/emailClassUpdater.js",
     "followUpSender": "node server/followUpSender/followUpMailSender.js",
     "emailQueuePoller": "node server/mailSender/emailQueuePoller.js",
     "validate": "npm ls"

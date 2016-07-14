@@ -1,6 +1,7 @@
 "use strict";
 
 import async from "async";
+import constants from "../../server/utils/constants";
 import logger from "../../server/log";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 
@@ -30,8 +31,8 @@ module.exports = function(InboxMail) {
    * @param  {Object}   mailResponse
    * @param  {Function} callback
    */
-  InboxMail.updateActionable = (inboxMail, actionable, callback) => {
-    inboxMail.updateAttribute("actionable", actionable,
+  InboxMail.updateClass = (inboxMail, classification, callback) => {
+    inboxMail.updateAttribute("class", classification,
         (updateErr, updatedData) => {
       return callback(updateErr, updatedData);
     });
@@ -83,42 +84,44 @@ module.exports = function(InboxMail) {
       accepts: [
         {arg: "ctx", type: "object", http: {source: "context"}},
         {arg: "campaignId", type: "number"},
+        {arg: "classification", type: "string"},
         {arg: "start", type: "number"},
-        {arg: "limit", type: "number"},
-        {arg: "actionable", type: "boolean"}
+        {arg: "limit", type: "number"}
       ],
       returns: {arg: "InboxMail", type: "array", root: true},
-      http: {verb: "get", path: "/campaign/:campaignId"}
+      http: {verb: "get", path: "/campaign/:campaignId/:classification"}
     }
   );
   /**
    * Method to return inbox mails
    * @param  {Object}   ctx
    * @param  {Number}   campaignId
+   * @param  {String}   classification - [all, bounced, out-of-office, actionalble, nurture, negative]
    * @param  {Number}   start
    * @param  {Number}   limit
    * @param  {Function} callback
    * @return {[InboxMail]} list of InboxMail
    */
-  InboxMail.inboxMails = (ctx, campaignId, start, limit, actionable,
+  InboxMail.inboxMails = (ctx, campaignId, classification, start, limit,
         callback) => {
-    let errorMessage = validateMailRequest(campaignId, start, limit);
+    let errorMessage = validateMailRequest(campaignId, start, limit,
+        classification);
     if (errorMessage) {
       return callback(errorMessage);
     }
     let whereQry = {};
-    if(actionable) {
+    if(classification === "all") {
       whereQry = {
         and: [
           {campaignId: campaignId},
-          {count: {gt: 1}},
-          {actionable: true}
+          {count: {gt: 1}}
         ]};
     } else {
       whereQry = {
         and: [
           {campaignId: campaignId},
-          {count: {gt: 1}}
+          {count: {gt: 1}},
+          {class: classification}
         ]};
     }
     InboxMail.find({
@@ -151,14 +154,70 @@ module.exports = function(InboxMail) {
     });
   };
 
+  InboxMail.remoteMethod(
+    "updateClassification", {
+      description: "Update Inbox Mails Classification",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "id", type: "number"},
+        {arg: "classification", type: "string"}
+      ],
+      returns: {arg: "InboxMail", type: "array", root: true},
+      http: {verb: "put", path: "/:id/:classification"}
+    }
+  );
+  /**
+   * API to Update Mail Classification
+   * @param  {Number}   id InboxMail Id
+   * @param  {String}   classification
+   * @param  {Function} callback
+   * @return {InboxMail} Updated InboxMail Class
+   * @author Syed Sulaiman M
+   */
+  InboxMail.updateClassification = (ctx, id, classification, callback) => {
+    if(!constants.CLASSIFICATIONS.includes(classification)) {
+      const errorMessage = errorMessages.INVALID_CLASSIFICATION;
+      return callback(errorMessage);
+    }
+    InboxMail.findById(id, (inboxMailErr, inboxMail) => {
+      if(inboxMailErr) {
+        logger.error("Error finding InboxMail",
+          {error: inboxMailErr, stack: inboxMailErr.stack, input:
+          {inboxMailId:id, classification:classification}});
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      if(!inboxMail) {
+        const errorMessage = errorMessages.INVALID_INBOX_MAIL_ID;
+        return callback(errorMessage);
+      }
+      async.parallel([
+        async.apply(InboxMail.updateClass, inboxMail, classification),
+        async.apply(InboxMail.app.models.MailResponse.updateUserClassByThreadId,
+          inboxMail.threadId, classification)
+      ], (err, results) => {
+        if(err) {
+          logger.error("Error updating Email Class",
+            {error: err, stack: err.stack, input:
+            {inboxMailId:id, classification:classification}});
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        let updatedInboxMail = results[0]; // Result of First Function
+        return callback(null, updatedInboxMail);
+      });
+    });
+  };
+
   /**
    * Method To validate mail request
    * @param  {Number} campaignId
    * @param  {Number} start
    * @param  {Number} limit
+   * @param  {String} classification Mail Class
    * @return {Object}
    */
-  const validateMailRequest = (campaignId, start, limit) => {
+  const validateMailRequest = (campaignId, start, limit, classification) => {
     const zero = 0;
     let errorMessage = null;
     if (campaignId <= zero) {
@@ -167,6 +226,9 @@ module.exports = function(InboxMail) {
       errorMessage = errorMessages.INVALID_START;
     } else if (limit <= zero) {
       errorMessage = errorMessages.INVALID_LIMIT;
+    } else if(!constants.CLASSIFICATIONS.includes(classification) &&
+        classification !== "all") {
+      errorMessage = errorMessages.INVALID_CLASSIFICATION;
     }
     return errorMessage;
   };

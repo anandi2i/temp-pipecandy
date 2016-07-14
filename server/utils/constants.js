@@ -5,7 +5,9 @@ const constants = {
   "USER_STOPPED_CAMPAIGN" : "User has Stopped the Campaign",
   "USER": "USER",
   "SYSTEM": "SYSTEM",
-  "ONE": 1
+  "ONE": 1,
+  "CLASSIFICATIONS" : ["bounced", "out-of-office", "actionable",
+    "nurture", "negative"]
 };
 
 //export default constants;

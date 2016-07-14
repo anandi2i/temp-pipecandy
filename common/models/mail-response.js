@@ -62,6 +62,29 @@ module.exports = function(MailResponse) {
     });
   };
 
+  /**
+   * Update User Class for Mail by Thread Id
+   * @param  {String}  threadId
+   * @param  {String}  userClass
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  MailResponse.updateUserClassByThreadId = (threadId, userClass, callback) => {
+    MailResponse.updateAll({
+      threadId : threadId
+    }, {
+      UserClass : userClass
+    }, (updateErr, info) => {
+      if(updateErr) {
+        logger.error("Error while updating MailResponse",
+          {error: updateErr, stack: updateErr.stack,
+            input: {threadId: threadId}});
+        return callback(updateErr);
+      }
+      return callback(null, info);
+    });
+  };
+
   MailResponse.remoteMethod(
     "mailThread", {
       description: "Get Mail Thread",
