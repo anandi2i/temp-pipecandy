@@ -751,8 +751,8 @@ module.exports = function(Campaign) {
     getCurrentCampaignMetricsCB) => {
     Campaign.findById(campaignId, (CampaignErr, Campaigns) => {
       if (!Campaigns) {
-        getCurrentCampaignMetricsCB(null,
-          "There is no campaign with that campaignId");
+        const errorMessage = errorMessages.INVALID_CAMPAIGN_ID;
+        return getCurrentCampaignMetricsCB(errorMessage);
       }
       Campaigns.campaignMetrics(
         (campaignMetricsErr, campaignMetricsData) => {
@@ -765,12 +765,32 @@ module.exports = function(Campaign) {
               campaignId: campaignId
             }
           }, (err, emailLinks) => {
-            const totalLinks = emailLinks.length;
-            buildCampaignMetricObject(campaignMetricArray,
-              campaignMetricsData[0], totalLinks,
-              (err, campaignMetricsObj) => {
-                getCurrentCampaignMetricsCB(null, campaignMetricsObj);
-              });
+            if(lodash.isEmpty(campaignMetricsData)){
+              const totalLinks = emailLinks.length;
+              const emptyCampaignMetricsData = {
+                opened: 0,
+                responded: 0,
+                clicked: 0,
+                bounced: 0,
+                unsubscribed: 0,
+                spammed: 0,
+                sentEmails: 0,
+                failedEmails: 0,
+                erroredEmails: 0
+              };
+              buildCampaignMetricObject(campaignMetricArray,
+                emptyCampaignMetricsData, totalLinks,
+                (err, campaignMetricsObj) => {
+                  getCurrentCampaignMetricsCB(null, campaignMetricsObj);
+                });
+            } else {
+              const totalLinks = emailLinks.length;
+              buildCampaignMetricObject(campaignMetricArray,
+                campaignMetricsData[0], totalLinks,
+                (err, campaignMetricsObj) => {
+                  getCurrentCampaignMetricsCB(null, campaignMetricsObj);
+                });
+            }
           });
         });
     });
