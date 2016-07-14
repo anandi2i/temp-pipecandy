@@ -9,6 +9,7 @@ import CampaignInfoMsg from "../performance/CampaignInfoMsg.react";
 import LinksClicked from "../performance/LinksClicked.react";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignReportStore from "../../../stores/CampaignReportStore";
+import Spinner from "../../Spinner.react";
 
 /**
  * Display selected campaign component to display campaign performance
@@ -18,7 +19,7 @@ class ViewCampaign extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isExistCampaign: false
+      isExistCampaign: ""
     };
   }
 
@@ -39,9 +40,16 @@ class ViewCampaign extends React.Component {
 
   render() {
     const campaignId = this.props.params.id;
+    const isExistCampaign = this.state.isExistCampaign;
     return (
       <div>
-        {this.state.isExistCampaign
+        <div className="container"
+          style={{display: isExistCampaign ? "none" : "block"}} >
+          <div className="spinner-container">
+            <Spinner />
+          </div>
+        </div>
+        {isExistCampaign === "displayReport"
           ? <div>
               <div className="m-b-120">
                 {/* Dashboard head */}
@@ -57,8 +65,11 @@ class ViewCampaign extends React.Component {
               </div>
               <CampaignFooter campaignId={campaignId} activePage={"report"}/>
             </div>
-          :
-          <CampaignInfoMsg displayPage="report" />
+          : ""
+        }
+        {isRecentCampaign === "displayMessage"
+          ? <CampaignInfoMsg displayPage="dashboard" />
+          : ""
         }
       </div>
     );

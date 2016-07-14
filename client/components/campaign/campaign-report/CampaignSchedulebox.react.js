@@ -173,7 +173,7 @@ class CampaignSchedulebox extends React.Component {
           </div>
           <div className="container"
             style={{display: requestSent ? "block" : "none"}} >
-            <div className="infinity-spinner">
+            <div className="spinner-container">
               <Spinner />
             </div>
           </div>

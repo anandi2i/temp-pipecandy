@@ -74,7 +74,11 @@ AppDispatcher.register(function(payload) {
     case Constants.GET_IS_EXISTING_CAMPAIGN:
       CampaignApi.getIsExistingCampaign(action.id).then((response) => {
         _error = "";
-        _isExistCampaign = response.data.hasCampaign;
+        if(response.data.hasCampaign) {
+          _isExistCampaign = "displayReport";
+        } else {
+          _isExistCampaign = "displayMessage";
+        }
         CampaignReportStore.emitReportViewChange();
       }, (err) => {
         _error = err.message;

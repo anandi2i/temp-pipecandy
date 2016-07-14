@@ -7,6 +7,7 @@ import CampaignInfoMsg from "./performance/CampaignInfoMsg.react";
 import CampaignReportHead from "./CampaignReportHead.react";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignReportStore from "../../stores/CampaignReportStore";
+import Spinner from "../Spinner.react";
 
 /**
  * Dashboard component to display campaign performance and other status
@@ -15,7 +16,7 @@ class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isRecentCampaign: false
+      isRecentCampaign: ""
     };
   }
 
@@ -35,9 +36,16 @@ class Dashboard extends React.Component {
   }
 
   render() {
+    const isRecentCampaign = this.state.isRecentCampaign;
     return (
       <div>
-        {this.state.isRecentCampaign
+        <div className="container"
+          style={{display: isRecentCampaign ? "none" : "block"}} >
+          <div className="spinner-container">
+            <Spinner />
+          </div>
+        </div>
+        {isRecentCampaign === "displayReport"
           ? <div>
               {/* Dashboard head */}
               <CampaignReportHead />
@@ -50,7 +58,11 @@ class Dashboard extends React.Component {
               {/* Links Clicked */}
               <LinksClicked />
             </div>
-          : <CampaignInfoMsg displayPage="dashboard" />
+          : ""
+        }
+        {isRecentCampaign === "displayMessage"
+          ? <CampaignInfoMsg displayPage="dashboard" />
+          : ""
         }
       </div>
     );
