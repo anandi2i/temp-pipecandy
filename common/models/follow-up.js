@@ -7,6 +7,32 @@ import moment from "moment-timezone";
 
 module.exports = function(FollowUp) {
 
+  /**
+   * return a json with folloup and step number
+   * @param  {[number]} campaignId
+   * @param  {[function]} getStepNoCB [callback]
+   * @return {[json]} {followUpId: StepNo }
+   * @author Ramanavel Selvaraju
+   */
+  FollowUp.getFollowupStepNo = (campaignId, getStepNoCB) => {
+    FollowUp.find({where : {campaignId: campaignId}},
+      (followUpsFindErr, followUps) => {
+        if(followUpsFindErr) {
+          logger.error({error: followUpsFindErr, stack: followUpsFindErr.stack,
+                        input: {campaignId: campaignId}});
+          return getStepNoCB(followUpsFindErr);
+        }
+        if(lodash.isEmpty(followUps)){
+          return getStepNoCB(null, null);
+        }//passing null because we can check this campagin doen't have any followup
+        let stepNos = {};
+        lodash(followUps).forEach(function(followup) {
+          stepNos[followup.id] = followup.stepNo;
+        });
+        return getStepNoCB(null, stepNos);
+    });
+  };
+
 /**
  * To update each of the followUps for the current campaign with the scheduled date
  * @param  {[campaignId]} campaignId

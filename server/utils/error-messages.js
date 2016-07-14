@@ -41,12 +41,17 @@ FIELD_VALUE_CONFLICT.message = "Field Value Already Exists";
 const SERVER_ERROR = new Error();
 SERVER_ERROR.status = 500;
 SERVER_ERROR.name = "SERVER_ERROR";
-SERVER_ERROR.message = "Server Error";
+SERVER_ERROR.message = "Internal Server Error";
 
 const CAMPAIGN_NOT_FOUND = new Error();
 CAMPAIGN_NOT_FOUND.status = 404;
 CAMPAIGN_NOT_FOUND.name = "CAMPAIGN_NOT_FOUND";
 CAMPAIGN_NOT_FOUND.message = "Campaign Not Found";
+
+const TEMAPLTE_NOT_FOUND = new Error();
+TEMAPLTE_NOT_FOUND.status = 404;
+TEMAPLTE_NOT_FOUND.name = "CAMPAIGN_TEMPLATE_NOT_FOUND";
+TEMAPLTE_NOT_FOUND.message = "Campaign Templates Not Found";
 
 const errorMessage = {
   "NO_EMAILS_FOUND": NO_EMAILS_FOUND,
@@ -58,7 +63,8 @@ const errorMessage = {
   "FIELD_VALUES_NOT_FOUND": FIELD_VALUES_NOT_FOUND,
   "FIELD_VALUE_CONFLICT": FIELD_VALUE_CONFLICT,
   "SERVER_ERROR": SERVER_ERROR,
-  "CAMPAIGN_NOT_FOUND": CAMPAIGN_NOT_FOUND
+  "CAMPAIGN_NOT_FOUND": CAMPAIGN_NOT_FOUND,
+  "TEMPLATES_NOT_FOUND": TEMAPLTE_NOT_FOUND
 };
 
 module.exports = {

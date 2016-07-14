@@ -6,35 +6,88 @@ import Spamd from "node-spamd";
 import lodash from "lodash";
 import _ from "underscore";
 import request from "request";
+import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 
 module.exports = function(CampaignTemplate) {
+
+  /**
+   * Gets the campagin's common template and followups in a parallel manner
+   * @param  {[Campaign]} campaign
+   * @param  {[NULL]} reqparams         [null for this case]
+   * @param  {[function]} getTemplateDataCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  CampaignTemplate.getTemplatesAndStepNo = (campaign, reqparams,
+    getTemplateDataCB) => {
+    async.parallel({
+      tempaltes: getAllCommonTemplates.bind(null, campaign.id),
+      stepNoMap: CampaignTemplate.app.models.followUp.getFollowupStepNo.bind(
+                      null, campaign.id)
+    }, (parallelErr, results) => {
+      if(parallelErr) {
+        logger.error({error: parallelErr, stack: parallelErr.stack,
+                      input: {campaign: campaign}});
+        return getTemplateDataCB(parallelErr);
+      }
+      return getTemplateDataCB(parallelErr,
+                             campaign, results.tempaltes, results.stepNoMap);
+    });
+  };
+
+  /**
+   * Get all the common templates used in a campaign
+   * @param  {[number]} campaignId
+   * @param  {[function]} getAllCommonTemplatesCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  const getAllCommonTemplates = (campaignId,
+            getAllCommonTemplatesCB) => {
+    CampaignTemplate.find({
+      where: {and: [{campaignId: campaignId}, {personId: null},
+                    {missingTagIds: null}]
+              }
+    }, (templateFindErr, campaignTemplates) => {
+      if(templateFindErr) {
+        logger.error({error: templateFindErr, stack: templateFindErr.stack,
+                      input: {campaignId: campaignId}});
+        return getAllCommonTemplatesCB(templateFindErr);
+      }
+      if (lodash.isEmpty(campaignTemplates)) {
+        return getAllCommonTemplatesCB(errorMessages.TEMPLATES_NOT_FOUND);
+      }
+      return getAllCommonTemplatesCB(null, campaignTemplates);
+    });
+  };
+
+  /**
+   * prepares the api model for preview methods
+   * @param  {[Campaign]} campaign
+   * @param  {[CampaignTemplate]} templates
+   * @param  {[JSON]} stepNoMap
+   * @param  {[Function]} previewResponseCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  CampaignTemplate.preparePreviewResponse = (campaign, templates, stepNoMap,
+      previewResponseCB) => {
+    let response = [];
+    console.log("coming herer==============");
+    lodash(templates).forEach(function(template) {
+      if(template.followUpId) {
+        template.stepNo = stepNoMap[template.followUpId];
+      }
+      response.push(template);
+    });
+    return previewResponseCB(null, {campaign: campaign, templates: response});
+  };
 
   CampaignTemplate.remoteMethod(
     "wordAI", {
       description: "Returns multiple combinatiosnof an email contents.",
-      accepts: [{
-        arg: "ctx",
-        type: "object",
-        http: {
-          source: "context"
-        }
-      }, {
-        arg: "template",
-        type: "object",
-        required: true,
-        http: {
-          source: "body"
-        }
-      }],
-      returns: {
-        arg: "content",
-        type: "object",
-        root: true
-      },
-      http: {
-        verb: "post",
-        path: "/wordAI"
-      }
+      accepts: [{arg: "ctx", type: "object", http: {source: "context"}},
+                {arg: "template", type: "object", required: true,
+                  http: {source: "body"}}],
+      returns: {arg: "content", type: "object", root: true},
+      http: {verb: "post", path: "/wordAI"}
     }
   );
 
@@ -59,14 +112,9 @@ module.exports = function(CampaignTemplate) {
      "content-type": "multipart/form-data; boundary=---011000010111000001101001"
       },
       formData: {
-        s: template.content,
-        quality: "Readable",
-        email: "ashwin@pipecandy.com",
-        pass: "ashwin0302",
-        output: "json",
-        nooriginal: "on",
-        sentence: "on",
-        paragraph: "on"
+        s: template.content, quality: "Readable", email: "ashwin@pipecandy.com",
+        pass: "ashwin0302", output: "json", nooriginal: "on",
+        sentence: "on", paragraph: "on"
       }
     };
 
@@ -82,29 +130,12 @@ module.exports = function(CampaignTemplate) {
   CampaignTemplate.remoteMethod(
     "checkSpam", {
       description: "Checks and returns whether contents is spam or not.",
-      accepts: [{
-        arg: "ctx",
-        type: "object",
-        http: {
-          source: "context"
-        }
-      }, {
-        arg: "contents",
-        type: "object",
-        required: true,
-        http: {
-          source: "body"
-        }
-      }],
-      returns: {
-        arg: "additionalField",
-        type: "object",
-        root: true
-      },
-      http: {
-        verb: "post",
-        path: "/checkSpam"
-      }
+      accepts: [{arg: "ctx", type: "object", http: {source: "context"}},
+                {arg: "contents", type: "object", required: true,
+                 http: {source: "body"}
+               }],
+      returns: {arg: "additionalField", type: "object", root: true},
+      http: {verb: "post", path: "/checkSpam"}
     }
   );
   /**
@@ -408,6 +439,7 @@ module.exports = function(CampaignTemplate) {
     });
   };
 
+//observers
   /**
    * Updates the updatedAt column with current Time
    * @param ctx Context

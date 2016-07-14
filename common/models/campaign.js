@@ -17,6 +17,35 @@ const serverUrl = config.appUrl;
 module.exports = function(Campaign) {
 
   Campaign.remoteMethod(
+    "previewCampaignTemplate", {
+      description: "Returns all the mail templates used in the campaign",
+      accepts: [{arg: "ctx", type: "object", http: {source: "context"}},
+                {arg: "id", type: "number", http: {source: "path"}}],
+      returns: {arg: "CampaignTemplate", type: "campaignTemplate", root: true},
+      http: {verb: "get",
+             path: "/:id/campaignTemplates/preview"}
+    }
+  );
+
+  Campaign.previewCampaignTemplate = (ctx, id, previewCB) => {
+    async.waterfall([
+     async.apply(getCampaign, ctx, id, null),
+     Campaign.app.models.campaignTemplate.getTemplatesAndStepNo,
+     Campaign.app.models.campaignTemplate.preparePreviewResponse
+   ], (asyncErr, response) => {
+      if(asyncErr) {
+        logger.error({error: asyncErr, stack: asyncErr.stack,
+                      input: {userId: ctx.req.accessToken.userId,
+                              campaignId: id}
+                      });
+        return previewCB(asyncErr.status ? asyncErr
+                                         : userrorMessages.SERVER_ERROR);
+      }
+      return previewCB(null, response);
+    });
+  };
+
+  Campaign.remoteMethod(
     "saveCampaignElements",
     {
       description: "Save the campaign tempalate and associates with list",
@@ -150,6 +179,7 @@ module.exports = function(Campaign) {
      * @param  {[reqParams]} reqParams
      * @param  {[function]} getCampaignCB
      * @return {[campaign, reqParams]}
+     * @author Ramanavel Selvaraju
      */
     const getCampaign = (ctx, id, reqParams, getCampaignCB) => {
       Campaign.find({
@@ -160,8 +190,8 @@ module.exports = function(Campaign) {
            {
                campginId: id,
                reqParams:reqParams,
-               error: parallelErr,
-               stack: parallelErr ? parallelErr.stack : ""
+               error: campaignErr,
+               stack: campaignErr ? campaignErr.stack : ""
            });
            return getCampaignCB(campaignErr);
          }
