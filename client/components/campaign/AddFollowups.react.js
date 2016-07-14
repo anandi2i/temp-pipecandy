@@ -97,9 +97,9 @@ class AddFollowups extends React.Component {
   }
 
   render() {
-    let followupId = this.props.followupId;
+    const {followupId, id, deleteFollowUp, content, peopleList} = this.props;
     let indexInc = 1;
-    let followUpCount = this.props.id + indexInc;
+    let followUpCount = id + indexInc;
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
       : "mdi mdi-chevron-up in-active";
@@ -119,7 +119,7 @@ class AddFollowups extends React.Component {
             <i className={className}>
             </i>
             <i className="mdi mdi-delete-forever"
-              onClick={this.props.deleteFollowUp}>
+              onClick={() => deleteFollowUp(id)}>
             </i>
           </div>
         </div>
@@ -145,7 +145,7 @@ class AddFollowups extends React.Component {
             <div className="row email-content m-lr-0">
               <div className="tiny-toolbar" id={"mytoolbar" + followupId} />
               <div id={"emailContent" + followupId} className={checkErrorCount}
-                dangerouslySetInnerHTML={{__html: this.props.content}} />
+                dangerouslySetInnerHTML={{__html: content}} />
             </div>
             {/* Preview button */}
             {
@@ -163,7 +163,7 @@ class AddFollowups extends React.Component {
             <CampaignIssuesPreviewPopup
               emailSubject=""
               emailContent={this.state.emailContent}
-              peopleList={this.props.peopleList}
+              peopleList={peopleList}
               personIssues={this.state.personIssues}
               closeCallback={this.closeCallback}
               ref="issues"

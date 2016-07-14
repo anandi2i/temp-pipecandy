@@ -17,9 +17,9 @@ class CampaignInfoMsg extends React.Component {
         <div className="content">
           {displayPage === "report"
             ?
-              <span>Your campaigns are scheduled. Let's wait till the action begins!</span>
+              <span>{"Your campaigns are scheduled. Let's wait till the action begins!"}</span>
             :
-              <span>There are no campaigns yet.<Link to={`/campaign/create`}> Want to create one?</Link></span>
+              <span>There are no campaigns yet.<Link to={"/campaign/create"}> Want to create one?</Link></span>
           }
         </div>
       </div>

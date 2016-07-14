@@ -1,7 +1,7 @@
 var loopback = require("loopback");
 var boot = require("loopback-boot");
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
+var cookieParser = require("cookie-parser");
+var session = require("express-session");
 var RedisStore = require("connect-redis")(session);
 var path = require("path");
 
@@ -138,7 +138,7 @@ for (var s in config) {
 
 // Check if the wildcard url does not start with /api/
 // If it is true, then redirect it to front-end routes
-app.all('*', function (req, res, next) {
+app.all("*", function (req, res, next) {
   const firstPosition = 0;
   if(req.originalUrl.search("/api/") !== firstPosition) {
     res.sendFile(path.resolve("client", "index.html"));

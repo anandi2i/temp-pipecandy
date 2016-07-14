@@ -33,7 +33,7 @@ module.exports = function(List) {
         List.app.models.person.getPoepleAndGenerateEmail(campaign, list,
           listIds, followup, (getPoepleByListForEmailErr) => {
             if(getPoepleByListForEmailErr) {
-              if(getPoepleByListForEmailErr.name === `StatusMismatchError`) {
+              if(getPoepleByListForEmailErr.name === "StatusMismatchError") {
                   return getListAndSaveEmailCB(getPoepleByListForEmailErr);
               }
             }

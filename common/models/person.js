@@ -35,7 +35,7 @@ module.exports = function(Person) {
         validatePersonToGenerate(campaign, person,
           followup, (checkEmailExistsErr, isEligible) => {
             if (checkEmailExistsErr) {
-              if(checkEmailExistsErr.name === `StatusMismatchError`) {
+              if(checkEmailExistsErr.name === "StatusMismatchError") {
                 return getPoepleAndGenerateEmailCB(checkEmailExistsErr);
               }
               return peopleEachCB(checkEmailExistsErr);

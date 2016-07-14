@@ -17,10 +17,11 @@ class TabsNav extends React.Component {
       }
     ];
 
-    let li = _tabs.map((item, i) => {
+    let li = _tabs.map((item, index) => {
       return (
-        <li key={i}>
-          <a onClick={this.handleClick.bind(this, i)} className={this.props.active === i ? "active" : {}}>
+        <li key={index}>
+          <a onClick={() => this.handleClick(index)}
+            className={this.props.active === index ? "active" : ""}>
             {item.name}
           </a>
         </li>

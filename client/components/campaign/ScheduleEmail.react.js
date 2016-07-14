@@ -234,25 +234,11 @@ class ScheduleEmail extends React.Component {
   }
 
   //http://stackoverflow.com/questions/29527385/react-removing-element-from-array-in-component-state
-  deleteFollowUp(key, event) {
+  deleteFollowUp = (key) => {
     let howMany = 1;
     this.setState({
       followups: update(this.state.followups, {$splice: [[key, howMany]]})
     });
-  }
-
-  //TODO: has to be removed in future
-  updateFollowUpContent() {
-    let followups = this.state.followups;
-    followups.forEach(function(followup) {
-      if($("#emailContent" + followup.id).length) {
-        followup.content = tinyMCE.get("emailContent" + followup.id)
-          .getContent();
-      }
-    });
-    this.setState((state) => ({
-      followups: followups
-    }));
   }
 
   onChange(e, field) {
@@ -383,7 +369,7 @@ class ScheduleEmail extends React.Component {
         template.content = followup.state.emailContent;
         template.usedTagIds = CampaignStore.usedTagIds(
           template.content).usedTagIds;
-        template.userId = getCookie(`userId`);
+        template.userId = getCookie("userId");
         followups.push({
           followUp: this.followupCampaignDetails(followup),
           campaignTemplates: template
@@ -413,7 +399,7 @@ class ScheduleEmail extends React.Component {
       daysAfter: el.find(`#dayPicker${followup.props.followupId} input`).val()
         .split("")[0],
       stepNo: followup.props.followUpNumber,
-      time: el.find(`.timepicker`).val()
+      time: el.find(".timepicker").val()
     };
     return followupCampaignDetails;
   }
@@ -434,8 +420,8 @@ class ScheduleEmail extends React.Component {
     address: address
   };
   if(displayScheduleCampaign) {
-    campaignDetails.scheduledDate = element.find(`.datepicker`).val();
-    campaignDetails.scheduledTime = element.find(`.timepicker`).val();
+    campaignDetails.scheduledDate = element.find(".datepicker").val();
+    campaignDetails.scheduledTime = element.find(".timepicker").val();
   }
   return campaignDetails;
 }
@@ -723,7 +709,7 @@ class ScheduleEmail extends React.Component {
               <AddFollowups followupId={followUp.id}
                 content={followUp.content}
                 getAllTags={this.state.getAllTags}
-                deleteFollowUp={this.deleteFollowUp.bind(this, key)}
+                deleteFollowUp={this.deleteFollowUp}
                 peopleList={this.state.getAllPeopleList}
                 id={key} key={followUp.id}
                 followUpNumber={++followUpNumber}

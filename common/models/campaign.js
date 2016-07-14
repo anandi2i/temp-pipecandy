@@ -607,7 +607,7 @@ module.exports = function(Campaign) {
      appendLinkClickTrackerCB) => {
     let hrefTags = email.content.match(/href=("|')(.*?)("|')/g);
     async.eachSeries(hrefTags, (href, hrefTagsCB) => {
-      href = lodash.replace(href, /("|')/g, `"`);
+      href = lodash.replace(href, /(')/g, "\"");
       let linkurl = href.split(/"/)[1];
       Campaign.app.models.emailLink.getOrSave(campaign, linkurl, followup,
         (getOrSaveErr, link) => {

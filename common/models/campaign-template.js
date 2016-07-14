@@ -362,7 +362,7 @@ module.exports = function(CampaignTemplate) {
       let spanTags = template.match(/<span class=("|')(tag)(.*?)(<\/span>)/g);
       async.eachSeries(spanTags, (spanTag, spanTagsCB) => {
         let spanDataId = spanTag.match(/data-id=("|')(\d*)("|')/g);
-        spanDataId = lodash.replace(spanDataId, /("|')/g, `"`);
+        spanDataId = lodash.replace(spanDataId, /(')/g, "\"");
         let fieldId = spanDataId.split(/"/)[1];
         let fieldValue = lodash.find(fieldValues,
                   lodash.matchesProperty("fieldId", lodash.toInteger(fieldId)));

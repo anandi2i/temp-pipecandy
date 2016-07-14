@@ -23,7 +23,7 @@
   },
   "rules": {
     "semi": [2, "always"],
-    "quotes": [1, "double", "avoid-escape"],
+    "quotes": [2, "double", "avoid-escape"],
     "object-curly-spacing": [2, "never"],
     "no-whitespace-before-property": 2,
     "jsx-quotes": [2, "prefer-double"],
@@ -55,7 +55,7 @@
     "eqeqeq": 2,
     "dot-notation": 2,
     "dot-location": [2, "property"],
-    "consistent-return": 1,
+    "consistent-return": 0,
     "block-scoped-var": 2,
     "no-catch-shadow": 2,
     "no-delete-var": 2,
@@ -70,12 +70,31 @@
       "ignoreComments": true,
       "ignorePattern": "  <"
     }],
+    "react/jsx-handler-names": [0, {
+      "eventHandlerPrefix": "handle",
+      "eventHandlerPropPrefix": "on"
+    }],
+    "react/jsx-no-bind": [2, {
+      "ignoreRefs": true,
+      "allowArrowFunctions": true,
+      "allowBind": false
+    }],
     "react/prop-types": 0,
     "react/jsx-uses-react": 2,
+    "react/jsx-key": 2,
+    "react/jsx-no-duplicate-props": 2,
     "react/jsx-no-undef": 2,
+    "react/jsx-pascal-case": 2,
     "react/self-closing-comp": 2,
     "react/wrap-multilines": 2,
     "react/jsx-equals-spacing": [2, "never"],
-    "react/no-danger": 1
+    "react/no-danger": 0,
+    "react/no-deprecated": [2, {
+      "react": "0.14.0"
+    }],
+    "react/no-did-mount-set-state": [2, "allow-in-func"],
+    "react/no-did-update-set-state": [2, "allow-in-func"],
+    "react/no-unknown-property": 2,
+    "react/prefer-es6-class": [2, "always"]
   }
 }

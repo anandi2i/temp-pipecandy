@@ -516,7 +516,7 @@ module.exports = function(File) {
                         "personId":person.id,
                         "value": newPerson[additionalField.name]
                       };
-                      if(additionalFieldValueObj.value!==''){
+                      if(additionalFieldValueObj.value){
                         File.app.models.additionalFieldValue
                         .create(additionalFieldValueObj,
                           (fieldValueCreateErr, createdFields) => {
@@ -627,7 +627,7 @@ module.exports = function(File) {
           "personId":createdPerson.id,
           "value": person[additionalField.name]
         };
-        if(additionalFieldValueObj.value!==''){
+        if(additionalFieldValueObj.value){
           File.app.models.additionalFieldValue.create(additionalFieldValueObj,
             (fieldValueCreateErr, createdFields) => {
               if(fieldValueCreateErr){

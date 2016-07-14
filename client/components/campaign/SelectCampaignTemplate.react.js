@@ -158,8 +158,7 @@ class SelectCampaignTemplate extends React.Component {
    * @param {string} templateName Name of the selected template
    */
   selectTemplate(templateName) {
-    displaySuccess(`${templateName}
-      ${SuccessMessages.successSelectTemplate}`);
+    displaySuccess(`${templateName} ${SuccessMessages.successSelectTemplate}`);
   }
 
   /**
@@ -177,7 +176,7 @@ class SelectCampaignTemplate extends React.Component {
               <div className="col s12 m6 l6" key={followup.value}>
                 <CampaignInfo />
                 <div className="card template-preview">
-                  <div onClick={this.selectTemplate.bind(this, this.state.template.name)}>
+                  <div onClick={() => this.selectTemplate(this.state.template.name)}>
                     <div style={followup.divStyle} className="campaign-template">
                       <div className="card-title">{this.state.template.name}</div>
                       <div className="card-content">

@@ -38,7 +38,7 @@ class SelectPreBuildTemplate extends React.Component {
     displayError(CampaignStore.getError());
   }
 
-  selectTemplate(key, event) {
+  selectTemplate(key) {
     this.setState((state) => ({
       activeTemplate: key,
       activeTemplateContent: state.templates[key].content
@@ -65,7 +65,7 @@ class SelectPreBuildTemplate extends React.Component {
             return (
               <div className="col s12 m6 l4" key={key}>
                 <div className={this.isActive(key)}
-                  onClick={this.selectTemplate.bind(this, key)}>
+                  onClick={() => this.selectTemplate(key)}>
                   <div className="card-title">{template.name}</div>
                   <div className="card-content">
                     <div dangerouslySetInnerHTML={{__html: template.content}} />
