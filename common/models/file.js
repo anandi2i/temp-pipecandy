@@ -2,12 +2,11 @@ import async from "async";
 import fs from "fs";
 import path from "path";
 import csv from "fast-csv";
-import xlsx from "node-xlsx";
+// import xlsx from "node-xlsx";
 import _ from "underscore";
 import logger from "../../server/log";
 import lodash from "lodash";
 var CONTAINERS_URL = "/api/containers/";
-const emptycount = 0;
 
 module.exports = function(File) {
 
@@ -46,8 +45,8 @@ module.exports = function(File) {
    */
   File.downloadCSV = (listId, res, downloadCSVCB) => {
     async.waterfall([
-      async.apply(getAllDefaultFields, listId),
-      getAllAdditionalFieldsForList,
+      async.apply(File.app.models.additionalField.getAllDefaultFields, listId),
+      File.app.models.additionalField.getAllAdditionalFieldsForList,
       generateCSV
     ], (asyncErr, csv) => {
       if(asyncErr){
@@ -75,9 +74,16 @@ module.exports = function(File) {
   };
 
 
+  /**
+   * API to upload CSV file and save the data in the table
+   * @param  {[ctx]} ctx
+   * @param  {[options]} options
+   * @param  {[listid]} listid
+   * @param  {[function]} uploadCB
+   * @return {[type]}
+   * @author Aswin Raj A
+   */
   File.upload = function(ctx, options, listid, uploadCB) {
-    let invalidData = [];
-
     if (!options) options = {};
     ctx.req.params.container = "listUploads";
     options = {
@@ -87,836 +93,514 @@ module.exports = function(File) {
         return newFilename;
       }
     };
-    let filePath;
-
-    function saveFile(callback) {
-      File.app.models.container.upload(ctx.req, ctx.result, options,
-        function(err, fileObj) {
-        if (err) {
-          logger.error("Error in uploading file for the list:", listid, " ",
-            err.message);
-          return callback(err);
-        }
-        let fileInfo = fileObj.files.file[0];
-        filePath = path.join("server/storage", fileInfo.container,
-          fileInfo.name);
-        let fileExt = _.last(fileInfo.name.split("."));
-        let acceptableFileTypes = ["csv", "xls", "xlsx"];
-        if (_.contains(acceptableFileTypes, fileExt)) {
-          File.create({
-            name: fileInfo.name,
-            type: fileInfo.type,
-            container: fileInfo.container,
-            url: path.join(CONTAINERS_URL, fileInfo.container, "/download/",
-              fileInfo.name)
-          }, function(err, obj) {
-            if (err) {
-              logger.error("Error in saving file details for list:", listid,
-                " ", err.message);
-              callback(err);
-            }
-            callback(null, fileInfo.name);
-          });
-        } else {
-          fs.unlinkSync(filePath);
-          let error = new Error();
-          error.message = "File should be in csv/excel format";
-          error.name = "InvalidFile";
-          logger.error("Error in removing the invalid file", error.message);
-          callback(error);
-        }
-      });
-    }
-
-
-    /**
-     * Get all the additionalFields for the current list
-     * @param  {[fileName]} fileName
-     * @param  {[function]} getAllFieldsForListCB
-     * @return {[fileName, fields]}
-     * @author Aswin Raj A
-     */
-    let getAllFieldsForList = (fileName, getAllFieldsForListCB) => {
-      async.waterfall([
-        async.apply(getAllDefaultFields, listid),
-        getAllAdditionalFieldsForList
-      ], (asyncErr, fields) => {
-        if(asyncErr){
-          logger.error("Error while geting all fields for list", {
-            error: asyncErr,
-            stack: asyncErr ? asyncErr.stack : ""
-          });
-          return getAllFieldsForListCB(asyncErr);
-        }
-        return getAllFieldsForListCB(null, fileName, fields);
-      });
-    };
-
-    function parseUploadedFile(fileName, fields, callback) {
-      let fileExt = _.last(fileName.split("."));
-      fileExt === "csv" ? parseCSV(fields, callback) : parseExcel(fields,
-        callback);
-    }
-
-    function parseExcel(fields, callback) {
-      let people = [];
-      let companies = [];
-      let header = ["firstName", "middleName", "lastName", "email", "field1",
-        "value1", "field2", "value2", "field3", "value3", "field4", "value4",
-        "field5", "value5"];
-      let err = false;
-      let obj = xlsx.parse(filePath);
-      _.each(obj, function(object) {
-        let rowData = [];
-        if(object.data) {
-          if(_.isEqual(object.data[0], header)) {
-            rowData = _.rest(object.data);
-          } else {
-            let error = new Error();
-            error.message = "Please upload file in valid format";
-            error.name = "FileUploadInvalidHeader";
-            logger.error("File is not in valid format", error.message);
-            err = true;
-            callback(error);
-          }
-        }
-        _.each(rowData, function(row) {
-          if(!row[0]) {
-            let error = new Error();
-            error.message = "One or more rows doesn't have first name";
-            error.name = "FileUploadFnameEmpty";
-            logger.error("First name is empty", error.message);
-            err = true;
-            callback(error);
-          }
-          let domain = row[3].split("@")[1];
-          if(!domain) {
-            let error = new Error();
-            error.message = "One or more rows doesn't have valid email Id";
-            error.name = "FileUploadInvalidEmail";
-            logger.error("Not a valid email", error.message);
-            err = true;
-            callback(error);
-          } else {
-            companies.push(domain);
-          }
-          people.push(_.object(header, row));
-        });
-      });
-      if(!err) {
-        callback(null, companies, people);
-      }
-    }
-
-
-    /**
-     * Parse the csv file and validate it
-     *  - Check if the header fields are same comparing it with the additional
-     *  fields for the list and the csv coloumn headers
-     *  - Generate an array of companies
-     *  - Generate an array of people where all required fields are filled
-     *  - Generate an array of invalid data where the required fields would have
-     *  been missing
-     *  - And Generate the responseMessage
-     * @param  {[fields]}   fields
-     * @param  {function} callback
-     * @return {[companies, people, invalidData, responseMessage]}
-     * @author: modified by Aswin Raj A
-     */
-    function parseCSV(fields, callback){
-      let people = [];
-      let companies = [];
-      let responseMessage = "";
-      let domain;
-      let stream = fs.createReadStream(filePath);
-      let header = fields;
-      let headerCheck = true;
-      let err = false;
-      csv.fromStream(stream, {headers: true}).on("data", (data) => {
-        const streamHeader = _.keys(data);
-
-        if(headerCheck) {
-          headerCheck = false;
-          if(!_.isEqual(streamHeader, header)) {
-            let error = new Error();
-            error.message = "Please upload file in valid format";
-            error.name = "FileUploadInvalidHeader";
-            logger.error("File is not in valid format", error.message);
-            err = true;
-            return callback(error);
-          }
-        }
-
-        if(!data["First Name"] || !data["Last Name"] || !data.Email){
-          responseMessage = "One or more rows have unfilled or invalid data!";
-          invalidData.push(data);
-        } else{
-          domain = data.Email.split("@")[1];
-          if(!domain) {
-            responseMessage = "One or more rows have unfilled or invalid data!";
-            invalidData.push(data);
-          } else{
-            companies.push(domain);
-            people.push(data);
-          }
-        }
-
-      }).on("end", () => {
-        if(!err) {
-          return callback(null, companies, people, invalidData,
-             responseMessage);
-        }
-      });
-    }
-
-    function createCompanies(companies, newPeople, invalidData, responseMessage,
-      createCompaniesCB) {
-      companies = _.uniq(companies);
-      async.eachSeries(companies, (company, companyCB) => {
-        File.app.models.company.findOrCreate({
-          where: {
-            name: company
-          }
-        }, {
-          name:company
-        },
-        (companyCreateErr, company) => {
-          if(companyCreateErr){
-            logger.error("Error while finding or creating company",
-             {error: companyCreateErr,
-               stack: companyCreateErr ? companyCreateErr.stack : ""});
-               return createCompaniesCB(companyCreateErr);
-          }
-          companyCB(null);
-
-        });
-      }, (asyncErr) => {
-        if(asyncErr){
-          logger.error("Error while creating companie",
-           {error: asyncErr, stack: asyncErr ? asyncErr.stack : ""});
-          return createCompaniesCB(asyncErr);
-        }
-        return createCompaniesCB(null, newPeople, invalidData, responseMessage);
-      });
-    }
-
-    /**
-     * Populate the validated person data and corresponding field values for
-     * the person and
-     * @param  {[people]} people
-     * @param  {[invalidData]} invalidData
-     * @param  {[responseMessage]} responseMessage
-     * @param  {[function]} populatePeopleAndFieldsCB
-     * @return {[uploadResponse]} Has invalid data if any and the responseMessage
-     * @author Aswin Raj A
-     */
-    let populatePeopleAndField = (newPeople, invalidData, responseMessage,
-      populatePeopleAndFieldsCB) => {
-      File.app.models.List.findById(listid, (err, list) => {
-        if(err) {
-          logger.error("Error in finding list:", listid, " ", err.message);
-          return populatePeopleAndFieldsCB(err);
-        }
-        async.waterfall([
-          async.apply(getAdditionalfield, list, newPeople),
-          populateFieldsForPerson
-        ], (asyncErr, result) => {
-          if(asyncErr){
-            logger.error("Error while populating people and field valued",
-             {error: asyncErr, stack: asyncErr ? asyncErr.stack : ""});
-          }
-          let uploadResponse = {
-            "invalidData": invalidData,
-            "responseMessage":responseMessage
-          };
-          return populatePeopleAndFieldsCB(null, uploadResponse);
-        });
-      });
-    };
-
-    /**
-     * Check if there exist any email in the table with the email in the newly
-     * uploaded file,
-     * if the current email exist in the table already, then return that person
-     * @param  {[personEmail]} personEmail
-     * @param  {[function]} emailExistCheckCB
-     * @return {[people]}
-     * @author Aswin Raj A
-     */
-    let emailExistCheck = (personEmail, listId, emailExistCheckCB) =>{
-      let response = {};
-      File.app.models.person.find({
-        where : {
-          email : personEmail,
-        }
-      }, (emailFindErr, people) => {
-        if(emailFindErr){
-          logger.error("Error while finding email",
-           {error: emailFindErr, stack: emailFindErr ? err.stack : ""});
-          return emailExistCheckCB(emailFindErr);
-        }
-        if(lodash.isEmpty(people)){
-          response = {
-            msg : "doesnotExist",
-            people : people
-          };
-          return emailExistCheckCB(null, response);
-        }
-        people[0].lists((listfindErr, lists) => {
-          if(listfindErr){
-            logger.error("Error while finding list for person",
-             {error: listfindErr, stack: listfindErr ? err.stack : ""});
-            return emailExistCheckCB(listfindErr);
-          }
-          async.eachSeries(lists, (list, listCB) => {
-            if(list.id === listId){
-              response = {
-                msg : "exist",
-                people : people
-              };
-              emailExistCheckCB(null, response);
-            } else {
-              response = {
-                msg : "existInDiffList",
-                people : people
-              };
-              emailExistCheckCB(null, response);
-            }
-          });
-        });
-      });
-    };
-
-    /**
-     * To get all the additionalFields for the list
-     * @param  {[list]} list
-     * @param  {[people]} people
-     * @param  {[function]} getAdditionalfieldCB
-     * @return {[additionalFields, list, people]}
-     * @author Aswin Raj A
-     */
-    let getAdditionalfield = (list, newPeople, getAdditionalfieldCB) => {
-        list.fields((fieldErr, fields) => {
-          let additionalFields = fields.map((field) => {
-            const fieldObj = {
-              "name" : field.name,
-              "id" : field.id
-            };
-            return fieldObj;
-          });
-          return getAdditionalfieldCB(null, additionalFields, list, newPeople);
-        });
-    };
-
-    /**
-     * Populate person from the csv and the corresponding additional field values
-     * - Create an entry for if there is no duplicate entry in the table for the person
-     * - Update the person if the email already exist with a different name
-     * @param  {[additionalFields]} additionalFields
-     * @param  {[list]} list
-     * @param  {[people]} people
-     * @param  {[function]} populateFieldsForPersonCB
-     * @author Aswin Raj A
-     */
-    let populateFieldsForPerson = (additionalFields, list, newPeople,
-      populateFieldsForPersonCB) => {
-      async.eachSeries(newPeople, (newPerson, newPersonCB) => {
-      emailExistCheck(newPerson.Email, list.id,
-        (emailExistCheckErr, response) => {
-        if(emailExistCheckErr){
-          logger.error("Error while checking if emailId already exist",
-          {error: emailExistCheckErr,
-          stack: emailExistCheckErr ? err.stack : ""});
-          return populateFieldsForPersonCB(emailExistCheckErr);
-        }
-        if(response.msg === "doesnotExist"){
-          let newPersonObject = {
-            firstName: newPerson["First Name"],
-            middleName: newPerson["Middle Name"],
-            lastName: newPerson["Last Name"],
-            salutation: newPerson.Salutation,
-            email: newPerson.Email
-          };
-          createPersonAndAdditionalFieldValue(newPersonObject, additionalFields,
-             list, newPerson,
-            (creatErr, response) => {
-            if(creatErr){
-              logger.error(creatErr, {error: creatErr,
-                stack: creatErr ? creatErr.stack : ""});
-              return populateFieldsForPersonCB(creatErr);
-              }
-            newPersonCB(null);
-          });
-        } else if(response.msg === "exist"){
-          updatePersonAndAdditionalFieldValues(response.people[0],
-            additionalFields, list, newPerson, (updateErr, response) => {
-          if(updateErr){
-            logger.error(updateErr,
-            {error: updateErr,
-            stack: updateErr ? updateErr.stack : ""});
-            return populateFieldsForPersonCB(updateErr);
-          }
-          newPersonCB(null);
-          });
-        } else if(response.msg === "existInDiffList"){
-          let personObject = {
-            firstName: newPerson["First Name"],
-            middleName: newPerson["Middle Name"],
-            lastName: newPerson["Last Name"],
-            salutation: newPerson.Salutation,
-            email: newPerson.Email
-          };
-          list.people.add(response.people[0].id,
-          (peopleCreateErr, people) => {
-            if(peopleCreateErr){
-              logger.error("Error while associating person",
-              {error: peopleCreateErr,
-                stack: peopleCreateErr ? peopleCreateErr.stack : ""});
-              return populateFieldsForPersonCB(peopleCreateErr);
-            }
-            let auditPersonObj = {};
-            if(response.people[0].firstName !== newPerson["First Name"]){
-              auditPersonObj.firstName = response.people[0].firstName;
-            }
-            if(response.people[0].middleName !== newPerson["Middle Name"]){
-              auditPersonObj.middleName = response.people[0].middleName;
-            }
-            if(response.people[0].lastName !== newPerson["Last Name"]){
-              auditPersonObj.lastName = response.people[0].lastName;
-            }
-            if(response.people[0].salutation !== newPerson.Salutation){
-              auditPersonObj.salutation = response.people[0].salutation;
-            }
-            let objLength = Object.getOwnPropertyNames(auditPersonObj).length;
-            if(objLength!== emptycount){
-              auditPersonObj.personId = response.people[0].id;
-              File.app.models.personAudit.create(auditPersonObj,
-                (auditCreateErr, createdPersonAudit) => {
-                if(auditCreateErr){
-                  logger.error("auditCreateErr",
-                  {error: auditCreateErr,
-                  stack: auditCreateErr ? auditCreateErr.stack : ""});
-                  return populateFieldsForPersonCB(auditCreateErr);
-                }
-                File.app.models.person.findById(response.people[0].id,
-                  (findErr, person) => {
-                  person.updateAttributes(personObject,
-                    (updateErr, updatedperson) => {
-                    if(updateErr){
-                      logger.error("person update err",
-                      {error: updateErr,
-                      stack: updateErr ? updateErr.stack : ""});
-                      return populateFieldsForPersonCB(updateErr);
-                    }
-                    async.each(additionalFields, (additionalField,
-                      additionalFieldsCB) => {
-                      let additionalFieldValueObj = {
-                        "fieldId":additionalField.id,
-                        "listId": list.id,
-                        "personId":person.id,
-                        "value": newPerson[additionalField.name]
-                      };
-                      if(additionalFieldValueObj.value){
-                        File.app.models.additionalFieldValue
-                        .create(additionalFieldValueObj,
-                          (fieldValueCreateErr, createdFields) => {
-                        if(fieldValueCreateErr){
-                          logger.error("Error in creating fields for\
-                           the person", createdPerson.id, " ",
-                           fieldValueCreateErr.message);
-                        return populateFieldsForPersonCB(fieldValueCreateErr);
-                        }
-                        additionalFieldsCB(null);
-                        });
-                      } else{
-                        additionalFieldsCB(null);
-                      }
-                    }, (err) => {
-                      if(err){
-                        return populateFieldsForPersonCB(err);
-                      }
-                      logger.info("File uploaded successfully for the list:",
-                      listid);
-                      return newPersonCB(null);
-                    });
-                  });
-                });
-              });
-            } else{
-              return newPersonCB(null);
-            }
-          });
-        }
-      });
-      }, (err) => {
-      if(err){
-      return populateFieldsForPersonCB(err);
-      }
-      return populateFieldsForPersonCB(null);
-      });
-    };
-
-
-    /**
-     * Create person and additionalFields values
-     * @param  {[personObject]} personObject
-     * @param  {[additionalFields]} additionalFields
-     * @param  {[list]} list
-     * @param  {[person]} person
-     * @param  {[function]} createPersonAndAdditionalFieldValueCB
-     * @author Aswin Raj A
-     */
-    let createPersonAndAdditionalFieldValue = (personObject,
-      additionalFields, list, person,
-      createPersonAndAdditionalFieldValueCB) => {
-        async.waterfall([
-            async.apply(createPerson, personObject,
-              additionalFields, list, person),
-            createAdditionalFields
-        ], function (asyncErr, result) {
-          if(asyncErr){
-            logger.error("Error while creating person and field\
-             values", {error: asyncErr,
-               stack: asyncErr ? asyncErr.stack : ""});
-             return createPersonAndAdditionalFieldValueCB(asyncErr);
-          }
-            return createPersonAndAdditionalFieldValueCB(null);
-        });
-    };
-
-
-    /**
-     * Create an entry in the person table
-     * @param  {[personObject]} personObject
-     * @param  {[additionalFields]} additionalFields
-     * @param  {[list]} list
-     * @param  {[person]} person
-     * @param  {[function]} createPersonCB
-     * @return {[createdPerson, additionalFields, list, person]}
-     * @author Aswin Raj A
-     */
-    let createPerson = (personObject, additionalFields, list, person,
-      createPersonCB) => {
-      list.people.create(personObject, (err, createdPerson) => {
-        if(err) {
-          logger.error("Error in creating people for the list:",
-          listid, " ", err.message);
-          return createPersonCB(err);
-        }
-        return createPersonCB(null, createdPerson, additionalFields,
-           list, person);
-      });
-    };
-
-
-    /**
-     * Create additionalFields value for the current created person
-     * @param  {[createdPerson]} createdPerson
-     * @param  {[additionalFields]} additionalFields
-     * @param  {[list]} list
-     * @param  {[person]} person
-     * @param  {[type]} createAdditionalFieldsCB
-     * @author Aswin Raj A
-     */
-    let createAdditionalFields = (createdPerson, additionalFields,
-      list, person, createAdditionalFieldsCB) => {
-      async.each(additionalFields, (additionalField, additionalFieldsCB) => {
-        let additionalFieldValueObj = {
-          "fieldId":additionalField.id,
-          "listId": list.id,
-          "personId":createdPerson.id,
-          "value": person[additionalField.name]
-        };
-        if(additionalFieldValueObj.value){
-          File.app.models.additionalFieldValue.create(additionalFieldValueObj,
-            (fieldValueCreateErr, createdFields) => {
-              if(fieldValueCreateErr){
-                logger.error("Error in creating fields for the person",
-                createdPerson.id, " ", fieldValueCreateErr.message);
-                return createAdditionalFieldsCB(fieldValueCreateErr);
-              }
-              additionalFieldsCB(null);
-          });
-        }else{
-          additionalFieldsCB(null);
-        }
-      }, (err) => {
-        if(err){
-          return createAdditionalFieldsCB(err);
-        }
-        logger.info("File uploaded successfully for the list:",
-        listid);
-        return createAdditionalFieldsCB(null);
-      });
-    };
-
-
-    /**
-     * When the list has email which already exist in the person table, we need
-     * to update the personaudit, person and additionalFieldsvalue table
-     * @param  {[oldPerson]} oldPerson
-     * @param  {[additionalFields]} additionalFields
-     * @param  {[list]} list
-     * @param  {[person]} person
-     * @param  {[function]} updatePersonAndAdditionalFieldValuesCB
-     * @author Aswin Raj A
-     */
-    let updatePersonAndAdditionalFieldValues = (oldPerson, additionalFields,
-      list, newperson,
-      updatePersonAndAdditionalFieldValuesCB) => {
-        async.waterfall([
-          async.apply(createPersonAudit, oldPerson, additionalFields, list,
-            newperson),
-          updatePerson,
-          updateAdditionalFieldValues
-        ], (asyncErr, result) => {
-          if(asyncErr){
-            logger.error("Error while updating person and person\
-            audit and additionalFields", {error: asyncErr,
-               stack: asyncErr ? asyncErr.stack : ""});
-             return updatePersonAndAdditionalFieldValuesCB(asyncErr);
-           }
-           return updatePersonAndAdditionalFieldValuesCB(null);
-        });
-    };
-
-    /**
-     * To create person audit for the person
-     * - While uploading csv file if the email already exist with different name
-     *   we need to create an audit for the person
-     * @param  {[oldPerson]} oldPerson
-     * @param  {[additionalFields]} additionalFields
-     * @param  {[list]} list
-     * @param  {[newPerson]} newPerson
-     * @param  {[function]} createPersonAuditCB
-     * @return {[newPerson, oldPersonId, list, additionalFields]}
-     * @author Aswin Raj A
-     */
-    let createPersonAudit = (oldPerson, additionalFields, list, newPerson,
-      createPersonAuditCB) => {
-      let auditPersonObj = {};
-      if(oldPerson.firstName !== newPerson["First Name"]){
-        auditPersonObj.firstName = oldPerson.firstName;
-      }
-      if(oldPerson.middleName !== newPerson["Middle Name"]){
-        auditPersonObj.middleName = oldPerson.middleName;
-      }
-      if(oldPerson.lastName !== newPerson["Last Name"]){
-        auditPersonObj.lastName = oldPerson.lastName;
-      }
-      if(oldPerson.salutation !== newPerson.Salutation){
-        auditPersonObj.salutation = oldPerson.salutation;
-      }
-      let objectLenth = Object.getOwnPropertyNames(auditPersonObj).length;
-      if(objectLenth!== emptycount){
-        auditPersonObj.personId = oldPerson.id;
-        File.app.models.personAudit.create(auditPersonObj,
-          (auditCreateErr, createdPersonAudit) => {
-          if(auditCreateErr){
-            logger.error("auditCreateErr",
-            {error: auditCreateErr,
-              stack: auditCreateErr ? auditCreateErr.stack : ""});
-            return createPersonAuditCB(auditCreateErr);
-          }
-          return createPersonAuditCB(null, newPerson, oldPerson.id, list,
-            additionalFields);
-        });
-      } else{
-      return createPersonAuditCB(null, newPerson, oldPerson.id, list,
-        additionalFields);
-      }
-    };
-
-    /**
-     * To update the person table after creating person audit for that person
-     * - Insert the old person data in the personaudit table and update the new
-     *   data in the person table
-     * @param  {[newPerson]} newPerson
-     * @param  {[personId]} personId
-     * @param  {[list]} list
-     * @param  {[additionalFields]} additionalFields
-     * @param  {[function]} updatePersonCB
-     * @return {[newPerson, personId, list, additionalFields]}
-     * @author Aswin Raj A
-     */
-    let updatePerson = (newPerson, personId, list, additionalFields,
-      updatePersonCB) => {
-      let newPersonObj = {
-        firstName: newPerson["First Name"],
-        middleName: newPerson["Middle Name"],
-        lastName: newPerson["Last Name"],
-        salutation: newPerson.Salutation,
-        email: newPerson.Email
-      };
-      File.app.models.person.findById(personId,
-        (personFindErr, person) => {
-        if(personFindErr){
-          logger.error("Error while finding person",
-           {error: personFindErr,
-             stack: personFindErr ? personFindErr.stack : ""});
-          return updatePersonCB(personFindErr);
-        }
-        person.updateAttributes(newPersonObj,
-          (personUpdateErr, updatedPerson) => {
-          if(personUpdateErr){
-            logger.error("personUpdateErr",
-             {error: personUpdateErr,
-               stack: personUpdateErr ? personUpdateErr.stack : ""});
-            return updatePersonCB(personUpdateErr);
-          }
-          return updatePersonCB(null, newPerson, personId, list,
-            additionalFields);
-        });
-      });
-    };
-
-
-    /**
-     * Update the additionalFields values after updating the person audit and
-     * the person table
-     * @param  {[newPerson]} newPerson
-     * @param  {[personId]} personId
-     * @param  {[list]} list
-     * @param  {[additionalFields]} additionalFields
-     * @param  {[function]} updateAdditionalFieldValuesCB
-     * @author Aswin Raj A
-     */
-    let updateAdditionalFieldValues = (newPerson, personId, list,
-      additionalFields, updateAdditionalFieldValuesCB) => {
-      async.eachSeries(additionalFields, (additionalField,
-        additionalFieldsCB) => {
-        File.app.models.additionalFieldValue.find({
-          where: {
-            and: [
-              {personId : personId},
-              {listId: list.id},
-              {fieldId: additionalField.id}
-            ]
-          }
-        }, (fieldFindErr, fieldData) => {
-          if(fieldFindErr){
-            logger.error("Error while finding field", {error: fieldFindErr,
-              stack: fieldFindErr ? fieldFindErr.stack : ""});
-            return updateAdditionalFieldValuesCB(fieldFindErr);
-          }
-          if(lodash.isEmpty(fieldData)){
-            let addFieldValueObj = {
-              personId : personId,
-              listId: list.id,
-              fieldId: additionalField.id,
-              value: newPerson[additionalField.name]
-            };
-            File.app.models.additionalFieldValue.create(addFieldValueObj,
-              (fieldCreateErr, createdField) => {
-                if(fieldCreateErr){
-                  logger.error("Error while creating fields",
-                   {error: fieldCreateErr,
-                     stack: fieldCreateErr ? fieldCreateErr.stack : ""});
-                  return updateAdditionalFieldValuesCB(fieldCreateErr);
-                }
-               additionalFieldsCB(null);
-            });
-          } else{
-            fieldData[0].updateAttribute("value",
-            newPerson[additionalField.name],
-              (fieldUpdateErr, updatedField) => {
-              if(fieldUpdateErr){
-                logger.error("Error while updating additionalField\
-                 value", {error: fieldUpdateErr,
-                 stack: fieldUpdateErr ? fieldUpdateErr.stack : ""});
-                 return updateAdditionalFieldValuesCB(fieldUpdateErr);
-              }
-              additionalFieldsCB(null);
-            });
-          }
-        });
-      }, (err) => {
-        if(err){
-          logger.error("Error while updating additionalField",
-           {error: err, stack: err ? err.stack : ""});
-           return updateAdditionalFieldValuesCB(err);
-        }
-        return updateAdditionalFieldValuesCB(null);
-      });
-
-    };
-
-
     async.waterfall([
-      saveFile,
+      async.apply(saveFile, ctx, options, listid),
       getAllFieldsForList,
-      parseUploadedFile,
-      createCompanies,
-      populatePeopleAndField
-    ], (asyncErr, asyncResult) => {
+      parseCSV
+    ], (asyncErr, result) => {
       if(asyncErr){
+        logger.error("Error while processing csv file", {
+          listid:listid,
+          error: asyncErr,
+          stack: asyncErr ? asyncErr.stack : ""
+        });
         uploadCB(asyncErr);
       }
-      uploadCB(null, asyncResult);
+      uploadCB(null);
     });
-
   };
 
   /**
-   * Get all the additionalField where userId is null, implying common
-   * additionalField
+   * Save the file to the storage
+   * @param  {[ctx]} ctx
+   * @param  {[options]} options
    * @param  {[listid]} listid
-   * @param  {[function]} getAllDefaultFieldsCB
-   * @return {[defaultAdditionalFields, listid]}
+   * @param  {[function]} saveFileCB
+   * @return {[fileName, listid, filePath]}
    * @author Aswin Raj A
    */
-  let getAllDefaultFields = (listid, getAllDefaultFieldsCB) => {
-    File.app.models.additionalField.find({
-      where : {
-        userId : null
-      }
-    }, (fieldsFindErr, defaultFields) => {
-      if(fieldsFindErr){
-        logger.error("Error while finding default fields for the\
-         list", {
-          error: fieldsFindErr,
-          stack: fieldsFindErr ? fieldsFindErr.stack : ""
+  let saveFile = (ctx, options, listid, saveFileCB) => {
+    File.app.models.container.upload(ctx.req, ctx.result, options,
+      (uploadErr, fileObj) => {
+      if(uploadErr){
+        logger.error("Error while uploading file for list", listid, {
+          error: uploadErr,
+          stack: uploadErr ? uploadErr.stack : ""
         });
-        return getAllDefaultFieldsCB(fieldsFindErr);
+        saveFileCB(uploadErr);
       }
-      let defaultAdditionalFields = _.pluck(defaultFields, "name");
-      return getAllDefaultFieldsCB(null, defaultAdditionalFields,
-         listid);
+      let fileInfo = fileObj.files.file[0];
+      let filePath = path.join("server/storage", fileInfo.container,
+        fileInfo.name);
+      let fileExt = _.last(fileInfo.name.split("."));
+      let acceptableFileTypes = ["csv"]; // ["csv", "xls", "xlsx"];
+      if (_.contains(acceptableFileTypes, fileExt)) {
+        File.create({
+          name: fileInfo.name,
+          type: fileInfo.type,
+          container: fileInfo.container,
+          url: path.join(CONTAINERS_URL, fileInfo.container, "/download/",
+            fileInfo.name)
+        }, (err, obj) => {
+          if (err) {
+            logger.error("Error in saving file details for list:", listid,
+              " ", err.message);
+            saveFileCB(err);
+          }
+          saveFileCB(null, fileInfo.name, listid, filePath);
+        });
+      } else {
+        fs.unlinkSync(filePath);
+        let error = new Error();
+        error.message = "File should be in csv/excel format";
+        error.name = "InvalidFile";
+        logger.error("Error in removing the invalid file", error.message);
+        saveFileCB(error);
+      }
     });
   };
 
-
   /**
-   * Get all additionalField for the listid,
-   * @param  {[type]} defaultAdditionalFields         [description]
-   * @param  {[type]} listid                          [description]
-   * @param  {[type]} getAllAdditionalFieldsForListCB [description]
-   * @return {[type]}                                 [description]
+   * To get all the additional fields for the current list along with the
+   * default fields
+   * @param  {[fileName]} fileName
+   * @param  {[listid]} listid
+   * @param  {[filePath]} filePath
+   * @param  {[function]} getAllFieldsForListCB
+   * @return {[listid, fieldsForList, filePath]}
    * @author Aswin Raj A
    */
-  let getAllAdditionalFieldsForList = (defaultAdditionalFields,
-     listid, getAllAdditionalFieldsForListCB) => {
-    File.app.models.list.findById(listid, (listFindErr, list) => {
+  let getAllFieldsForList = (fileName, listid, filePath,
+    getAllFieldsForListCB) => {
+    async.waterfall([
+      async.apply(File.app.models.additionalField.getAllDefaultFields, listid),
+      File.app.models.additionalField.getAllAdditionalFieldsForList
+    ], (asyncErr, fieldsForList) => {
+      if(asyncErr){
+        logger.error("Error while geting all fields for list", {
+          error: asyncErr,
+          stack: asyncErr ? asyncErr.stack : ""
+        });
+        return getAllFieldsForListCB(asyncErr);
+      }
+      getAllFieldsForListCB(null, listid, fieldsForList, filePath);
+    });
+  };
+
+  /**
+   * Parse the CSV and save the person with the corresponding additionalField
+   * values
+   * @param  {[listid]} listid
+   * @param  {[fieldsForList]} fieldsForList
+   * @param  {[filePath]} filePath
+   * @param  {[function]} parseCSVCB
+   * @return {[type]}
+   * @author Aswin Raj A
+   */
+  let parseCSV = (listid, fieldsForList, filePath, parseCSVCB) => {
+    async.waterfall([
+      async.apply(getDataFromCSV, fieldsForList, filePath, listid),
+      validateHeaders,
+      savePersonWithAdditionalFields
+    ], (asyncErr, result) => {
+      if(asyncErr){
+        logger.error("Error while parsing csv file", asyncErr);
+        return parseCSVCB(asyncErr);
+      }
+      parseCSVCB(null);
+    });
+  };
+
+  /**
+   * Get all data from the uploaded CSV
+   * @param  {[fieldsForList]} fieldsForList
+   * @param  {[filePath]} filePath
+   * @param  {[listid]} listid
+   * @param  {[function]} getDataFromCSVCB
+   * @return {[streamHeader, streamData, fieldsForList, listid]}
+   * @author Aswin Raj A
+   */
+  let getDataFromCSV = (fieldsForList, filePath, listid, getDataFromCSVCB) => {
+    let stream = fs.createReadStream(filePath);
+    let streamData = [];
+    let streamHeader = [];
+    csv.fromStream(stream, {headers: true})
+    .on("data", (data) => {
+      streamHeader = _.keys(data);
+      streamData.push(data);
+    })
+    .on("end", () => {
+      getDataFromCSVCB(null, streamHeader, streamData, fieldsForList, listid);
+    });
+  };
+
+  /**
+   * Validate headers from CSV with the additionalField for the current list
+   * @param  {[type]} streamHeaders
+   * @param  {[type]} streamData
+   * @param  {[type]} fieldsForList
+   * @param  {[type]} listid
+   * @param  {[function]} validateHeadersCB
+   * @return {[streamData, listid]}
+   * @author Aswin Raj A
+   */
+  let validateHeaders = (streamHeaders, streamData, fieldsForList, listid,
+    validateHeadersCB) => {
+    const notFound = -1;
+    async.eachSeries(streamHeaders, (streamHeader, streamHeaderCB) => {
+      if(fieldsForList.indexOf(streamHeader) !== notFound){
+        streamHeaderCB(null);
+      } else{
+        validateHeadersCB("There seems to be some invalid fields!");
+      }
+    }, (err) => {
+      if(err){
+        return validateHeadersCB("There seems to be some invalid fields!");
+      }
+      validateHeadersCB(null, streamData, listid);
+    });
+  };
+
+  /**
+   * Check if the current row has any empty column data
+   * @param  {[personData]}  personData
+   * @param  {function} isValidDataCB
+   * @return {[boolean]}
+   * @author Aswin Raj A
+   */
+  let isValidData = (personData, isValidDataCB) => {
+    if(personData["First Name"] === "" || personData["Last Name"] ==="" ||
+      personData.Email === ""){
+      isValidDataCB(false);
+    } else{
+      isValidDataCB(true);
+    }
+  };
+
+  /**
+   * Save person with additionalField
+   * If ther is any invlid data, push it to invalidData array
+   * Else process it
+   * @param  {[streamData]} streamData
+   * @param  {[listid]} listid
+   * @param  {[function]} savePersonWithAdditionalFieldsCB
+   * @return {[responseMsg]}
+   * @author Aswin Raj A
+   */
+  let savePersonWithAdditionalFields = (streamData, listid,
+    savePersonWithAdditionalFieldsCB) => {
+    let invalidData = [];
+    File.app.models.additionalField.getAdditionalFieldsForList(listid,
+      (listFieldErr, fieldsForList) => {
+      if(listFieldErr){
+        return savePersonWithAdditionalFieldsCB(listFieldErr);
+      }
+      async.eachSeries(streamData, (personData, personCB) => {
+        isValidData(personData, (isValid) => {
+          if(isValid){
+            async.waterfall([
+              async.apply(decouplePersonData, personData, fieldsForList,
+                listid),
+              createOrUpdatePerson,
+              createOrUpdateFields
+            ], (asyncErr, result) => {
+              if(asyncErr){
+                invalidData.push(personData);
+                logger.error("Error while processing person", asyncErr);
+                return personCB(asyncErr);
+              }
+              return personCB(null);
+            });
+          } else{
+            invalidData.push(personData);
+            return personCB(null);
+          }
+        });
+      }, (personSeriesErr) => {
+        if(personSeriesErr){
+          logger.error("Error while processing people data", personSeriesErr);
+          return savePersonWithAdditionalFieldsCB(personSeriesErr);
+        }
+        if(lodash.isEmpty(invalidData)){
+          savePersonWithAdditionalFieldsCB(null, {
+            responseMsg : "All fields are saved successfully!",
+            invalidData : invalidData
+          });
+        } else{
+          savePersonWithAdditionalFieldsCB(null, {
+            responseMsg : "There seems to be some invalid data!",
+            invalidData : invalidData
+          });
+        }
+      });
+    });
+  };
+
+  /**
+   * Decouple the personData into person object and additionalFields object
+   * @param  {[personData]} personData
+   * @param  {[fieldsForList]} fieldsForList
+   * @param  {[listid]} listid
+   * @param  {[function]} decouplePersonDataCB
+   * @return {[decoupledObj, listid]}
+   * @author Aswin Raj A
+   */
+  let decouplePersonData = (personData, fieldsForList, listid,
+    decouplePersonDataCB) => {
+    async.parallel({
+      person : (parallelPersonCB) => {
+        let newPersonObj = {
+          firstName : personData["First Name"],
+          lastName : personData["Last Name"],
+          middleName : personData["Middle Name"],
+          salutation : personData.Salutation,
+          email : personData.Email
+        };
+        return parallelPersonCB(null, newPersonObj);
+      },
+      additionalFields : (parallelFieldsCB) => {
+        let additionalFieldObj = [];
+        async.eachSeries(fieldsForList, (field, fieldCB) => {
+          additionalFieldObj.push({
+            fieldId : field.id,
+            listId : listid,
+            value : personData[field.name] || ""
+          });
+          return fieldCB(null);
+        }, (err) => {
+          if(err){
+            logger.error("Error while creating additionalFieldObj",
+             {error: err, stack: err ? err.stack : ""});
+            return parallelFieldsCB(err);
+          }
+          return parallelFieldsCB(null, additionalFieldObj);
+        });
+      }
+    }, (err, decoupledObj) => {
+      if(err){
+        return decouplePersonDataCB(err);
+      }
+      return decouplePersonDataCB(null, decoupledObj, listid);
+    });
+  };
+
+  /**
+   * Create or Update the Person for the current list,
+   * Check if there already exist a person entry with the same email id
+   * If exist, and if exist in the same list then update Person For CurrentList
+   * else update person for the different list
+   * Else create a new entry for person and additionalFields
+   * @param  {[decoupledObj]} decoupledObj
+   * @param  {[listid]} listid
+   * @param  {[function]} createOrUpdatePersonCB
+   * @return {[personId, listid, newAdditionalFields]}
+   * @author Aswin Raj A
+   */
+  let createOrUpdatePerson = (decoupledObj, listid, createOrUpdatePersonCB) => {
+    const newPerson = decoupledObj.person;
+    const newAdditionalFields = decoupledObj.additionalFields;
+    File.app.models.person.find({
+      where : {
+        email : newPerson.email
+      }
+    }, (personFindErr, people) => {
+      if(personFindErr){
+        logger.error("Error while finding person with email:", {
+          email: newPerson.email,
+          error: personFindErr,
+          stack: personFindErr ? personFindErr.stack : ""
+        });
+        return createOrUpdatePersonCB(personFindErr);
+      }
+      if(lodash.isEmpty(people)){
+        File.app.models.person.createNewPerson(listid, newPerson,
+          (createErr, person) => {
+          if(createErr){
+            return createOrUpdatePersonCB(createErr);
+          }
+          return createOrUpdatePersonCB(null, person.id, listid,
+            newAdditionalFields);
+        });
+      } else{
+        people[0].lists((listfindErr, list) => {
+          if(listfindErr){
+            logger.error("Error while finding list for person", {
+              person: people[0],
+              error: err,
+              stack: err ? err.stack : ""
+            });
+            return createOrUpdatePersonCB(listfindErr);
+          }
+          if(list[0].id === listid){
+            updatePersonForCurrentList(people[0], newPerson,
+              (personUpdateErr, person) => {
+              if(personUpdateErr){
+                return createOrUpdatePersonCB(personUpdateErr);
+              }
+              return createOrUpdatePersonCB(null, person.id, listid,
+                newAdditionalFields);
+            });
+          } else{
+            updatePersonForDifferentList(listid, people[0], newPerson,
+              (personUpdateErr, person) => {
+              if(personUpdateErr){
+                return createOrUpdatePersonCB(personUpdateErr);
+              }
+              return createOrUpdatePersonCB(null, person.id, listid,
+                newAdditionalFields);
+            });
+          }
+        });
+      }
+    });
+  };
+
+  /**
+   * If there exist an email for the current list, then update the person for
+   * the current list
+   * @param  {[oldPerson]} oldPerson
+   * @param  {[newPerson]} newPerson
+   * @param  {[function]} updatePersonCB
+   * @return {[person]}
+   * @author Aswin Raj A
+   */
+  let updatePersonForCurrentList = (oldPerson, newPerson, updatePersonCB) => {
+    async.waterfall([
+      async.apply(File.app.models.person.generateAuditPersonObj,
+        oldPerson, newPerson),
+      File.app.models.person.savePersonAudit,
+      File.app.models.person.updatePersonWithNewData
+    ], (asyncErr, person) => {
+      if(asyncErr){
+        logger.error("Error while updating person for current list", asyncErr);
+        updatePersonCB(asyncErr);
+      }
+      updatePersonCB(null, person);
+    });
+  };
+
+  /**
+   * If there exist an email in different list, then update the person for
+   * another list
+   * Associate the person to the new list
+   * Update the person if necessary and make an entry in audit table
+   * @param  {[listid]} listid
+   * @param  {[oldPerson]} oldPerson
+   * @param  {[newPerson]} newPerson
+   * @param  {[function]} updatePersonCB
+   * @return {[person]}
+   * @author Aswin Raj A
+   */
+  let updatePersonForDifferentList = (listid, oldPerson, newPerson,
+    updatePersonCB) => {
+    File.app.models.List.findById(listid, (listFindErr, list) => {
       if(listFindErr){
         logger.error("Error while finding list", {
+          listid: listid,
           error: listFindErr,
           stack: listFindErr ? listFindErr.stack : ""
         });
-        return getAllAdditionalFieldsForListCB(listFindErr);
+        updatePersonCB(listFindErr);
       }
-      list.fields((fieldErr, fields) => {
-        if(fieldErr){
-          logger.error("Error while finding fields for list", {
-            error: fieldErr,
-            stack: fieldErr ? fieldErr.stack : ""
-          });
-          return getAllAdditionalFieldsForListCB(fieldErr);
+      async.waterfall([
+        async.apply(File.app.models.person.associatePersonWithList, list,
+          oldPerson, newPerson),
+        File.app.models.person.generateAuditPersonObj,
+        File.app.models.person.savePersonAudit,
+        File.app.models.person.updatePersonWithNewData
+      ], (asyncErr, person) => {
+        if(asyncErr){
+          logger.error("Error while updating person who exist in another list",
+            asyncErr);
+          updatePersonCB(asyncErr);
         }
-        let allAdditionalFields = lodash
-        .concat(defaultAdditionalFields, _.pluck(fields, "name"));
-        return getAllAdditionalFieldsForListCB(null,
-          allAdditionalFields);
+        updatePersonCB(null, person);
       });
+    });
+  };
+
+  /**
+   * Create or update fields for the current person,
+   * If additionalFieldValue doesnot exist already for the current list, person
+   * and for the current field id create a new entry
+   * If already exist, update the entry
+   * If already exist and if new value is empty donot update it
+   * @param  {[personId]} personId
+   * @param  {[listid]} listid
+   * @param  {[newAdditionalFields]} newAdditionalFields
+   * @param  {[function]} createOrUpdateFieldsCB
+   * @author Aswin Raj A
+   */
+  let createOrUpdateFields = (personId, listid, newAdditionalFields,
+    createOrUpdateFieldsCB) => {
+    newAdditionalFields = newAdditionalFields.map(field => {
+      field.personId = personId;
+      return field;
+    });
+    async.eachSeries(newAdditionalFields, (newField, fieldCB) => {
+      File.app.models.additionalFieldValue.find({
+        where:{
+          and:[
+            {fieldId : newField.fieldId},
+            {listId : newField.listId},
+            {personId : newField.personId}
+          ]
+        }
+      }, (fieldFindErr, fields) => {
+        if(fieldFindErr){
+          logger.error("Error while finding list", {
+            fieldId : newField.fieldId, listId : newField.listid,
+            personId : newField.personId,
+            error: fieldFindErr,
+            stack: fieldFindErr ? fieldFindErr.stack : ""
+          });
+          return fieldCB(fieldFindErr);
+        }
+        if(lodash.isEmpty(fields)){
+          if(newField.value !== ""){
+            File.app.models.additionalFieldValue.createFields(newField,
+              (fieldCreateErr, field) => {
+              if(fieldCreateErr){
+                logger.error("Error while creating additionalFieldValue", {
+                  field: field,
+                  error: fieldCreateErr,
+                  stack: fieldCreateErr ? fieldCreateErr.stack : ""
+                });
+                return fieldCB(fieldCreateErr);
+              }
+              return fieldCB(null);
+            });
+          } else{
+            return fieldCB(null);
+          }
+        } else{
+          if(newField.value !== ""){
+            File.app.models.additionalFieldValue.updateFields(fields[0],
+              newField, (fieldUpdateErr, result) => {
+              if(fieldUpdateErr){
+                logger.error("Error while updating additionalFieldValue", {
+                  error: fieldUpdateErr,
+                  stack: fieldUpdateErr ? fieldUpdateErr.stack : ""
+                });
+                return fieldCB(fieldUpdateErr);
+              }
+              return fieldCB(null);
+            });
+          } else{
+            return fieldCB(null);
+          }
+        }
+      });
+    }, (err) => {
+      if(err){
+        logger.error("Error while creating additional field for person", {
+          personId: personId,
+          error: err,
+          stack: err ? err.stack : ""
+        });
+        return createOrUpdateFieldsCB(err);
+      }
+      return createOrUpdateFieldsCB(null);
     });
   };
 

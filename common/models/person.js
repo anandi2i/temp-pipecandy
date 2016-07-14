@@ -4,13 +4,13 @@ import logger from "../../server/log";
 import async from "async";
 import lodash from "lodash";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
+const emptycount = 0;
 
 module.exports = function(Person) {
 
   /**
    * Gets people using list object and checks for the eligibility to generate
    * the email or a followup email and pushing to the sending queue
-   *
    * @param  {[campaign]} campaign
    * @param  {[list]} list
    * @param  {[List]} listIds
@@ -20,9 +20,7 @@ module.exports = function(Person) {
    */
   Person.getPoepleAndGenerateEmail = (campaign, list, listIds, followup,
     getPoepleAndGenerateEmailCB) => {
-
     list.people((peopleFindErr, people) => {
-
       if (peopleFindErr) {
         logger.error("Error on fing the people using list", {
           list: list, listIds: listIds, followup: followup,
@@ -30,7 +28,6 @@ module.exports = function(Person) {
         });
         return getPoepleAndGenerateEmailCB(peopleFindErr);
       }
-
       async.eachSeries(people, (person, peopleEachCB) => {
         validatePersonToGenerate(campaign, person,
           followup, (checkEmailExistsErr, isEligible) => {
@@ -361,6 +358,186 @@ module.exports = function(Person) {
           }
           return getOrSaveUnsubscribeCB(null, unsubscribeInst);
         });
+    });
+  };
+
+  /**
+   * For: CSV - Upload and Add Recepient
+   * Create a new person for the current list
+   * @param  {[listid]} listid
+   * @param  {[newPerson]} newPerson
+   * @param  {[function]} createNewPersonCB
+   * @return {[person]}
+   * @author Aswin Raj A
+   */
+  Person.createNewPerson = (listid, newPerson, createNewPersonCB) => {
+    Person.app.models.List.findById(listid, (listFindErr, list) => {
+      if(listFindErr){
+        logger.error("Error while finding list for listId:", {
+           listid: listid,
+           error: listFindErr,
+           stack: listFindErr ? listFindErr.stack : ""
+         });
+        return createNewPersonCB(listFindErr);
+      }
+      list.people.create(newPerson, (personCreateErr, person) => {
+        if(personCreateErr){
+          logger.error("Error while creating person for list", {
+            listid: listid,
+            error: personCreateErr,
+            stack: personCreateErr ? personCreateErr.stack : ""
+          });
+          return createNewPersonCB(personCreateErr);
+        }
+        return createNewPersonCB(null, person);
+      });
+    });
+  };
+
+
+  /**
+   * For: CSV - Upload and Add Recepient
+   * Create a new person for the current list createdBy the current user
+   * @param  {[ctx]} ctx
+   * @param  {[newPerson]} newPerson
+   * @param  {[listId]} listId
+   * @param  {[type]} createNewPersonForListCB
+   * @return {[person]}
+   * @author Aswin Raj A
+   */
+  Person.createNewPersonForList = (ctx, newPerson, listId,
+    createNewPersonForListCB) => {
+    Person.app.models.list.find({
+      where: {id: listId, createdBy: ctx.req.accessToken.userId}
+    }, (listFindErr, lists) => {
+      if(listFindErr) {
+        logger.error("Error while finding list for listid", {
+          listId : listId,
+          error: err,
+          stack: err ? err.stack : ""
+        });
+        return createNewPersonForListCB(listFindErr);
+      }
+      lists[0].people.create(newPerson, (listCreateErr, person) => {
+        if(listCreateErr){
+          logger.error("Error while creating person for list", {
+            listId : listId,
+            error: err,
+            stack: err ? err.stack : ""
+          });
+          return createNewPersonForListCB(listCreateErr);
+        }
+        return createNewPersonForListCB(null, person);
+      });
+    });
+  };
+
+
+  /**
+   * For: CSV - Upload and Add Recepient
+   * Method to associate a person to the current list
+   * @param  {[list]} list
+   * @param  {[oldPerson]} oldPerson
+   * @param  {[newPerson]} newPerson
+   * @param  {[function]} associateCB
+   * @return {[oldPerson, newPerson]}
+   * @author Aswin Raj A
+   */
+  Person.associatePersonWithList = (list, oldPerson, newPerson,
+    associateCB) => {
+    list.people.add(oldPerson.id, (peopleCreateErr, people) => {
+      if(peopleCreateErr){
+        logger.error("Error while creating people for list", {
+          listid: listid,
+          error: peopleCreateErr,
+          stack: peopleCreateErr ? peopleCreateErr.stack : ""
+        });
+        associateCB(peopleCreateErr);
+      }
+      associateCB(null, oldPerson, newPerson);
+    });
+  };
+
+  /**
+   * For: CSV - Upload and Add Recepient
+   * Generate audit person object if there are any changes to the current
+   * person entry
+   * @param  {[oldPerson]} oldPerson
+   * @param  {[newPerson]} newPerson
+   * @param  {[function]} generateAuditPersonObjCB
+   * @return {[auditPersonObj, oldPerson, newPerson]}
+   * @author Aswin Raj A
+   */
+  Person.generateAuditPersonObj = (oldPerson, newPerson,
+    generateAuditPersonObjCB) => {
+    let auditPersonObj = {};
+    if(oldPerson.firstName !== newPerson.firstName){
+      auditPersonObj.firstName = oldPerson.firstName;
+    }
+    if(oldPerson.middleName !== newPerson.middleName){
+      auditPersonObj.middleName = oldPerson.middleName;
+    }
+    if(oldPerson.lastName !== newPerson.lastName){
+      auditPersonObj.lastName = oldPerson.lastName;
+    }
+    let objLength = Object.getOwnPropertyNames(auditPersonObj).length;
+    if(objLength!== emptycount){
+      auditPersonObj.personId = oldPerson.id;
+    }
+    return generateAuditPersonObjCB(null, auditPersonObj, oldPerson, newPerson);
+  };
+
+  /**
+   * For: CSV - Upload and Add Recepient
+   * Save person to the audit table
+   * @param  {[auditPersonObj]} auditPersonObj
+   * @param  {[oldPerson]} oldPerson
+   * @param  {[newPerson]} newPerson
+   * @param  {[function]} savePersonAuditCB
+   * @return {[oldPerson, newPerson]}
+   * @author Aswin Raj A
+   */
+  Person.savePersonAudit = (auditPersonObj, oldPerson, newPerson,
+    savePersonAuditCB) => {
+    let personAuditLength = Object.getOwnPropertyNames(auditPersonObj).length;
+    if(personAuditLength !== emptycount){
+      Person.app.models.personAudit.create(auditPersonObj,
+        (auditCreateErr, createdPerson) => {
+        if(auditCreateErr){
+          logger.error("Error while creating personAudit", {
+            auditPerson: auditPersonObj,
+            error: auditCreateErr,
+            stack: auditCreateErr ? auditCreateErr.stack : ""
+          });
+          savePersonAuditCB(auditCreateErr);
+        }
+        savePersonAuditCB(null, oldPerson, newPerson);
+      });
+    } else{
+      savePersonAuditCB(null, oldPerson, newPerson);
+    }
+  };
+
+  /**
+   * For: CSV - Upload and Add Recepient
+   * Update the existing person with the new data
+   * @param  {[oldPerson]} oldPerson
+   * @param  {[newPerson]} newPerson
+   * @param  {[function]} updateDataCB
+   * @return {[updatedObj]}
+   * @author Aswin Raj A
+   */
+  Person.updatePersonWithNewData = (oldPerson, newPerson, updateDataCB) => {
+    oldPerson.updateAttributes(newPerson, (updateErr, updatedObj) => {
+      if(updateErr) {
+        logger.error("Error while updating person", {
+          person: oldPerson,
+          error: oldPerson,
+          stack: oldPerson ? oldPerson.stack : ""
+        });
+        updateDataCB(updateErr);
+      }
+      updateDataCB(null, updatedObj);
     });
   };
 

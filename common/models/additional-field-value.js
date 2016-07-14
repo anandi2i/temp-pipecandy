@@ -59,6 +59,49 @@ module.exports = function(AdditionalFieldValue) {
   };
 
   /**
+   * Create a new entry in the additional fields
+   * @param  {[newField]} newField
+   * @param  {[function]} createFieldCB
+   * @author Aswin Raj A
+   */
+  AdditionalFieldValue.createFields = (newField, createFieldCB) => {
+    AdditionalFieldValue.create(newField,
+      (fieldCreateErr, field) => {
+      if(fieldCreateErr){
+        logger.error("Error while creating additionalFieldValue", {
+          newField : newField,
+          error: fieldCreateErr,
+          stack: fieldCreateErr ? fieldCreateErr.stack : ""
+        });
+        return createFieldCB(fieldCreateErr);
+      }
+      createFieldCB(null, "Created Successfully!");
+    });
+  };
+
+  /**
+   * Update the existing additionalFields with the new fields
+   * @param  {[oldField]} oldField
+   * @param  {[newField]} newField
+   * @param  {[function]} fieldUpdateCB
+   * @author Aswin Raj A
+   */
+  AdditionalFieldValue.updateFields = (oldField, newField, fieldUpdateCB) => {
+    oldField.updateAttributes(newField, (fieldUpdateErr, field) => {
+      if(fieldUpdateErr){
+        logger.error("Error while updating additional field values", {
+          newField: newField,
+          error: fieldUpdateErr,
+          stack: fieldUpdateErr ? fieldUpdateErr.stack : ""
+        });
+        return fieldUpdateCB(fieldUpdateErr);
+      }
+      fieldUpdateCB(null, "Updated Successfully!");
+    });
+  };
+
+
+  /**
    * Updates the updatedAt column with current Time
    * @param ctx Context
    * @param next (Callback)

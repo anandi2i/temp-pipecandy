@@ -22,7 +22,8 @@
       "type": "string"
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "time_zone": {
       "type": "string"

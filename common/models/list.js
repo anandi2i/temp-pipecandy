@@ -5,7 +5,6 @@ import lodash from "lodash";
 import async from "async";
 import _ from "underscore";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
-const emptycount = 0;
 
 module.exports = function(List) {
   /**
@@ -194,432 +193,243 @@ module.exports = function(List) {
    * @param  {[Object]} reqParam [Exmaple of an reqParam shown above]
    * @param  {[function]} savePersonWithFieldsCB [description]
    * @return {[person]} [Persisted person with fields and values]
-   * @author Ramanavel Selvaraju
+   * @author Ramanavel Selvaraju, Aswin Raj A(Modified)
    */
   List.savePersonWithFields = (ctx, id, reqParams, savePersonWithFieldsCB) => {
-    List.find({
-       where: {id: id, createdBy: ctx.req.accessToken.userId}
-     }, (listErr, list) => {
-      if(listErr | lodash.isEmpty(list)) {
-         logger.error("Error in getting List for id : ", id);
-         return savePersonWithFieldsCB(listErr);
+    async.waterfall([
+      async.apply(createOrUpdatePerson, ctx, reqParams, id),
+      createOrUpdateFields
+    ], (asyncErr, result) => {
+      if(asyncErr){
+        logger.error(asyncErr);
+        savePersonWithFieldsCB(asyncErr);
       }
-      emailExistCheck(reqParams.person.email, id, (checkErr, response) => {
+      savePersonWithFieldsCB(null);
+    });
+  };
 
-        if(response.msg === "exist"){
-          let newPersonObject = {
-             firstName: reqParams.person.firstName,
-             middleName: reqParams.person.middleName,
-             lastName: reqParams.person.lastName,
-             email: reqParams.person.email
-          };
-          updatePersonAuditAndAdditionalFields(list[0], response.people[0],
-            newPersonObject, reqParams.person.fieldValues,
-            (createErr, createdPerson) => {
+  /**
+   * Create or Update the Person for the current list,
+   * Check if there already exist a person entry with the same email id
+   * If exist, and if exist in the same list then update Person For CurrentList
+   * else update person for the different list
+   * Else create a new entry for person and additionalFields
+   * @param  {[ctx]} ctx
+   * @param  {[reqParams]} reqParams
+   * @param  {[listId]} listId
+   * @param  {[function]} createOrUpdatePersonCB
+   * @return {[personId, listId, newAdditionalFields]}
+   * @author Aswin Raj A
+   */
+  let createOrUpdatePerson = (ctx, reqParams, listId,
+    createOrUpdatePersonCB) => {
+    const newPerson = _.omit(reqParams.person, "fieldValues");
+    const newAdditionalFields = reqParams.person.fieldValues;
+    List.app.models.person.find({
+      where : {
+        email : newPerson.email,
+      }
+    }, (personFindErr, people) => {
+      if(personFindErr) {
+        logger.error("Error while finding person for the email id", {
+          email : newPerson.email,
+          error: err,
+          stack: err ? err.stack : ""
+        });
+        createOrUpdatePersonCB(personFindErr);
+      }
+      if(lodash.isEmpty(people)){
+        List.app.models.person.createNewPersonForList(ctx, newPerson, listId,
+          (createErr, person) => {
           if(createErr){
-           logger.error("Error while creating person and fieldValues",
-            {error: createErr, stack: createErr ? createErr.stack : ""});
-           savePersonWithFieldsCB(createErr);
+            logger.error(createErr);
+            createOrUpdatePersonCB(createErr);
           }
-          savePersonWithFieldsCB(null, createdPerson);
-          });
-        } else if(response.msg === "existInDiffList"){
-          let auditPersonObj = {};
-          if(response.people[0].firstName !== reqParams.person.firstName){
-            auditPersonObj.firstName = response.people[0].firstName;
-          }
-          if(response.people[0].middleName !== reqParams.person.middleName){
-            auditPersonObj.middleName = response.people[0].middleName;
-          }
-          if(response.people[0].lastName !== reqParams.person.lastName){
-            auditPersonObj.lastName = response.people[0].lastName;
-          }
-          if(response.people[0].salutation !== reqParams.person.salutation){
-            auditPersonObj.salutation = response.people[0].salutation;
-          }
-
-          if(Object.getOwnPropertyNames(auditPersonObj).length !== emptycount){
-            auditPersonObj.personId = response.people[0].id;
-            List.app.models.personAudit.create(auditPersonObj,
-              (auditCreateErr, createdPersonAudit) => {
-            if(auditCreateErr){
-              logger.error("Error while creating Person Audit",
-              {error: auditCreateErr,
-              stack: auditCreateErr ? auditCreateErr.stack : ""});
-              return savePersonWithFieldsCB(auditCreateErr);
-            }
-              return savePersonWithFieldsCB(null, newPerson, oldPerson.id, list,
-              additionalFields);
+          createOrUpdatePersonCB(null, person.id, listId, newAdditionalFields);
+        });
+      } else {
+        people[0].lists((listFindErr, list) => {
+          if(listFindErr){
+            logger.error("Error while finding list for person", {
+              person: people[0],
+              error: err,
+              stack: err ? err.stack : ""
             });
-          } else{
-            savePersonWithFieldsCB(null, newPerson, oldPerson.id, list,
-              additionalFields);
+            createOrUpdatePersonCB(listFindErr);
           }
+          if(list[0].id === listId){
+            updatePersonForList(people[0], newPerson, (updateErr, person) => {
+              if(updateErr){
+                logger.error(updateErr);
+                return createOrUpdatePersonCB(updateErr);
+              }
+              return createOrUpdatePersonCB(null, person.id, listId,
+                newAdditionalFields);
+            });
+          } else {
+            updatePersonForDifferentList(listId, people[0], newPerson,
+              (updateErr, person) => {
+              if(updateErr){
+                logger.error(updateErr);
+                return createOrUpdatePersonCB(updateErr);
+              }
+              return createOrUpdatePersonCB(null, person.id, listId,
+                newAdditionalFields);
+            });
+          }
+        });
+      }
+    });
+  };
 
+  /**
+   * If there exist an email for the current list, then update the person for
+   * the current list
+   * @param  {[oldPerson]} oldPerson
+   * @param  {[newPerson]} newPerson
+   * @param  {[function]} updatePersonForListCB
+   * @return {[person]}
+   * @author Aswin Raj A
+   */
+  let updatePersonForList = (oldPerson, newPerson, updatePersonForListCB) => {
+    async.waterfall([
+      async.apply(List.app.models.person.generateAuditPersonObj,
+        oldPerson, newPerson),
+      List.app.models.person.savePersonAudit,
+      List.app.models.person.updatePersonWithNewData
+    ], (asyncErr, person) => {
+      if(asyncErr){
+        logger.error(asyncErr);
+        return updatePersonForListCB(asyncErr);
+      }
+      return updatePersonForListCB(null, person);
+    });
+  };
 
-        } else{
-          let personObject = {
-             firstName: reqParams.person.firstName,
-             middleName: reqParams.person.middleName,
-             lastName: reqParams.person.lastName,
-             email: reqParams.person.email
-           };
-          createPersonAndAdditionalFields(list[0], personObject,
-            reqParams.person.fieldValues, (createErr, createdPerson) => {
-             if(createErr){
-               logger.error("Error while creating person and fieldValues",
-                {error: createErr, stack: createErr ? createErr.stack : ""});
-               savePersonWithFieldsCB(createErr);
-             }
-             savePersonWithFieldsCB(null, createdPerson);
-           });
+  /**
+   * If there exist an email in different list, then update the person for
+   * another list,
+   * Associate the person to the new list
+   * Update the person if necessary and make an entry in audit table
+   * @param  {[listid]} listid
+   * @param  {[oldPerson]} oldPerson
+   * @param  {[newPerson]} newPerson
+   * @param  {[function]} updatePersonCB
+   * @return {[type]}
+   * @author Aswin Raj A
+   */
+  let updatePersonForDifferentList = (listid, oldPerson, newPerson,
+    updatePersonCB) => {
+    List.findById(listid, (listFindErr, list) => {
+      if(listFindErr){
+        logger.error("Error while finding list", {
+          listid: listid,
+          error: listFindErr,
+          stack: listFindErr ? listFindErr.stack : ""
+        });
+        updatePersonCB(listFindErr);
+      }
+      async.waterfall([
+        async.apply(List.app.models.person.associatePersonWithList, list,
+          oldPerson, newPerson),
+        List.app.models.person.generateAuditPersonObj,
+        List.app.models.person.savePersonAudit,
+        List.app.models.person.updatePersonWithNewData
+      ], (asyncErr, person) => {
+        if(asyncErr){
+          logger.error("Error while updating person who exist in another list",
+            asyncErr);
+          updatePersonCB(asyncErr);
         }
+        updatePersonCB(null, person);
       });
     });
   };
 
-
-
   /**
-   * While creating new recepient, if there is no person saved with recepient's
-   * email before we need to create person and additionalField values
-   * @param  {[list]} list
-   * @param  {[personObject]} personObject
-   * @param  {[additionalFields]} additionalFields
-   * @param  {[function]} createPersonAndAdditionalFieldsCB
-   * @return {[createdPerson]}
+   * Create or Update additionalField values
+   * - If additional field value already exist for the person in the current list
+   *   update it
+   * - Else create a new entry
+   * @param  {[personId]} personId
+   * @param  {[listid]} listid
+   * @param  {[newAdditionalFields]} newAdditionalFields
+   * @param  {[function]} createOrUpdateFieldsCB
    * @author Aswin Raj A
    */
-  let createPersonAndAdditionalFields = (list, personObject, additionalFields,
-     createPersonAndAdditionalFieldsCB) => {
-   async.waterfall([
-     async.apply(createPerson, list, personObject, additionalFields),
-     createAdditionalFields
-   ], (asyncErr, createdPerson) => {
-     if(asyncErr){
-       logger.error("Error while creating person and additional fields",
-        {error: asyncErr, stack: asyncErr ? asyncErr.stack : ""});
-       return createPersonAndAdditionalFieldsCB(asyncErr);
-     }
-     return createPersonAndAdditionalFieldsCB(null, createdPerson);
-   });
-  };
-
-  /**
-   * To create a person for the list
-   * @param  {[list]} list
-   * @param  {[personObject]} personObject
-   * @param  {[fields]} fields
-   * @param  {[function]} createPersonCB
-   * @return {[createdPerson, fields]}
-   * @author Aswin Raj A
-   */
-  let createPerson = (list, personObject, fields, createPersonCB) => {
-    list.people.create(personObject, (listPeopleCreateErr, createdPerson) => {
-      if(listPeopleCreateErr){
-        logger.error("Error while creating person for the list",
-         {error: listPeopleCreateErr,
-           stack: listPeopleCreateErr ? listPeopleCreateErr.stack : ""});
-        createPersonCB(listPeopleCreateErr);
-      }
-      createPersonCB(null, createdPerson, fields);
+  let createOrUpdateFields = (personId, listid, newAdditionalFields,
+    createOrUpdateFieldsCB) => {
+    newAdditionalFields = newAdditionalFields.map(field => {
+      field.personId = personId;
+      return field;
     });
-  };
-
-  /**
-   * Create additionalField values for the created Person
-   * @param  {[createdPerson]} createdPerson
-   * @param  {[fields]} fields
-   * @param  {[function]} createAdditionalFieldsCB
-   * @return {[createdPerson]}
-   * @author Aswin Raj A
-   */
-  let createAdditionalFields = (createdPerson, fields,
-    createAdditionalFieldsCB) => {
-    let fieldValues = [];
-    async.eachSeries(fields, (field, fieldsCB) => {
-      let fieldValueObj = {
-        "fieldId":  field.fieldId,
-        "listId": parseInt(field.listId),
-        "personId": createdPerson.id,
-        "value": field.value
-      };
-      List.app.models.additionalFieldValue.create(fieldValueObj,
-        (fieldCreateErr, createdField) => {
-        if(fieldCreateErr){
-          logger.error("Error while creating additional fields",
-           {error: fieldCreateErr,
-             stack: fieldCreateErr ? fieldCreateErr.stack : ""});
-          createAdditionalFieldsCB(fieldCreateErr);
+    async.eachSeries(newAdditionalFields, (newField, fieldCB) => {
+      List.app.models.additionalFieldValue.find({
+        where:{
+          and:[
+            {fieldId : newField.fieldId},
+            {listId : newField.listId},
+            {personId : newField.personId}
+          ]
         }
-        fieldValues.push(createdField);
-        fieldsCB(null);
+      }, (fieldFindErr, fields) => {
+        if(fieldFindErr){
+          logger.error("Error while finding list", {
+            fieldId : newField.fieldId,
+            listId : newField.listid,
+            personId : newField.personId,
+            error: fieldFindErr,
+            stack: fieldFindErr ? fieldFindErr.stack : ""
+          });
+          return fieldCB(fieldFindErr);
+        }
+        if(lodash.isEmpty(fields)){
+          if(newField.value !== ""){
+            List.app.models.additionalFieldValue.createFields(newField,
+              (fieldCreateErr, field) => {
+              if(fieldCreateErr){
+                logger.error("Error while creating additionalFieldValue", {
+                  field: field,
+                  error: fieldCreateErr,
+                  stack: fieldCreateErr ? fieldCreateErr.stack : ""
+                });
+                return fieldCB(fieldCreateErr);
+              }
+              return fieldCB(null);
+            });
+          } else{
+            return fieldCB(null);
+          }
+        } else{
+          if(newField.value !== ""){
+            List.app.models.additionalFieldValue.updateFields(fields[0],
+              newField, (fieldUpdateErr, result) => {
+              if(fieldUpdateErr){
+                logger.error("Error while updating additionalFieldValue", {
+                  error: fieldUpdateErr,
+                  stack: fieldUpdateErr ? fieldUpdateErr.stack : ""
+                });
+                return fieldCB(fieldUpdateErr);
+              }
+              return fieldCB(null);
+            });
+          } else{
+            return fieldCB(null);
+          }
+        }
       });
     }, (err) => {
       if(err){
-        logger.error("Error while creatign additionalField values",
-         {error: err, stack: err ? err.stack : ""});
-         createAdditionalFieldsCB(err);
-      }
-      let person = JSON.parse(JSON.stringify(createdPerson));
-      person.fieldValues = JSON.parse(
-        JSON.stringify(fieldValues)
-      );
-      createAdditionalFieldsCB(null, person);
-    });
-  };
-
-  /**
-   * While creating a new recepient, if there already exist a entry with the
-   * same recepient's email then update person and additionalField values and
-   * create an entry in personAudit table
-   * @param  {[list]} list
-   * @param  {[person]} person
-   * @param  {[newPersonObject]} newPersonObject
-   * @param  {[additionalFields]} additionalFields
-   * @param  {[function]} updatePersonAuditAndAdditionalFieldsCB
-   * @return {[type]}
-   * @author Aswin Raj A
-   */
-  let updatePersonAuditAndAdditionalFields = (list, person,
-   newPersonObject, additionalFields,
-   updatePersonAuditAndAdditionalFieldsCB) => {
-     async.waterfall([
-       async.apply(createPersonAudit, list, person, newPersonObject,
-         additionalFields),
-       updateCurrentPerson,
-       updateAdditionalFieldValues
-     ], (asyncErr, updatedPerson) => {
-       if(asyncErr){
-         logger.error("Error while updating the person audit and\
-          additionalFieldValue",
-          {error: asyncErr, stack: asyncErr ? asyncErr.stack : ""});
-         return updatePersonAuditAndAdditionalFieldsCB(asyncErr);
-        }
-       return updatePersonAuditAndAdditionalFieldsCB(null, updatedPerson);
-     });
-   };
-
-  /**
-   * First step in updatePersonAuditAndAdditionalFields
-   * - To create an entry in person audit table
-   * @param  {[list]} list
-   * @param  {[oldPerson]} oldPerson
-   * @param  {[newPerson]} newPerson
-   * @param  {[additionalFields]} additionalFields
-   * @param  {[function]} createPersonAuditCB
-   * @return {[newPerson, oldPersonId, list, additionalFields]}
-   * @author Aswin Raj A
-   */
-  let createPersonAudit = (list, oldPerson, newPerson, additionalFields,
-    createPersonAuditCB) => {
-    let auditPersonObj = {};
-    if(oldPerson.firstName !== newPerson.firstName){
-      auditPersonObj.firstName = oldPerson.firstName;
-    }
-    if(oldPerson.middleName !== newPerson.middleName){
-      auditPersonObj.middleName = oldPerson.middleName;
-    }
-    if(oldPerson.lastName !== newPerson.lastName){
-      auditPersonObj.lastName = oldPerson.lastName;
-    }
-    if(oldPerson.salutation !== newPerson.salutation){
-      auditPersonObj.salutation = oldPerson.salutation;
-    }
-
-    if(Object.getOwnPropertyNames(auditPersonObj).length !== emptycount){
-      auditPersonObj.personId = oldPerson.id;
-      List.app.models.personAudit.create(auditPersonObj,
-        (auditCreateErr, createdPersonAudit) => {
-      if(auditCreateErr){
-        logger.error("Error while creating Person Audit",
-        {error: auditCreateErr,
-        stack: auditCreateErr ? auditCreateErr.stack : ""});
-        return createPersonAuditCB(auditCreateErr);
-      }
-        return createPersonAuditCB(null, newPerson, oldPerson.id, list,
-        additionalFields);
-      });
-    } else{
-      createPersonAuditCB(null, newPerson, oldPerson.id, list,
-        additionalFields);
-    }
-  };
-
-  /**
-   * Secone step in updatePersonAuditAndAdditionalFields
-   * - To update the current person data with the recent values
-   * @param  {[newPerson]} newPerson
-   * @param  {[personId]} personId
-   * @param  {[list]} list
-   * @param  {[additionalFields]} additionalFields
-   * @param  {[function]} updatePersonCB
-   * @return {[personId, list, additionalFields]}
-   * @author Aswin Raj A
-   */
-  let updateCurrentPerson = (newPerson, personId, list, additionalFields,
-     updatePersonCB) => {
-
-    List.app.models.person.findById(personId, (personFindErr, person) => {
-     if(personFindErr){
-       logger.error("Error while finding person",
-        {error: personFindErr,
-          stack: personFindErr ? personFindErr.stack : ""});
-       return updatePersonCB(personFindErr);
-     }
-     person.updateAttributes(newPerson,
-       (personUpdateErr, updatedPerson) => {
-       if(personUpdateErr){
-         logger.error("personUpdateErr",
-          {error: personUpdateErr,
-            stack: personUpdateErr ? personUpdateErr.stack : ""});
-         return updatePersonCB(personUpdateErr);
-       }
-       return updatePersonCB(null, personId, list, additionalFields,
-         updatedPerson);
-     });
-    });
-  };
-
-  /**
-   * Third step in updatePersonAuditAndAdditionalFields
-   * - To update the additionalField values for the current person
-   * @param  {[personId]} personId
-   * @param  {[list]} list
-   * @param  {[additionalFields]} additionalFields
-   * @param  {[function]} updateAdditionalFieldValuesCB
-   * @return {[type]}
-   * @author Aswin Raj A
-   */
-  let updateAdditionalFieldValues = (personId, list, additionalFields,
-    updatedPerson, updateAdditionalFieldValuesCB) => {
-    let fieldValues = [];
-    async.eachSeries(additionalFields, (additionalField,
-      additionalFieldsCB) => {
-     List.app.models.additionalFieldValue.find({
-       where: {
-         and: [
-           {personId : personId},
-           {listId: additionalField.listId},
-           {fieldId: additionalField.fieldId}
-         ]
-       }
-     }, (fieldFindErr, fieldData) => {
-       fieldData[0].updateAttribute("value",
-         additionalField.value, (fieldUpdateErr, updatedField) => {
-         if(fieldUpdateErr){
-           logger.error("Error while updating additionalField value",
-            {error: fieldUpdateErr,
-              stack: fieldUpdateErr ? fieldUpdateErr.stack : ""});
-              return updateAdditionalFieldValuesCB(fieldUpdateErr);
-         }
-         fieldValues.push(fieldData[0]);
-         additionalFieldsCB(null);
-       });
-     });
-    }, (err) => {
-     if(err){
-       logger.error("Error while updating additionalField",
-        {error: err, stack: err ? err.stack : ""});
-        return updateAdditionalFieldValuesCB(err);
-     }
-     let person = JSON.parse(JSON.stringify(updatedPerson));
-     person.fieldValues = JSON.parse(
-       JSON.stringify(fieldValues)
-     );
-     return updateAdditionalFieldValuesCB(null, person);
-    });
-  };
-
-  /**
-   * Check if there exist any email in the table with the email created
-   * if the current email exist in the table already, then return that person
-   * @param  {[personEmail]} personEmail
-   * @param  {[function]} emailExistCheckCB
-   * @return {[people]}
-   * @author Aswin Raj A
-   */
-  let emailExistCheck = (personEmail, listId, emailExistCheckCB) =>{
-    let response = {};
-    List.app.models.person.find({
-      where : {
-        email : personEmail,
-      }
-    }, (emailFindErr, people) => {
-      if(emailFindErr){
-        logger.error("Error while finding email",
-         {error: emailFindErr, stack: emailFindErr ? err.stack : ""});
-        return emailExistCheckCB(emailFindErr);
-      }
-      if(lodash.isEmpty(people)){
-        response = {
-          msg : "doesnotExist",
-          people : people
-        };
-        return emailExistCheckCB(null, response);
-      }
-      people[0].lists((listfindErr, lists) => {
-        if(listfindErr){
-          logger.error("Error while finding list for person",
-           {error: listfindErr, stack: listfindErr ? err.stack : ""});
-          return emailExistCheckCB(listfindErr);
-        }
-        async.eachSeries(lists, (list, listCB) => {
-          if(list.id === listId){
-            response = {
-              msg : "exist",
-              people : people
-            };
-            emailExistCheckCB(null, response);
-          } else {
-            response = {
-              msg : "existInDiffList",
-              people : people
-            };
-            emailExistCheckCB(null, response);
-          }
+        logger.error("Error while creating additional field for person", {
+          personId: personId,
+          error: err,
+          stack: err ? err.stack : ""
         });
-      });
+        return createOrUpdateFieldsCB(err);
+      }
+      return createOrUpdateFieldsCB(null);
     });
   };
-
-    /*List.findById(listId, (listFindErr, list) => {
-      if(listFindErr){
-        logger.error("Error while finding list for id:"+listId,
-         {error: listFindErr, stack: listFindErr ? listFindErr.stack : ""});
-        emailExistCheckCB(listFindErr);
-      }
-      list.people((peopleFindErr, people) => {
-        if(peopleFindErr){
-          logger.error("Error while finding person for list:"+listId,
-           {error: peopleFindErr, stack: peopleFindErr ? peopleFindErr.stack : ""});
-          emailExistCheckCB(peopleFindErr);
-        }
-        return emailExistCheckCB(null, people);
-      });
-    });*/
-
-
-
-
-
-    /*List.app.models.person.find({
-      where : {
-        and : [
-          {email : personEmail},
-          {}
-        ]
-      }
-    }, (emailFindErr, people) => {
-      if(emailFindErr){
-        logger.error("Error while finding email",
-         {error: emailFindErr, stack: emailFindErr ? err.stack : ""});
-        return emailExistCheckCB(emailFindErr);
-      }
-      return emailExistCheckCB(null, people);
-    });*/
-
-
 
   List.remoteMethod(
     "updatePersonWithFields", {
@@ -665,7 +475,6 @@ module.exports = function(List) {
   );
 
   /**
-   *
    * @param  {[Context]} ctx [Context Object to get accessToken]
    * @param  {[number]} id [listId]
    * @param  {[Object]} reqParam [Exmaple of an reqParam shown above]
