@@ -403,7 +403,7 @@ module.exports = function(Campaign) {
       applySmartTags,
       appendOpenTracker,
       appendLinkClickTracker,
-      // appendUnsubscribeLink,
+      appendBottomPart,
       prepareScheduledAt,
       preapreFollowUp,
       sendToEmailQueue
@@ -541,23 +541,33 @@ module.exports = function(Campaign) {
    * @param  {[function]} applyUnsubscribeLinkCB Callback function
    * @author Syed Sulaiman M
    */
-  // const appendUnsubscribeLink = (campaign, followup, person, email,
-  //       appendUnsubscribeLinkCB) => {
-  //   if(followup){
-  //     return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
-  //   }
-  //   if(campaign.isOptTextNeeded) {
-  //     let trackerContent = email.content;
-  //     let url = `${serverUrl}/api/`;
-  //     url += `people/${person.id}/`;
-  //     url += `user/${campaign.createdBy}/`;
-  //     url += `campaign/${campaign.id}/unsubscribe`;
-  //     let trackerTag = `<a href='${url}'>${campaign.optText}</a>`;
-  //     trackerContent += trackerTag;
-  //     email.content = trackerContent;
-  //   }
-  //   return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
-  // };
+  const appendBottomPart = (campaign, followup, person, email,
+        appendUnsubscribeLinkCB) => {
+    if(followup){
+      return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
+    }
+    if(!campaign.isAddressNeeded && !campaign.isOptTextNeeded) {
+      return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
+    }
+    let bottomContent = email.content;
+    let bottom = `<div style="width: 100%;border-top: 1px solid #c2c2c2;\
+    padding-top: 0;margin-top: 20px;"><table style="width:100%"><tbody>\
+    <tr style="color:#c2c2c2;"><td style="width: 50%;float: left;padding: 0;">`;
+    bottom += campaign.isAddressNeeded ? campaign.address : "";
+    bottom += `</td></td><td style="width:50%;text-align:right;padding: 0;">`;
+    if(campaign.isOptTextNeeded) {
+      let url = `${serverUrl}/api/`;
+      url += `people/${person.id}/`;
+      url += `user/${campaign.createdBy}/`;
+      url += `campaign/${campaign.id}/unsubscribe`;
+      const optText = campaign.optText ? campaign.optText : Unsubscribe;
+      bottom += `<a href="${url}">${optText}</a>`;
+    }
+    bottom += "</td></tr></tbody></table></div>";
+    bottomContent += bottom;
+    email.content = bottomContent;
+    return appendUnsubscribeLinkCB(null, campaign, followup, person, email);
+  };
 
   /**
    * Appends an image url to track the person whether he opens our email or not

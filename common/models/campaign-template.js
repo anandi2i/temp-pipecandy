@@ -70,7 +70,6 @@ module.exports = function(CampaignTemplate) {
   CampaignTemplate.preparePreviewResponse = (campaign, templates, stepNoMap,
       previewResponseCB) => {
     let response = [];
-    console.log("coming herer==============");
     lodash(templates).forEach(function(template) {
       if(template.followUpId) {
         template.stepNo = stepNoMap[template.followUpId];
