@@ -9,7 +9,6 @@ import CampaignStore from "../../../stores/CampaignStore";
 
 /**
  * Display scheduled mails of a campaign
- * @author Dinesh R <dinesh.r@ideas2it.com>
  */
 class CampaignSchedulebox extends React.Component {
   constructor(props) {

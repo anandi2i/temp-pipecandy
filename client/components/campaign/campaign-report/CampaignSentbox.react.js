@@ -9,7 +9,6 @@ import CampaignStore from "../../../stores/CampaignStore";
 
 /**
  * Display sent mails of a campaign
- * @author Dinesh R <dinesh.r@ideas2it.com>
  */
 class CampaignSentbox extends React.Component {
   constructor(props) {

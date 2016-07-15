@@ -34,7 +34,6 @@ class ListView extends React.Component {
      * @property {array} suggestions The values that match the input field
      * @property {array} metaFields The metaFields array
      * @property {array} listFields The listFields array
-     * @author Dinesh R <dinesh.r@ideas2it.com>
      */
     this.initialStateValues = {
       listName: "",

@@ -9,26 +9,25 @@ class TabsMenu extends React.Component {
    * Call handleClick props function to set active-tab
    * @param {string} index active-tab
    */
-  handleClick(index) {
-   this.props.handleClick(index);
+  handleClick(tabId) {
+   this.props.handleClick(tabId);
   }
 
   render() {
-    const _tabs = this.props.tabNames;
-    let li = _tabs.map((item, key) => {
-      key = key.toString();
+    const {tabs, activeTabId, mainClass} = this.props;
+    const li = tabs.map((tab, index) => {
       return (
-        <li key={key}>
-          <a onClick={() => this.handleClick(key)}
-            className={this.props.activeTab === key ? "active" : ""}>
-            {item.name}
+        <li key={index}>
+          <a onClick={() => this.handleClick(tab.id)}
+            className={activeTabId === tab.id ? "active" : ""}>
+            {tab.name}
           </a>
         </li>
       );
     });
 
     return (
-      <div className={this.props.mainClass}>
+      <div className={mainClass}>
         <div className="row inner-tabs">
           <nav>
             <div className="nav-wrapper">

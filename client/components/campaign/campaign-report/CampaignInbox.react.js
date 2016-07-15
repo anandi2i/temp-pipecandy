@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import moment from "moment";
+import _ from "underscore";
 import CampaignFooter from "./CampaignFooter.react";
 import CampaignReportHead from "../CampaignReportHead.react";
 import Spinner from "../../Spinner.react";
@@ -18,22 +19,36 @@ class CampaignInbox extends React.Component {
      * Initial state values
      * @property {object} inboxMails
      * @property {boolean} requestSent
-     * @property {string} activeTab
+     * @property {string} activeTabId
      * @property {array} tabs
-     * @property {array} tabContent
      */
     this.state = {
-      inboxMails : {
-        data: []
-      },
+      inboxMails : [],
       requestSent: false,
-      activeTab: "0",
-      tabs: ["0", "1", "2"],
-      tabContent: [{
+      activeTabId: "all",
+      tabs: [{
+        id: "all",
         name: "ALL",
       },
       {
+        id: "actionable",
         name: "ACTIONABLE",
+      },
+      {
+        id: "out-of-office",
+        name: "OUT OF OFFICE",
+      },
+      {
+        id: "nurture",
+        name: "NURTURE",
+      },
+      {
+        id: "negative",
+        name: "NEGATIVE",
+      },
+      {
+        id: "bounced",
+        name: "BOUNCED",
       }]
     };
   }
@@ -54,8 +69,8 @@ class CampaignInbox extends React.Component {
     CampaignActions.getInboxMails({
       id: this.props.params.id,
       start: start,
-      end: limit,
-      actionable: false
+      limit: limit,
+      classification: this.state.activeTabId
     });
   }
 
@@ -75,9 +90,7 @@ class CampaignInbox extends React.Component {
   onStoreChange = () => {
     const inboxMails = CampaignStore.getInboxMails();
     this.setState({
-      inboxMails: {
-        data: this.state.inboxMails.data.concat(inboxMails)
-      },
+      inboxMails: this.state.inboxMails.concat(inboxMails),
       requestSent: false
     });
     displayError(CampaignStore.getError());
@@ -89,7 +102,7 @@ class CampaignInbox extends React.Component {
    * bottom of the page
    */
   handleOnScroll = () => {
-    const {inboxMails, requestSent, activeTab, tabs} = this.state;
+    const {inboxMails, requestSent, activeTabId} = this.state;
     const docEl = document.documentElement;
     const docBody = document.body;
     const scrollTop = (docEl && docEl.scrollTop) || docBody.scrollTop;
@@ -97,21 +110,17 @@ class CampaignInbox extends React.Component {
     const clientHeight = docEl.clientHeight || window.innerHeight;
     const scrolledToBottom = Math.ceil(scrollTop+clientHeight) >= scrollHeight;
     const next = 1;
-    const nextStartRange = inboxMails.data.length + next;
+    const nextStartRange = inboxMails.length + next;
     const limit = 10;
     if (scrolledToBottom) {
       if (requestSent) {
         return;
       }
-      let actionable = false;
-      if(activeTab === tabs[1]) {
-        actionable = true;
-      }
       CampaignActions.getInboxMails({
         id: this.props.params.id,
         start: nextStartRange,
-        end: limit,
-        actionable: actionable
+        limit: limit,
+        classification: activeTabId
       });
       this.setState({requestSent: true});
     }
@@ -122,24 +131,20 @@ class CampaignInbox extends React.Component {
    * Call to load the Inbox mails
    * @param {string} index
    */
-  handleClick = (index) => {
+  handleClick = (tabId) => {
+    const start = 0;
+    const limit = 10;
     this.setState({
-      activeTab: index
+      activeTabId: tabId
     });
-    let actionable = false;
-    if(index === this.state.tabs[1]) {
-      actionable = true;
-    }
     CampaignActions.getInboxMails({
       id: this.props.params.id,
-      start: 0,
-      end: 10,
-      actionable: actionable
+      start: start,
+      limit: limit,
+      classification: tabId
     });
     this.setState({
-      inboxMails : {
-        data: []
-      },
+      inboxMails : [],
       requestSent: true
     });
   }
@@ -157,7 +162,9 @@ class CampaignInbox extends React.Component {
    * @return {ReactElement} markup
    */
   render() {
-    const {inboxMails, requestSent, activeTab, tabContent} = this.state;
+    const {inboxMails, requestSent, activeTabId, tabs} = this.state;
+    const activeTabName =
+      _.findWhere(tabs, {id: activeTabId}).name.toLowerCase();
     return (
       <div>
         <div className="m-b-120">
@@ -186,13 +193,12 @@ class CampaignInbox extends React.Component {
               </div>
             </div>
           </div>
-          <TagMenu activeTab={activeTab}
-            handleClick={this.handleClick} tabNames={tabContent}
-            mainClass={"container"} />
+          <TagMenu activeTabId={activeTabId} tabs={tabs}
+            handleClick={this.handleClick} mainClass={"container"} />
           <div>
             <div className="container">
               {
-                inboxMails.data.map((inbox, key) => {
+                inboxMails.map((inbox, key) => {
                   const subject = $(`<div>${inbox.subject}</div>`).text();
                   const content = $(`<div>${inbox.content}</div>`).text();
                   const receivedDate = moment(inbox.receivedDate)
@@ -237,8 +243,8 @@ class CampaignInbox extends React.Component {
               </div>
             </div>
             <div className="container center-align m-t-20"
-              style={{display: inboxMails.data.length ? "none" : "block"}} >
-              Inbox seems to be empty!
+              style={{display: inboxMails.length ? "none" : "block"}} >
+              {activeTabName} seems to be empty!
             </div>
           </div>
         </div>

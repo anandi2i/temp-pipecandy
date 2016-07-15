@@ -67,7 +67,7 @@ class ViewCampaign extends React.Component {
             </div>
           : ""
         }
-        {isRecentCampaign === "displayMessage"
+        {isExistCampaign === "displayMessage"
           ? <CampaignInfoMsg displayPage="dashboard" />
           : ""
         }

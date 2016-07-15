@@ -95,13 +95,13 @@ const CampaignApi = {
   },
   /**
    * Get inbox mails
-   * @param  {object} data - The data includes campaign id, start and end count
+   * @param  {object} data - The data includes campaign id, start, limit, classification
    * @return {object} Promise
    */
   getInboxMails(data) {
-    const {id, start, end, actionable} = data;
-    return api.get(`/api/inboxMails/campaign/${id}?` +
-      `start=${start}&limit=${end}&actionable=${actionable}`);
+    const {id, start, limit, classification} = data;
+    return api.get(`/api/inboxMails/campaign/${id}/${classification}?\
+      start=${start}&limit=${limit}`);
   },
   /**
    * Get scheduled mails
@@ -110,8 +110,8 @@ const CampaignApi = {
    */
   getScheduledMails(data) {
     const {id, start, end} = data;
-    return api.get(`/api/emailsQueue/scheduledMails/campaign/${id}?` +
-      `start=${start}&limit=${end}`);
+    return api.get(`/api/emailsQueue/scheduledMails/campaign/${id}?\
+      start=${start}&limit=${end}`);
   },
   /**
    * Get sent mails
@@ -120,8 +120,8 @@ const CampaignApi = {
    */
   getSentMails(data) {
     const {id, start, end} = data;
-    return api.get(`/api/sentMailBoxes/sentMails/campaign/${id}?` +
-      `start=${start}&limit=${end}`);
+    return api.get(`/api/sentMailBoxes/sentMails/campaign/${id}?\
+      start=${start}&limit=${end}`);
   }
 };
 
