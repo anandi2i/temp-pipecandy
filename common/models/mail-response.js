@@ -41,7 +41,15 @@ module.exports = function(MailResponse) {
       },
       order: "receivedDate desc"
     }, (mailResponseEntryErr, mailResponseEntry) => {
-      callback(mailResponseEntry);
+      if(mailResponseEntryErr) {
+        logger.error("Error while getting SentBoxMail", {
+            error: mailResponseEntryErr,
+            stack: mailResponseEntryErr.stack,
+            input: {userId:userId, mailId:mailId}
+        });
+        return callback(mailResponseEntryErr);
+      }
+      return callback(null, mailResponseEntry);
     });
   };
 

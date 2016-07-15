@@ -73,6 +73,32 @@ module.exports = function(SentMailBox) {
     });
   };
 
+  /**
+   * Get Initial Message Sent By User
+   * @param  {Number}   userId
+   * @param  {Function} callback
+   * @return {SentMailBox}
+   * @author Syed Sulaiman M
+   */
+  SentMailBox.getInitialMsgforUser = (userId, callback) => {
+    SentMailBox.findOne({
+      where: {
+        userId: userId
+      },
+      order: "createdAt ASC"
+    }, (sentMailBoxErr, sentMailBox) => {
+      if(sentMailBoxErr) {
+        logger.error("Error while getting SentBoxMail", {
+            error: sentMailBoxErr,
+            stack: sentMailBoxErr.stack,
+            input: {userId:userId}
+        });
+        return callback(sentMailBoxErr);
+      }
+      return callback(null, sentMailBox);
+    });
+  };
+
   SentMailBox.remoteMethod(
     "sentMails", {
       description: "Get Sent Mails",

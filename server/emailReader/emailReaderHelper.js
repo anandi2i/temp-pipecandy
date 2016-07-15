@@ -41,43 +41,53 @@ function readUserMails(App, gmail, auth, param, callback) {
     }
 
     let messageSubList = lodash.take(response.messages, (messagesToRead++));
-    async.eachSeries(messageSubList, function(message, callbackMessage) {
-      App.sentMailBox.findByUserIdAndThreadId(param.userId, message.threadId,
+    let grpdMsgListByThrdId = lodash.groupBy(messageSubList, "threadId");
+    const threadIds = lodash.keys(grpdMsgListByThrdId);
+
+    async.eachSeries(threadIds, function(threadId, threadIdCB) {
+      App.sentMailBox.findByUserIdAndThreadId(param.userId, threadId,
             (sentMailErr, sentMail) => {
         if(sentMailErr) {
           console.error("Error while getting Sent Mail for User Id - ",
               param.userId, "for Thread Id", message.threadId, sentMailErr);
-          callbackMessage(sentMailErr);
+          threadIdCB(sentMailErr);
         } else {
           if(sentMail) {
-            getMessage(gmail, auth, param.userMailId, message.id,
+            getMessageByThreadId(gmail, auth, param.userMailId, threadId,
                   (error, response) => {
-              let payload = response.payload;
-              if (payload) {
-                let mailResponse =
-                  constructResponse(param.userId, sentMail, payload, response);
-                if (mailResponse.receivedDate) {
-                  if (!messageFound && param.lastMsgDate) {
+              if(error) threadIdCB(error);
+              let messagesInThread = response.messages;
+              let messagesToProcess = getMessageToBeProcessed(messagesInThread,
+                  grpdMsgListByThrdId, threadId);
+              async.eachSeries(messagesToProcess, function(message, messageCB) {
+                let payload = message.payload;
+                if (payload) {
+                  let mailResponse =
+                    constructResponse(param.userId, sentMail, payload, message);
+                  if (mailResponse.receivedDate && !messageFound
+                        && param.lastMsgDate) {
                     messageFound =
                       (mailResponse.receivedDate < param.lastMsgDate)
                       ? true : false;
-                    if (messageFound) return callbackMessage(true);
+                    if (messageFound) return messageCB(null);
                   }
+                  processMailResponse(App, param, mailResponse, sentMail,
+                        (error, result) => {
+                    messageCB(null);
+                  });
+                } else {
+                  messageCB(null);
                 }
-                processMailResponse(App, param, mailResponse, sentMail,
-                      (error, result) => {
-                  callbackMessage(null);
-                });
-              } else {
-                callbackMessage(null);
-              }
+              }, () => {
+                  threadIdCB(null);
+              });
             });
           } else {
-            callbackMessage(null);
+            threadIdCB(null);
           }
         }
       });
-    }, (error, result) => {
+    }, () => {
       if (param.messageId && !messageFound && param.nextPageToken) {
         readUserMails(App, gmail, auth, param, callback);
       } else {
@@ -130,14 +140,14 @@ function getMessageList(App, gmail, auth, param, callback) {
  * @param {labelIds} Labels to pull filter the mails.
  * @param {callback} A callback function.
  */
-function getMessage(gmail, auth, userMailId, messageId, callback) {
-  gmail.users.messages.get({
+function getMessageByThreadId(gmail, auth, userMailId, threadId, callback) {
+  gmail.users.threads.get({
     auth: auth,
     userId: userMailId,
-    id: messageId
+    id: threadId
   }, (error, response) => {
     if (error) {
-      console.error("Error while Getting Message", error);
+      console.error("Error while Getting Message By Thread Id", error);
       callback(error);
     } else {
       callback(null, response);
@@ -171,8 +181,7 @@ function constructResponse(userId, sentMail, payload, response) {
   mailResponse.userId = userId;
   mailResponse.personId = sentMail.toPersonId;
   let headers = payload.headers;
-  let date = lodash.find(headers,
-    lodash.matchesProperty("name", "Date"));
+  let date = lodash.find(headers, lodash.matchesProperty("name", "Date"));
   if (date) {
     mailResponse.receivedDate = new Date(date.value);
   }
@@ -184,23 +193,19 @@ function constructResponse(userId, sentMail, payload, response) {
   if (deliveredTo) {
     mailResponse.deliveredToEmailId = deliveredTo.value;
   }
-  let from = lodash.find(headers,
-    lodash.matchesProperty("name", "From"));
+  let from = lodash.find(headers, lodash.matchesProperty("name", "From"));
   if (from) {
     mailResponse.fromEmailId = from.value;
   }
-  let to = lodash.find(headers,
-    lodash.matchesProperty("name", "To"));
+  let to = lodash.find(headers, lodash.matchesProperty("name", "To"));
   if (to) {
     mailResponse.toEmailId = to.value;
   }
-  let subject = lodash.find(headers,
-    lodash.matchesProperty("name", "Subject"));
+  let subject = lodash.find(headers, lodash.matchesProperty("name", "Subject"));
   if (subject) {
     mailResponse.subject = subject.value;
   }
-  let cc = lodash.find(headers,
-    lodash.matchesProperty("name", "Cc"));
+  let cc = lodash.find(headers, lodash.matchesProperty("name", "Cc"));
   if (cc) {
     mailResponse.ccMailId = cc.value;
   }
@@ -214,7 +219,9 @@ function constructResponse(userId, sentMail, payload, response) {
   if (body) {
     let mailBody = new Buffer(body, "base64");
     mailBody = mailBody.toString();
-    let regExIndex = mailBody.match(regExBody);
+    let mailBodyTmp = mailBody.replace(/\r?\n|\r/g, " ");
+    mailBodyTmp = mailBodyTmp.toString();
+    let regExIndex = mailBodyTmp.match(regExBody);
     let replyMsg = mailBody.trim();
     if (regExIndex) {
       const zero = 0;
@@ -266,7 +273,7 @@ function processMailResponse(App, param, mailResponse, sentMail, callback) {
       function(tableUpdateCB) {
         updateRelatedTables(App, param, response, sentMail, (error, response)=>{
           if(error) {
-            console.log("Error while updating Tables for User Id - ",
+            console.error("Error while updating Tables for User Id - ",
               param.userId, "for Thread Id", message.threadId, error);
           }
           tableUpdateCB(null);
@@ -312,9 +319,10 @@ function updateRelatedTables(App, param, mailResponse, sentMail, callback) {
 function updateSentMailBox(App, param, mailResponse, sentMail, callback) {
   App.sentMailBox.findByUserIdAndThreadId(param.userId, mailResponse.threadId,
         (err, sentMailBoxInst) => {
+    let replyMsg = getPlainTextFromBody(mailResponse.content);
     const one = 1;
     let attrToUpdate = {
-      content: mailResponse.content,
+      content: replyMsg,
       count: sentMailBoxInst.count + one,
       sentDate: mailResponse.receivedDate
     };
@@ -333,6 +341,7 @@ function updateSentMailBox(App, param, mailResponse, sentMail, callback) {
  * @author Syed Sulaiman M
  */
 function updateInboxMail(App, param, mailResponse, sentMail, callback) {
+  let replyMsg = getPlainTextFromBody(mailResponse.content);
   let inboxMailInst = {
     fromEmailId: mailResponse.fromEmailId,
     toEmailId: mailResponse.toEmailId,
@@ -340,7 +349,7 @@ function updateInboxMail(App, param, mailResponse, sentMail, callback) {
     mailId: mailResponse.mailId,
     count: 1,
     subject: mailResponse.subject,
-    content: mailResponse.content,
+    content: replyMsg,
     receivedDate: mailResponse.receivedDate,
     personId: sentMail.toPersonId,
     campaignId: sentMail.campaignId,
@@ -369,6 +378,33 @@ function getPlainTextFromBody(content) {
   }
   replyMsg = emojiStrip(replyMsg);
   return replyMsg;
+}
+
+/**
+ * Get Messages To Be Processed
+ *  This method will filter already Processed Messages
+ * @param  {[Object]} messagesInThread
+ * @param  {[Object]} grpdMsgListByThrdId
+ * @return {[Object]}      List of Message Objects to be Processed
+ * @author Syed Sulaiman M
+ */
+function getMessageToBeProcessed(messagesInThread, grpdMsgListByThrdId,
+      threadId) {
+  let messages = grpdMsgListByThrdId[threadId];
+  let messagesToProcess = lodash.filter(messagesInThread, function(o) {
+    let filteredMsgs = lodash.find(messages, {"id":o.id});
+    return !lodash.isEmpty(filteredMsgs);
+  });
+  messagesToProcess = lodash.sortBy(messagesToProcess, function(o) {
+    let headers = o.payload.headers;
+    let date = lodash.find(headers, lodash.matchesProperty("name", "Date"));
+    if (!date) {
+      console.error("Date not Available for threadId", threadId, headers);
+      return new Date();
+    }
+    return new Date(date.value);
+  });
+  return messagesToProcess;
 }
 
 module.exports = {

@@ -18,9 +18,6 @@ const clientSecret = config.googleCredentials.installed.client_secret;
 const clientId = config.googleCredentials.installed.client_id;
 const redirectUrl = config.googleCredentials.installed.redirect_uris[0];
 
-const OAuth2 = google.auth.OAuth2;
-const oauth2Client = new OAuth2(clientId, clientSecret, redirectUrl);
-
 /**
  * Workflow initiator to Read User Mail Box
  */
@@ -56,7 +53,7 @@ function getUsers(callback) {
  * @author Syed Sulaiman M
  */
 function initiateEmailRead(users, callback) {
-  async.eachSeries(users, (user, userCB) => {
+  async.each(users, (user, userCB) => {
     var userJson = user.toJSON();
     if(!userJson.identity || !userJson.identity.profile) {
       console.log(`Profile not found ${user}`);
@@ -64,14 +61,26 @@ function initiateEmailRead(users, callback) {
     }
     let userMailId = userJson.identity.profile.emails[0].value;
     let userId = user.id;
+    const OAuth2 = google.auth.OAuth2;
+    const oauth2Client = new OAuth2(clientId, clientSecret, redirectUrl);
     oauth2Client.credentials.access_token =
                       userJson.identity.credentials.accessToken;
     oauth2Client.credentials.refresh_token =
                       userJson.identity.credentials.refreshToken;
-    readEmail(oauth2Client, userId, userMailId, function(err, userMailId) {
-      console.log("Emails fetched for user mail id - ", userMailId);
+    if(!userJson.identity.credentials.accessToken &&
+        !userJson.identity.credentials.refreshToken) {
+      console.log("Access or Refresh Token not available for User Id", userId);
       userCB(null, userMailId);
-    });
+    } else {
+      readEmail(oauth2Client, userId, userMailId, function(err, userMailId) {
+        if(err) {
+          console.log("Error fetching mails for user mail id-", userMailId);
+        } else {
+          console.log("Emails fetched for user mail id-", userMailId);
+        }
+        userCB(null, userMailId);
+      });
+    }
   }, (err, result) => {
     if(err){
       console.log("Error in init email reader");
@@ -93,10 +102,11 @@ function initiateEmailRead(users, callback) {
 function readEmail(auth, userId, userMailId, callback) {
   let messageId = null;
   let date = null;
-  App.MailResponse.getLatestResponse(userId, userMailId, function(mailResponse){
-    if (mailResponse) {
-      messageId = mailResponse.mailId;
-      date = mailResponse.receivedDate;
+  getReadLastMessage(userId, userMailId, function(error, lastReadMessage) {
+    if(error) callback(error);
+    if (lastReadMessage) {
+      messageId = lastReadMessage.messageId;
+      date = lastReadMessage.date;
     }
     let param = {
       userId: userId,
@@ -108,6 +118,41 @@ function readEmail(auth, userId, userMailId, callback) {
     emailReaderHelper.readUserMails(App, gmail, auth, param,
         function(err, response) {
       callback(err, userMailId);
+    });
+  });
+}
+
+/**
+ * Get User's Last Read Mail
+ *
+ * @param  {Number}   userId
+ * @param  {String}   userMailId
+ * @param  {Function} callback
+ * @author Syed Sulaiman M
+ */
+function getReadLastMessage(userId, userMailId, callback) {
+  let lastReadMessage = null;
+  App.MailResponse.getLatestResponse(userId, userMailId,
+      function(error, mailResponse) {
+    if(error) return callback(error);
+    if (mailResponse) {
+      lastReadMessage = {
+        messageId: mailResponse.mailId,
+        date: mailResponse.receivedDate
+      };
+      return callback(null, lastReadMessage);
+    }
+    App.sentMailBox.getInitialMsgforUser(userId,
+        function(error, initialMsg) {
+      if(error) return callback(error);
+      if (initialMsg) {
+        lastReadMessage = {
+          messageId: initialMsg.mailId,
+          date: initialMsg.sentDate
+        };
+        return callback(null, lastReadMessage);
+      }
+      return callback(null, lastReadMessage);
     });
   });
 }

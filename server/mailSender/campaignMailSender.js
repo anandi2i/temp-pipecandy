@@ -106,9 +106,16 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
             email: userCredential.profile.emails[0],
             credential: userCredential.credentials
           };
-          mailSender(emailQueueEntry, mailContent, function(err) {
+          if(!userCredential.credential.accessToken &&
+              !userCredential.credential.refreshToken) {
+            console.log("Access or Refresh Token not available for User Id",
+                emailQueueEntry.userId);
             emailQueueCB();
-          });
+          } else {
+            mailSender(emailQueueEntry, mailContent, function(err) {
+              emailQueueCB();
+            });
+          }
         });
     },
     function(err) {
