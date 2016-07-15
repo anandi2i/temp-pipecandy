@@ -1,4 +1,5 @@
 import lodash from "lodash";
+import async from "async";
 
 module.exports = function(CampaignAudit) {
 
@@ -45,6 +46,52 @@ module.exports = function(CampaignAudit) {
         return isEligibleForFollowupCB(auditFindErr, false);
       }
       return isEligibleForFollowupCB(null, !lodash.isEmpty(audits));
+    });
+  };
+
+
+  /**
+   * API to update isEmili
+   * @param  {[type]} campaignId [description]
+   * @param  {[type]} updateCB   [description]
+   * @return {[type]}            [description]
+   * @author Aswin Raj A
+   */
+  CampaignAudit.updateFollowUpEligiblity = (campaignId, personId, updateCB) => {
+    CampaignAudit.find({
+      where: {
+        campaignId: campaignId,
+        personId: personId
+      }
+    }, (auditFindErr, campaignAudits) => {
+      if(auditFindErr){
+        logger.error("Error while finding campaign audit", {
+          input:{campaignId: campaignId, personId: personId},
+          error: auditFindErr, stack: auditFindErr.stack
+        });
+        return updateCB(auditFindErr);
+      }
+      async.each(campaignAudits, (campaignAudit, auditEachCB) => {
+        campaignAudit.updateAttribute("isEligibleToFollowUp", false,
+          (auditUpdateErr, updatedAudit) => {
+          if(auditUpdateErr){
+            logger.error("Error while finding campaign audit", {
+              input:{campaignId: campaignId},
+              error: auditUpdateErr,
+              stack: auditUpdateErr.stack
+            });
+            return auditEachCB(auditUpdateErr);
+          }
+          return auditEachCB(null);
+        });
+      }, (err) => {
+        if(err){
+          logger.error("Error while updating followup eligibility status in\
+           campaignAudit");
+           return updateCB(err);
+        }
+        return updateCB(null);
+      });
     });
   };
 

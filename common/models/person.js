@@ -356,7 +356,14 @@ module.exports = function(Person) {
             const errorMessage = errorMessages.SERVER_ERROR;
             return getOrSaveUnsubscribeCB(errorMessage);
           }
-          return getOrSaveUnsubscribeCB(null, unsubscribeInst);
+          Person.app.models.campaignAudit
+            .updateFollowUpEligiblity(campaignId, personId, (updateErr) => {
+            if(updateErr){
+              logger.error(updateErr);
+              return getOrSaveUnsubscribeCB(updateErr);
+            }
+            return getOrSaveUnsubscribeCB(null, unsubscribeInst);
+          });
         });
     });
   };

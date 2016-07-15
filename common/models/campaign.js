@@ -1425,6 +1425,81 @@ module.exports = function(Campaign) {
       }
     );
 
+
+  /**
+   * Process 1 of listMetricEntry
+   * - Get all the list for the campaign in which the current person exist
+   * @param  {[campaignId]} campaignId
+   * @param  {[personId]} personId
+   * @param  {[function]} getListCB
+   * @return {[campaignList, campaignId, personId]}
+   * @author Aswin Raj A
+   */
+  Campaign.getCampaignListForPerson = (campaignId, personId, getListCB) => {
+    async.parallel({
+      campaign: (campaignCB) => {
+        Campaign.findById(campaignId,
+          (campaignFindErr, campaign) => {
+          if(campaignFindErr || !campaign){
+            const errParam = campaignFindErr || "Campaign not found!";
+            logger.error("Error while finding campaign", {
+              input: {campaignId: campaignId},
+              error: campaignFindErr,
+              stack: campaignFindErr ? campaignFindErr.stack : ""
+            });
+            return campaignCB(errParam);
+          }
+          campaign.lists((listFindErr, campaignList) => {
+            if(listFindErr){
+              const errParam = listFindErr || "No List for Campaign!";
+              logger.error("Error while finding list for campaign", {
+                input: {campaignId: campaignId},
+                error: listFindErr,
+                stack: listFindErr ? listFindErr.stack : ""
+              });
+              return campaignCB(errParam);
+            }
+            return campaignCB(null, campaignList);
+          });
+        });
+      },
+      person: (personCB) => {
+        Campaign.app.models.person.findById(personId,
+          (personFindErr, person) => {
+          if(personFindErr || !person){
+            const errParam = personFindErr || "Person not found!";
+            logger.error("Error while finding person", {
+              input: {personId: personId},
+              err: personFindErr,
+              stack: personFindErr ? personFindErr.stack : ""
+            });
+            return personCB(errParam);
+          }
+          person.lists((listFindErr, personList) => {
+            if(listFindErr){
+              const errParam = listFindErr || "No List for Person!";
+              logger.error("Error while finding list for person", {
+                input: {personId:personId},
+                error: listFindErr,
+                stack: listFindErr ? listFindErr.stack : ""
+              });
+              return personCB(errParam);
+            }
+            return personCB(null, personList);
+          });
+        });
+      }
+    }, (parallelErr, result) => {
+      if(parallelErr) {
+        logger.error(parallelErr);
+        return getListCB(parallelErr);
+      }
+      let campaignList = lodash.intersectionBy(result.campaign,
+        result.person, "id");
+      return getListCB(null, campaignList, campaignId, personId);
+    });
+  };
+
 //observers
   /**
    * Updates the updatedAt column with current Time

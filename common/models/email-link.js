@@ -70,8 +70,8 @@ module.exports = function(EmailLink) {
           stack: linkFindErr.stack});
         return res.redirect(config.redirectURL);
       }
-      //If the request is not from www.pipecandy.com alone process it, else just
-      //redirect it
+      // If the request is not from www.pipecandy.com alone process it, else just
+      // redirect it
       if(req.headers.referer !== config.emailHost){
         isCampaignSent(reqParams.campaignId,
           (isCampaignSentErr, isCampaignSentResponse) => {
@@ -83,7 +83,15 @@ module.exports = function(EmailLink) {
                   stack: updateMetricsErr.stack});
                 return res.redirect(config.redirectURL);
               }
-              res.redirect(link.linkurl);
+              EmailLink.app.models.campaignAudit
+                .updateFollowUpEligiblity(campaignId, personId,
+                  (updateErr) => {
+                if(updateErr){
+                  logger.error(updateErr);
+                  res.redirect(config.redirectURL);
+                }
+                res.redirect(link.linkurl);
+              });
             });
           } else{
             res.redirect(link.linkurl);
@@ -132,7 +140,7 @@ module.exports = function(EmailLink) {
         updateAllLinkRelatedMetrics(reqParams, (updateCounterCacheErr) => {
           return updateMetricsCB(updateCounterCacheErr);
         });
-      } else{
+      } else {
         const clikedlinks = lodash.find(linkMetrics, lodash.matchesProperty(
           "emailLinkId", lodash.toInteger(reqParams.emailLinkId)));
         if(clikedlinks) {
@@ -140,12 +148,12 @@ module.exports = function(EmailLink) {
             (linkMetricAddMetricsErr) => {
               return updateMetricsCB(linkMetricAddMetricsErr);
             });
-        } else{
+        } else {
           updatelinkAndLinkMetrics(reqParams, (updatelinkAndLinkMetricsErr) => {
             return updateMetricsCB(updatelinkAndLinkMetricsErr);
           });
-        } //else if(clikedlinks)
-      } //else if(lodash.isEmpty(linkMetrics)){
+        }
+      }
     });
   };
 

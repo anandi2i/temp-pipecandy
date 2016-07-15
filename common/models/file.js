@@ -106,7 +106,7 @@ module.exports = function(File) {
         });
         uploadCB(asyncErr);
       }
-      uploadCB(null);
+      uploadCB(null, result);
     });
   };
 
@@ -207,7 +207,7 @@ module.exports = function(File) {
         logger.error("Error while parsing csv file", asyncErr);
         return parseCSVCB(asyncErr);
       }
-      parseCSVCB(null);
+      parseCSVCB(null, result);
     });
   };
 
@@ -268,12 +268,17 @@ module.exports = function(File) {
    * @return {[boolean]}
    * @author Aswin Raj A
    */
-  let isValidData = (personData, isValidDataCB) => {
-    if(personData["First Name"] === "" || personData["Last Name"] ==="" ||
-      personData.Email === ""){
-      isValidDataCB(false);
+  let isValidData = (person, isValidDataCB) => {
+    if(person["First Name"] && person["Last Name"] && person.Email){
+      if(person["First Name"].trim() === "" ||
+        person["Last Name"].trim() === "" ||
+        person.Email.trim() === ""){
+          isValidDataCB(false);
+        } else{
+          isValidDataCB(true);
+        }
     } else{
-      isValidDataCB(true);
+      isValidDataCB(false);
     }
   };
 
@@ -293,6 +298,9 @@ module.exports = function(File) {
     File.app.models.additionalField.getAdditionalFieldsForList(listid,
       (listFieldErr, fieldsForList) => {
       if(listFieldErr){
+        logger.error("Error while finding list", {
+          input:{listid:listid},
+          error: listFieldErr, stack: listFieldErr.stack});
         return savePersonWithAdditionalFieldsCB(listFieldErr);
       }
       async.eachSeries(streamData, (personData, personCB) => {
