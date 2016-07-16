@@ -18,9 +18,13 @@ class CampaignSentbox extends React.Component {
      * Initial state values
      * @property {object} sentMails
      * @property {boolean} requestSent
+     * @property {boolean} isEmailThreadView
+     * @property {string} threadId
      */
     this.state = {
       requestSent: false,
+      isEmailThreadView: false,
+      threadId: "",
       sentMails : {
         data: []
       }
@@ -108,12 +112,28 @@ class CampaignSentbox extends React.Component {
   }
 
   /**
-   * get email thread API
+   * get email thread and open modal popup
+   * @param  {string} threadId - email thread id
    */
-  getEmailThread(id) {
-    CampaignActions.getEmailThread(id);
-    this.refs.emailthread.openModal();
-  }
+   getEmailThread(threadId) {
+     if(threadId){
+       this.setState({
+         threadId: threadId,
+         isEmailThreadView: true
+       }, () => {
+         this.refs.emailthread.openModal();
+       });
+     }
+   }
+
+   /**
+    * Remove email thread view container after close modal popup
+    */
+   closeCallback = () => {
+     this.setState({
+       isEmailThreadView: false
+     });
+   }
 
   /**
    * render
@@ -121,7 +141,7 @@ class CampaignSentbox extends React.Component {
    * @return {ReactElement} markup
    */
   render() {
-    const {sentMails, requestSent} = this.state;
+    const {sentMails, requestSent, isEmailThreadView, threadId} = this.state;
     const campaignId = this.props.params.id;
     return (
       <div>
@@ -187,7 +207,15 @@ class CampaignSentbox extends React.Component {
             Sent mails seems to be empty!
           </div>
         </div>
-        <EmailThreadView ref="emailthread" />
+        {
+          isEmailThreadView
+          ?
+            <EmailThreadView
+              ref="emailthread"
+              threadId={threadId}
+              closeCallback={this.closeCallback} />
+          : ""
+        }
         <CampaignFooter campaignId={campaignId} activePage={"sent"}/>
       </div>
     );

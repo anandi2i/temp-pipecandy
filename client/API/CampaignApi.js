@@ -123,6 +123,11 @@ const CampaignApi = {
     return api.get(`/api/sentMailBoxes/sentMails/campaign/${id}?` +
       `start=${start}&limit=${end}`);
   },
+  /**
+   * Get email thread
+   * @param  {object} id - Email thread id to get all emails in that thread
+   * @return {object} Promise
+   */
   getEmailThread(id) {
     return api.get(`/api/MailResponses/threadId/${id}`);
   }

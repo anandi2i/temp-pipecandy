@@ -57,17 +57,17 @@ const CampaignReportStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("threadView", callback);
   },
 
-  // get other stats metrics data
+  // Get other stats metrics data
   getOtherStatsMetrics() {
     return _otherCampaignMetrics;
   },
 
-  // check is campaign is existing
+  // Check is campaign is existing
   getIsExistCampaign() {
     return _isExistCampaign;
   },
 
-  // get email thread's
+  // Get email thread's
   getEmailThread() {
     return emailThread;
   },
@@ -110,10 +110,10 @@ AppDispatcher.register(function(payload) {
         CampaignApi.getEmailThread(action.id).then((response) => {
           _error = "";
           emailThread = response.data;
-          console.log("---------------------222---", emailThread);
           CampaignReportStore.emitThreadViewChange();
         }, (err) => {
           _error = err.message;
+          CampaignReportStore.emitThreadViewChange();
         });
         break;
     default:

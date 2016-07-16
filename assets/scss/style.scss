@@ -15,7 +15,7 @@ html {
   .footer-tabs {
     a {
       cursor: pointer;
-      padding: 12px 0px;
+      padding: 12px 0;
       color: $white;
       display: inline-block;
       width: 25%;
@@ -995,7 +995,7 @@ $lines-to-show: 8;
   &:hover {
     background-color: $light-bg-clr;
   }
-  &.waves-effect{
+  &.waves-effect {
     display: block;
   }
 }
@@ -1328,6 +1328,10 @@ span#autocomplete {
       border: none;
       padding: 0;
       height: auto;
+      width: calc(100% - 20px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       .sub-head {
         font-size: 12px;
         padding-left: 15px;
@@ -1378,6 +1382,24 @@ span#autocomplete {
     .modal-content {
       padding: 0;
       position: relative;
+      .collapsible {
+        width: calc(100% - 1px);
+        .collapsible-body {
+          padding: 20px 10px;
+          .subject {
+            border-bottom: $border-1px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+          }
+        }
+        .collapsible-header {
+          min-height: 60px;
+        }
+        .to-email {
+          margin-top: 20px;
+          position: absolute;
+        }
+      }
       .preview-content {
         padding: 15px;
         margin-top: 10px;

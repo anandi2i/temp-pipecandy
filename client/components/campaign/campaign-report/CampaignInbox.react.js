@@ -6,6 +6,7 @@ import CampaignFooter from "./CampaignFooter.react";
 import CampaignReportHead from "../CampaignReportHead.react";
 import Spinner from "../../Spinner.react";
 import TagMenu from "../../TagMenu.react";
+import EmailThreadView from "./EmailThreadView.react";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
 
@@ -21,10 +22,14 @@ class CampaignInbox extends React.Component {
      * @property {boolean} requestSent
      * @property {string} activeTabId
      * @property {array} tabs
+     * @property {boolean} isEmailThreadView
+     * @property {string} threadId
      */
     this.state = {
       inboxMails : [],
       requestSent: false,
+      isEmailThreadView: false,
+      threadId: "",
       activeTabId: "all",
       tabs: [{
         id: "all",
@@ -157,12 +162,43 @@ class CampaignInbox extends React.Component {
   }
 
   /**
+   * get email thread and open modal popup
+   * @param  {string} threadId - email thread id
+   */
+  getEmailThread(threadId) {
+    if(threadId){
+      this.setState({
+        threadId: threadId,
+        isEmailThreadView: true
+      }, () => {
+        this.refs.inboxEmailThread.openModal();
+      });
+    }
+  }
+
+  /**
+   * Remove email thread view container after close modal popup
+   */
+  closeCallback = () => {
+    this.setState({
+      isEmailThreadView: false
+    });
+  }
+
+  /**
    * render
    * @ref http://stackoverflow.com/questions/28320438/react-js-create-loop-through-array
    * @return {ReactElement} markup
    */
   render() {
-    const {inboxMails, requestSent, activeTabId, tabs} = this.state;
+    const {
+      inboxMails,
+      requestSent,
+      activeTabId,
+      tabs,
+      threadId,
+      isEmailThreadView
+    } = this.state;
     const activeTabName =
       _.findWhere(tabs, {id: activeTabId}).name.toLowerCase();
     return (
@@ -210,7 +246,7 @@ class CampaignInbox extends React.Component {
                           <input type="checkbox" className="filled-in"
                             id={key} defaultChecked="" />
                           <label htmlFor={key} className="full-w" />
-                          <div className="mail-sub-content">
+                          <div className="mail-sub-content" onClick={() => this.getEmailThread(inbox.threadId)}>
                             <div className="data-info col s8 m3 l3 person-name">
                               <span>{inbox.person.firstName}</span>, <span>Me</span>
                               <span> ({inbox.count}) </span>
@@ -244,6 +280,14 @@ class CampaignInbox extends React.Component {
             </div>
           </div>
         </div>
+        {
+          isEmailThreadView
+          ?
+            <EmailThreadView ref="inboxEmailThread"
+              threadId={threadId}
+              closeCallback={this.closeCallback}/>
+          : ""
+        }
         <CampaignFooter campaignId={this.props.params.id} activePage={"inbox"}/>
       </div>
     );
