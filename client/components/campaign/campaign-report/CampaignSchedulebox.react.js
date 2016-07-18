@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import CampaignFooter from "./CampaignFooter.react";
 import CampaignReportHead from "../CampaignReportHead.react";
+import ScheduleEmailView from "./ScheduleEmailView.react";
 import Spinner from "../../Spinner.react";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
@@ -17,9 +18,11 @@ class CampaignSchedulebox extends React.Component {
      * Initial state values
      * @property {object} scheduledMails
      * @property {boolean} requestSent
+     * @property {boolean} isEmailPreview
      */
     this.state = {
       requestSent: false,
+      isEmailPreview: false,
       scheduledMails : {
         data: []
       }
@@ -107,12 +110,39 @@ class CampaignSchedulebox extends React.Component {
   }
 
   /**
+   * get scheduled email content and open modal popup
+   * @param  {number} keyId - scheduledMails.data index
+   */
+  emailPreview(keyId) {
+    this.setState({
+      emailContent: this.state.scheduledMails.data[keyId],
+      isEmailPreview: true
+    }, () => {
+      this.refs.emailPreview.openModal();
+    });
+  }
+
+  /**
+   * Remove schedule email view container after close modal popup
+   */
+  closeCallback = () => {
+    this.setState({
+      isEmailPreview: false
+    });
+  }
+
+  /**
    * render
    * @see http://stackoverflow.com/questions/28320438/react-js-create-loop-through-array
    * @return {ReactElement} markup
    */
   render() {
-    const {scheduledMails, requestSent} = this.state;
+    const {
+      scheduledMails,
+      requestSent,
+      emailContent,
+      isEmailPreview
+    } = this.state;
     const campaignId = this.props.params.id;
     return (
       <div>
@@ -145,7 +175,7 @@ class CampaignSchedulebox extends React.Component {
                         <input type="checkbox" className="filled-in"
                           id={key} defaultChecked="" />
                         <label htmlFor={key} className="full-w" />
-                        <div className="mail-sub-content">
+                        <div className="mail-sub-content" onClick={() => this.emailPreview(key)}>
                           <div className="data-info col s8 m3 l2 person-name">
                             <span>{scheduled.person.firstName}</span>
                           </div>
@@ -177,6 +207,14 @@ class CampaignSchedulebox extends React.Component {
             Scheduled mails seems to be empty!
           </div>
         </div>
+        {
+          isEmailPreview
+          ?
+            <ScheduleEmailView ref="emailPreview"
+              emailContent={emailContent}
+              closeCallback={this.closeCallback}/>
+          : ""
+        }
         <CampaignFooter campaignId={campaignId} activePage={"scheduled"}/>
       </div>
     );

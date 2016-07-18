@@ -71,6 +71,7 @@ class EmailThreadView extends React.Component {
 
   render() {
     const emailContent = this.state.emailContent;
+    const initVal = 1;
     return (
       <div className="modal modal-fixed-header modal-fixed-footer lg-modal">
         <i className="mdi mdi-close" onClick={this.closeModal}></i>
@@ -87,9 +88,13 @@ class EmailThreadView extends React.Component {
                 emailContent.map(function(email, key){
                   const receivedDate = moment(email.receivedDate)
                     .format("DD MMM YYYY");
+                  let active = "";
+                  if(emailContent.length === (key + initVal)){
+                    active = "active";
+                  }
                   return (
-                    <li className="active" key={key}>
-                      <div className="collapsible-header">
+                    <li className={active} key={key}>
+                      <div className={`collapsible-header ${active}`}>
                         <div>
                           <span className="left">{email.fromEmailId}</span>
                           <span className="right">{receivedDate}</span>
@@ -98,7 +103,8 @@ class EmailThreadView extends React.Component {
                           <small>to {email.toEmailId}</small>
                         </div>
                       </div>
-                      <div className="collapsible-body">
+                      <div className="collapsible-body"
+                        style={{display: active ? "block" : "none"}}>
                         <div className="subject">{email.subject}</div>
                         <div dangerouslySetInnerHTML={{__html: email.content}} />
                       </div>
