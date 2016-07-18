@@ -68,7 +68,7 @@ const CampaignApi = {
   /**
    * Get other campaignMetrics details
    * @param  {number|boolean} campaignId - check if campaign id
-   * @return {object}                    - campaignMetrics
+   * @return {object} - campaignMetrics
    */
   getOtherCampaignMetrics(campaignId) {
     let campaignReportURL;
@@ -100,8 +100,8 @@ const CampaignApi = {
    */
   getInboxMails(data) {
     const {id, start, limit, classification} = data;
-    return api.get(`/api/inboxMails/campaign/${id}/${classification}?\
-      start=${start}&limit=${limit}`);
+    return api.get(`/api/inboxMails/campaign/${id}/${classification}?` +
+      `start=${start}&limit=${limit}`);
   },
   /**
    * Get scheduled mails
@@ -110,8 +110,8 @@ const CampaignApi = {
    */
   getScheduledMails(data) {
     const {id, start, end} = data;
-    return api.get(`/api/emailsQueue/scheduledMails/campaign/${id}?\
-      start=${start}&limit=${end}`);
+    return api.get(`/api/emailsQueue/scheduledMails/campaign/${id}?` +
+      `start=${start}&limit=${end}`);
   },
   /**
    * Get sent mails
@@ -130,6 +130,14 @@ const CampaignApi = {
    */
   getEmailThread(id) {
     return api.get(`/api/MailResponses/threadId/${id}`);
+  },
+  /**
+   * Move emails to specified classfication
+   * @param {object} data - The data object includes classification and inboxIds
+   */
+  moveMails(data) {
+    const {classification, inboxIds} = data;
+    return api.put(`/api/inboxMails/${classification}`, inboxIds);
   }
 };
 

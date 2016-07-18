@@ -35,5 +35,6 @@ export default keyMirror({
   GET_IS_EXISTING_CAMPAIGN: null,
   GET_SCHEDULED_EMAILS: null,
   GET_SENT_EMAILS: null,
-  GET_EMAIL_THREAD: null
+  GET_EMAIL_THREAD: null,
+  MOVE_INBOX_MAILS: null
 });

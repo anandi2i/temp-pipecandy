@@ -124,6 +124,20 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("MailboxChange", callback);
   },
 
+  //Emitter for moving mails
+  emitMoveMailsChange() {
+    this.emit("MoveMails");
+  },
+
+  //Add move mails listener
+  addMoveMailsChangeListener(callback) {
+    this.on("MoveMails", callback);
+  },
+
+  //Remove move mails listener
+  removeMoveMailsChangeListener(callback) {
+    this.removeListener("MoveMails", callback);
+  },
 
   getError() {
     return _error;
@@ -604,6 +618,14 @@ AppDispatcher.register(function(payload) {
       }, (err) => {
         _WordIoVariations = {};
         displayError("Sorry, something went wrong");
+      });
+      break;
+    case Constants.MOVE_INBOX_MAILS:
+      CampaignApi.moveMails(action.data).then((response) => {
+        CampaignStore.emitMoveMailsChange();
+      }, (err) => {
+        _error = err;
+        CampaignStore.emitMoveMailsChange();
       });
       break;
     default:

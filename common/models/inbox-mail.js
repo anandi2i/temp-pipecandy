@@ -159,13 +159,14 @@ module.exports = function(InboxMail) {
       description: "Update Inbox Mails Classification",
       accepts: [
         {arg: "ctx", type: "object", http: {source: "context"}},
-        {arg: "id", type: "number"},
+        {arg: "id", type: "array", http: {source: "body"}},
         {arg: "classification", type: "string"}
       ],
       returns: {arg: "InboxMail", type: "array", root: true},
-      http: {verb: "put", path: "/:id/:classification"}
+      http: {verb: "put", path: "/:classification"}
     }
   );
+
   /**
    * API to Update Mail Classification
    * @param  {Number}   id InboxMail Id
@@ -174,38 +175,52 @@ module.exports = function(InboxMail) {
    * @return {InboxMail} Updated InboxMail Class
    * @author Syed Sulaiman M
    */
-  InboxMail.updateClassification = (ctx, id, classification, callback) => {
+  InboxMail.updateClassification = (ctx, ids, classification, callback) => {
     if(!constants.CLASSIFICATIONS.includes(classification)) {
       const errorMessage = errorMessages.INVALID_CLASSIFICATION;
       return callback(errorMessage);
     }
-    InboxMail.findById(id, (inboxMailErr, inboxMail) => {
-      if(inboxMailErr) {
-        logger.error("Error finding InboxMail",
-          {error: inboxMailErr, stack: inboxMailErr.stack, input:
-          {inboxMailId:id, classification:classification}});
-        const errorMessage = errorMessages.SERVER_ERROR;
-        return callback(errorMessage);
-      }
-      if(!inboxMail) {
-        const errorMessage = errorMessages.INVALID_INBOX_MAIL_ID;
-        return callback(errorMessage);
-      }
-      async.parallel([
-        async.apply(InboxMail.updateClass, inboxMail, classification),
-        async.apply(InboxMail.app.models.MailResponse.updateUserClassByThreadId,
-          inboxMail.threadId, classification)
-      ], (err, results) => {
-        if(err) {
-          logger.error("Error updating Email Class",
-            {error: err, stack: err.stack, input:
-            {inboxMailId:id, classification:classification}});
+    let updatedInboxMails = [];
+    async.each(ids, (id, inboxCB) => {
+      InboxMail.findById(id, (inboxMailErr, inboxMail) => {
+        if(inboxMailErr) {
+          logger.error("Error finding InboxMail",
+            {error: inboxMailErr, stack: inboxMailErr.stack, input:
+            {inboxMailId:ids, classification:classification}});
           const errorMessage = errorMessages.SERVER_ERROR;
           return callback(errorMessage);
         }
-        let updatedInboxMail = results[0]; // Result of First Function
-        return callback(null, updatedInboxMail);
+        if(!inboxMail) {
+          const errorMessage = errorMessages.INVALID_INBOX_MAIL_ID;
+          return callback(errorMessage);
+        }
+        async.parallel([
+          async.apply(InboxMail.updateClass, inboxMail, classification),
+          async.apply(
+            InboxMail.app.models.MailResponse.updateUserClassByThreadId,
+            inboxMail.threadId, classification)
+        ], (err, results) => {
+          if(err) {
+            logger.error("Error updating Email Class",
+              {error: err, stack: err.stack, input:
+              {inboxMailId:ids, classification:classification}});
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return callback(errorMessage);
+          }
+          let updatedInboxMail = results[0]; // Result of First Function
+          updatedInboxMails.push(updatedInboxMail);
+          inboxCB(null);
+        });
       });
+    }, (err) => {
+      if(err) {
+        logger.error("Error updating Email Class",
+          {error: err, stack: err.stack, input:
+          {inboxMailId:ids, classification:classification}});
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      return callback(null, updatedInboxMails);
     });
   };
 

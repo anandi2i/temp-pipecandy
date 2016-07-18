@@ -154,6 +154,17 @@ const CampaignActions = {
       actionType: Constants.GET_EMAIL_THREAD,
       id : threadId
     });
+  },
+  /**
+   * Move the selected mails to specified classification
+   * @return {object} data - The data object includes classification name and
+   * selected mail ids.
+   */
+  moveMails(data) {
+    AppDispatcher.handleAction({
+      actionType: Constants.MOVE_INBOX_MAILS,
+      data: data
+    });
   }
 };
 

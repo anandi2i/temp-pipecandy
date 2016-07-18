@@ -20,16 +20,18 @@ class CampaignInbox extends React.Component {
      * Initial state values
      * @property {object} inboxMails
      * @property {boolean} requestSent
-     * @property {string} activeTabId
-     * @property {array} tabs
      * @property {boolean} isEmailThreadView
      * @property {string} threadId
+     * @property {array} selectedInboxIds
+     * @property {string} activeTabId
+     * @property {array} tabs
      */
     this.state = {
       inboxMails : [],
       requestSent: false,
       isEmailThreadView: false,
       threadId: "",
+      selectedInboxIds: [],
       activeTabId: "all",
       tabs: [{
         id: "all",
@@ -62,6 +64,7 @@ class CampaignInbox extends React.Component {
    * Instantiate material_select
    * Add listener to listen Inbox mails Update
    * Add listener to listen if mouse is scrolled to bottom
+   * Add listener to listen moved mails in inbox
    * Call initial set of inbox mails
    */
   componentDidMount() {
@@ -70,6 +73,7 @@ class CampaignInbox extends React.Component {
     this.el = $(ReactDOM.findDOMNode(this));
     this.el.find("select").material_select();
     CampaignStore.addMailboxChangeListener(this.onStoreChange);
+    CampaignStore.addMoveMailsChangeListener(this.moveMailsChange);
     window.addEventListener("scroll", this.handleOnScroll);
     CampaignActions.getInboxMails({
       id: this.props.params.id,
@@ -81,11 +85,12 @@ class CampaignInbox extends React.Component {
 
   /**
    * Destory material select
-   * Remove the added listeners for Inbox mails and scroll
+   * Remove the added listeners for Inbox mails, moved mails and scroll
    */
   componentWillUnmount() {
     this.el.find("select").material_select("destroy");
     CampaignStore.removeMailboxChangeListener(this.onStoreChange);
+    CampaignStore.removeMoveMailsChangeListener(this.moveMailsChange);
     window.removeEventListener("scroll", this.handleOnScroll);
   }
 
@@ -99,6 +104,23 @@ class CampaignInbox extends React.Component {
       requestSent: false
     });
     displayError(CampaignStore.getError());
+  }
+
+  /**
+   * Remove the selected mails after moving
+   * Uncheck all checkboxes
+   */
+  moveMailsChange = () => {
+    const {activeTabId, inboxMails, selectedInboxIds} = this.state;
+    this.el.find(".filled-in").attr("checked", false);
+    if(activeTabId !== "all") {
+      this.setState({
+        inboxMails: _.reject(inboxMails,
+          inbox => selectedInboxIds.includes(inbox.id)
+        ),
+        selectedInboxIds: []
+      });
+    }
   }
 
   /**
@@ -150,7 +172,8 @@ class CampaignInbox extends React.Component {
     });
     this.setState({
       inboxMails : [],
-      requestSent: true
+      requestSent: true,
+      selectedInboxIds: []
     });
   }
 
@@ -186,6 +209,40 @@ class CampaignInbox extends React.Component {
   }
 
   /**
+   * Add the checkbox if not exists else remove it
+   * Push/Splice the selected inbox id to selectedInboxIds array
+   * @param  {number} inboxId selected inbox id
+   */
+  handleCheckboxChange(inboxId) {
+    const {selectedInboxIds} = this.state;
+    const idx = selectedInboxIds.indexOf(inboxId);
+    const notExist = -1;
+    const howMany = 1;
+    if(idx === notExist) {
+      this.setState({
+        selectedInboxIds: selectedInboxIds.concat(inboxId)
+      });
+    } else {
+      this.setState({
+        selectedInboxIds: selectedInboxIds.splice(inboxId, howMany)
+      });
+    }
+  }
+
+  /**
+   * Move the selected mails to specfic class
+   * @param {string} classification - Classification name
+   */
+  moveMail(classification) {
+    const {activeTabId, selectedInboxIds} = this.state;
+    CampaignActions.moveMails({
+      classification: classification,
+      inboxIds: selectedInboxIds,
+      activeTabId: activeTabId
+    });
+  }
+
+  /**
    * render
    * @ref http://stackoverflow.com/questions/28320438/react-js-create-loop-through-array
    * @return {ReactElement} markup
@@ -201,6 +258,7 @@ class CampaignInbox extends React.Component {
     } = this.state;
     const activeTabName =
       _.findWhere(tabs, {id: activeTabId}).name.toLowerCase();
+    const classifications = _.rest(tabs); //remove first object "all"
     return (
       <div>
         <div className="m-b-120">
@@ -217,14 +275,25 @@ class CampaignInbox extends React.Component {
                   onChange={this.handleChange} />
               </div>
               <div className="col s12 m6 l6 p-lr-0">
-                <div className="col s12 m8 offset-m4 p-lr-0">
-                  <select>
-                    <option value="" disabled>Choose your list</option>
-                    <option value="1">Show for all lists</option>
-                    <option value="1">List 1</option>
-                    <option value="2">List 2</option>
-                    <option value="3">List 3</option>
-                  </select>
+                <div className="right">
+                  <a className="btn btn-dflt blue sm-icon-btn dropdown-button"
+                    data-activates="addDropDown">
+                    Move to
+                    <i className="right mdi mdi-chevron-down"></i>
+                  </a>
+                  <ul id="addDropDown" className="dropdown-content">
+                    {
+                      classifications.map((tab, key) => {
+                        return (
+                          <li key={key}>
+                            <a onClick={() => this.moveMail(tab.id)}>
+                              {tab.name}
+                            </a>
+                          </li>
+                        );
+                      })
+                    }
+                  </ul>
                 </div>
               </div>
             </div>
@@ -244,8 +313,9 @@ class CampaignInbox extends React.Component {
                       <div className="row">
                         <div className="content">
                           <input type="checkbox" className="filled-in"
-                            id={key} defaultChecked="" />
-                          <label htmlFor={key} className="full-w" />
+                            onChange={() => this.handleCheckboxChange(inbox.id)}
+                            id={inbox.id} defaultChecked="" />
+                          <label htmlFor={inbox.id} className="full-w" />
                           <div className="mail-sub-content" onClick={() => this.getEmailThread(inbox.threadId)}>
                             <div className="data-info col s8 m3 l3 person-name">
                               <span>{inbox.person.firstName}</span>, <span>Me</span>
