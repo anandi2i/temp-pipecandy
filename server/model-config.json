@@ -155,5 +155,9 @@
   "inboxMail": {
     "dataSource": "psqlDs",
     "public": true
-  }
+  },
+  "deletedCampaignPerson": {
+   "dataSource": "psqlDs",
+   "public": true
+ }
 }

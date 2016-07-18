@@ -61,6 +61,7 @@ module.exports = function(Person) {
    * first checks wheter the email is already generated or not
    * then if followup object is there means it goes further to check the eligibility
    * of person using the campaignAudit table
+   * checks wheter the person is deleted from the current campagin or not
    * returns true if eligible to generate
    * @param  {[type]}  campaign
    * @param  {[type]}  person
@@ -73,6 +74,8 @@ module.exports = function(Person) {
     async.series({
       validateStatus: Person.app.models.campaign.validateStatus.bind(null,
                       campaign, followup),
+      deletedEmailCheck: Person.app.models.DeletedCampaignPerson
+                      .eligibilityCheck.bind(null, campaign, person),
       unsubscribed: Person.app.models.unsubscribe.eligibleCheck.bind(null,
                       campaign, person),
       eligible: isEligibleToGenerate.bind(null, campaign, person, followup)
@@ -80,7 +83,9 @@ module.exports = function(Person) {
       if(seriesErr) {
         return validateCB(seriesErr);
       }
-      return validateCB(seriesErr, results.unsubscribed && results.eligible);
+      const valid = results.unsubscribed && results.eligible
+                                         && results.deletedEmailCheck;
+      return validateCB(seriesErr, valid);
     });
   };
 

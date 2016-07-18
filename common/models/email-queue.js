@@ -8,6 +8,81 @@ import statusCodes from "../../server/utils/status-codes";
 
 module.exports = function(EmailQueue) {
 
+  EmailQueue.remoteMethod(
+    "deletePeople", {
+      description: "Deletes people assoiciate with campagin from EmailQueue",
+      accepts: [{arg: "ctx", type: "object", http: {source: "context"}},
+                {arg: "reqParams", type: "object", http: {source: "body"}}],
+      returns: {arg: "person", type: "person", root: true},
+      http: {verb: "delete", path: "/people"}
+    }
+  );
+
+  /**
+   * Deletes the emailQueue entry for given ids and puts entry in
+   * DeletedCampaginPerson model
+   * Ex.input {"ids": [1,2,3,4]}
+   *
+   * @param  {[context]} ctx            [application context]
+   * @param  {[JSON]} reqParams      [input shown in the comment]
+   * @param  {[function]} deletePeopleCB [callback function]
+   * @author Ramanavel Selvaraju
+   */
+  EmailQueue.deletePeople = (ctx, reqParams, deletePeopleCB) => {
+    async.waterfall([
+     async.apply(getEmailsFromQueue, reqParams.ids, ctx.req.accessToken.userId),
+     EmailQueue.app.models.deletedCampaignPerson.saveDeletedPeople,
+     deleteEmailsFromQueue
+    ], (asyncErr) => {
+      if(asyncErr) {
+        return deletePeopleCB(userrorMessages.SERVER_ERROR);
+      }
+      return deletePeopleCB(null, "Deleted Successfully!");
+    });
+  };
+
+  /**
+   * gets the emails using id with userid from the emal Queue
+   *
+   * @param  {[Array]} ids   [Array of emailQueueIds]
+   * @param  {[number]} userId  [currentUserId]
+   * @param  {[function]} getEmailsFromQueueCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  const getEmailsFromQueue = (ids, userId, getEmailsFromQueueCB) => {
+    EmailQueue.find({where: {and: [{id: {inq: ids}}, {userId: userId}]}
+    }, (emailFindErr, emails) => {
+      if(emailFindErr){
+        logger.error({error: emailFindErr, stack: emailFindErr.stack,
+                      input: {ids: ids, userId: userId}});
+        return getEmailsFromQueueCB(emailFindErr);
+      }
+      return getEmailsFromQueueCB(null, ids, userId, emails);
+    });
+  };
+
+  /**
+   * destroys  the emails using ids and userID
+   *
+   * @param  {[Array[Number]]}  ids  [emailQueueIds]
+   * @param  {[number]}   userId   [current userId]
+   * @param  {[EmailQueue]}   emails   [email objects from queue]
+   * @param  {[type]} destroyCB [description]
+   * @return {[type]}           [description]
+   * @author Ramanavel Selvaraju
+   */
+  const deleteEmailsFromQueue = (ids, userId, emails, destroyCB) => {
+    EmailQueue.destroyAll({and: [{id: {inq: ids}}, {userId: userId}]
+    }, (emailDestroyErr, emails) => {
+      if(emailDestroyErr){
+        logger.error({error: emailDestroyErr, stack: emailDestroyErr.stack,
+                      input: {ids: ids, userId: userId}});
+        return destroyCB(emailDestroyErr);
+      }
+      return destroyCB(null);
+    });
+  };
+
   /**
    * Delete the email queue when the campaign updates
    * - from destroyCampaignElements process
