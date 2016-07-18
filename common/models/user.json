@@ -152,6 +152,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "current"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "campaignList"
     }
   ],
   "methods": {}

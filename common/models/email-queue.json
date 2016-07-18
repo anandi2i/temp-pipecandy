@@ -82,7 +82,7 @@
       "type": "belongsTo",
       "model": "followUp",
       "foreignKey": "followUpId"
-    }    
+    }
   },
   "acls": [],
   "methods": {}

@@ -2,10 +2,14 @@ import path from "path";
 import fs from "fs";
 import _ from "underscore";
 import loopback from "loopback";
+import async from "async";
+import lodash from "lodash";
 import logger from "../../server/log";
 import publicEmailProviders from "../../server/utils/public-email-providers";
 import config from "../../server/config.json";
 
+const emptyCount = 0;
+const percent = 100;
 module.exports = function(user) {
   const milliSec = 1000;
 
@@ -425,6 +429,231 @@ module.exports = function(user) {
       http: {verb: "post"}
     }
   );
+
+
+  user.remoteMethod(
+    "campaignList", {
+      description: "Get current campaign details for the current campaign",
+      accepts: [{
+        arg: "userId",
+        type: "number"
+      }],
+      returns: {
+        arg: "campaignsList",
+        type: "object"
+      },
+      http: {
+        verb: "get",
+        path: "/:userId/campaignList"
+      }
+    }
+  );
+
+  /**
+   * API to get the list of campaign for the current user
+   * @param  {[userId]} userId
+   * @param  {[function]} campaignListCB
+   * @return {[campaignsList]}
+   * @author Aswin Raj A
+   */
+  user.campaignList = (userId, campaignListCB) => {
+    async.waterfall([
+      async.apply(getAllcampaignsForUser, userId),
+      generateCampaignMetric
+    ], (asyncErr, campaignsList) => {
+      if(asyncErr){
+        logger.error("", asyncErr);
+        campaignListCB(asyncErr);
+      }
+      campaignListCB(null, campaignsList);
+    });
+  };
+
+  /**
+   * Get all the campaigns created by the current User
+   * @param  {[userId]} userId
+   * @param  {[function]} getAllcampaignsForUser
+   * @return {[campaigns]}
+   * @author Aswin Raj A
+   */
+  const getAllcampaignsForUser = (userId, getAllcampaignsForUser) => {
+    user.app.models.campaign.find({
+      where : {
+        createdBy: userId
+      }
+    }, (campaignFindErr, campaigns) => {
+      if(campaignFindErr || lodash.isEmpty(campaigns)) {
+        logger.error("Error while finding campaigns", {
+          input : {userId: userId},
+          error: campaignFindErr,
+          stack: campaignFindErr ? campaignFindErr.stack : ""
+        });
+        let errParam = campaignFindErr || "No campaign for user";
+        getAllcampaignsForUser(errParam);
+      }
+      getAllcampaignsForUser(null, campaigns);
+    });
+  };
+
+  /**
+   * To generate campaign metric data for each campaign createdBy the user
+   * @param  {[campaigns]} campaigns
+   * @param  {[function]} generateCB
+   * @return {[campaignList]}
+   * @author Aswin Raj A
+   */
+  const generateCampaignMetric = (campaigns, generateCB) => {
+    let campaignList = [];
+    async.each(campaigns, (campaign, campaignEachCB) => {
+      async.parallel({
+        listSentTo : getCampaignListCount.bind(null, campaign),
+        status : getCampaignStatus.bind(null, campaign),
+        replies : getCampaignReplyCount.bind(null, campaign),
+        progress : getCampaignProgress.bind(null, campaign)
+      }, (parallelErr, campaignMetrics) => {
+        if(parallelErr){
+          logger.error("Error while getting campaign list metrics", {
+            input : {campaignId: campaign.id},
+            error: parallelErr, stack: parallelErr.stack
+          });
+          campaignEachCB(parallelErr);
+        }
+        campaignMetrics.campaignId = campaign.id;
+        campaignMetrics.campaign = campaign.name;
+        campaignList.push(campaignMetrics);
+        campaignEachCB(null);
+      });
+    }, (eachErr) => {
+      if(eachErr){
+        logger.error("Error while generating campaign list with metrics", {
+          error: eachErr, stack: eachErr.stack});
+        generateCB(eachErr);
+      }
+      generateCB(null, campaignList);
+    });
+  };
+
+  /**
+   * To get the total count of lists attached to the current campaign
+   * @param  {[campaign]} campaign
+   * @param  {[function]} getCountCB
+   * @return {[listCount]}
+   * @author Aswin Raj A
+   */
+  const getCampaignListCount = (campaign, getCountCB) => {
+    campaign.lists((listFindErr, lists) => {
+      if(listFindErr){
+        logger.error("Error while finding list for campaign", {
+          input : {campaignId: campaign.id},
+          error: listFindErr, stack: listFindErr.stack
+        });
+        getCountCB(listFindErr);
+      }
+      getCountCB(null, lists.length);
+    });
+  };
+
+  /**
+   * To get the campaign status whether it has been
+   *  - scheduled || sent || failed || in progress || partially sent
+   * @param  {[campaign]} campaign
+   * @param  {[getStatusCB]} getStatusCB
+   * @return {[status]}
+   * @author Aswin Raj A
+   */
+  const getCampaignStatus = (campaign, getStatusCB) => {
+    if(!campaign.isSent){
+      getStatusCB(null, "Scheduled");
+    } else {
+      user.app.models.campaignMetric.find({
+        where : {
+          campaignId : campaign.id
+        }
+      }, (metricFindErr, campaignMetrics) => {
+        if(metricFindErr){
+          logger.error("Error while finding campaign metric", {
+            input: {campaignId : campaign.id},
+            error: metricFindErr, stack: metricFindErr.stack
+          });
+          getStatusCB(metricFindErr);
+        }
+        const processedMail = campaignMetrics[0].sent +
+          campaignMetrics[0].failedEmails + campaignMetrics[0].erroredEmails;
+        const failedEmails = campaignMetrics[0].failedEmails +
+          campaignMetrics[0].erroredEmails;
+        if(campaignMetrics[0].assembled === processedMail){
+          if(campaignMetrics[0].erroredEmails !== emptyCount ||
+            campaignMetrics[0].failedEmails !== emptyCount){
+            getStatusCB(null, "Partially Sent");
+          } else if(campaignMetrics[0].assembled === failedEmails){
+            getStatusCB(null, "Failed");
+          } else {
+            getStatusCB(null, "Sent");
+          }
+        } else {
+            getStatusCB(null, "Sending");
+        }
+      });
+    }
+  };
+
+  /**
+   * To get the total count of response for the current campaign
+   * @param  {[campaign]} campaign
+   * @param  {[function]} getReplyCountCB
+   * @return {[responseCount]}
+   * @author Aswin Raj A
+   */
+  const getCampaignReplyCount = (campaign, getReplyCountCB) => {
+    if(!campaign.isSent){
+      getReplyCountCB(null, emptyCount);
+    } else {
+      user.app.models.campaignMetric.find({
+        where : {
+          campaignId : campaign.id
+        }
+      }, (metricFindErr, campaignMetrics) => {
+        if(metricFindErr){
+          logger.error("Error while finding campaign metric", {
+            input: {campaignId : campaign.id},
+            error: metricFindErr, stack: metricFindErr.stack
+          });
+          getReplyCountCB(metricFindErr);
+        }
+        getReplyCountCB(null, campaignMetrics[0].responded);
+      });
+    }
+  };
+
+  /**
+   * To get the progress rate for the current campaign
+   * @param  {[campaign]} campaign
+   * @param  {[function]} getProgressCB
+   * @return {[progress]}
+   * @author Aswin Raj A
+   */
+  const getCampaignProgress = (campaign, getProgressCB) => {
+    if(!campaign.isSent){
+      getProgressCB(null, emptyCount);
+    } else {
+      user.app.models.campaignMetric.find({
+        where : {
+          campaignId : campaign.id
+        }
+      }, (metricFindErr, campaignMetrics) => {
+        if(metricFindErr){
+          logger.error("Error while finding campaign metric", {
+            input: {campaignId : campaign.id},
+            error: metricFindErr, stack: metricFindErr.stack
+          });
+          return getProgressCB(metricFindErr);
+        }
+        let progress = campaignMetrics[0].sent / campaignMetrics[0].assembled;
+        progress = Math.round(parseFloat(progress*percent));
+        return getProgressCB(null, progress);
+      });
+    }
+  };
 
   /**
    * Updates the updatedAt column with current Time

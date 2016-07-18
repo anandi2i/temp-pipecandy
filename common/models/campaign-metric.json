@@ -7,6 +7,10 @@
     "validateUpsert": true
   },
   "properties": {
+    "assembled": {
+      "type": "number",
+      "default": 0
+    },
     "opened": {
       "type": "number",
       "default": 0
