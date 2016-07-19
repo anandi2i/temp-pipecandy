@@ -11,6 +11,7 @@ import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 import SubscriberGrid from "../grid/subscriber-list/SubscriberGrid.react";
 import Subscriber from "../grid/subscriber-list/Subscriber.react";
+import TagMenu from "../TagMenu.react";
 import {ErrorMessages} from "../../utils/UserAlerts";
 
 /**
@@ -42,7 +43,16 @@ class ListView extends React.Component {
       fieldName: "",
       suggestions: [],
       metaFields: [],
-      listFields: []
+      listFields: [],
+      activeTabId: "original",
+      tabs: [{
+        id: "original",
+        name: "ORIGINAL",
+      },
+      {
+        id: "amplified",
+        name: "AMPLIFIED",
+      }]
     };
     this.state = this.initialStateValues;
     this.validatorTypes = {
@@ -356,12 +366,25 @@ class ListView extends React.Component {
   }
 
   /**
+   * Handle tabs navigations
+   * Call to load the Inbox mails
+   * @param {string} index
+   */
+  handleClick = (tabId) => {
+    this.setState({
+      activeTabId: tabId
+    }, () => {
+      enabledropDownBtn();
+    });
+  }
+
+  /**
    * render
    * @return {ReactElement} markup
    */
   render() {
     const {fieldName, suggestions, people,
-      fieldsName, listFields, peopleDetails} = this.state;
+      fieldsName, listFields, peopleDetails, activeTabId, tabs} = this.state;
     const {listId} = this.props.params;
     const inputProps = {
       id: "fieldName",
@@ -379,32 +402,37 @@ class ListView extends React.Component {
               <Link to="/list">Back to Email Lists</Link>
             </div>
           </div>
-          <div className="row r-btn-container m-lr-0 email-list-action-btn">
-            <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" data-activates="addDropDown">
-              <i className="left mdi mdi-account-plus"></i> Add
-              <i className="right mdi mdi-chevron-down"></i>
-            </a>
-            <ul id="addDropDown" className="dropdown-content">
-              <li><a onClick={this.addRecipient}>Add Recipient</a></li>
-              <li><a className="modal-trigger" href="#addField" onClick={this.getFields}>Add Field</a></li>
-            </ul>
-            <input id="fileUpload" type="file" className="hide" name="file"
-              accept=".csv, .xls, .xlsx" onChange={this.fileChange} />
-            <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" onClick={this.openDialog}>
-              <i className="left mdi mdi-upload"></i> Add From File
-            </a>
-            <a className="btn btn-dflt blue sm-icon-btn p-1-btn"
-              href={`/api/file/list/${this.props.params.listId}/downloadCSV`}
-              download>
-              <i className="left mdi mdi-download"></i> Sample CSV
-            </a>
-            { people && people.length ?
-                <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.deleteSubscriber}>
-                  <i className="left mdi mdi-delete"></i> Delete
+          {/*TODO need to clean - for demo purpose*/}
+          { activeTabId === tabs[0].id
+            ? <div className="row r-btn-container m-lr-0 email-list-action-btn">
+                <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" data-activates="addDropDown">
+                  <i className="left mdi mdi-account-plus"></i> Add
+                  <i className="right mdi mdi-chevron-down"></i>
                 </a>
-              : ""
-            }
-          </div>
+                <ul id="addDropDown" className="dropdown-content">
+                  <li><a onClick={this.addRecipient}>Add Recipient</a></li>
+                  <li><a className="modal-trigger" href="#addField" onClick={this.getFields}>Add Field</a></li>
+                  <li><a>Build From Master</a></li>
+                </ul>
+                <input id="fileUpload" type="file" className="hide" name="file"
+                  accept=".csv, .xls, .xlsx" onChange={this.fileChange} />
+                <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" onClick={this.openDialog}>
+                  <i className="left mdi mdi-upload"></i> Add From File
+                </a>
+                <a href={`/api/file/list/${this.props.params.listId}/downloadCSV`}
+                  className="btn btn-dflt blue sm-icon-btn p-1-btn"
+                  download>
+                  <i className="left mdi mdi-download"></i> Sample CSV
+                </a>
+                { people && people.length ?
+                    <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.deleteSubscriber}>
+                      <i className="left mdi mdi-delete"></i> Delete
+                    </a>
+                  : ""
+                }
+              </div>
+            : ""
+          }
           {/* Add new field starts here */}
           <div id="addField" className="modal modal-fixed-header mini-modal">
             <i className="mdi mdi-close modal-close" onClick={this.clearValidations}></i>
@@ -438,25 +466,29 @@ class ListView extends React.Component {
             <Spinner />
           </div>
         </div>
-        {
-          people && people.length ?
-            <SubscriberGrid results={people}
-              fieldsName={fieldsName}
-              listFields={listFields}
-              listId={listId}
-              peopleDetails={peopleDetails}
-              ref="subscriberGrid" />
-          :
-            !this.state.spinning ?
-              <div className="container">
-                <div className="row card">
-                  <div className="col s12 center card-content">
-                    <p>
-                      People list seems to be empty. Could you please add ?
-                    </p>
+        <TagMenu activeTabId={activeTabId} tabs={tabs}
+          handleClick={this.handleClick} mainClass={"container"} />
+        { /*TODO need to clean - for demo purpose*/
+          activeTabId
+            ? people && people.length ?
+                <SubscriberGrid results={people}
+                  fieldsName={fieldsName}
+                  listFields={listFields}
+                  listId={listId}
+                  peopleDetails={peopleDetails}
+                  ref="subscriberGrid" />
+              :
+                !this.state.spinning ?
+                  <div className="container">
+                    <div className="row card">
+                      <div className="col s12 center card-content">
+                        <p>
+                          People list seems to be empty. Could you please add ?
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                : ""
             : ""
         }
         {/* Add Recipient Component */}

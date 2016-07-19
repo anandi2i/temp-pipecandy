@@ -1,9 +1,4 @@
 {
-  "initial:before": {
-    "loopback#favicon": {
-      "params": "./assets/images/pipecandy-favicon.png"
-    }
-  },
   "initial": {
     "compression": {},
     "cors": {

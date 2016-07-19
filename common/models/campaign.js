@@ -1512,7 +1512,7 @@ module.exports = function(Campaign) {
   /**
    * To get all the list associated with the current person
    * @param  {[personId]} personId
-   * @param  {[function]} getPersonListCB 
+   * @param  {[function]} getPersonListCB
    * @return {[personList]}
    * @author Aswin Raj A
    */

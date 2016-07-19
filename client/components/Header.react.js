@@ -89,8 +89,6 @@ class Menu extends React.Component {
   openNotification = () => {
     this.setState({
       isNotification: true
-    }, () => {
-      this.refs.notification.openModal();
     });
   }
 
