@@ -3,8 +3,168 @@
 import logger from "../../server/log";
 import lodash from "lodash";
 import async from "async";
+import _ from "underscore";
 
 module.exports = function(ListMetric) {
+
+  /**
+   * find the related list for the person and the campaign
+   * and increments the metrics
+   * @param  {[type]}   campagin
+   * @param  {[type]}   person
+   * @param  {[type]}   property
+   * @param  {Function} callback
+   * @author Ramanavel Selvaraju
+   */
+  ListMetric.getAndIncrementByProperty = (campagin, person, property,
+    callback) => {
+    getListMetricsByCampaignAndPerson(campagin, person,
+      (getMetricsErr, metrics) => {
+        if(getMetricsErr) return callback(getMetricsErr);
+        async.each(metrics, (metric, cb) => {
+          ListMetric.app.models.campaignMetric.incrementMetric(metric, property,
+            (incrementErr) => {
+            return callback(incrementErr);
+          });
+        });
+    });
+  };
+
+  /**
+   * gets lists and then list metrics using campagin and person objects
+   *
+   * @param  {Campagin}   campagin
+   * @param  {Person}   person
+   * @param  {Function} callback
+   * @author Ramanavel Selvaraju
+   */
+  const getListMetricsByCampaignAndPerson = (campaign, person, callback) => {
+    async.waterfall([
+      async.apply(ListMetric.app.models.campaign.getCampaignListForPerson,
+      campaign.id, person.id),
+      getListMetricsForLists,
+    ], (waterfallErr, metrics) => {
+      if(waterfallErr) {
+        return callback(waterfallErr);
+      }
+      return callback(null, metrics);
+    });
+  };
+
+  /**
+   * get list metrics for given array of list object
+   *
+   * @param  {[List]}   lists
+   * @param  {Function} callback
+   * @author Ramanavel Selvaraju
+   */
+  const getListMetricsForLists = (lists, campaignId, personId, callback) => {
+    if(lodash.isEmpty(lists)) return callback(null, lists);
+    const listIds = _.pluck(lists, "id");
+    ListMetric.find({where: {and:
+      [{listId: {inq: listIds}, campaignId: campaignId}]}
+    }, (metricFindErr, metrics) => {
+      if(metricFindErr) {
+        logger.error("Error while finding the metrics for lists : ",
+                  {error: metricFindErr, stack: metricFindErr.stack,
+                      input: {listIds: listIds}});
+        return callback(metricFindErr);
+      }
+      return callback(null, metrics);
+    });
+  };
+
+  /**
+   * gets lists using campaign object itterates and updates the assemblermetrics
+   * @param  {[type]} campaign                [description]
+   * @param  {[type]} updateListMetricOnGenCB [description]
+   * @return {[type]}                         [description]
+   * @author Ramanavel Selvaraju
+   */
+  ListMetric.updateListMetricOnGen = (campaign, updateListMetricOnGenCB) => {
+    campaign.lists((listErr, lists) => {
+      async.each(lists, (list, cb) => {
+        async.waterfall([
+          async.apply(getListMetrics, campaign, list),
+          createListMetrics,
+          updateAssemblerMetrics
+        ], (waterfallErr) => {
+          if(waterfallErr) {
+            return updateListMetricOnGenCB(waterfallErr);
+          }
+          return updateListMetricOnGenCB(null);
+        });
+      });
+    });
+  };
+
+  /**
+   * returns list metrics for a campaign and list Objects
+   *
+   * @param  {[type]} campaign
+   * @param  {[List]} list
+   * @param {[Function]} getListMetricsCB
+   * @author Ramanavel Selvaraju
+   */
+  const getListMetrics = (campaign, list, getListMetricsCB) => {
+    ListMetric.find({where: {and:
+      [{campaignId: campaign.id}, {listId: list.id}]}
+    }, (findErr, listMetrics) => {
+      if(findErr) {
+        logger.error({error: findErr, stack: findErr.stack,
+                      input: {campaign: campaign, list: list}});
+        return getListMetricsCB(findErr);
+      }
+      return getListMetricsCB(null, campaign, list,
+                  lodash.isEmpty(listMetrics) ? null : listMetrics[0]);
+    });
+  };
+
+  /**
+   * if metrics object null creates metrics object
+   *
+   * @param  {[campaign]} campaign
+   * @param  {[List]} list
+   * @param  {[CampaignMetric]} metric
+   * @param  {[function]} createListMetricsCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  const createListMetrics = (campaign, list, metric, createListMetricsCB) => {
+    if(metric) {
+      return createListMetricsCB(null, metric);
+    }
+    ListMetric.create({campaignId: campaign.id, listId: list.id},
+      (err, metrics) => {
+      if(err) {
+        logger.error({error: err, stack: err.stack,
+                      input: {campaign: campaign, list: list}});
+        return createListMetricsCB(err);
+      }
+      return createListMetricsCB(null, metrics);
+    });
+  };
+
+  /**
+   * updates the already sent mails as assembeled emails count
+   * because already sent means already assembed from assember so that metrics
+   * also should caputured here
+   *
+   * @param  {[campaign]} campaign
+   * @param  {[ListMetric]} metric
+   * @param  {[function]} updateAssemblerMetricsCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  const updateAssemblerMetrics = (metrics, updateAssemMetricsCB) => {
+    metrics.updateAttribute("assembled", metrics.sentEmails,
+      (err, updatedMetrics) => {
+        if(err) {
+          logger.error({error: err, stack: err.stack,
+                        input: {campaign: campaign}});
+          return updateAssemMetricsCB(err);
+        }
+        return updateAssemMetricsCB(null);
+    });
+  };
 
   /**
    * Creates an entry on the clicked email model to get the report of

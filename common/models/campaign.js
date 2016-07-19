@@ -406,7 +406,8 @@ module.exports = function(Campaign) {
       appendBottomPart,
       prepareScheduledAt,
       preapreFollowUp,
-      sendToEmailQueue
+      sendToEmailQueue,
+      incrementAssmebedCountInMetrics
     ], (waterfallError) => {
       generateEmailCB(waterfallError);
     });
@@ -722,7 +723,6 @@ module.exports = function(Campaign) {
    * @param  {[CampaignTemplate]} template
    * @param  {[Object]} email
    * @param  {[function]} sendToEmailQueueCB
-   * @return void
    * @author Ramanavel Selvaraju
    */
   const sendToEmailQueue = (campaign, followup, person, email,
@@ -735,9 +735,35 @@ module.exports = function(Campaign) {
         return sendToEmailQueueCB(emailQueueErr);
       }
       logger.info("Pushed Email to the Queue", emailQueueObj);
-      sendToEmailQueueCB();
+      sendToEmailQueueCB(null, campaign, followup, person, email);
     });
 
+  };
+
+  /**
+   * increments the camapain and list metrics assmebled count
+   *
+   * @param  {[Campaign]} campaign
+   * @param  {[FollowUp]} followup
+   * @param  {[Person]} person
+   * @param  {[Object]} email
+   * @param  {[function]} sendToEmailQueueCB
+   * @author Ramanavel Selvaraju
+   */
+  const incrementAssmebedCountInMetrics = (campaign, followup, person,
+      email, callback) => {
+    if(followup) return callback(null);
+    async.parallel([
+      async.apply(Campaign.app.models.campaignMetric.getAndIncrementByProperty,
+                          campaign, "assembled"),
+      async.apply(Campaign.app.models.listMetric.getAndIncrementByProperty,
+                          campaign, person, "assembled")
+    ], (parallelErr) => {
+      if(parallelErr) {
+        return callback(parallelErr);
+      }
+      return callback(null);
+    });
   };
 
   /**

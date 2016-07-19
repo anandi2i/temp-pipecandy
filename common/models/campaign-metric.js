@@ -2,8 +2,150 @@
 
 import logger from "../../server/log";
 import async from "async";
+import lodash from "lodash";
 
 module.exports = function(CampaignMetric) {
+
+//npm run calls
+  /**
+   * creates metric entry for campagin and lists in parallel manner
+   *
+   * @param  {[Campaign]} campaign
+   * @param  {[function]} createMetricsOnGenCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  CampaignMetric.createMetricsOnGen = (campaign, createMetricsOnGenCB) => {
+    async.parallel([
+      async.apply(CampaignMetric.updateMertricsOnGen, campaign),
+      async.apply(CampaignMetric.app.models.listMetric.updateListMetricOnGen,
+                    campaign),
+    ], (parallelErr) => {
+      return createMetricsOnGenCB(parallelErr);
+    });
+  };
+
+  /**
+   * updaets the campaign metrics campagin metrics not found it will create
+   * new one
+   *
+   * @param  {[type]} campaign              [description]
+   * @param  {[type]} updateMertricsOnGenCB [description]
+   * @return {[type]}                       [description]
+   * @author Ramanavel Selvaraju
+   */
+  CampaignMetric.updateMertricsOnGen = (campaign, updateMertricsOnGenCB) => {
+    async.waterfall([
+      async.apply(getCampaignMetrics, campaign),
+      createCampaignMetrics,
+      updateAssemblerMetrics
+    ], (waterfallErr) => {
+      return updateMertricsOnGenCB(waterfallErr);
+    });
+  };
+
+  /**
+   * returns campagin metrics for a campaign Object
+   *
+   * @param  {[type]} campaign             [description]
+   * @param  {[type]} getCampaignMetricsCB [description]
+   * @return {[type]}                      [description]
+   * @author Ramanavel Selvaraju
+   */
+  const getCampaignMetrics = (campaign, getCampaignMetricsCB) => {
+    CampaignMetric.find({where: {campaignId: campaign.id}
+    }, (findErr, campaignMetrics) => {
+      if(findErr) {
+        logger.error({error: findErr, stack: findErr.stack,
+                      input: {campaign: campaign}});
+        return getCampaignMetricsCB(findErr);
+      }
+      return getCampaignMetricsCB(null, campaign,
+                  lodash.isEmpty(campaignMetrics) ? null : campaignMetrics[0]);
+    });
+  };
+
+  /**
+   * if metrics object null creates metrics object
+   *
+   * @param  {[campaign]} campaign
+   * @param  {[CampaignMetric]} metric
+   * @param  {[function]} createCampaignMetricsCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  const createCampaignMetrics = (campaign, metric, createCampaignMetricsCB) => {
+    if(metric) {
+      return createCampaignMetricsCB(null, campaign, metric);
+    }
+    CampaignMetric.create({campaignId: campaign.id}, (err, metrics) => {
+      if(err) {
+        logger.error({error: err, stack: err.stack,
+                      input: {campaign: campaign}});
+        return createCampaignMetricsCB(err);
+      }
+      return createCampaignMetricsCB(null, campaign, metrics);
+    });
+  };
+
+  /**
+   * updates the already sent mails as assembeled emails count
+   * because already sent means already assembed from assember so that metrics
+   * also should caputured here
+   *
+   * @param  {[campaign]} campaign
+   * @param  {[CampaignMetric]} metric
+   * @param  {[function]} updateAssemblerMetricsCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  const updateAssemblerMetrics = (campaign, metrics, updateAssemMetricsCB) => {
+    metrics.updateAttribute("assembled", metrics.sentEmails,
+      (err, updatedMetrics) => {
+        if(err) {
+          logger.error({error: err, stack: err.stack,
+                        input: {campaign: campaign}});
+          return updateAssemMetricsCB(err);
+        }
+        return updateAssemMetricsCB(null);
+    });
+  };
+
+  /**
+   * gets campagin metric and incremntes the assembled count
+   *
+   * @param  {Campaign}   campaign
+   * @param  {String} property [metric property like sent, assembled, bounced]
+   * @param  {Function} cb       [callback]
+   * @author Ramanavel Selvaraju
+   */
+  CampaignMetric.getAndIncrementByProperty =
+    (campaign, property, cb) => {
+    getCampaignMetrics(campaign, (findErr, campaign, metric) => {
+      if(findErr) return cb(findErr);
+      CampaignMetric.incrementMetric(metric, property, (incrementErr) => {
+        return cb(incrementErr);
+      });
+    });
+  };
+
+  /**
+   * increments with one whatever the property you have given in the params
+   *
+   * @param  {[campaignMetric/ListMetric]} metric
+   * @param  {[String]} property [metric property like sent, assembled, bounced]
+   * @param  {[callaback]} incrementMetricCB [callabck]
+   * @author Ramanavel Selvaraju
+   */
+  CampaignMetric.incrementMetric = (metric, property, incrementMetricCB) => {
+    const one = 1;
+    metric.updateAttribute(property, metric[property] + one,
+      (err, updatedMetrics) => {
+        if(err) {
+          logger.error({error: err, stack: err.stack,
+                        input: {metric: metric, property: property}});
+          return incrementMetricCB(err);
+        }
+        return incrementMetricCB(null);
+    });
+  };
 
   /**
    * Creates an entry on the clicked email model to get the report of

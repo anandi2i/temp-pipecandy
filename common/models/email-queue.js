@@ -77,9 +77,8 @@ module.exports = function(EmailQueue) {
       if(emailDestroyErr){
         logger.error({error: emailDestroyErr, stack: emailDestroyErr.stack,
                       input: {ids: ids, userId: userId}});
-        return destroyCB(emailDestroyErr);
       }
-      return destroyCB(null);
+      return destroyCB(emailDestroyErr);
     });
   };
 
@@ -236,6 +235,8 @@ EmailQueue.assembleEmails = (campaignId, assembleEmailsCB) => {
       async.apply(EmailQueue.destroyByCampaign, campaign),
       async.apply(EmailQueue.app.models.campaign.updateStatusCode,
                     campaign, statusCodes.processing),
+      async.apply(EmailQueue.app.models.campaignMetric.createMetricsOnGen,
+                    campaign),
       async.apply(EmailQueue.app.models.list.getListAndSaveEmail,
                     campaign, null),
       async.apply(EmailQueue.app.models.campaign.updateStatusCode,
