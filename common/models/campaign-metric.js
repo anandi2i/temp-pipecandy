@@ -208,6 +208,21 @@ module.exports = function(CampaignMetric) {
   };
 
   /**
+   * Update Properties of a CampaignMetric
+   *
+   * @param  {CampaignMetric}   campaignMetric
+   * @param  {Object}   properties
+   * @param  {Function} callback
+   * @return {CampaignMetric} Updated Instance
+   * @author Syed Sulaiman M
+   */
+  CampaignMetric.updateProperties = (campaignMetric, properties, callback) => {
+    campaignMetric.updateAttributes(properties, (metricErr, metric) => {
+      return callback(metricErr, metric);
+    });
+  };
+
+  /**
    * Updates the updatedAt column with current Time
    * @param ctx Context
    * @param next (Callback)

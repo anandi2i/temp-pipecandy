@@ -2,6 +2,7 @@
 
 import async from "async";
 import constants from "../../server/utils/constants";
+import lodash from "lodash";
 import logger from "../../server/log";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 
@@ -127,7 +128,7 @@ module.exports = function(InboxMail) {
     InboxMail.find({
       include: "person",
       where: whereQry,
-      order: "createdAt DESC",
+      order: "receivedDate DESC",
       limit: limit,
       skip: start
     }, (inboxMailsErr, inboxMails) => {
@@ -159,7 +160,7 @@ module.exports = function(InboxMail) {
       description: "Update Inbox Mails Classification",
       accepts: [
         {arg: "ctx", type: "object", http: {source: "context"}},
-        {arg: "id", type: "array", http: {source: "body"}},
+        {arg: "inboxIds", type: "array", http: {source: "body"}},
         {arg: "classification", type: "string"}
       ],
       returns: {arg: "InboxMail", type: "array", root: true},
@@ -175,13 +176,14 @@ module.exports = function(InboxMail) {
    * @return {InboxMail} Updated InboxMail Class
    * @author Syed Sulaiman M
    */
-  InboxMail.updateClassification = (ctx, ids, classification, callback) => {
+  InboxMail.updateClassification = (ctx, inboxIds, classification,
+      callback) => {
     if(!constants.CLASSIFICATIONS.includes(classification)) {
       const errorMessage = errorMessages.INVALID_CLASSIFICATION;
       return callback(errorMessage);
     }
     let updatedInboxMails = [];
-    async.each(ids, (id, inboxCB) => {
+    async.each(inboxIds, (id, inboxCB) => {
       InboxMail.findById(id, (inboxMailErr, inboxMail) => {
         if(inboxMailErr) {
           logger.error("Error finding InboxMail",
@@ -196,9 +198,10 @@ module.exports = function(InboxMail) {
         }
         async.parallel([
           async.apply(InboxMail.updateClass, inboxMail, classification),
-          async.apply(
-            InboxMail.app.models.MailResponse.updateUserClassByThreadId,
-            inboxMail.threadId, classification)
+          async.apply(InboxMail.app.models.MailResponse.updateUserClassByMailId,
+            inboxMail.mailId, classification),
+          async.apply(InboxMail.updateMetricForClassification, inboxMail,
+            classification, inboxMail.class)
         ], (err, results) => {
           if(err) {
             logger.error("Error updating Email Class",
@@ -225,6 +228,271 @@ module.exports = function(InboxMail) {
   };
 
   /**
+   * Method to update List and Campaign Metrics
+   * @param  {InboxMail}   inboxMail
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  InboxMail.updateMetricForClassification = (inboxMail, classification,
+      oldClassification, callback) => {
+    async.parallel([
+      async.apply(updateCampaignMetricClassCount, inboxMail, classification,
+        oldClassification),
+      async.apply(updateListMetricClassCount, inboxMail, classification,
+        oldClassification)
+    ], (err, results) => {
+      if(err) {
+        logger.error("Error updating Email Class",
+          {error: err, stack: err.stack, input:
+          {inboxMailId:inboxMail.id, classification:classification}});
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      callback(null, results);
+    });
+  };
+
+  /**
+   * Method to update List and Campaign Metrics for Responded Count
+   * @param  {InboxMail}   inboxMail
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  InboxMail.updateMetricForResponded = (inboxMail, callback) => {
+    InboxMail.app.models.MailResponse.findByThreadId(inboxMail.threadId,
+      (mailResponsesErr, mailResponses) => {
+        if(mailResponsesErr) {
+          logger.error("Error getting MailResponse",
+            {error: mailResponsesErr, stack: mailResponsesErr.stack, input:
+            {personId:inboxMail.threadId}});
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        if(!lodash.isEmpty(mailResponses)) {
+          mailResponses = lodash.filter(mailResponses, (o) => {
+            return !o.labels.includes("SENT");
+          });
+          const one = 1;
+          if(mailResponses.length === one) {
+            async.parallel([
+              async.apply(updateCampaignMetricRespondedCount, inboxMail),
+              async.apply(updateListMetricRespondedCount, inboxMail)
+            ], (err, results) => {
+              if(err) {
+                logger.error("Error updating Metric for Responded Count",
+                  {error: err, stack: err.stack, input:
+                  {inboxMailId:inboxMail.id}});
+                const errorMessage = errorMessages.SERVER_ERROR;
+                return callback(errorMessage);
+              }
+              callback(null, results);
+            });
+          } else {
+            return callback(null);
+          }
+        } else {
+          return callback(null);
+        }
+    });
+  };
+
+  /**
+   * Update Campaign Metric Classification Count
+   * @param  {InboxMail}   inboxMail
+   * @param  {Function} callback
+   * @return {CampaignMetric}
+   * @author Syed Sulaiman M
+   */
+  const updateCampaignMetricClassCount = (inboxMail, classification,
+      oldClassification, callback) => {
+    InboxMail.app.models.campaignMetric.getMetricByCampaignId(
+        inboxMail.campaignId, (campaignMetricErr, campaignMetric) => {
+      if(campaignMetricErr) {
+        logger.error("Error updating Email Class",
+          {error: campaignMetricErr, stack: campaignMetricErr.stack, input:
+          {campaignId:inboxMail.campaignId}});
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      if(campaignMetric && (oldClassification !== classification)) {
+        let properties = {};
+        const zero = 0, one = 1;
+        let colName = getColumnNameFromClassification(oldClassification);
+        let value = campaignMetric[colName];
+        if(value > zero) properties[colName] = value - one;
+        colName = getColumnNameFromClassification(classification);
+        value = campaignMetric[colName];
+        properties[colName] = value + one;
+        InboxMail.app.models.campaignMetric.updateProperties(
+            campaignMetric, properties, (updateErr, updatedInst) => {
+          if(updateErr) {
+            logger.error("Error updating Campaign Metric ",
+              {error: updateErr, stack: updateErr.stack, input:
+              {campaignMetricId:campaignMetric.id}});
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return callback(errorMessage);
+          }
+          return callback(null, updatedInst);
+        });
+      } else {
+        return callback(null);
+      }
+    });
+  };
+
+  /**
+   * Update Campaign Metric Responded Count
+   * @param  {InboxMail}   inboxMail
+   * @param  {Function} callback
+   * @return {CampaignMetric}
+   * @author Syed Sulaiman M
+   */
+  const updateCampaignMetricRespondedCount = (inboxMail, callback) => {
+    InboxMail.app.models.campaignMetric.getMetricByCampaignId(
+      inboxMail.campaignId, (campaignMetricErr, campaignMetric) => {
+      if(campaignMetricErr) {
+        logger.error("Error updating Email Class",
+          {error: campaignMetricErr, stack: campaignMetricErr.stack,
+          input: {campaignId:inboxMail.campaignId}});
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      if(campaignMetric) {
+        let properties = {
+          responded: ++campaignMetric.responded
+        };
+        InboxMail.app.models.campaignMetric.updateProperties(
+            campaignMetric, properties, (updateErr, updatedInst) => {
+          if(updateErr) {
+            logger.error("Error updating Campaign Metric ",
+              {error: updateErr, stack: updateErr.stack, input:
+              {campaignMetricId:campaignMetric.id}});
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return callback(errorMessage);
+          }
+          return callback(null, updatedInst);
+        });
+      }
+    });
+  };
+
+  /**
+   * Update List Metric Classification Count
+   * @param  {Number}   campaignId
+   * @param  {Number}   personId
+   * @param  {Function} callback
+   * @return {[ListMetric]}
+   * @author Syed Sulaiman M
+   */
+  const updateListMetricClassCount = (inboxMail, classification,
+      oldClassification, callback) => {
+    InboxMail.app.models.campaign.getCampaignListForPerson(
+        inboxMail.campaignId, inboxMail.personId, (listsErr, lists) => {
+      let listMetrics = [];
+      async.each(lists, (list, listCB) => {
+        InboxMail.app.models.listMetric.findByListIdAndCampaignId(
+            list.id, inboxMail.campaignId, (err, listMetric) => {
+          if(err) {
+            logger.error("Error getting List Metric ",
+              {error: err, stack: err.stack, input:
+              {listId:list.id}});
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return listCB(errorMessage);
+          }
+          if(listMetric && (oldClassification !== classification)) {
+            let properties = {};
+            const zero = 0, one = 1;
+            let colName = getColumnNameFromClassification(oldClassification);
+            let value = listMetric[colName];
+            if(value > zero) properties[colName] = value - one;
+            colName = getColumnNameFromClassification(classification);
+            value = listMetric[colName];
+            properties[colName] = value + one;
+            InboxMail.app.models.listMetric.updateProperties(
+                listMetric, properties, (updateErr, updatedInst) => {
+              if(updateErr) {
+                logger.error("Error updating List Metric ",
+                  {error: updateErr, stack: updateErr.stack, input:
+                  {listMetricId:listMetric.id}});
+                const errorMessage = errorMessages.SERVER_ERROR;
+                return listCB(errorMessage);
+              }
+              listMetrics.push(updatedInst);
+              return listCB(null);
+            });
+          } else {
+            return listCB(null);
+          }
+        });
+      }, (updateErr) => {
+        if(updateErr) {
+          logger.error("Error updating List Metric ",
+            {error: updateErr, stack: updateErr.stack, input:
+            {campaignId:inboxMail.campaignId, personId:inboxMail.personId}});
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        return callback(null, listMetrics);
+      });
+    });
+  };
+
+  /**
+   * Update List Metric Classification Count
+   * @param  {Number}   campaignId
+   * @param  {Number}   personId
+   * @param  {Function} callback
+   * @return {[ListMetric]}
+   * @author Syed Sulaiman M
+   */
+  const updateListMetricRespondedCount = (inboxMail, callback) => {
+    InboxMail.app.models.campaign.getCampaignListForPerson(
+        inboxMail.campaignId, inboxMail.personId, (listsErr, lists) => {
+      let listMetrics = [];
+      async.each(lists, (list, listCB) => {
+        InboxMail.app.models.listMetric.findByListIdAndCampaignId(
+            list.id, inboxMail.campaignId, (err, listMetric) => {
+          if(err) {
+            logger.error("Error getting List Metric ",
+              {error: err, stack: err.stack, input:
+              {listId:list.id}});
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return listCB(errorMessage);
+          }
+          if(listMetric) {
+            let properties = {
+              responded: ++listMetric.responded
+            };
+            InboxMail.app.models.listMetric.updateProperties(
+                listMetric, properties, (updateErr, updatedInst) => {
+              if(updateErr) {
+                logger.error("Error updating List Metric ",
+                  {error: updateErr, stack: updateErr.stack, input:
+                  {listMetricId:listMetric.id}});
+                const errorMessage = errorMessages.SERVER_ERROR;
+                return listCB(errorMessage);
+              }
+              listMetrics.push(updatedInst);
+              return listCB(null);
+            });
+          } else {
+            return listCB(null);
+          }
+        });
+      }, (updateErr) => {
+        if(updateErr) {
+          logger.error("Error updating List Metric ",
+            {error: updateErr, stack: updateErr.stack, input:
+            {campaignId:inboxMail.campaignId, personId:inboxMail.personId}});
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        return callback(null, listMetrics);
+      });
+    });
+  };
+
+  /**
    * Method To validate mail request
    * @param  {Number} campaignId
    * @param  {Number} start
@@ -246,6 +514,29 @@ module.exports = function(InboxMail) {
       errorMessage = errorMessages.INVALID_CLASSIFICATION;
     }
     return errorMessage;
+  };
+
+  /**
+   * Return Column Name for Metric Table to the corresponding classification
+   *
+   * @param  {String} classification
+   * @return {String}   Column Name of Metric Table
+   * @author Syed Sulaiman M
+   */
+  const getColumnNameFromClassification = (classification) => {
+    let columnName = null;
+    if (classification === "bounced") {
+      columnName = "bounced";
+    } else if (classification === "out-of-office") {
+      columnName = "outOfOffice";
+    } else if (classification === "actionable") {
+      columnName = "actionable";
+    } else if(classification === "nurture") {
+      columnName = "nurture";
+    } else if(classification === "negative") {
+      columnName = "negative";
+    }
+    return columnName;
   };
 
   /**

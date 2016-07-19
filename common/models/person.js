@@ -361,15 +361,138 @@ module.exports = function(Person) {
             const errorMessage = errorMessages.SERVER_ERROR;
             return getOrSaveUnsubscribeCB(errorMessage);
           }
-          Person.app.models.campaignAudit
-            .updateFollowUpEligiblity(campaignId, personId, (updateErr) => {
-            if(updateErr){
+          async.parallel([
+              (followUpUpdateCB) => {
+                Person.app.models.campaignAudit.updateFollowUpEligiblity(
+                    campaignId, personId, (updateErr) => {
+                  followUpUpdateCB(updateErr);
+                });
+              },
+              async.apply(updateMetricForUnsubscribe, unsubscribeInst)
+          ], (err, results) => {
+            if(err){
               logger.error(updateErr);
               return getOrSaveUnsubscribeCB(updateErr);
             }
             return getOrSaveUnsubscribeCB(null, unsubscribeInst);
           });
         });
+    });
+  };
+
+  /**
+   * Method to update List and Campaign Metrics
+   * @param  {Unsubscribe}   unsubscribeInst
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  const updateMetricForUnsubscribe = (unsubscribeInst, callback) => {
+    async.parallel([
+      async.apply(updateCampaignMetricUnsubCount, unsubscribeInst.campaignId),
+      async.apply(updateListMetricUnsubCount,
+        unsubscribeInst.campaignId, unsubscribeInst.personId)
+    ], (err, results) => {
+      if(err) {
+        logger.error("Error updating Metric",
+          {error: err, stack: err.stack, input:
+          {unsubscribeId:unsubscribeInst.id}});
+      }
+      return callback(null, unsubscribeInst);
+    });
+  };
+
+  /**
+   * Update Campaign Metric UbSubscribe Count
+   * @param  {Number}   campaignId
+   * @param  {Function} callback
+   * @return {CampaignMetric}
+   * @author Syed Sulaiman M
+   */
+  const updateCampaignMetricUnsubCount = (campaignId, callback) => {
+    Person.app.models.campaignMetric.getMetricByCampaignId(campaignId,
+            (campaignMetricErr, campaignMetric) => {
+      if(campaignMetricErr) {
+        logger.error("Error getting Campaign Metric ",
+          {error: campaignMetricErr, stack: campaignMetricErr.stack, input:
+          {campaignId:campaign.id}});
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      if(campaignMetric) {
+        const one = 1;
+        let properties = {
+          unsubscribed: campaignMetric.unsubscribed + one
+        };
+        Person.app.models.campaignMetric.updateProperties(
+            campaignMetric, properties, (updateErr, updatedInst) => {
+          if(updateErr) {
+            logger.error("Error updating Campaign Metric ",
+              {error: updateErr, stack: updateErr.stack, input:
+              {campaignMetricId:campaignMetric.id}});
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return callback(errorMessage);
+          }
+          return callback(null, updatedInst);
+        });
+      } else {
+        return callback(null);
+      }
+    });
+  };
+
+  /**
+   * Update List Metric UbSubscribe Count
+   * @param  {Number}   campaignId
+   * @param  {Number}   personId
+   * @param  {Function} callback
+   * @return {[ListMetric]}
+   * @author Syed Sulaiman M
+   */
+  const updateListMetricUnsubCount = (campaignId, personId, callback) => {
+    Person.app.models.campaign.getCampaignListForPerson(campaignId, personId,
+        (listsErr, lists) => {
+      let listMetrics = [];
+      async.each(lists, (list, listCB) => {
+        Person.app.models.listMetric.findByListIdAndCampaignId(
+            list.id, campaignId, (err, listMetric) => {
+          if(err) {
+            logger.error("Error getting List Metric ",
+              {error: err, stack: err.stack, input:
+              {listId:list.id}});
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return listCB(errorMessage);
+          }
+          if(listMetric) {
+            const one = 1;
+            let properties = {
+              unsubscribed: listMetric.unsubscribed + one
+            };
+            Person.app.models.listMetric.updateProperties(
+                listMetric, properties, (updateErr, updatedInst) => {
+              if(updateErr) {
+                logger.error("Error updating List Metric ",
+                  {error: updateErr, stack: updateErr.stack, input:
+                  {listMetricId:listMetric.id}});
+                const errorMessage = errorMessages.SERVER_ERROR;
+                return listCB(errorMessage);
+              }
+              listMetrics.push(updatedInst);
+              return listCB(null);
+            });
+          } else {
+            return listCB(null);
+          }
+        });
+      }, (updateErr) => {
+        if(updateErr) {
+          logger.error("Error updating List Metric ",
+            {error: updateErr, stack: updateErr.stack, input:
+            {campaignId:campaignId, personId:personId}});
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
+        }
+        return callback(null, listMetrics);
+      });
     });
   };
 

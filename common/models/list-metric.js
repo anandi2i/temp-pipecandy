@@ -193,6 +193,40 @@ module.exports = function(ListMetric) {
   };
 
   /**
+   * Get ListMetric By List Id
+   * @param  {Number}   listId
+   * @param  {Function} callback
+   * @return {ListMetric}
+   * @author Syed Sulaiman M
+   */
+  ListMetric.findByListIdAndCampaignId = (listId, campaignId, callback) => {
+    ListMetric.find({
+      where: {
+        listId: listId,
+        campaignId: campaignId
+      }
+    }, (listMetricsErr, listMetrics) => {
+      if(listMetricsErr) return callback(listMetricsErr);
+      return callback(null, listMetrics[0]);
+    });
+  };
+
+  /**
+   * Update Properties of a ListMetric
+   *
+   * @param  {ListMetric}   listMetric
+   * @param  {Object}   properties
+   * @param  {Function} callback
+   * @return {ListMetric} Updated Instance
+   * @author Syed Sulaiman M
+   */
+  ListMetric.updateProperties = (listMetric, properties, callback) => {
+    listMetric.updateAttributes(properties, (metricErr, metric) => {
+      return callback(metricErr, metric);
+    });
+  };
+
+  /**
    * Get the list for the campaign in which the current person is linked to.
    * @param  {[reqParams]} reqParams [{emailLinkId, personId, campaignId}]
    * @param  {[function]} getListsForCampaignCB

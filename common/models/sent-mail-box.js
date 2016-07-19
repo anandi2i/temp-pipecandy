@@ -135,7 +135,7 @@ module.exports = function(SentMailBox) {
       where: {
         campaignId: campaignId
       },
-      order: "createdAt DESC",
+      order: "sentDate DESC",
       limit: limit,
       skip: start
     }, (sentMailsErr, sentMails) => {

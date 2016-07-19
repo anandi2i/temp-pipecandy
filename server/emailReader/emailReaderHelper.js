@@ -319,16 +319,20 @@ function updateRelatedTables(App, param, mailResponse, sentMail, callback) {
 function updateSentMailBox(App, param, mailResponse, sentMail, callback) {
   App.sentMailBox.findByUserIdAndThreadId(param.userId, mailResponse.threadId,
         (err, sentMailBoxInst) => {
-    let replyMsg = getPlainTextFromBody(mailResponse.content);
-    const one = 1;
-    let attrToUpdate = {
-      content: replyMsg,
-      count: sentMailBoxInst.count + one,
-      sentDate: mailResponse.receivedDate
-    };
-    App.sentMailBox.updateAttr(sentMailBoxInst, attrToUpdate, (err, res) => {
+    if(sentMailBoxInst.mailId !== mailResponse.mailId) {
+      let replyMsg = getPlainTextFromBody(mailResponse.content);
+      const one = 1;
+      let attrToUpdate = {
+        content: replyMsg,
+        count: sentMailBoxInst.count + one,
+        sentDate: mailResponse.receivedDate
+      };
+      App.sentMailBox.updateAttr(sentMailBoxInst, attrToUpdate, (err, res) => {
+        callback(null, param, mailResponse, sentMail);
+      });
+    } else {
       callback(null, param, mailResponse, sentMail);
-    });
+    }
   });
 }
 
@@ -356,7 +360,26 @@ function updateInboxMail(App, param, mailResponse, sentMail, callback) {
     userId: param.userId
   };
   App.inboxMail.saveOrUpdate(inboxMailInst, function(err, response) {
-    callback(null, param, mailResponse, sentMail);
+    updateMetricForResponded(App, response, function (err, result) {
+      callback(null, param, mailResponse, sentMail);
+    });
+  });
+}
+
+/**
+ * Update Related Metric for Responded Count
+ * @param  {InboxMail}   inboxMail
+ * @param  {MailResponse}   mailData
+ * @param  {Function} callback
+ * @author Syed Sulaiman M
+ */
+function updateMetricForResponded(App, inboxMail, callback) {
+  App.inboxMail.updateMetricForResponded(inboxMail, function (err, inboxMail) {
+    if(err) {
+      console.error("Error updating metric for responded for userId and"
+        + " threadId", mailData.userId, mailData.threadId, err);
+    }
+    callback(null);
   });
 }
 

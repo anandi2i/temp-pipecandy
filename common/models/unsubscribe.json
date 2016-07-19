@@ -7,14 +7,6 @@
     "validateUpsert": true
   },
   "properties": {
-    "campaignId": {
-      "type": "number",
-      "required": true
-    },
-    "campaignAuditId": {
-      "type": "number",
-      "required": true
-    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"
@@ -34,6 +26,16 @@
       "type": "belongsTo",
       "model": "person",
       "foreignKey": "personId"
+    },
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": "campaignId"
+    },
+    "campaignAudit": {
+      "type": "belongsTo",
+      "model": "campaignAudit",
+      "foreignKey": "campaignAuditId"
     }
   },
   "acls": [],

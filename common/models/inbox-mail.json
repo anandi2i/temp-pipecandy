@@ -39,7 +39,8 @@
       "type": "date"
     },
     "createdAt": {
-      "type": "date"
+      "type": "date",
+      "defaultFn": "now"
     },
     "updatedAt": {
       "type": "date"

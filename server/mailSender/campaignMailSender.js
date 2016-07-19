@@ -106,8 +106,8 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
             email: userCredential.profile.emails[0],
             credential: userCredential.credentials
           };
-          if(!userCredential.credential.accessToken &&
-              !userCredential.credential.refreshToken) {
+          if(!userCredential.credentials.accessToken &&
+              !userCredential.credentials.refreshToken) {
             console.log("Access or Refresh Token not available for User Id",
                 emailQueueEntry.userId);
             emailQueueCB();
@@ -310,6 +310,17 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
 }
 
 /**
+ * Method to Encode Email Subject
+ * @param  {String} subject Email Subject
+ * @return {String}   Encode Email Subject
+ * @author Syed Sulaiman M
+ */
+function encodeSubject(subject) {
+  let encSubject = new Buffer(subject).toString("base64");
+  return "=?utf-8?B?" + encSubject + "?=";
+}
+
+/**
  * Build the mail with the credentials and the mail content
  * @param credentials
  * @return void
@@ -333,7 +344,7 @@ function buildEmail(emailQueue, mailContent, buildEmailCB) {
   emailLines.push("To: <" + mailContent.personEmail + ">");
   emailLines.push("Content-type: text/html;charset=iso-8859-1");
   emailLines.push("MIME-Version: 1.0");
-  emailLines.push("Subject: " + mailContent.mailSubject);
+  emailLines.push("Subject: " + encodeSubject(mailContent.mailSubject));
   emailLines.push("");
   emailLines.push(mailContent.contents);
 
@@ -499,23 +510,24 @@ function updateCampaignMetric(emailQueue, mailContent, sentMailResp,
  */
 function updateListMetric(emailQueue, mailContent, sentMailResp,
       updateMetricCB) {
-  getCommonList(emailQueue.campaignId, emailQueue.personId,
-    function(commonLists) {
-      async.each(commonLists, (commonList, commonListCB) => {
-        commonList.listMetrics((listMetricsErr, listMetrics) => {
+  App.campaign.getCampaignListForPerson(emailQueue.campaignId,
+      emailQueue.personId, function(err, lists) {
+      async.each(lists, (list, listCB) => {
+        App.listMetric.findByListIdAndCampaignId(
+            list.id, emailQueue.campaignId, (err, listMetric) => {
           let listMetricInst = {};
           listMetricInst.sentEmails = 1;
-          listMetricInst.listId = commonList.id;
+          listMetricInst.listId = list.id;
           listMetricInst.campaignId = emailQueue.campaignId;
-          if (!lodash.isEmpty(listMetrics)) {
-            listMetricInst = listMetrics[0];
-            listMetricInst.sentEmails = ++listMetrics[0].sentEmails;
+          if(listMetric) {
+            listMetricInst = listMetric;
+            listMetricInst.sentEmails = ++listMetric.sentEmails;
           }
           App.listMetric.upsert(listMetricInst, function(err, response) {
             if (err) {
               console.error("Error in updating List Metric", err);
             }
-            commonListCB(null, response);
+            listCB(null, response);
           });
         });
       }, function(err) {
@@ -572,48 +584,6 @@ function updateCampaignLastRunAt(emailQueue, mailContent, sentMailResp,
         function(err, updatedCampaign) {
       updateCampaignCB(null, emailQueue, mailContent, sentMailResp);
     });
-  });
-}
-
-/**
- * Method to Get common list of Campaign and Person
- * @param  {Number}   campaignId
- * @param  {Number}   personId
- * @param  {Function} callback
- * @author Syed Sulaiman M
- */
-function getCommonList(campaignId, personId, callback) {
-  async.parallel([
-    (campaignListCB) => {
-      App.campaign.findById(campaignId, (campaignInstErr, campaignInst) => {
-        if (campaignInstErr) {
-          campaignListCB(campaignInstErr);
-        }
-        campaignInst.lists((listsErr, lists) => {
-          campaignListCB(listsErr, lists);
-        });
-      });
-    },
-    (personListCB) => {
-      App.person.findById(personId, (personInstErr, personInst) => {
-        if (personInstErr) {
-          campaignListCB(personInstErr);
-        }
-        personInst.lists((listsErr, lists) => {
-          personListCB(listsErr, lists);
-        });
-      });
-    }
-  ], function(err, results) {
-    if (err) {
-      console.error("Unable to get List ", err);
-      callback([]);
-    } else {
-      let campaignList = results[0];
-      let personList = results[1];
-      let commonLists = lodash.intersectionBy(campaignList, personList, "id");
-      callback(commonLists);
-    }
   });
 }
 

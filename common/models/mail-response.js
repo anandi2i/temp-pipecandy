@@ -71,15 +71,31 @@ module.exports = function(MailResponse) {
   };
 
   /**
+   * Find MailResponses by threadId
+   * @param  {String}   threadId
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  MailResponse.findByThreadId = (threadId, callback) => {
+    MailResponse.find({
+      where: {
+        threadId: threadId
+      }
+    }, (mailResponsesErr, mailResponses) => {
+      return callback(mailResponsesErr, mailResponses);
+    });
+  };
+
+  /**
    * Update User Class for Mail by Thread Id
    * @param  {String}  threadId
    * @param  {String}  userClass
    * @param  {Function} callback
    * @author Syed Sulaiman M
    */
-  MailResponse.updateUserClassByThreadId = (threadId, userClass, callback) => {
+  MailResponse.updateUserClassByMailId = (mailId, userClass, callback) => {
     MailResponse.updateAll({
-      threadId : threadId
+      mailId : mailId
     }, {
       UserClass : userClass
     }, (updateErr, info) => {

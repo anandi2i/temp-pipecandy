@@ -47,6 +47,22 @@
       "type": "number",
       "default": 0
     },
+    "outOfOffice": {
+      "type": "number",
+      "default": 0
+    },
+    "actionable": {
+      "type": "number",
+      "default": 0
+    },
+    "nurture": {
+      "type": "number",
+      "default": 0
+    },
+    "negative": {
+      "type": "number",
+      "default": 0
+    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"
