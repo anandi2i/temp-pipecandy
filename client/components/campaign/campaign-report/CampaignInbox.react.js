@@ -235,11 +235,13 @@ class CampaignInbox extends React.Component {
    */
   moveMail(classification) {
     const {activeTabId, selectedInboxIds} = this.state;
-    CampaignActions.moveMails({
-      classification: classification,
-      inboxIds: selectedInboxIds,
-      activeTabId: activeTabId
-    });
+    if(activeTabId !== classification) {
+      CampaignActions.moveMails({
+        classification: classification,
+        inboxIds: selectedInboxIds,
+        activeTabId: activeTabId
+      });
+    }
   }
 
   /**
@@ -256,8 +258,10 @@ class CampaignInbox extends React.Component {
       threadId,
       isEmailThreadView
     } = this.state;
-    const activeTabName =
-      _.findWhere(tabs, {id: activeTabId}).name.toLowerCase();
+    const activeTabName = _.findWhere(tabs, {
+      id: activeTabId
+    }).name.toLowerCase().capitalizeFirstLetter();
+    const showEmptymsg = inboxMails.length || requestSent;
     const classifications = _.rest(tabs); //remove first object "all"
     return (
       <div>
@@ -309,7 +313,7 @@ class CampaignInbox extends React.Component {
                   const receivedDate = moment(inbox.receivedDate)
                     .format("DD MMM YYYY");
                   return (
-                    <div key={key} className="camp-repo-grid waves-effect">
+                    <div key={key} className="camp-repo-grid waves-effect animated flipInX">
                       <div className="row">
                         <div className="content">
                           <input type="checkbox" className="filled-in"
@@ -345,7 +349,7 @@ class CampaignInbox extends React.Component {
               </div>
             </div>
             <div className="container center-align m-t-20"
-              style={{display: inboxMails.length ? "none" : "block"}} >
+              style={{display: showEmptymsg ? "none" : "block"}} >
               {activeTabName} seems to be empty!
             </div>
           </div>

@@ -143,6 +143,7 @@ class CampaignSentbox extends React.Component {
   render() {
     const {sentMails, requestSent, isEmailThreadView, threadId} = this.state;
     const campaignId = this.props.params.id;
+    const showEmptymsg = sentMails.data.length || requestSent;
     return (
       <div>
         <div className="m-b-120">
@@ -203,7 +204,7 @@ class CampaignSentbox extends React.Component {
             </div>
           </div>
           <div className="container center-align m-t-20"
-            style={{display: sentMails.data.length ? "none" : "block"}} >
+            style={{display: showEmptymsg ? "none" : "block"}} >
             Sent mails seems to be empty!
           </div>
         </div>

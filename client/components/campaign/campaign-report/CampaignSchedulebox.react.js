@@ -144,6 +144,7 @@ class CampaignSchedulebox extends React.Component {
       isEmailPreview
     } = this.state;
     const campaignId = this.props.params.id;
+    const showEmptymsg = scheduledMails.data.length || requestSent;
     return (
       <div>
         <div className="m-b-120">
@@ -169,7 +170,7 @@ class CampaignSchedulebox extends React.Component {
                 const scheduledAt = moment(scheduled.scheduledAt)
                   .format("DD MMM YYYY");
                 return (
-                  <div key={key} className="camp-repo-grid waves-effect">
+                  <div key={key} className="camp-repo-grid waves-effect animated flipInX">
                     <div className="row">
                       <div className="content">
                         <input type="checkbox" className="filled-in"
@@ -203,7 +204,7 @@ class CampaignSchedulebox extends React.Component {
             </div>
           </div>
           <div className="container center-align m-t-20"
-            style={{display: scheduledMails.data.length ? "none" : "block"}} >
+            style={{display: showEmptymsg ? "none" : "block"}} >
             Scheduled mails seems to be empty!
           </div>
         </div>

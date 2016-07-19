@@ -69,4 +69,13 @@ Array.prototype.equals = function (array) {
 }
 Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
+/**
+ * Capitalize the first letter of given string
+ * Adding it to string prototype
+ * @return {string}
+ */
+String.prototype.capitalizeFirstLetter = function() {
+  return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 })();

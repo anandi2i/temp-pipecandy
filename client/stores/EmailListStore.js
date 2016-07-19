@@ -3,6 +3,8 @@ import _ from "underscore";
 import Constants from "../constants/Constants";
 import AppDispatcher from "../dispatcher/AppDispatcher";
 import EmailListApi from "../API/EmailListApi";
+//@todo: Actions should not be imported here, should remove it asap
+import EmailListActions from "../actions/EmailListActions";
 import {HandleError} from "../utils/ErrorMessageHandler";
 import {SuccessMessages} from "../utils/UserAlerts";
 import {browserHistory} from "react-router";
@@ -143,6 +145,7 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.GET_LIST_BY_ID:
       let data = {"ids":[action.data]};
+      _getEmailList = [];
       EmailListApi.getSelectedList(data).then((response) => {
         _getEmailList = response.data;
         EmailListStore.emitChange();
@@ -156,6 +159,9 @@ AppDispatcher.register(function(payload) {
       EmailListApi.uploadFile(action.data).then((response) => {
         _success = SuccessMessages.successUpload;
         EmailListStore.emitChange();
+        //@todo This has to be removed asap as it calls api inside API
+        //100% dirty call
+        EmailListActions.getEmailListByID(action.data.listId);
         _success = "";
       }, (err)=> {
         _error = HandleError.evaluateError(err);
@@ -210,7 +216,10 @@ AppDispatcher.register(function(payload) {
     case Constants.SAVE_ADDITIONAL_FIELD:
       EmailListApi.saveAdditionalField(action.data).then((response) => {
         _success = SuccessMessages.successAddAdditionalField;
-        EmailListStore.emitChange();
+        //_getEmailListByID.listFields.push(response.data);
+        //@todo: This dirty call has to be removed asap
+        EmailListActions.getEmailListByID(action.data.listId);
+        // EmailListStore.emitChange();
         _success = "";
       }, (err)=> {
         _error = HandleError.evaluateError(err);
@@ -221,7 +230,8 @@ AppDispatcher.register(function(payload) {
     case Constants.RELATE_ADDITIONAL_FIELD:
       EmailListApi.relateAdditionalField(action.data).then((response) => {
         _success = SuccessMessages.successAddAdditionalField;
-        EmailListStore.emitChange();
+        //@todo: This dirty call has to be removed asap
+        EmailListActions.getEmailListByID(action.data.id);
         _success = "";
       }, (err)=> {
         _error = HandleError.evaluateError(err);
