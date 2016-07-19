@@ -6,6 +6,7 @@ import AddFollowups from "./AddFollowups.react";
 import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
 import WordaiPreviewPopup from "./WordaiPreviewPopup.react";
 import PreviewMailsPopup from "./PreviewMailsPopup.react";
+import ProspectSignals from "./ProspectSignals.react";
 import CampaignStore from "../../stores/CampaignStore";
 import UserStore from "../../stores/UserStore";
 import UserAction from "../../actions/UserAction";
@@ -609,6 +610,9 @@ class ScheduleEmail extends React.Component {
               {/* email subject */}
               <div className="row email-subject m-lr-0">
                 <div id="emailSubject" className="email-body inline-tiny-mce" />
+              </div>
+              <div className="row m-lr-0">
+                <ProspectSignals />
               </div>
               <div className="row email-content m-lr-0">
                 <div className="tiny-toolbar" id="mytoolbar">

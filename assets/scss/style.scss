@@ -1,6 +1,120 @@
 html {
   font-family: 'Ubuntu', sans-serif;
 }
+body {
+  background: url("../images/tile.png");
+  background-repeat: repeat-x;
+}
+a {
+  cursor: pointer;
+}
+.main-head {
+  float: left;
+  font-size: 24px;
+  font-weight: 300;
+  width: 100%;
+}
+.notification {
+  margin-top: 5px;
+  font-size: 22px;
+}
+.notification-count {
+  background-color: $orange-clr;
+  position: absolute;
+  height: 15px;
+  padding: 3px 7px;
+  margin: 0;
+  line-height: 1.2;
+  margin-top: -45px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-left: 16px;
+  color: $white;
+}
+.notification-container {
+  position: fixed;
+  top: 74px;
+  right: 1px;
+  height: calc(100% - 74px);
+  background-color: $white;
+  border-left: 2px solid $orange-clr;
+  border-top: 2px solid $orange-clr;
+  border-right: 2px solid $orange-clr;
+  width: 320px;
+  font-size: 12px;
+}
+.notification-modal {
+  height: 100%;
+  .head {
+    color: $orange-clr;
+    border-bottom: $border-1px;
+    padding: 5px 15px;
+    line-height: 1;
+    height: 50px;
+    .notify-titl {
+      font-size: 14px;
+      font-weight: 500;
+      margin-left: 10px;
+    }
+    i {
+      line-height: 35px;
+      font-size: 20px;
+      height: 0;
+      display: inline-block;
+      cursor: pointer;
+    }
+  }
+  .notify-content {
+    line-height: 18px;
+    height: calc(100% - 74px);
+    .notify {
+      padding: 10px 15px;
+      border-bottom: $border-1px;
+      .content {
+        color: $dflt-txt-clr;
+      }
+      .title {
+        color: $orange-clr;
+        font-weight: 500;
+        padding-bottom: 10px;
+      }
+      &.new {
+        background-color: $white;
+        &:hover {
+          background-color: $lit-blue-bg;
+        }
+      }
+      &.old {
+        background-color: $menu-hovr-clr;
+        &:hover {
+          background-color: $lit-blue-bg;
+        }
+      }
+    }
+  }
+}
+.side-nav {
+  .notification {
+    margin-top: 14px;
+    font-size: 22px;
+  }
+  .notification-count {
+    background-color: $orange-clr;
+    position: relative;
+    height: 15px;
+    padding: 3px 7px;
+    margin: 0;
+    line-height: 1.1;
+    margin-top: 17px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-right: 15px;
+    float: right;
+    color: $white;
+  }
+}
 .footer {
   position: fixed;
   left: 0;
@@ -26,19 +140,6 @@ html {
     }
   }
 }
-body {
-  background: url("../images/tile.png");
-  background-repeat: repeat-x;
-}
-a {
-  cursor: pointer;
-}
-.main-head {
-  float: left;
-  font-size: 24px;
-  font-weight: 300;
-  width: 100%;
-}
 .top-candy-bdr {
   background: url("../images/tile.png");
   background-repeat: repeat-x;
@@ -59,30 +160,6 @@ a {
         &.dropdown-button {
           &.active {
             border-bottom: none;
-          }
-        }
-      }
-      &.alarm {
-        a {
-          height: 68px;
-        }
-        i {
-          font-size: 20px;
-          .alarm-info {
-            font-size: 8px;
-            margin-top: 20px;
-            margin-left: -7px;
-            position: absolute;
-            color: #FFF;
-            background: red;
-            border-radius: 5px;
-            height: 13px;
-            line-height: 10px;
-            min-width: 20px;
-            text-align: center;
-            display: inline-block;
-            font-weight: bold;
-            padding: 2px;
           }
         }
       }
@@ -938,6 +1015,47 @@ $lines-to-show: 8;
     border-radius: 3px;
   }
 }
+.signal-container {
+  .title {
+    padding-top: 8px;
+    background-color: #F7F7F7;
+    min-height: 36px;
+    font-weight: 500;
+  }
+  .sig-in-cntr {
+    max-height: 200px;
+    padding: 0;
+    .prospect-list {
+      padding: 10px;
+      border-bottom: $border-1px;
+      cursor: pointer;
+      &:hover {
+        background-color: $lit-blue-bg;
+      }
+      &.active {
+        color: $a-tag-clr;
+      }
+    }
+    .prospect-signals {
+      padding: 10px;
+      .title {
+        min-height: 36px;
+        font-weight: 500;
+        background-color: $white;
+      }
+      .content {
+        font-size: 12px;
+      }
+    }
+  }
+  .sig-out-cntr {
+    border: $border-1px;
+    padding: 0;
+  }
+  .brdr-rit {
+    border-right: $border-1px;
+  }
+}
 /***********************************
   campaign report
 ***********************************/
@@ -1189,20 +1307,20 @@ span#autocomplete {
         vertical-align: middle;
         &.safe {
           border: 2px solid $green-clr;
-          background-color: #FFF;
+          background-color: $white;
           color: $green-clr;
           line-height: 35px;
         }
         &.danger {
           border: 2px solid $red-clr;
-          background-color: #FFF;
+          background-color: $white;
           color: $red-clr;
           line-height: 35px;
         }
         &.careful {
-          border: 2px solid $orange-clr;
-          background-color: #FFF;
-          color: $orange-clr;
+          border: 2px solid $orange-clr-lit;
+          background-color: $white;
+          color: $orange-clr-lit;
           line-height: 35px;
         }
       }

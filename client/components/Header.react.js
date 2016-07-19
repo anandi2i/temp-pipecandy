@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import {Link} from "react-router";
 import UserAction from "../actions/UserAction";
 import UserStore from "../stores/UserStore";
@@ -76,17 +77,37 @@ export default Header;
 class Menu extends React.Component {
   constructor(props) {
     super(props);
-    this.state={};
+    this.state=({
+      isNotification: false
+    });
   }
 
   componentDidUpdate(){
     enableSideNavDropDown();
   }
 
+  openNotification = () => {
+    this.setState({
+      isNotification: true
+    }, () => {
+      this.refs.notification.openModal();
+    });
+  }
+
+  /**
+   * Remove notification container after close
+   */
+  closeCallback = () => {
+    this.setState({
+      isNotification: false
+    });
+  }
+
   render () {
     let avatarStyle = {
       backgroundImage: "url(" + this.props.user.avatar + ")"
     };
+    const {isNotification} = this.state;
     return (
       this.props.user.firstName
         ?
@@ -110,12 +131,123 @@ class Menu extends React.Component {
             <li>
               <Link to="/campaign" activeClassName="active">Campaigns</Link>
             </li>
+            <li>
+              <a onClick={this.openNotification}>
+                <i className="mdi mdi-bell-outline notification"></i>
+                <span className="notification-count">3</span>
+              </a>
+            </li>
+            {
+              isNotification
+              ? <Notification ref="notification"
+                closeCallback={this.closeCallback}/>
+              : ""
+            }
           </span>
         :
           <span>
             <li><Link to="/login" activeClassName="active">Login</Link></li>
             <li><Link to="/signup" activeClassName="active">Signup</Link></li>
           </span>
+    );
+  }
+}
+
+//TODO Need to rework on this.
+class Notification extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state=({
+      notificationView: "bounceInRight"
+    });
+  }
+
+  componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
+    this.el.find(".notify-content").mCustomScrollbar({
+      theme:"minimal-dark"
+    });
+  }
+
+  /**
+   * Close modal popup
+   * Call closeCallback to remove notification in parent container
+   */
+  closeModal = () => {
+    const timeDelay = 1000;
+    this.setState({
+      notificationView: "bounceOutRight"
+    }, () => {
+      const props = this.props;
+      setTimeout(function() {props.closeCallback();}, timeDelay);
+    });
+  }
+
+  render () {
+    const {notificationView} = this.state;
+    return (
+      <div className={`notification-container animated ${notificationView}`}>
+        <div className="notification-modal">
+          <div className="head">
+            <span className="left">
+              <i className="mdi mdi-bell"></i>
+              <span className="notify-titl">3 New Notification</ span>
+            </span>
+            <span className="right">
+              <i className="mdi mdi-close" onClick={() => this.closeModal()}></i>
+            </span>
+          </div>
+          <div className="notify-content">
+            <div className="notify new">
+              <div className="title">Common Connections:</div>
+              <div className="content">
+                You had mailed John Smith, 5 days ago. He has connected with
+                Dan Harper, your connection on LinkedIn. <br/>
+                Jason Drucker of Net Media is now connected to Paul Allen whom
+                you emailed one month ago.
+              </div>
+            </div>
+            <div className="notify new">
+              <div className="title">Job Change:</div>
+              <div className="content">
+                You emailed Mike Pearson a month ago. He has just joined a new
+                job. Congratulate him.
+              </div>
+            </div>
+            <div className="notify new">
+              <div className="title">Job Postings:</div>
+              <div className="content">
+                You sent emails to Node.js users. Adcom media is on of them &
+                has 20 Node.js openings
+              </div>
+            </div>
+            <div className="notify old">
+              <div className="title">Common Connections:</div>
+              <div className="content">
+                You had mailed John Smith, 5 days ago. He has connected with Dan
+                Harper, your connection on LinkedIn.
+                <br/><br/>
+                Jason Drucker of Net Media is now connected to Paul Allen whom
+                you emailed one month ago.
+              </div>
+            </div>
+            <div className="notify old">
+              <div className="title">Job Change:</div>
+              <div className="content">
+                You emailed Mike Pearson a month ago. He has just joined a new
+                job. Congratulate him.
+              </div>
+            </div>
+            <div className="notify old">
+              <div className="title">Job Postings:</div>
+              <div className="content">
+                You sent emails to Node.js users. Adcom media is on of them &
+                has 20 Node.js openings
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 }
