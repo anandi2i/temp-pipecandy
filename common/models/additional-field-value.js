@@ -75,7 +75,7 @@ module.exports = function(AdditionalFieldValue) {
         });
         return createFieldCB(fieldCreateErr);
       }
-      createFieldCB(null, "Created Successfully!");
+      createFieldCB(null, field);
     });
   };
 
@@ -96,7 +96,7 @@ module.exports = function(AdditionalFieldValue) {
         });
         return fieldUpdateCB(fieldUpdateErr);
       }
-      fieldUpdateCB(null, "Updated Successfully!");
+      fieldUpdateCB(null, field);
     });
   };
 

@@ -157,21 +157,21 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.FILE_UPLOAD:
       EmailListApi.uploadFile(action.data).then((response) => {
-        _success = SuccessMessages.successUpload;
+        _success = response.data.responseMsg;
         EmailListStore.emitChange();
         //@todo This has to be removed asap as it calls api inside API
         //100% dirty call
         EmailListActions.getEmailListByID(action.data.listId);
         _success = "";
       }, (err)=> {
-        _error = HandleError.evaluateError(err);
+        _error = err.data.error.message;
         EmailListStore.emitChange();
-        _error = "";
+        _error = err.data.message;
       });
       break;
     case Constants.SAVE_SINGLE_PERSON:
       EmailListApi.saveSinglePerson(action.data).then((response) => {
-        _getEmailList[0].people.push(response.data.person);
+        _getEmailList[0].people.push(response.data);
         _success = SuccessMessages.successSubscribe;
         EmailListStore.emitChange();
         _success = "";

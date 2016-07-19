@@ -198,13 +198,14 @@ module.exports = function(List) {
   List.savePersonWithFields = (ctx, id, reqParams, savePersonWithFieldsCB) => {
     async.waterfall([
       async.apply(createOrUpdatePerson, ctx, reqParams, id),
-      createOrUpdateFields
-    ], (asyncErr, result) => {
+      createOrUpdateFields,
+      getSavedPersonWithFields
+    ], (asyncErr, savedPersonWithFields) => {
       if(asyncErr){
         logger.error(asyncErr);
         savePersonWithFieldsCB(asyncErr);
       }
-      savePersonWithFieldsCB(null);
+      savePersonWithFieldsCB(null, savedPersonWithFields);
     });
   };
 
@@ -245,7 +246,8 @@ module.exports = function(List) {
             logger.error(createErr);
             createOrUpdatePersonCB(createErr);
           }
-          createOrUpdatePersonCB(null, person.id, listId, newAdditionalFields);
+          createOrUpdatePersonCB(null, person.id, listId, newAdditionalFields,
+            person);
         });
       } else {
         people[0].lists((listFindErr, list) => {
@@ -258,23 +260,24 @@ module.exports = function(List) {
             createOrUpdatePersonCB(listFindErr);
           }
           if(list[0].id === listId){
-            updatePersonForList(people[0], newPerson, (updateErr, person) => {
+            updatePersonForList(people[0], newPerson,
+              (updateErr, updatedPerson) => {
               if(updateErr){
                 logger.error(updateErr);
                 return createOrUpdatePersonCB(updateErr);
               }
-              return createOrUpdatePersonCB(null, person.id, listId,
-                newAdditionalFields);
+              return createOrUpdatePersonCB(null, updatedPerson.id, listId,
+                newAdditionalFields, updatedPerson);
             });
           } else {
             updatePersonForDifferentList(listId, people[0], newPerson,
-              (updateErr, person) => {
+              (updateErr, updatedPerson) => {
               if(updateErr){
                 logger.error(updateErr);
                 return createOrUpdatePersonCB(updateErr);
               }
-              return createOrUpdatePersonCB(null, person.id, listId,
-                newAdditionalFields);
+              return createOrUpdatePersonCB(null, updatedPerson.id, listId,
+                newAdditionalFields, updatedPerson);
             });
           }
         });
@@ -357,8 +360,9 @@ module.exports = function(List) {
    * @param  {[function]} createOrUpdateFieldsCB
    * @author Aswin Raj A
    */
-  let createOrUpdateFields = (personId, listid, newAdditionalFields,
+  let createOrUpdateFields = (personId, listid, newAdditionalFields, newPerson,
     createOrUpdateFieldsCB) => {
+    let newFieldValues = [];
     newAdditionalFields = newAdditionalFields.map(field => {
       field.personId = personId;
       return field;
@@ -395,6 +399,7 @@ module.exports = function(List) {
                 });
                 return fieldCB(fieldCreateErr);
               }
+              newFieldValues.push(field);
               return fieldCB(null);
             });
           } else{
@@ -403,7 +408,7 @@ module.exports = function(List) {
         } else{
           if(newField.value !== ""){
             List.app.models.additionalFieldValue.updateFields(fields[0],
-              newField, (fieldUpdateErr, result) => {
+              newField, (fieldUpdateErr, updatedField) => {
               if(fieldUpdateErr){
                 logger.error("Error while updating additionalFieldValue", {
                   error: fieldUpdateErr,
@@ -411,9 +416,11 @@ module.exports = function(List) {
                 });
                 return fieldCB(fieldUpdateErr);
               }
+              newFieldValues.push(updatedField);
               return fieldCB(null);
             });
           } else{
+            newFieldValues.push(fields[0]);
             return fieldCB(null);
           }
         }
@@ -427,8 +434,14 @@ module.exports = function(List) {
         });
         return createOrUpdateFieldsCB(err);
       }
-      return createOrUpdateFieldsCB(null);
+      return createOrUpdateFieldsCB(null, newPerson, newFieldValues);
     });
+  };
+
+  const getSavedPersonWithFields = (newPerson, newFieldValues, getPersonCB) => {
+    newPerson = JSON.parse(JSON.stringify(newPerson));
+    newPerson.fieldValues = newFieldValues;
+    getPersonCB(null, newPerson);
   };
 
   List.remoteMethod(
