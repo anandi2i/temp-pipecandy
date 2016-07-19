@@ -6,6 +6,9 @@ var striptags = require("striptags");
 var mailEnqueue = require("../../server/emailReader/mailEnqueue");
 var emojiStrip = require("emoji-strip");
 var googleTokenHandler = require("../../server/utils/googleTokenHandler");
+var constants = require("../../server/utils/constants");
+require("console-stamp")(console, 
+  {pattern : constants.default.TIME_FORMAT});
 
 // Regular expression to extract reply message alone
 const regExBody = "On ((Sun|Mon|Tue|Wed|Thu|Fri|Sat),|([0-3]*))(.*)wrote:";

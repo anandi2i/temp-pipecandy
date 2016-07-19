@@ -220,34 +220,23 @@ module.exports = function(EmailQueue) {
  * @return {[string]} [success message]
  * @author Ramanavel Selvaraju
  */
-EmailQueue.assembleEmails = (campaignId, assembleEmailsCB) => {
+EmailQueue.assembleEmails = (campaign, assembleEmailsCB) => {
 
-  EmailQueue.app.models.campaign.findById(campaignId,
-    (campaignErr, campaign) => {
-
-    if(campaignErr | lodash.isEmpty(campaign)) {
-     logger.error("Error in getting campaign for id : ",
-          {campginId: campaignId, error: campaignErr});
-    const notFound = "Campaign not Found";
-     return assembleEmailsCB(campaignErr ? campaignErr : new Error(notFound));
-    }
-    async.series([
-      async.apply(EmailQueue.destroyByCampaign, campaign),
-      async.apply(EmailQueue.app.models.campaign.updateStatusCode,
-                    campaign, statusCodes.processing),
-      async.apply(EmailQueue.app.models.campaignMetric.createMetricsOnGen,
-                    campaign),
-      async.apply(EmailQueue.app.models.list.getListAndSaveEmail,
-                    campaign, null),
-      async.apply(EmailQueue.app.models.campaign.updateStatusCode,
-                   campaign, statusCodes.readyToSend),
-    ], (getPoepleAndGenerateEmailErr, results) => {
-      return assembleEmailsCB(getPoepleAndGenerateEmailErr,
-        "Generated emails for campginId:" + campaignId);
-    });
-
-  });//campaign.findById
-
+  async.series([
+    async.apply(EmailQueue.destroyByCampaign, campaign),
+    async.apply(EmailQueue.app.models.campaign.updateStatusCode,
+                  campaign, statusCodes.processing),
+    async.apply(EmailQueue.app.models.campaignMetric.createMetricsOnGen,
+                  campaign),
+    async.apply(EmailQueue.app.models.list.getListAndSaveEmail,
+                  campaign, null),
+    async.apply(EmailQueue.app.models.campaign.updateStatusCode,
+                 campaign, statusCodes.readyToSend),
+  ], (getPoepleAndGenerateEmailErr, results) => {
+    return assembleEmailsCB(getPoepleAndGenerateEmailErr,
+      "Generated emails for campginId:" + campaign.id);
+  });
+  //campaign.findById
 };
 
 /**

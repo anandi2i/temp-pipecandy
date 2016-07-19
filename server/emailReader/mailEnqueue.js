@@ -1,6 +1,9 @@
 "use strict";
 
 var AWS = require("aws-sdk");
+var constants = require("../../server/utils/constants");
+require("console-stamp")(console, 
+  {pattern : constants.default.TIME_FORMAT});
 
 const appConfig = process.cwd() + "/server/server.js";
 const queue = require(appConfig).settings.queue;

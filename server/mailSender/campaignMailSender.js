@@ -9,6 +9,8 @@ var lodash = require("lodash");
 var config = require("../../server/config.json");
 var statusCodes = require("../../server/utils/status-codes");
 var constants = require("../../server/utils/constants");
+require("console-stamp")(console, 
+  {pattern : constants.default.TIME_FORMAT});
 
 var gmailClass = google.gmail("v1");
 
@@ -50,7 +52,7 @@ function generateAndSendEmail(queuedMails, callback) {
     ],
     function(error) {
       if (error) {
-        console.log("Error while Generate and Send Mail: " + error);
+        console.error("Error while Generate and Send Mail: " + error);
         return callback(callback);
       }
       console.log("All Mails Sent");
@@ -108,7 +110,7 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
           };
           if(!userCredential.credentials.accessToken &&
               !userCredential.credentials.refreshToken) {
-            console.log("Access or Refresh Token not available for User Id",
+            console.error("Access or Refresh Token not available for User Id",
                 emailQueueEntry.userId);
             emailQueueCB();
           } else {
@@ -120,7 +122,7 @@ function generateCredentials(emailQueue, generateCredentialsCB) {
     },
     function(err) {
       if (err) {
-        console.log("err: ", err);
+        console.error("err: ", err);
         return generateCredentialsCB(err);
       }
       return generateCredentialsCB(null);
@@ -171,7 +173,7 @@ function updateStoppedFlag(emailQueueToStop, stoppedBy, isError, reason,
     });
   }, function(error) {
     if(error) {
-      console.log("Error while Updating Email Queue", error);
+      console.error("Error while Updating Email Queue", error);
     }
     callback(error);
   });
@@ -209,7 +211,7 @@ function filterUnsubscribePerson(emailQueue, campaigns, groupedEmailQueue,
         userIdCB(null);
       }, (error) => {
         if(error) {
-          console.log("Error while Filtering Unsubscribed Person", error);
+          console.error("Error while Filtering Unsubscribed Person", error);
           callback(null, emailQueue);
         } else {
           const emailQueueNotToSent = lodash.differenceBy(
@@ -220,7 +222,7 @@ function filterUnsubscribePerson(emailQueue, campaigns, groupedEmailQueue,
           updateStoppedFlag(emailQueueNotToSent, stoppedBy, isError, reason,
               function(error) {
             if(error) {
-              console.log("Error while Update Unsubscribed Emails", error);
+              console.error("Error while Update Unsubscribed Emails", error);
             }
             callback(null, emailsToSent);
           });
@@ -303,7 +305,7 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
   ],
   function(err) {
     if (err) {
-      console.log("waterfallErr: " + err);
+      console.error("waterfallErr: " + err);
     }
     mailSenderCB(null);
   });
@@ -434,7 +436,7 @@ function updateRelatedTables(emailQueue, mailContent, sentMailResp,
   ],
   function(err, results) {
     if (err) {
-      console.log("Error while Updating related tables: " + err);
+      console.error("Error while Updating related tables: " + err);
     }
     updateRelatedTablesCB(null);
   });

@@ -2,6 +2,9 @@
 
 var CronJob = require("cron").CronJob;
 var campaignMailSender = require("../../server/mailSender/campaignMailSender");
+var constants = require("../../server/utils/constants");
+require("console-stamp")(console, 
+  {pattern : constants.default.TIME_FORMAT});
 
 let isJobInProgress = false;
 
@@ -16,7 +19,7 @@ var job = new CronJob({
       isJobInProgress = true;
       campaignMailSender.getEmailQueue( function (queuedMailsErr, queuedMails) {
         if (queuedMailsErr) {
-          console.log("Error while getting queued Mails", queuedMailsErr);
+          console.error("Error while getting queued Mails", queuedMailsErr);
           isJobInProgress = false;
           return;
         }

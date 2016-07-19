@@ -6,6 +6,7 @@ const constants = {
   "USER": "USER",
   "SYSTEM": "SYSTEM",
   "ONE": 1,
+  "TIME_FORMAT": "dd/mm/yyyy HH:MM:ss.l",
   "CLASSIFICATIONS" : ["bounced", "out-of-office", "actionable",
     "nurture", "negative"]
 };

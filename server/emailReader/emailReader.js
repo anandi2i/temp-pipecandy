@@ -6,6 +6,8 @@ var constants = require("../../server/utils/constants");
 var google = require("googleapis");
 var lodash = require("lodash");
 var emailReaderHelper = require("../../server/emailReader/emailReaderHelper");
+require("console-stamp")(console, 
+  {pattern : constants.default.TIME_FORMAT});
 
 const appConfig = process.cwd() + "/server/server.js";
 const dataSource = require(appConfig).dataSources.psqlDs;
@@ -56,7 +58,7 @@ function initiateEmailRead(users, callback) {
   async.each(users, (user, userCB) => {
     var userJson = user.toJSON();
     if(!userJson.identity || !userJson.identity.profile) {
-      console.log(`Profile not found ${user}`);
+      console.error(`Profile not found ${user}`);
       return callback("Profile not found");
     }
     let userMailId = userJson.identity.profile.emails[0].value;
@@ -69,12 +71,12 @@ function initiateEmailRead(users, callback) {
                       userJson.identity.credentials.refreshToken;
     if(!userJson.identity.credentials.accessToken &&
         !userJson.identity.credentials.refreshToken) {
-      console.log("Access or Refresh Token not available for User Id", userId);
+      console.error("Access/Refresh Token not available for User Id", userId);
       userCB(null, userMailId);
     } else {
       readEmail(oauth2Client, userId, userMailId, function(err, userMailId) {
         if(err) {
-          console.log("Error fetching mails for user mail id-", userMailId);
+          console.error("Error fetching mails for user mail id-", userMailId);
         } else {
           console.log("Emails fetched for user mail id-", userMailId);
         }
@@ -83,7 +85,7 @@ function initiateEmailRead(users, callback) {
     }
   }, (err, result) => {
     if(err){
-      console.log("Error in init email reader");
+      console.error("Error in init email reader");
       callback(err);
     }
     callback(null, users);

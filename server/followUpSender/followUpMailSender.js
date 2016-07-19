@@ -3,6 +3,9 @@
 var async = require("async");
 var CronJob = require("cron").CronJob;
 var lodash = require("lodash");
+var constants = require("../../server/utils/constants");
+require("console-stamp")(console, 
+  {pattern : constants.default.TIME_FORMAT});
 
 const appConfig = process.cwd() + "/server/server.js";
 const dataSource = require(appConfig).dataSources.psqlDs;
@@ -54,7 +57,7 @@ function initFollowUpWorkflow(callback) {
 function getFollowUpIds(callback) {
   App.followUp.getFolloUpsToSent( function(followUpsErr, followUps) {
     if(lodash.isEmpty(followUps)) {
-      console.log("No Follow Ups to Sent");
+      console.error("No Follow Ups to Sent");
     }
     callback(followUpsErr, followUps);
   });

@@ -1,4 +1,7 @@
 var AWS = require("aws-sdk");
+var constants = require("../../server/utils/constants");
+require("console-stamp")(console, 
+  {pattern : constants.default.TIME_FORMAT});
 
 AWS.config.update({
   accessKeyId: "AKIAJUDP7FRPRTLTANWA",
@@ -18,7 +21,7 @@ var sqsParams = {
 
 sqs.sendMessage(sqsParams, function(err, data) {
   if (err) {
-    console.log("Error while pushing to the AWS Queue");
+    console.error("Error while pushing to the AWS Queue");
   }
   console.log(data);
 });

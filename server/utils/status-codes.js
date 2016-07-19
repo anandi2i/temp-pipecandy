@@ -7,6 +7,7 @@ const statusCodes = {
   "readyToSend" : 50,
   "executingCampaign" : 60,
   "campaignStopped" : 62,
+  "campaignResumed" : 63,
   "campaignExecuted" : 65
 };
 

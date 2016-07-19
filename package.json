@@ -28,6 +28,7 @@
     "babel-preset-react": "^6.5.0",
     "compression": "^1.6.2",
     "connect-redis": "^3.0.2",
+    "console-stamp": "^0.2.2",
     "cookie-parser": "^1.4.3",
     "cors": "^2.5.2",
     "cron": "^1.1.0",
