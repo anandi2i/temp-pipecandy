@@ -1150,7 +1150,8 @@ module.exports = function(Campaign) {
             campaignMetricObj.title = "actionable responses";
             let responseRate = (campaignMetricsData.actionable /
               campaignMetricsData.sentEmails) * hundredPercent;
-            campaignMetricObj.percentage = responseRate || "0";
+            let roundresponseRate = Math.round(parseFloat(responseRate));
+            campaignMetricObj.percentage = roundresponseRate || "0";
             campaignMetricObj.count = campaignMetricsData.actionable;
             campaignMetricObj.class = "";
             campaignMetricObj.status = "";
