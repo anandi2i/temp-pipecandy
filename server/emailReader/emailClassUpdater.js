@@ -45,7 +45,7 @@ const app = Consumer.create({
 function updateMailResponseClass(mailData, callback) {
   App.MailResponse.updateMailClass(mailData, function (err, result) {
     if(err) {
-      console.error("Error while updating Class for mail", mailData.id, err);
+      console.error("Error while updating Class for mail", mailData, err);
     }
     return callback(null);
   });

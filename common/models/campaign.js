@@ -149,6 +149,62 @@ module.exports = function(Campaign) {
       });
     };
 
+    Campaign.remoteMethod(
+      "openClickRate",
+      {
+        description: "Save the campaign tempalate and associates with list",
+        accepts: [{
+          arg: "ctx", type: "object", http: {source: "context"}
+        }, {
+          arg: "id", type: "any", required: true, http: {source: "path"}
+        }],
+        returns: {arg: "object", type: "object", root: true},
+        http: {
+          verb: "get", path: "/:id/openClickRate"
+        }
+      }
+    );
+
+    /**
+     * API to get Open and Click Rate for Emails
+     * @param  {context}   ctx      [description]
+     * @param  {Number}   id       CampaignId
+     * @param  {Function} callback
+     * @return {Object}      Object conatins Open and Click rate for Emails
+     * @author Syed Sulaiman M
+     */
+    Campaign.openClickRate = (ctx, id, callback) => {
+        Campaign.findById(id, (campaignErr, campaign) => {
+          if(campaignErr) {
+            logger.error("Error while getting campaign", {error: campaignErr,
+              stack: campaignErr.stack, input:{campaignId:id}});
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return callback(errorMessage);
+          }
+          if(!campaign) {
+            const errorMessage = errorMessages.CAMPAIGN_NOT_FOUND;
+            return callback(errorMessage);
+          }
+          async.parallel({
+            clickRate: getClickedEmailLinkRate.bind(null, campaign),
+            openRate: getOpenedEmailRate.bind(null, campaign)
+          }, (parallelErr, result) => {
+            if(parallelErr) {
+              logger.error("Error while processing campaign for rate",
+                {error: campaignErr, stack: campaignErr.stack,
+                input:{campaignId:id}});
+              const errorMessage = errorMessages.SERVER_ERROR;
+              return callback(errorMessage);
+            }
+            let rate = {
+              openRate: result.openRate,
+              clickRate: result.clickRate
+            };
+            return callback(null, rate);
+          });
+        });
+      };
+
     /**
      * validates the request param object
      * @param  {[Object]} reqParams
@@ -1546,6 +1602,72 @@ module.exports = function(Campaign) {
     });
   };
 
+  /**
+   * Date Wise Click Rate for emails
+   * @param  {Campaign}   campaign
+   * @param  {Function} callback [description]
+   * @return {Object}            Clickrate
+   * @author Syed Sulaiman M
+   */
+  const getClickedEmailLinkRate = (campaign, callback) => {
+    campaign.clickedEmailLinks((error, clickedEmailLinks) => {
+      let clickedEmailLinksTmp = [], clickRate = [];
+      lodash(clickedEmailLinks).forEach( (o) => {
+        o.createdAt = new Date(
+          new Date(o.createdAt).getFullYear(),
+          new Date(o.createdAt).getMonth(),
+          new Date(o.createdAt).getDate());
+        clickedEmailLinksTmp.push(o);
+      });
+      let grpdclickedEmailLinks =
+          lodash.groupBy(clickedEmailLinksTmp, "createdAt");
+      const keys = lodash.keys(grpdclickedEmailLinks);
+      async.each(keys, function(key, keyCB) {
+        let clickRateInst = {
+          date: key,
+          count: grpdclickedEmailLinks[key].length
+        };
+        clickRate.push(clickRateInst);
+        keyCB(null);
+      }, (err) => {
+        clickRate = lodash.sortBy(clickRate, "date");
+        callback(null, clickRate);
+      });
+    });
+  };
+
+  /**
+   * Date Wise Open Rate for emails
+   * @param  {Campaign}   campaign
+   * @param  {Function} callback [description]
+   * @return {Object}            Openrate
+   * @author Syed Sulaiman M
+   */
+  const getOpenedEmailRate = (campaign, callback) => {
+    campaign.openedEmail((error, openedEmails) => {
+      let openedEmailsTmp = [], openRate = [];
+      lodash(openedEmails).forEach( (o) => {
+        o.createdAt = new Date(
+          new Date(o.createdAt).getFullYear(),
+          new Date(o.createdAt).getMonth(),
+          new Date(o.createdAt).getDate());
+        openedEmailsTmp.push(o);
+      });
+      let grpdOpenedEmail = lodash.groupBy(openedEmailsTmp, "createdAt");
+      const keys = lodash.keys(grpdOpenedEmail);
+      async.each(keys, function(key, keyCB) {
+        let openRateInst = {
+          date: key,
+          count: grpdOpenedEmail[key].length
+        };
+        openRate.push(openRateInst);
+        keyCB(null);
+      }, (err) => {
+        openRate = lodash.sortBy(openRate, "date");
+        callback(null, openRate);
+      });
+    });
+  };
 
 //observers
   /**

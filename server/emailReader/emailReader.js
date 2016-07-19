@@ -102,18 +102,21 @@ function initiateEmailRead(users, callback) {
 function readEmail(auth, userId, userMailId, callback) {
   let messageId = null;
   let date = null;
+  let isFromSentBox = false;
   getReadLastMessage(userId, userMailId, function(error, lastReadMessage) {
     if(error) callback(error);
     if (lastReadMessage) {
       messageId = lastReadMessage.messageId;
       date = lastReadMessage.date;
+      isFromSentBox = lastReadMessage.isFromSentBox;
     }
     let param = {
       userId: userId,
       userMailId: userMailId,
       messageId: messageId,
       lastMsgDate: date,
-      nextPageToken: null
+      nextPageToken: null,
+      isFromSentBox: isFromSentBox
     };
     emailReaderHelper.readUserMails(App, gmail, auth, param,
         function(err, response) {
@@ -148,7 +151,8 @@ function getReadLastMessage(userId, userMailId, callback) {
       if (initialMsg) {
         lastReadMessage = {
           messageId: initialMsg.mailId,
-          date: initialMsg.sentDate
+          date: initialMsg.sentDate,
+          isFromSentBox: true
         };
         return callback(null, lastReadMessage);
       }

@@ -37,6 +37,10 @@ function readUserMails(App, gmail, auth, param, callback) {
       if (messageFound) {
         messagesToRead = lodash.findIndex(response.messages,
           lodash.matchesProperty("id", param.messageId));
+        if(param.isFromSentBox) {
+          const bufferToLoadAllEmails = 25;
+          messagesToRead += bufferToLoadAllEmails;
+        }
       }
     }
 
