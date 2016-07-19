@@ -9,7 +9,7 @@ let isJobInProgress = false;
  *  Registering Job To Get Users and Read their Inbox
  */
 var job = new CronJob({
-  cronTime: "* * * * *", // Cron Expression to Run for every 1 minutes
+  cronTime: "*/10 * * * * *", // Cron Expression to Run for every 1 minutes
   onTick: function() {
     if (!isJobInProgress) {
       isJobInProgress = true;

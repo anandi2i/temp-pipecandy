@@ -10,34 +10,6 @@ module.exports = function(app) {
   });
 
   /**
-   * Method to interrup open email call for redirect after processing
-   */
-  app.get("/api/campaign/:campaignId/person/:personId/trackEmail.png",
-        function(req, res) {
-    let campaignId = req.params.campaignId;
-    let personId = req.params.personId;
-    app.models.OpenedEmail.trackEmail(campaignId, personId,
-            (error, response) => {
-      res.redirect("/images/1x1.png");
-    });
-  });
-
-  /**
-   * Method to interrup link click call for redirect after processing
-   */
-  app.get(
-   "/api/clickedEmailLinks/:linkId/campaign/:campaignId/person/:personId/track",
-        function(req, res) {
-    let campaignId = req.params.campaignId;
-    let personId = req.params.personId;
-    let linkId = req.params.linkId;
-    app.models.ClickedEmailLink.track(campaignId, personId, linkId,
-            (error, response) => {
-      res.redirect("/images/1x1.png");
-    });
-  });
-
-  /**
    * Set unsigned cookie for userId and redirect to homepage
    * Download user profile picture an update it
    */

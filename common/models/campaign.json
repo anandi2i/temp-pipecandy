@@ -124,6 +124,21 @@
       "type": "hasMany",
       "model": "campaignMetric",
       "foreignKey": ""
+    },
+    "unsubscribes": {
+      "type": "hasMany",
+      "model": "unsubscribe",
+      "foreignKey": ""
+    },
+    "sentMailBox": {
+      "type": "hasMany",
+      "model": "sentMailBox",
+      "foreignKey": ""
+    },
+    "inboxMails": {
+      "type": "hasMany",
+      "model": "inboxMail",
+      "foreignKey": ""
     }
   },
   "acls": [

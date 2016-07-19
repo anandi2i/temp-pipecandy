@@ -57,6 +57,11 @@
       "type": "hasMany",
       "model": "campaignTemplate",
       "foreignKey": ""
+    },
+    "emailLinks": {
+      "type": "hasMany",
+      "model": "emailLink",
+      "foreignKey": ""
     }
   },
   "acls": [],

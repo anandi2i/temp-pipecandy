@@ -73,52 +73,27 @@ module.exports = function(EmailLink) {
       // If the request is not from www.pipecandy.com alone process it, else just
       // redirect it
       if(req.headers.referer !== config.emailHost){
-        isCampaignSent(reqParams.campaignId,
-          (isCampaignSentErr, isCampaignSentResponse) => {
-            logger.error(isCampaignSentErr, isCampaignSentResponse);
-          if(isCampaignSentResponse){
-            updateMetrics(reqParams, link, (updateMetricsErr) => {
-              if(updateMetricsErr) {
-                logger.error("Update Metrics Error:", {error: updateMetricsErr,
-                  stack: updateMetricsErr.stack});
-                return res.redirect(config.redirectURL);
-              }
-              EmailLink.app.models.campaignAudit
-                .updateFollowUpEligiblity(campaignId, personId,
-                  (updateErr) => {
-                if(updateErr){
-                  logger.error(updateErr);
-                  res.redirect(config.redirectURL);
-                }
-                res.redirect(link.linkurl);
-              });
-            });
-          } else{
-            res.redirect(link.linkurl);
+        updateMetrics(reqParams, link, (updateMetricsErr) => {
+          if(updateMetricsErr) {
+            logger.error("Update Metrics Error:", {error: updateMetricsErr,
+              stack: updateMetricsErr.stack});
+            return res.redirect(config.redirectURL);
           }
+          EmailLink.app.models.campaignAudit
+            .updateFollowUpEligiblity(campaignId, personId,
+              (updateErr) => {
+            if(updateErr){
+              logger.error(updateErr);
+              res.redirect(config.redirectURL);
+            }
+            res.redirect(link.linkurl);
+          });
         });
       } else{
         res.redirect(link.linkurl);
       }
     });
   };
-
-  const isCampaignSent = (campaignId, isCampaignSentCB) => {
-    EmailLink.app.models.campaign.findById(campaignId,
-      (campaignFindErr, campaign) => {
-        if(campaignFindErr || !campaign){
-          reqParams.error = campaignFindErr;
-          logger.error("Error while finding campaign:", {error: campaignFindErr,
-            stack: campaignFindErr.stack});
-          return isCampaignSentCB(campaignFindErr);
-        }
-        if(campaign.isSent){
-          return isCampaignSentCB(null, true);
-        }
-        return isCampaignSentCB(null, false);
-    });
-  };
-
 
   const updateMetrics = (reqParams, link, updateMetricsCB) => {
     EmailLink.app.models.clickedEmailLink.find({

@@ -56,6 +56,11 @@
       "type": "belongsTo",
       "model": "person",
       "foreignKey": "personId"
+    },
+    "unsubscribes": {
+      "type": "hasOne",
+      "model": "unsubscribe",
+      "foreignKey": ""
     }
   },
   "acls": [],

@@ -4,6 +4,18 @@ import logger from "../../server/log";
 
 module.exports = function(OpenedEmail) {
 
+  OpenedEmail.remoteMethod(
+    "trackEmail", {
+      accepts: [
+        {arg: "campaignId", type: "number"},
+        {arg: "personId", type: "number"},
+        {arg: "res", type: "object", "http": {source: "res"}},
+        {arg: "req", type: "object", "http": {source: "req"}}
+      ],
+      http:
+        {path: "/campaign/:campaignId/person/:personId/trackEmail", verb: "GET"}
+    }
+  );
   /**
    * API to track whether the campaign email has been opened by the prospect
    * http://localhost:3000/api/openedEmails/trackEmail/:campaignId/:personId/track.png
@@ -12,7 +24,7 @@ module.exports = function(OpenedEmail) {
    * @param  trackEmailCB (Callback)
    * @return void
    */
-  OpenedEmail.trackEmail = (campaignId, personId, trackEmailCB) => {
+  OpenedEmail.trackEmail = (campaignId, personId, res, req) => {
     OpenedEmail.find({
       where: {
         "campaignId": campaignId,
@@ -24,7 +36,7 @@ module.exports = function(OpenedEmail) {
           input: {
             "campaignId": campaignId, "personId": personId
           }, error: openedEmailEntryErr, stack: openedEmailEntryErr.stack});
-        return trackEmailCB(openedEmailEntryErr);
+        return res.redirect("/images/1x1.png");
       }
       if(lodash.isEmpty(openedEmailEntry)) {
         async.waterfall([
@@ -34,24 +46,30 @@ module.exports = function(OpenedEmail) {
         ], (asyncErr, results) => {
           if (asyncErr) {
             logger.error({error: asyncErr, stack: asyncErr});
-            return trackEmailCB(asyncErr);
+            return res.redirect("/images/1x1.png");
           }
-          return trackEmailCB(null);
+          return res.redirect("/images/1x1.png");
         });
       } else {
         OpenedEmail.create({
           "campaignId": campaignId, "personId": personId, "count": 1
         }, (openedEmailNewEntryErr, openedEmailNewEntry) => {
           if (openedEmailNewEntryErr) {
-            return trackEmailCB(openedEmailNewEntryErr);
+            logger.error("Error while creating open email entry", {
+              input: {"campaignId": campaignId, "personId": personId
+              }, error: openedEmailNewEntryErr,
+              stack: openedEmailNewEntryErr.stack});
+            return res.redirect("/images/1x1.png");
           }
           OpenedEmail.app.models.campaignAudit
             .updateFollowUpEligiblity(campaignId, personId, (updateErr) => {
             if(updateErr){
-              logger.error(updateErr);
-              return trackEmailCB(updateErr);
+              logger.error("Error while updating follow up eligibility", {
+                input: {"campaignId": campaignId, "personId": personId
+                }, error: updateErr, stack: updateErr.stack});
+              return res.redirect("/images/1x1.png");
             }
-            return trackEmailCB(null);
+            return res.redirect("/images/1x1.png");
           });
         });
       }

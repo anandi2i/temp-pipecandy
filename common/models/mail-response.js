@@ -134,7 +134,7 @@ module.exports = function(MailResponse) {
       where: {
         threadId: threadId
       },
-      order: "createdAt DESC"
+      order: "createdAt ASC"
     }, (mailResponsesErr, mailResponses) => {
       if (mailResponsesErr) {
         logger.error("Error while getting mailResponses", mailResponsesErr);

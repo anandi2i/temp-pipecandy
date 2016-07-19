@@ -582,8 +582,8 @@ module.exports = function(Campaign) {
   const appendOpenTracker = (campaign, followup, person, email,
     applyOpenTrackCB) => {
     let trackerContent = email.content;
-    let url =
-  `${serverUrl}/api/campaign/${campaign.id}/person/${person.id}/trackEmail.png`;
+    let url = `${serverUrl}/api/openedEmails/campaign/${campaign.id}/person/` +
+      `${person.id}/trackEmail`;
     if(followup) {
       url += `?followUpId=${followup.id}`;
     }
@@ -616,7 +616,7 @@ module.exports = function(Campaign) {
           return hrefTagsCB(getOrSaveErr);
         }
         let content = email.content;
-        let proxyUrl = `${serverUrl}/api/clickedEmailLinks/${link.id}`;
+        let proxyUrl = `${serverUrl}/api/emailLinks/${link.id}`;
         proxyUrl += `/campaign/${campaign.id}/person/${person.id}/track`;
         if(followup) {
           proxyUrl += `?followUpId=${followup.id}`;
@@ -1368,6 +1368,7 @@ module.exports = function(Campaign) {
         if(metric) {
           campaignReport.sentEmails = metric.sentEmails;
           campaignReport.deliveredEmails = metric.sentEmails - metric.bounced;
+          campaignReport.warmResponses = metric.actionable + metric.nurture;
         }
         return callback(null, campaignReport);
       });
