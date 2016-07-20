@@ -79,6 +79,32 @@ module.exports = function(InboxMail) {
     });
   };
 
+  /**
+   * Method to get Latest Read Message from User Inbox
+   * @param  {Number}   userId
+   * @param  {Function} callback
+   * @return {InboxMail} Latest Inbox Mail for User
+   * @author Syed Sulaiman M
+   */
+  InboxMail.getLatestResponse = (userId, callback) => {
+    InboxMail.findOne({
+      where: {
+        "userId": userId
+      },
+      order: "receivedDate desc"
+    }, (inboxMailErr, inboxMail) => {
+      if(inboxMailErr) {
+        logger.error("Error while getting InboxMail", {
+            error: inboxMailErr,
+            stack: inboxMailErr.stack,
+            input: {userId:userId}
+        });
+        return callback(inboxMailErr);
+      }
+      return callback(null, inboxMail);
+    });
+  };
+
   InboxMail.remoteMethod(
     "inboxMails", {
       description: "Get Inbox Mails",

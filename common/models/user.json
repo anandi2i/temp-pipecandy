@@ -22,7 +22,7 @@
     },
     "isMailReadEnabled": {
       "type": "boolean",
-      "default": true
+      "default": false
     },
     "isMailReaded": {
       "type": "boolean",

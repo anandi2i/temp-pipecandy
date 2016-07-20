@@ -137,13 +137,12 @@ function readEmail(auth, userId, userMailId, callback) {
  */
 function getReadLastMessage(userId, userMailId, callback) {
   let lastReadMessage = null;
-  App.MailResponse.getLatestResponse(userId, userMailId,
-      function(error, mailResponse) {
+  App.inboxMail.getLatestResponse(userId, function(error, inboxMail) {
     if(error) return callback(error);
-    if (mailResponse) {
+    if (inboxMail) {
       lastReadMessage = {
-        messageId: mailResponse.mailId,
-        date: mailResponse.receivedDate
+        messageId: inboxMail.mailId,
+        date: inboxMail.receivedDate
       };
       return callback(null, lastReadMessage);
     }

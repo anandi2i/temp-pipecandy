@@ -60,6 +60,9 @@ module.exports = function(app) {
    * @author Syed Sulaiman M
    */
   const updateUserName = (user, userData, callback) => {
+    if("google" === userData.identities[0].provider) {
+      user.isMailReadEnabled = true;
+    }
     if(lodash.isEmpty(user.firstName) && lodash.isEmpty(user.lastName)) {
       let userName = userData.identities[0].profile.name;
       if(!lodash.isEmpty(userName)) {
