@@ -272,22 +272,9 @@ class ListView extends React.Component {
 
 /**
  * Delete selected persons from Email List
- * @property {Array} ids - selected row ids to delete
- * @property {Number} listId - id of the email list
- * @property {Array} people - List of People present in the Email list
  */
   deleteSubscriber = () => {
-    const ids = this.refs.subscriberGrid.refs.component.state.selectedRowIds;
-    const listId = this.props.params.listId;
-    if(ids.length) {
-      const data = {
-        listId : listId,
-        peopleId : ids
-      };
-      EmailListActions.deletePersons(data);
-    } else {
-      displayError(ErrorMessages.DeletePerson);
-    }
+    this.refs.subscriberGrid.refs.component.deleteSubscriber();
   }
 
   /**

@@ -8,7 +8,7 @@ import CustomPagerComponent from "../CustomGridPagination.react";
 import CustomSelectComponent from "./CustomSelectComponent.react";
 import CustomSelectAllComponent from "./CustomSelectAllComponent.react";
 import Subscriber from "./Subscriber.react";
-
+import EmailListActions from "../../../actions/EmailListActions";
 /**
  * Render the people data for a list using react-griddle
  */
@@ -29,6 +29,25 @@ class SubscriberGridView extends React.Component {
       visibleRowIds: visibleRowIds
     };
   }
+
+  /**
+   * Delete selected persons from Email List
+   */
+    deleteSubscriber = () => {
+      const {selectedRowIds} = this.state;
+      if(selectedRowIds.length) {
+        const data = {
+          listId: this.props.listId,
+          peopleIds: selectedRowIds
+        };
+        EmailListActions.deletePersons(data);
+        this.setState({
+          selectedRowIds: []
+        });
+      } else {
+        displayError(ErrorMessages.DeletePerson);
+      }
+    }
 
   /**
    * Handle edit grid row

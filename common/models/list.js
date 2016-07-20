@@ -794,7 +794,7 @@ module.exports = function(List) {
         root: true
       },
       http: {
-        verb: "delete",
+        verb: "post",
         path: "/removePeople/:listId"
       }
     }

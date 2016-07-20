@@ -39,13 +39,10 @@ const EmailListApi = {
   },
   /**
    * Delete list of persons from the email list
-   *
-   * @param  {Object} data Contains list of persons to delete and list of persons emaillist id
+   * @param {Object} data Contains list of persons to delete and list of persons emaillist id
    */
   deletePersons(data) {
-    //TODO - call to delete list of persons
-    console.log(data);
-    return null;
+    return api.post(`/api/lists/removePeople/${data.listId}`, data.peopleIds);
   },
   /**
    * Api to get fields for the list

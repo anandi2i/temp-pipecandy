@@ -198,7 +198,9 @@ AppDispatcher.register(function(payload) {
     case Constants.DELETE_PERSONS:
       EmailListApi.deletePersons(action.data).then((response) => {
         _success = SuccessMessages.successDelete;
-        EmailListStore.emitChange();
+        //@todo This has to be removed asap as it calls api inside API
+        //100% dirty call
+        EmailListActions.getEmailListByID(action.data.listId);
       }, (err)=> {
         _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
