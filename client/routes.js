@@ -23,6 +23,7 @@ import ResetPwdResponse from "./components/user/ResetPasswordResponse.react";
 import CreateEmailList from "./components/email-list/CreateEmailList.react";
 import ViewAllList from "./components/email-list/ViewAllList.react";
 import ViewSingleList from "./components/email-list/ViewSingleList.react";
+import BuildMasterList from "./components/email-list/BuildMasterList.react";
 
 //Campaign
 import CreateCampaign from "./components/campaign/CreateCampaign.react";
@@ -66,6 +67,7 @@ const routes = (
     <Route path="list">
       <IndexRoute component={ViewAllList} />
       <Route path="create" component={CreateEmailList} />
+      <Route path="master-list" component={BuildMasterList} />
       <Route path=":listId" component={ViewSingleList} />
     </Route>
     <Route path="campaign">

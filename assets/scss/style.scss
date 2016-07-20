@@ -668,6 +668,14 @@ a {
     font-size: 15px;
   }
 }
+.master-list-filter{
+  border-top: $border-1px;
+  border-bottom: $border-1px;
+  padding: 20px 0;
+  .input-field{
+    padding: 0;
+  }
+}
 /*************************
   Single event handling
 **************************/

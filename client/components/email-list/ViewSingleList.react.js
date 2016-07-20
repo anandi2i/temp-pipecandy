@@ -412,7 +412,7 @@ class ListView extends React.Component {
                 <ul id="addDropDown" className="dropdown-content">
                   <li><a onClick={this.addRecipient}>Add Recipient</a></li>
                   <li><a className="modal-trigger" href="#addField" onClick={this.getFields}>Add Field</a></li>
-                  <li><a>Build From Master</a></li>
+                  <li><Link to="/list/master-list">Build From Master</Link></li>
                 </ul>
                 <input id="fileUpload" type="file" className="hide" name="file"
                   accept=".csv, .xls, .xlsx" onChange={this.fileChange} />
