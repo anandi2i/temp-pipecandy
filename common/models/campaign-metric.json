@@ -11,6 +11,10 @@
       "type": "number",
       "default": 0
     },
+    "errorInAssmebler": {
+      "type": "number",
+      "default": 0
+    },    
     "opened": {
       "type": "number",
       "default": 0

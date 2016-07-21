@@ -809,11 +809,12 @@ module.exports = function(Campaign) {
   const incrementAssmebedCountInMetrics = (campaign, followup, person,
       email, callback) => {
     if(followup) return callback(null);
+    const property = email.isError ? "errorInAssmebler" : "assembled";
     async.parallel([
       async.apply(Campaign.app.models.campaignMetric.getAndIncrementByProperty,
-                          campaign, "assembled"),
+                          campaign, property),
       async.apply(Campaign.app.models.listMetric.getAndIncrementByProperty,
-                          campaign, person, "assembled")
+                          campaign, person, property)
     ], (parallelErr) => {
       if(parallelErr) {
         return callback(parallelErr);

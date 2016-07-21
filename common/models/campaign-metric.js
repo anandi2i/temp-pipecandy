@@ -97,14 +97,15 @@ module.exports = function(CampaignMetric) {
    * @author Ramanavel Selvaraju
    */
   const updateAssemblerMetrics = (campaign, metrics, updateAssemMetricsCB) => {
-    metrics.updateAttribute("assembled", metrics.sentEmails,
-      (err, updatedMetrics) => {
-        if(err) {
-          logger.error({error: err, stack: err.stack,
-                        input: {campaign: campaign}});
-          return updateAssemMetricsCB(err);
-        }
-        return updateAssemMetricsCB(null);
+    metrics.assembled = metrics.sentEmails;
+    metrics.errorInAssmebler = 0;
+    metrics.updateAttributes(metrics, (err, updatedMetrics) => {
+      if(err) {
+        logger.error({error: err, stack: err.stack,
+                      input: {campaign: campaign}});
+        return updateAssemMetricsCB(err);
+      }
+      return updateAssemMetricsCB(null);
     });
   };
 
