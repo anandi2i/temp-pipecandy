@@ -326,9 +326,9 @@ class CampaignInbox extends React.Component {
                               <span> ({inbox.count}) </span>
                             </div>
                             <div className="data-info col s4 m6 l6 hide-on-600">
-                              <div className="mailDescription">
-                                <div className="subjectLine">{subject}</div>
-                                <div className="mailContentLine">{content}</div>
+                              <div className="mail-description">
+                                <div className="subject-line">{subject}</div>
+                                <div className="mail-content-line">{content}</div>
                               </div>
                             </div>
                             <div className="data-info col s4 m3 l3 rit-txt date">

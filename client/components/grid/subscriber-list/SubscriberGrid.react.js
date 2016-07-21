@@ -236,7 +236,7 @@ class SubscriberGridView extends React.Component {
   render() {
     const {listId, listFields, peopleDetails, results} = this.props;
     return (
-      <div className="row subscriber_list" id="subscriber_list">
+      <div className="row subscriber-list" id="subscriberList">
         <div className="container">
           <Griddle
             results={results}

@@ -165,7 +165,7 @@ class PerformanceReport extends React.Component {
           <div className="row main-head">
             Performance Report
           </div>
-          <div id="performanceReport" className="graphSize" />
+          <div id="performanceReport" className="graph-size" />
         </div>
       </div>
     );

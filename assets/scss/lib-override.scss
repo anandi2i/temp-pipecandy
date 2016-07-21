@@ -1,0 +1,48 @@
+.add-list-field,
+.create-container {
+  .react-autosuggest__container {
+    .react-autosuggest__suggestions-container {
+      background-color: $white;
+      box-shadow: $box-shadow;
+      margin-top: -12px;
+      width: 100%;
+      z-index: 2;
+      .react-autosuggest__suggestion {
+        cursor: pointer;
+        padding: 6px 0;
+        &.react-autosuggest__suggestion--focused {
+          background-color: $drp-dwn-bg;
+        }
+      }
+    }
+  }
+}
+
+/***********************************
+  '@' mention dropdown autocomplete
+***********************************/
+.rte-autocomplete {
+  background-color: $white;
+  box-shadow: $box-shadow;
+  position: absolute;
+  li {
+    padding: 15px;
+    &:hover {
+      background-color: $lit-gray-bg;
+    }
+    &.active {
+      background-color: $light-border;
+    }
+  }
+}
+span#autocomplete {
+  background-color: $chip-border-clr;
+  border: solid 1px $drp-dwn-bg;
+  #autocomplete-delimiter {
+    background-color: $drp-dwn-bg;
+    padding: 0 2px;
+  }
+  #autocomplete-searchtext {
+    padding: 0 4px 0 2px;
+  }
+}

@@ -288,8 +288,8 @@ class FileUpload extends React.Component {
 
   render() {
     return (
-      <input ref="in" type="file" accept="image/*"
-        id="selectAvatar" onChange={this.handleFile} />
+      <input ref="in" type="file" accept="image/*" id="selectAvatar"
+        className="select-avatar" onChange={this.handleFile} />
     );
   }
 }

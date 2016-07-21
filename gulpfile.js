@@ -9,6 +9,7 @@
 
 var gulp = require("gulp");
 var sass = require("gulp-sass");
+var sassLint = require("gulp-sass-lint");
 var livereload = require("gulp-livereload");
 var nodemon = require("gulp-nodemon");
 var concat = require("gulp-concat");
@@ -24,6 +25,7 @@ var WebpackDevServer = require("webpack-dev-server");
 var exec = require("gulp-exec");
 var webpack = require("webpack");
 var config = require("./webpack.config.dev");
+var sassLintConfig = require("./.sass-lint.config");
 var devPort = 3001;
 var isProduction = !!util.env.production;
 
@@ -32,6 +34,15 @@ var isProduction = !!util.env.production;
  */
 gulp.task("clean", function(cb) {
   del.sync("./public/assets", cb);
+});
+
+gulp.task("sassLint", function () {
+  return gulp.src("./assets/scss/**/style.s+(a|c)ss")
+    .pipe(sassLint({
+      rules: sassLintConfig
+    }))
+    .pipe(sassLint.format())
+    .pipe(sassLint.failOnError());
 });
 
 /**

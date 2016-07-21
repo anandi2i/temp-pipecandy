@@ -421,7 +421,7 @@ class ListView extends React.Component {
             : ""
           }
           {/* Add new field starts here */}
-          <div id="addField" className="modal modal-fixed-header mini-modal">
+          <div id="addField" className="modal modal-fixed-header mini-modal add-list-field">
             <i className="mdi mdi-close modal-close" onClick={this.clearValidations}></i>
             <div className="modal-header">
               <div className="head">Add Field</div>

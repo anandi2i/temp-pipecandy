@@ -47,7 +47,7 @@ class CampaignReportHead extends React.Component {
             ?
             <div className="row sub-nav dashboard-head animated fadeIn">
               <div className="head">{campaignDetails.campaignName}</div>
-              <div className="head campaignDetailSection">
+              <div className="head campaign-detail-section">
                 <ul className="separator">
                   <li> Sent to {campaignDetails.listCount} lists
                     <i className="mdi mdi-record"></i>
