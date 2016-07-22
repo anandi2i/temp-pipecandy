@@ -414,8 +414,7 @@ module.exports = function(File) {
     }, (personFindErr, people) => {
       if(personFindErr){
         logger.error("Error while finding person with email:", {
-          email: newPerson.email,
-          error: personFindErr,
+          email: newPerson.email, error: personFindErr,
           stack: personFindErr ? personFindErr.stack : ""
         });
         return createOrUpdatePersonCB(personFindErr);
@@ -430,34 +429,13 @@ module.exports = function(File) {
             newAdditionalFields);
         });
       } else{
-        people[0].lists((listfindErr, list) => {
-          if(listfindErr){
-            logger.error("Error while finding list for person", {
-              person: people[0],
-              error: err,
-              stack: err ? err.stack : ""
-            });
-            return createOrUpdatePersonCB(listfindErr);
+        updatePersonForDifferentList(listid, people[0], newPerson,
+          (personUpdateErr, person) => {
+          if(personUpdateErr){
+            return createOrUpdatePersonCB(personUpdateErr);
           }
-          if(list[0].id === listid){
-            updatePersonForCurrentList(people[0], newPerson,
-              (personUpdateErr, person) => {
-              if(personUpdateErr){
-                return createOrUpdatePersonCB(personUpdateErr);
-              }
-              return createOrUpdatePersonCB(null, person.id, listid,
-                newAdditionalFields);
-            });
-          } else{
-            updatePersonForDifferentList(listid, people[0], newPerson,
-              (personUpdateErr, person) => {
-              if(personUpdateErr){
-                return createOrUpdatePersonCB(personUpdateErr);
-              }
-              return createOrUpdatePersonCB(null, person.id, listid,
-                newAdditionalFields);
-            });
-          }
+          return createOrUpdatePersonCB(null, person.id, listid,
+            newAdditionalFields);
         });
       }
     });
@@ -472,7 +450,7 @@ module.exports = function(File) {
    * @return {[person]}
    * @author Aswin Raj A
    */
-  let updatePersonForCurrentList = (oldPerson, newPerson, updatePersonCB) => {
+  /*let updatePersonForCurrentList = (oldPerson, newPerson, updatePersonCB) => {
     async.waterfall([
       async.apply(File.app.models.person.generateAuditPersonObj,
         oldPerson, newPerson),
@@ -485,7 +463,7 @@ module.exports = function(File) {
       }
       updatePersonCB(null, person);
     });
-  };
+  };*/
 
   /**
    * If there exist an email in different list, then update the person for
