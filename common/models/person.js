@@ -8,6 +8,31 @@ const emptycount = 0;
 
 module.exports = function(Person) {
 
+
+  /**
+   * To get the person object for the current email
+   * @param  {[email]} email
+   * @param  {[function]} getPersonForEmailCB
+   * @return {[person]}
+   * @author Aswin Raj A
+   */
+  Person.getPersonForEmail = (email, getPersonForEmailCB) => {
+    Person.find({
+      where : {
+        email : email
+      }
+    }, (personFindErr, person) => {
+      if(personFindErr){
+        logger.error("Error while finding person for email", {
+          input : {email: email},
+          error: personFindErr, stack: personFindErr.stack
+        });
+        getPersonForEmailCB(personFindErr);
+      }
+      getPersonForEmailCB(null, person[0]);
+    });
+  };
+
   /**
    * Gets people using list object and checks for the eligibility to generate
    * the email or a followup email and pushing to the sending queue
@@ -548,8 +573,8 @@ module.exports = function(Person) {
       if(listFindErr) {
         logger.error("Error while finding list for listid", {
           listId : listId,
-          error: err,
-          stack: err ? err.stack : ""
+          error: listCreateErr,
+          stack: listCreateErr ? listCreateErr.stack : ""
         });
         return createNewPersonForListCB(listFindErr);
       }
@@ -557,8 +582,8 @@ module.exports = function(Person) {
         if(listCreateErr){
           logger.error("Error while creating person for list", {
             listId : listId,
-            error: err,
-            stack: err ? err.stack : ""
+            error: listCreateErr,
+            stack: listCreateErr ? listCreateErr.stack : ""
           });
           return createNewPersonForListCB(listCreateErr);
         }

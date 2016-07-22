@@ -6,6 +6,7 @@ import csv from "fast-csv";
 import _ from "underscore";
 import logger from "../../server/log";
 import lodash from "lodash";
+import validator from "../../server/utils/validatorUtility";
 var CONTAINERS_URL = "/api/containers/";
 
 module.exports = function(File) {
@@ -261,24 +262,98 @@ module.exports = function(File) {
     });
   };
 
+
   /**
-   * Check if the current row has any empty column data
-   * @param  {[personData]}  personData
-   * @param  {function} isValidDataCB
-   * @return {[boolean]}
+   * To validate the current person record whether it has anuy invalid data or
+   * not
+   * @param  {[person]} person
+   * @param  {[function]} validateDataCB
+   * @return {[validatedData]}
    * @author Aswin Raj A
    */
-  let isValidData = (person, isValidDataCB) => {
-    if(person["First Name"] && person["Last Name"] && person.Email){
-      if(person["First Name"].trim() === "" ||
-        person["Last Name"].trim() === "" ||
-        person.Email.trim() === ""){
-          isValidDataCB(false);
-        } else{
-          isValidDataCB(true);
+  const validateData = (person, validateDataCB) => {
+    async.waterfall([
+      function toValidateEmail(validateCB){
+        validator.validateEmail(person.Email, (isValid) => {
+          if(isValid){
+            validateCB(null, true, person);
+          } else {
+            validateCB(null, false, person);
+          }
+        });
+      },
+      amendData
+    ], (asyncErr, result) => {
+      if(asyncErr){
+        logger.error(asyncErr);
+      }
+      validateDataCB(result);
+    });
+  };
+
+
+
+  /**
+   * To check if there is any data missing for the manadatory fields,
+   * if missing and if the email already exist, amend the fields with
+   * the existing data
+   * if no person exist with the email and there are any invalid fields then
+   * return as invalid data
+   * @param  {isValidEmail} isValidEmail
+   * @param  {[newPerson]}  newPerson
+   * @param  {[function]}  amendDataCB
+   * @return {isValid, person}
+   * @author Aswin Raj A
+   */
+  const amendData = (isValidEmail, newPersonObj, amendDataCB) => {
+    let newPerson = JSON.parse(JSON.stringify(newPersonObj));
+    if(isValidEmail){
+      File.app.models.person.getPersonForEmail(newPerson.Email,
+        (personGetErr, person) => {
+        if(person){
+          newPerson["First Name"] =
+            validator.validateString(newPerson["First Name"]).trim() !== "" ?
+              validator.validateString(newPerson["First Name"]) :
+                person.firstName;
+          newPerson["Last Name"] =
+            validator.validateString(newPerson["Last Name"]).trim() !== "" ?
+              validator.validateString(newPerson["Last Name"]) :
+                person.lastName;
+          newPerson["Middle Name"] =
+            validator.validateString(newPerson["Middle Name"]).trim() !== "" ?
+              validator.validateString(newPerson["Middle Name"]) :
+                person.middleName;
+        } else {
+          newPerson["First Name"] =
+            validator.validateString(newPerson["First Name"]).trim() !=="" ?
+              validator.validateString(newPerson["First Name"]) : "";
+          newPerson["Last Name"] =
+            validator.validateString(newPerson["Last Name"]).trim() !=="" ?
+              validator.validateString(newPerson["Last Name"]) : "";
+          newPerson["Middle Name"] =
+            validator.validateString(newPerson["Middle Name"]).trim() !=="" ?
+              validator.validateString(newPerson["Middle Name"]) : "";
         }
-    } else{
-      isValidDataCB(false);
+        if(newPerson["First Name"].trim() === "" ||
+          newPerson["Last Name"].trim() === ""){
+          amendDataCB(null, {
+            isValid : false,
+            person : newPersonObj,
+          });
+        } else {
+          newPerson["Middle Name"] =
+            validator.validateString(newPerson["Middle Name"]).trim();
+          amendDataCB(null, {
+            isValid : true,
+            person : newPerson,
+          });
+        }
+      });
+    } else {
+      amendDataCB(null, {
+        isValid : false,
+        person : newPersonObj,
+      });
     }
   };
 
@@ -304,23 +379,24 @@ module.exports = function(File) {
         return savePersonWithAdditionalFieldsCB(listFieldErr);
       }
       async.eachSeries(streamData, (personData, personCB) => {
-        isValidData(personData, (isValid) => {
-          if(isValid){
+        validateData(personData, (validateResponse) => {
+          if(validateResponse.isValid){
+            const newPerson = validateResponse.person;
             async.waterfall([
-              async.apply(decouplePersonData, personData, fieldsForList,
+              async.apply(decouplePersonData, newPerson, fieldsForList,
                 listid),
               createOrUpdatePerson,
               createOrUpdateFields
             ], (asyncErr, result) => {
               if(asyncErr){
-                invalidData.push(personData);
+                invalidData.push(newPerson);
                 logger.error("Error while processing person", asyncErr);
                 return personCB(asyncErr);
               }
               return personCB(null);
             });
-          } else{
-            invalidData.push(personData);
+          } else {
+            invalidData.push(validateResponse.person);
             return personCB(null);
           }
         });
@@ -428,7 +504,7 @@ module.exports = function(File) {
           return createOrUpdatePersonCB(null, person.id, listid,
             newAdditionalFields);
         });
-      } else{
+      } else {
         updatePersonForDifferentList(listid, people[0], newPerson,
           (personUpdateErr, person) => {
           if(personUpdateErr){
