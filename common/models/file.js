@@ -55,7 +55,7 @@ module.exports = function(File) {
         {error: asyncErr, stack: asyncErr ? asyncErr.stack : ""});
         downloadCSVCB(asyncErr);
       }
-      res.set("Content-Disposition", "attachment;filename=sampleEmailList.csv");
+      res.set("Content-Disposition", "attachment;filename=SampleEmailList.csv");
       res.send(csv);
     });
   };

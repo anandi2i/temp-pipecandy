@@ -233,9 +233,9 @@ module.exports = function(List) {
     }, (personFindErr, people) => {
       if(personFindErr) {
         logger.error("Error while finding person for the email id", {
-          email : newPerson.email,
-          error: err,
-          stack: err ? err.stack : ""
+          input : {email : newPerson.email},
+          error: personFindErr,
+          stack: personFindErr.stack
         });
         createOrUpdatePersonCB(personFindErr);
       }
@@ -254,8 +254,8 @@ module.exports = function(List) {
           if(listFindErr){
             logger.error("Error while finding list for person", {
               person: people[0],
-              error: err,
-              stack: err ? err.stack : ""
+              error: listFindErr,
+              stack: listFindErr.stack
             });
             createOrUpdatePersonCB(listFindErr);
           }
@@ -328,7 +328,7 @@ module.exports = function(List) {
         logger.error("Error while finding list", {
           listid: listid,
           error: listFindErr,
-          stack: listFindErr ? listFindErr.stack : ""
+          stack: listFindErr.stack
         });
         updatePersonCB(listFindErr);
       }
@@ -383,7 +383,7 @@ module.exports = function(List) {
             listId : newField.listid,
             personId : newField.personId,
             error: fieldFindErr,
-            stack: fieldFindErr ? fieldFindErr.stack : ""
+            stack: fieldFindErr.stack
           });
           return fieldCB(fieldFindErr);
         }
@@ -395,7 +395,7 @@ module.exports = function(List) {
                 logger.error("Error while creating additionalFieldValue", {
                   field: field,
                   error: fieldCreateErr,
-                  stack: fieldCreateErr ? fieldCreateErr.stack : ""
+                  stack: fieldCreateErr.stack
                 });
                 return fieldCB(fieldCreateErr);
               }
@@ -412,7 +412,7 @@ module.exports = function(List) {
               if(fieldUpdateErr){
                 logger.error("Error while updating additionalFieldValue", {
                   error: fieldUpdateErr,
-                  stack: fieldUpdateErr ? fieldUpdateErr.stack : ""
+                  stack: fieldUpdateErr.stack
                 });
                 return fieldCB(fieldUpdateErr);
               }
