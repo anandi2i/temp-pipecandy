@@ -1,5 +1,6 @@
 const constants = {
   "EMPTYOBJECT" : "10",
+  "EMPTYARRAY" : 0,
   "STATUS_NOT_SUPPORTED" : "Status Not Supported while Sending",
   "PERSON_UNSUBSCRIBED" : "Person Unsubscribed Current User",
   "USER_STOPPED_CAMPAIGN" : "User has Stopped the Campaign",

@@ -23,10 +23,22 @@ const validateEmail = (email, validateEmailCB) => {
  * @author Aswin Raj A
  */
 const validateString = (string) => {
-  return string.replace(/[^a-zA-Z]/g, "").trim();
+  return string.replace(/[^a-zA-Z ]/g, "").trim();
+};
+
+
+/**
+ * To strip out all the special characters and numbers in a given string
+ * @param  {[string]} string
+ * @return {[strippedString]}
+ * @author Aswin Raj A
+ */
+const validateStringWithNumber = (string) => {
+  return string.replace(/[^a-zA-Z0-9 ]/g, "").trim();
 };
 
 module.exports = {
   validateEmail: validateEmail,
-  validateString: validateString
+  validateString: validateString,
+  validateStringWithNumber: validateStringWithNumber
 };

@@ -6,6 +6,8 @@ import async from "async";
 import lodash from "lodash";
 import logger from "../../server/log";
 import publicEmailProviders from "../../server/utils/public-email-providers";
+import validator from "../../server/utils/validatorUtility";
+import constants from "../../server/utils/constants";
 import config from "../../server/config.json";
 
 const emptyCount = 0;
@@ -307,6 +309,16 @@ module.exports = function(user) {
     });
   });
 
+
+  user.remoteMethod(
+    "current",
+    {
+      http: {path: "/current", verb: "get"},
+      description: "Returns the currently authenticated user",
+      returns: {arg: "current", type: "object", root: true}
+    }
+  );
+
   /**
    * Get the current authenticated user details
    * @callback {Function} cb The callback function
@@ -323,75 +335,198 @@ module.exports = function(user) {
   };
 
   /**
-   * Get new campaign name and create (if name is unique)
-   * @param ctx
-   * @param campaign
-   * @param cb
+   * To create a new campaign if and only if is valid and doesnot exist
+   * - checked for special characters
+   * @param  {[ctx]} ctx
+   * @param  {[campaign]} campaign
+   * @param  {[function]} createCampaignCB
+   * @return {[createdCampaign]}
+   * @author Aswin Raj A
    */
-  user.createCampaign = function(ctx, campaign, cb) {
-    campaign.createdBy = ctx.req.accessToken.userId;
-    user.app.models.Campaign.findOrCreate({
-      where: {
-        createdBy: campaign.createdBy,
-        name: campaign.name
+  user.createCampaign = function(ctx, campaign, createCampaignCB) {
+    async.waterfall([
+      async.apply(validateCampaignName, ctx, campaign),
+      checkForDuplicateCampaign,
+      createNewCampaign
+    ], (asyncErr, createdCampaign) => {
+      if(asyncErr){
+        logger.error(asyncErr);
+        return createCampaignCB(asyncErr);
       }
-    }, campaign, (err, campaign, created) => {
-      if (err) {
-        logger.error("Error while creating a campaign", err);
-        cb(err);
+      return createCampaignCB(null, createdCampaign);
+    });
+  };
+
+
+  /**
+   * Step 1/createCampaign:
+   * Validate the campaign name and strip off all the special characters
+   * after stripping the special characters if Alphabest exists then campaign
+   * will be created with that string, else its invalid name
+   * @param  {[ctx]} ctx
+   * @param  {[campaign]} campaign
+   * @param  {[function]} validateCampaignNameCB
+   * @return {[campaignName, ctx]}
+   * @author Aswin Raj A
+   */
+  const validateCampaignName = (ctx, campaign, validateCampaignNameCB) => {
+    let campaignName = validator.validateStringWithNumber(campaign.name);
+    if (campaignName.length > constants.EMPTYARRAY) {
+      return validateCampaignNameCB(null, campaignName, ctx);
+    }
+    logger.error("Invalid campaign name");
+    return validateCampaignNameCB("Invalid campaign name");
+  };
+
+  /**
+   * Step 2/createCampaign:
+   * Check for duplicate campaign name, if not available create it
+   * else throw error
+   * @param  {[campaignName]} campaignName
+   * @param  {[ctx]} ctx
+   * @param  {[function]} checkForDuplicateCampaignCB
+   * @return {[campaignObj]}
+   * @author Aswin Raj A
+   */
+  const checkForDuplicateCampaign = (campaignName, ctx,
+    checkForDuplicateCampaignCB) => {
+    const campaignObj = {
+      name: campaignName,
+      createdBy: ctx.req.accessToken.userId
+    };
+    user.app.models.Campaign.find({
+      where: campaignObj
+    }, (campaignFindErr, campaigns) => {
+      if(campaignFindErr || !lodash.isEmpty(campaigns)) {
+        let errMsg = campaignFindErr || "Campaign already exists!";
+        logger.error({
+          input : {campaignObj},
+          error: errMsg, stack: campaignFindErr ? campaignFindErr.stack : ""
+        });
+        return checkForDuplicateCampaignCB(errMsg);
       }
-      if (created) {
-        logger.info("Campaign name created successfully", campaign);
-        cb(null, campaign);
-      } else {
-        let error = new Error();
-        error.message = "campaign name already exists";
-        error.name = "ExistsCampaign";
-        logger.error("Campaign name already exists", campaign);
-        cb(error);
-      }
+      return checkForDuplicateCampaignCB(null, campaignObj);
     });
   };
 
   /**
-   * Create new a unique list name for an user
-   * @param ctx
-   * @param list
-   * @param cb
+   * Step 3/createCampaign:
+   * Create a new campaign name with the current object
+   * @param  {[campaignObj]} campaignObj
+   * @param  {[function]} createNewCampaignCB
+   * @return {[createdCampaign]}
+   * @author Aswin Raj A
    */
-  user.createEmailList = function(ctx, list, cb) {
-    list.createdBy = ctx.req.accessToken.userId;
-    user.app.models.List.findOrCreate({
-      where: {
-        createdBy: list.createdBy,
-        name: list.name
+  const createNewCampaign = (campaignObj, createNewCampaignCB) => {
+    user.app.models.Campaign.create(campaignObj,
+      (campaignCreateErr, createdCampaign) => {
+      if(campaignCreateErr){
+        logger.error("Error while creating campaign", {
+          input : {campaignObj},
+          error: campaignCreateErr, stack: campaignCreateErr.stack
+        });
+        return createNewCampaignCB(campaignCreateErr);
       }
-    }, list, (err, list, created) => {
-      if (err) {
-        logger.error("Error while creating a list", err);
-        cb(err);
-      }
-      if (created) {
-        logger.info("List name created successfully", list);
-        cb(null, list);
-      } else {
-        let error = new Error();
-        error.message = "List name already exists";
-        error.name = "ExistsList";
-        logger.error("List name already exists", list);
-        cb(error);
-      }
+      return createNewCampaignCB(null, createdCampaign);
     });
   };
 
-  user.remoteMethod(
-    "current",
-    {
-      http: {path: "/current", verb: "get"},
-      description: "Returns the currently authenticated user",
-      returns: {arg: "current", type: "object", root: true}
+
+  /**
+   * To create a new list if and only if is valid and doesnot exist
+   * - checked for special characters
+   * @param  {[ctx]} ctx
+   * @param  {[list]} list
+   * @param  {[function]} createListCB
+   * @return {[createdList]}
+   * @author Aswin Raj A
+   */
+  user.createEmailList = function(ctx, list, createListCB) {
+    async.waterfall([
+      async.apply(validateEmailListName, ctx, list),
+      checkForDuplicateEmailList,
+      createNewEmailList
+    ], (asyncErr, createdList) => {
+      if(asyncErr){
+        logger.error(asyncErr);
+        return createListCB(asyncErr);
+      }
+      return createListCB(null, createdList);
+    });
+  };
+
+  /**
+   * Step 1/ createEmailList
+   * Validate the email list name and strip off all the special characters
+   * after stripping the special characters if Alphabest exists then email list
+   * name will be created with that string, else its invalid name
+   * @param  {[ctx]} ctx
+   * @param  {[list]} list
+   * @param  {[function]} validateEmailListNameCB
+   * @return {[listName, ctx]}
+   * @author Aswin Raj A
+   */
+  const validateEmailListName = (ctx, list, validateEmailListNameCB) => {
+    let listName = validator.validateStringWithNumber(list.name);
+    if(listName.length > constants.EMPTYARRAY) {
+      return validateEmailListNameCB(null, listName, ctx);
     }
-  );
+    logger.error("Invalid list name");
+    return validateEmailListNameCB("Invalid list name");
+  };
+
+  /**
+   * Step 2/createEmailList:
+   * Check for duplicate email list name, if not available create it
+   * else throw error
+   * @param  {[listName]} listName
+   * @param  {[ctx]} ctx
+   * @param  {[function]} checkForDuplicateEmailListCB
+   * @return {[listNameObj]}
+   * @author Aswin Raj A
+   */
+  const checkForDuplicateEmailList = (listName, ctx,
+    checkForDuplicateEmailListCB) => {
+    const listNameObj = {
+      name: listName,
+      createdBy: ctx.req.accessToken.userId
+    };
+    user.app.models.list.find({
+        where: listNameObj
+    }, (listFindErr, lists) => {
+      if(listFindErr || !lodash.isEmpty(lists)) {
+        let errMsg = listFindErr || "List already exists!";
+        logger.error({
+          input : {listNameObj},
+          error: errMsg, stack: listFindErr ? listFindErr.stack : ""
+        });
+        return checkForDuplicateEmailListCB(errMsg);
+      }
+      return checkForDuplicateEmailListCB(null, listNameObj);
+    });
+  };
+
+  /**
+   * Step 3/createEmailList:
+   * Create a new email list name for the current object
+   * @param  {[listNameObj]} listNameObj
+   * @param  {[createNewEmailListCB]} createNewEmailListCB
+   * @return {[createdList]}
+   * @author Aswin Raj A
+   */
+  const createNewEmailList =(listNameObj, createNewEmailListCB) => {
+    user.app.models.list.create(listNameObj, (listCreateErr, createdList) => {
+      if(listCreateErr){
+        logger.error("Error while creating list", {
+          input : {listNameObj},
+          error: listCreateErr, stack: listCreateErr.stack
+        });
+        return createNewEmailListCB(campaignCreateErr);
+      }
+      return createNewEmailListCB(null, createdList);
+    });
+  };
+
   user.remoteMethod(
     "createCampaign",
     {
