@@ -11,7 +11,7 @@ import config from "../../server/config.json";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 import striptags from "striptags";
 
-const systemTimeZone = moment().format("Z");
+//const systemTimeZone = moment().format("Z");
 const serverUrl = config.appUrl;
 
 module.exports = function(Campaign) {
@@ -273,9 +273,8 @@ module.exports = function(Campaign) {
         "isOptTextNeeded": reqParams.campaign.isOptTextNeeded,
         "statusCode": statusCodes.updated
       };
-      if(reqParams.campaign.scheduledTime || reqParams.campaign.scheduledDate) {
-        campaignUpdateElements.scheduledAt = formatDate(
-          reqParams.campaign.scheduledDate, reqParams.campaign.scheduledTime);
+      if(reqParams.campaign.scheduledAt) {
+        campaignUpdateElements.scheduledAt = reqParams.campaign.scheduledAt;
       }
       campaign.updateAttributes(campaignUpdateElements,
         (campaignUpdateErr, updatedCampaign) => {
@@ -297,11 +296,11 @@ module.exports = function(Campaign) {
      * @param  {[timeString]} timeString
      * @return {[formatedDate]}
      */
-    const formatDate = (dateString, timeString) => {
+    /*const formatDate = (dateString, timeString) => {
       const formatedDate = new Date(dateString + " " + timeString + " " +
        systemTimeZone);
       return formatedDate;
-    };
+    };*/
 
 
     /**

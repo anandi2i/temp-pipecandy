@@ -421,8 +421,12 @@ class ScheduleEmail extends React.Component {
     address: address
   };
   if(displayScheduleCampaign) {
-    campaignDetails.scheduledDate = element.find(".datepicker").val();
-    campaignDetails.scheduledTime = element.find(".timepicker").val();
+    //campaignDetails.scheduledDate = element.find(".datepicker").val();
+    //campaignDetails.scheduledTime = element.find(".timepicker").val();
+    const scheduledAt =
+        new Date(element.find(".datepicker").val() + " "
+                  + element.find(".timepicker").val());
+    campaignDetails.scheduledAt = scheduledAt.toUTCString();
   }
   return campaignDetails;
 }
