@@ -1,6 +1,5 @@
 import React from "react";
 import {Link} from "react-router";
-import _ from "underscore";
 
 class CustomGridRowComponent extends React.Component {
 
@@ -12,12 +11,15 @@ class CustomGridRowComponent extends React.Component {
   }
 
   render() {
-    const data = this.props.data;
-    data.lastRunAt = new Date(_.now()).toUTCString();
-    let checkboxId = guid();
-    let checkedStatus = this.props.globalData().getIsRowChecked(data);
-    const {id, name, membersCount, createdBy, openPercentage,
-      lastRunAt, clickPercentage, spamPercentage, additions} = data;
+    const listMetrics = this.props.data;
+    const checkboxId = guid();
+    const checkedStatus = this.props.globalData().getIsRowChecked(listMetrics);
+    let {id, name, membersCount, createdBy, openPercentage,
+      clickPercentage, spamPercentage, additions, lastRunAt} = listMetrics;
+    openPercentage = openPercentage ? `${openPercentage} %` : "-";
+    clickPercentage = clickPercentage ? `${clickPercentage} %` : "-";
+    spamPercentage = spamPercentage ? `${spamPercentage} %` : "-";
+    lastRunAt = lastRunAt ? new Date(lastRunAt).toString() : "-";
     return (
       <div className="email-list">
         <div className="row">
@@ -56,13 +58,13 @@ class CustomGridRowComponent extends React.Component {
             </div>
             <div className="row campaign-details">
               <div className="col m3 s6">
-                <span>{openPercentage}% Opens</span>
+                <span>{openPercentage} Opens</span>
               </div>
               <div className="col m3 s6">
-                <span>{clickPercentage}% Clicks</span>
+                <span>{clickPercentage} Clicks</span>
               </div>
               <div className="col m3 s6">
-                <span>{spamPercentage}% Spam</span>
+                <span>{spamPercentage} Spam</span>
               </div>
               <div className="col m3 s6">
                 <span>{additions} Additions</span>

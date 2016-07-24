@@ -725,18 +725,19 @@ module.exports = function(List) {
             list.listMetrics((error, listMetrics) => {
               if (!lodash.isEmpty(listMetrics)) {
                 const hundred = 100;
-                let totalEmailReached =
-                      listMetrics[0].sentEmails - listMetrics[0].bounced;
-                listResponse.openPercentage = lodash.round(
-                      (listMetrics[0].opened / totalEmailReached) * hundred);
-                listResponse.clickPercentage = lodash.round(
-                      (listMetrics[0].clicked / totalEmailReached) * hundred);
-                listResponse.spamPercentage = lodash.round(
-                      (listMetrics[0].spammed / totalEmailReached) * hundred);
+                const {sentEmails, bounced, opened, clicked,
+                  spammed} = listMetrics[0];
+                const totalEmailReached = sentEmails - bounced;
+                listResponse.openPercentage =
+                  lodash.round((opened / totalEmailReached) * hundred);
+                listResponse.clickPercentage =
+                  lodash.round((clicked / totalEmailReached) * hundred);
+                listResponse.spamPercentage =
+                  lodash.round((spammed / totalEmailReached) * hundred);
               } else {
-                listResponse.openPercentage = 0;
-                listResponse.clickPercentage = 0;
-                listResponse.spamPercentage = 0;
+                listResponse.openPercentage = null;
+                listResponse.clickPercentage = null;
+                listResponse.spamPercentage = null;
               }
               callback(null, listResponse);
             });
@@ -749,7 +750,7 @@ module.exports = function(List) {
                 let campaign = campaigns[campaigns.length - sizeToDec];
                 listResponse.lastRunAt = campaign.lastRunAt;
               } else {
-                listResponse.lastRunAt = "0";
+                listResponse.lastRunAt = null;
               }
               callback(null, listResponse);
             });
