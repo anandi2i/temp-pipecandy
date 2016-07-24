@@ -11,6 +11,7 @@ import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 import SubscriberGrid from "../grid/subscriber-list/SubscriberGrid.react";
 import Subscriber from "../grid/subscriber-list/Subscriber.react";
+import CsvFileUploade from "./CsvFileUploade.react";
 import TagMenu from "../TagMenu.react";
 import {ErrorMessages} from "../../utils/UserAlerts";
 
@@ -52,7 +53,8 @@ class ListView extends React.Component {
       {
         id: "amplified",
         name: "AMPLIFIED",
-      }]
+      }],
+      uploadCsvDetails: {}
     };
     this.state = this.initialStateValues;
     this.validatorTypes = {
@@ -70,6 +72,7 @@ class ListView extends React.Component {
     EmailListStore.addChangeListener(this.onStoreChange);
     EmailListStore.addPersonChangeListener(this.onPersonChange);
     EmailListStore.addFieldsListener(this.getFieldsFromStore);
+    EmailListStore.addCsvListener(this.displayUploadCsvDetails);
     this.el.find(".modal-trigger").leanModal({
       dismissible: false
     });
@@ -85,6 +88,25 @@ class ListView extends React.Component {
     EmailListStore.removeChangeListener(this.onStoreChange);
     EmailListStore.removePersonChangeListener(this.onPersonChange);
     EmailListStore.removeFieldsListener(this.getFieldsFromStore);
+    EmailListStore.removeCsvListener(this.displayUploadCsvDetails);
+  }
+
+  displayUploadCsvDetails = () => {
+    const error = EmailListStore.getError();
+    const csvDetails = EmailListStore.getUploadCsvDetails();
+    if(error) {
+      displayError(error);
+      return false;
+    }
+    this.setState({
+      uploadCsvDetails: csvDetails
+    }, () => {
+      this.refs.csvDetails.openModal();
+    });
+  }
+
+  closeCallback = () => {
+    EmailListStore.removeUploadCsvDetails();
   }
 
   /**
@@ -370,7 +392,7 @@ class ListView extends React.Component {
    * @return {ReactElement} markup
    */
   render() {
-    const {fieldName, suggestions, people,
+    const {fieldName, suggestions, people, uploadCsvDetails,
       fieldsName, listFields, peopleDetails, activeTabId, tabs} = this.state;
     const {listId} = this.props.params;
     const inputProps = {
@@ -485,6 +507,11 @@ class ListView extends React.Component {
             peopleDetails={peopleDetails}
             ref="subscriber" />
         </div>
+        <CsvFileUploade
+          ref="csvDetails"
+          closeCallback={this.closeCallback}
+          uploadCsvDetails={uploadCsvDetails}
+        />
         {/* /Add Recipient Component */}
       </div>
     );

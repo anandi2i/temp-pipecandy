@@ -15,6 +15,7 @@ let _getEmailListByID = {};
 let _error = "";
 let _success = "";
 let _getFields = {};
+let _csvListDetails = {};
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const EmailListStore = _.extend({}, EventEmitter.prototype, {
@@ -28,18 +29,22 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
   emitChange() {
     this.emit("change");
   },
+
   // Emit get meta fiels
   emitFields() {
     this.emit("getFields");
   },
+
   // Add listener for fields
   addFieldsListener(fieldsCB) {
     this.on("getFields", fieldsCB);
   },
+
   // Remove listener for fields
   removeFieldsListener(fieldsCB) {
     this.removeListener("getFields", fieldsCB);
   },
+
   // Add change listener
   addChangeListener(callback) {
     this.on("change", callback);
@@ -60,9 +65,35 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("changeUpdates", callback);
   },
 
+  // Emit get upload csv list
+  emitCsvChange() {
+    this.emit("csvList");
+  },
+
+  // Add listener for upload csv list
+  addCsvListener(csvCB) {
+    this.on("csvList", csvCB);
+  },
+
+  // Remove listener for upload csv list
+  removeCsvListener(csvCB) {
+    this.removeListener("csvList", csvCB);
+  },
+
+  // Get upload csv response 
+  getUploadCsvDetails() {
+    return _csvListDetails;
+  },
+
+  // Clear upload csv response
+  removeUploadCsvDetails() {
+    _csvListDetails = "";
+  },
+
   getFieldsFromStore() {
     return _getFields;
   },
+
   /**
    * @return {Array} All lists created by the current user
    */
@@ -157,8 +188,8 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.FILE_UPLOAD:
       EmailListApi.uploadFile(action.data).then((response) => {
-        _success = response.data.responseMsg;
-        EmailListStore.emitChange();
+        _csvListDetails = response.data;
+        EmailListStore.emitCsvChange();
         //@todo This has to be removed asap as it calls api inside API
         //100% dirty call
         EmailListActions.getEmailListByID(action.data.listId);
@@ -166,7 +197,7 @@ AppDispatcher.register(function(payload) {
       }, (err)=> {
         _error = err.data.error.message;
         EmailListStore.emitChange();
-        _error = err.data.message;
+        _error = "";
       });
       break;
     case Constants.SAVE_SINGLE_PERSON:
