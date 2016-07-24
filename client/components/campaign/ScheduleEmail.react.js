@@ -54,6 +54,7 @@ class ScheduleEmail extends React.Component {
     this.el.find("select").material_select();
     initDatePicker(this.el.find(".datepicker"));
     initTimePicker(this.el.find(".timepicker"));
+    this.el.find(".tooltipped").tooltip({delay: 50});
   }
 
   componentWillUnmount() {
@@ -725,10 +726,12 @@ class ScheduleEmail extends React.Component {
             );
           }, this)
         }
-        <div className="row add-followups m-lr-0"
-          onClick={this.addFollowups}
-          style={{display: displayAddFollowup}}>
-          <i className="mdi mdi-plus"></i> Add Follow up
+        <div className="fixed-action-btn horizontal tooltipped" onClick={this.addFollowups}
+          style={{display: displayAddFollowup}}
+          data-position="left" data-tooltip="Add Follow up">
+          <a className="btn-floating btn-medium blue">
+            <i className="large material-icons">add</i>
+          </a>
         </div>
         <PreviewMailsPopup
           peopleList={this.state.getAllPeopleList}
