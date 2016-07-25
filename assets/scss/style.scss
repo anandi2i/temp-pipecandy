@@ -665,14 +665,20 @@ a {
 .m-t-5 {
   margin-top: 5px;
 }
+.m-t-20 {
+  margin-top: 20px;
+}
+.m-t-10 {
+  margin-top: 10px;
+}
+.m-b-30 {
+  margin-bottom: 30px;
+}
 .m-b-50 {
   margin-bottom: 50px;
 }
 .m-b-120 {
   margin-bottom: 120px;
-}
-.m-t-20 {
-  margin-top: 20px;
 }
 .m-0 {
   margin: 0 !important;
@@ -1374,6 +1380,14 @@ $lines-to-show: 8;
   background-color: $lit-gray-bg;
 }
 .modal {
+  &.min-model {
+    top: 25% !important;
+    width: 35%;
+    .modal-header {
+      min-height: 20px;
+      padding: 0;
+    }
+  }
   .modal-header {
     font-size: 18px;
     font-weight: 400;
@@ -1791,6 +1805,11 @@ $lines-to-show: 8;
       text-align: center;
     }
   }
+  .modal {
+    &.min-model {
+      width: 60%;
+    }
+  }
 }
 @media only screen and (max-width: 992px) {
   .side-nav-btn {
@@ -1832,6 +1851,9 @@ $lines-to-show: 8;
     }
   }
   .modal {
+    &.min-model {
+      width: 60%;
+    }
     &.lg-modal {
       height: 100%;
       max-height: 100%;
@@ -1900,6 +1922,11 @@ $lines-to-show: 8;
   }
 }
 @media only screen and (max-width: 460px) {
+  .modal {
+    &.min-model {
+      width: 90%;
+    }
+  }
   .draft-container {
     .draft-template {
       padding: 0 5px;

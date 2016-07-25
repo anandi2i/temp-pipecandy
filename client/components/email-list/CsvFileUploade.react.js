@@ -80,16 +80,14 @@ class CsvFileUploade extends React.Component {
   render() {
     const {uploadCsvDetails} = this.state;
     return (
-      <div className="modal modal-fixed-header">
+      <div className="modal min-model modal-fixed-header">
         <i className="mdi mdi-close" onClick={this.closeModal}></i>
         <div className="modal-header">
-          <div className="head">
-            Just one more thing before we get going!
-          </div>
+          <div className="head"></div>
         </div>
         <div className="preview-modal-content">
           <div className="col s12">
-            <div className="modal-content m-b-50 m-t-20">
+            <div className="modal-content m-b-30 m-t-10">
               {
                 uploadCsvDetails
                 ?
@@ -114,11 +112,12 @@ class CsvFileUploade extends React.Component {
                       </div>
                     :
                       <div className="center">
-                        500 Records Upload Successfully
+                        Success! All the (number) records got uploaded.
+                        Turn around & do a fist bump!
                         <br/><br/>
                         <a onClick={this.closeModal}
                           className="btn btn-dflt blue sm-icon-btn p-1-btn">
-                          Close
+                          Ok
                         </a>
                       </div>
                 : ""
