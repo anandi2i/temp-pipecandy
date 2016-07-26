@@ -33,21 +33,21 @@ class SubscriberGridView extends React.Component {
   /**
    * Delete selected persons from Email List
    */
-    deleteSubscriber = () => {
-      const {selectedRowIds} = this.state;
-      if(selectedRowIds.length) {
-        const data = {
-          listId: this.props.listId,
-          peopleIds: selectedRowIds
-        };
-        EmailListActions.deletePersons(data);
-        this.setState({
-          selectedRowIds: []
-        });
-      } else {
-        displayError(ErrorMessages.DeletePerson);
-      }
+  deleteSubscriber = () => {
+    const {selectedRowIds} = this.state;
+    if(selectedRowIds.length) {
+      const data = {
+        listId: this.props.listId,
+        peopleIds: selectedRowIds
+      };
+      EmailListActions.deletePersons(data);
+      this.setState({
+        selectedRowIds: []
+      });
+    } else {
+      displayError(ErrorMessages.DeletePerson);
     }
+  }
 
   /**
    * Handle edit grid row

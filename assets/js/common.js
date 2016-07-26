@@ -128,7 +128,7 @@ window.getIssueTagsInEditor = getIssueTagsInEditor;
 function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
   let getFocusId = id.split("#")[1];
   let toolbar = isToolbar;
-  if(isToolbar){
+  if(isToolbar) {
     toolbar = "bold italic underline | alignleft aligncenter alignright alignjustify | link image";
   }
   tinymce.init({
@@ -161,7 +161,9 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
         changeCb(editor);
       }).on("focus", (e) => {
         const editorDom =  document.getElementById(editorId);
-        $(editorDom).find("a.tinymce-placeholder").remove();
+        if($(editorDom).find("a.tinymce-placeholder").length) {
+          $(editorDom).find("a.tinymce-placeholder").closest("p").remove();
+        }
       }).on("blur", (e) => {
         if(!editor.getContent()) {
           let content = "";
