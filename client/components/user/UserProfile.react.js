@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDom from "react-dom";
+import {Link} from "react-router";
 import strategy from "joi-validation-strategy";
 import validation from "react-validation-mixin";
 import AvatarCropper from "react-avatar-cropper";
@@ -22,9 +23,9 @@ class Profile extends React.Component {
     let user = UserStore.getUser();
     this.state = {
       "id": user.id,
-      "firstName" : user.firstName,
-      "lastName" : user.lastName,
-      "email" : user.email,
+      "firstName" : user.firstName || "",
+      "lastName" : user.lastName || "",
+      "email" : user.email || "",
       "cropperOpen": false,
       "img": null,
       "croppedImg": user.avatar || "",
@@ -254,7 +255,7 @@ class Profile extends React.Component {
               </div>
             </div>
             <div className="row r-btn-container m-0">
-              <input type="button" className="btn red p-1-btn" value="Cancel" />
+              <Link className="btn red p-1-btn" to="/"> Cancel </Link>
               <input type="submit" className="btn blue" value="Save Changes" />
             </div>
           </form>

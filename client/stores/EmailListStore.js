@@ -80,7 +80,7 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
     this.removeListener("csvList", csvCB);
   },
 
-  // Get upload csv response 
+  // Get upload csv response
   getUploadCsvDetails() {
     return _csvListDetails;
   },
@@ -202,6 +202,11 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.SAVE_SINGLE_PERSON:
       EmailListApi.saveSinglePerson(action.data).then((response) => {
+        //Remove if same email id exists in grid
+        _getEmailList[0].people = _.reject(_getEmailList[0].people,
+          person => response.data.email === person.email
+        );
+        //Push the new recipient
         _getEmailList[0].people.push(response.data);
         _success = SuccessMessages.successSubscribe;
         EmailListStore.emitChange();
