@@ -68,6 +68,14 @@ const EmailListApi = {
   relateAdditionalField(data) {
     return api.put(`/api/lists/${data.id}/fields/rel/${data.fk}`);
   },
+  /**
+   * Api to get campaign templates for preview in grid view
+   *
+   * @return {object} Promise
+   */
+  getCampaignPreviewTemplate(id) {
+    return api.get(`/api/campaigns/${id}/campaignTemplates/preview`);
+  }
 };
 
 export default EmailListApi;

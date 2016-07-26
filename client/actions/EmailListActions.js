@@ -71,6 +71,17 @@ const EmailListActions = {
       actionType: Constants.RELATE_ADDITIONAL_FIELD,
       data: data
     });
+  },
+  /**
+   * Action to get campaign templates to display in campaign grid
+   * @param {number} id - campaign id
+   * @emits {Constants.GET_CAMPAIGN_PREVIEW_TEMPLATE}
+   */
+  getCampaignPreviewTemplate(id) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_CAMPAIGN_PREVIEW_TEMPLATE,
+      id: id
+    });
   }
 };
 

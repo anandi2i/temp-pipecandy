@@ -16,6 +16,7 @@ let _error = "";
 let _success = "";
 let _getFields = {};
 let _csvListDetails = {};
+let _campaignTemplatePreview = {};
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const EmailListStore = _.extend({}, EventEmitter.prototype, {
@@ -79,7 +80,20 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
   removeCsvListener(csvCB) {
     this.removeListener("csvList", csvCB);
   },
+  // Emit to get campaign grid preview template
+  emitCampaignGridPreviewChange() {
+    this.emit("campaignGridPreview");
+  },
 
+  // Add listener for campaign grid preview template
+  addCampaignGridPreviewListener(peviewCB) {
+    this.on("campaignGridPreview", peviewCB);
+  },
+
+  // Remove listener for campaign grid preview template
+  removeCampaignGridPreviewListener(peviewCB) {
+    this.removeListener("campaignGridPreview", peviewCB);
+  },
   // Get upload csv response
   getUploadCsvDetails() {
     return _csvListDetails;
@@ -145,6 +159,16 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
 
   getSuccess() {
     return _success;
+  },
+
+  // Get campaign template content to preview in campaign grid
+  getCampaignTemplatePreview() {
+    return _campaignTemplatePreview;
+  },
+
+  // Set empty value for template preview in campaign grid
+  removeCampaignTemplatePreview() {
+    _campaignTemplatePreview = "";
   }
 
 });
@@ -276,6 +300,17 @@ AppDispatcher.register(function(payload) {
       }, (err)=> {
         _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
+        _error = "";
+      });
+      break;
+    case Constants.GET_CAMPAIGN_PREVIEW_TEMPLATE:
+      EmailListApi.getCampaignPreviewTemplate(action.id).then((response) => {
+        _campaignTemplatePreview = response.data;
+        EmailListStore.emitCampaignGridPreviewChange();
+        _campaignTemplatePreview = "";
+      }, (err)=> {
+        _error = HandleError.evaluateError(err);
+        EmailListStore.emitCampaignGridPreviewChange();
         _error = "";
       });
       break;

@@ -944,6 +944,28 @@ $lines-to-show: 8;
     }
   }
 }
+.campaign-preview-tem {
+  font-size: 14px;
+  text-align: left;
+  &.modal {
+    .preview-modal-content {
+      height: calc(100% - 80px);
+      .modal-content {
+        width: calc(100% - 1px);
+      }
+      .preview-mail-container {
+        padding: 0;
+        width: 100%;
+        .head {
+          padding: 0;
+        }
+        .content {
+          white-space: normal;
+        }
+      }
+    }
+  }
+}
 .preview-mail-container {
   background-color: $lit-gray-bg;
   margin-bottom: 10px;
@@ -1532,11 +1554,6 @@ $lines-to-show: 8;
     padding: 0;
     position: absolute;
     top: 7px;
-    transition: transform .5s;
-    &:hover {
-      @include rotate(180deg);
-      transition: transform .5s;
-    }
   }
 }
 /*********************
@@ -1782,6 +1799,12 @@ $lines-to-show: 8;
     font-size: 16pt;
     font-weight: 500;
     margin-top: 1rem;
+  }
+  &.preview-popup {
+    margin-bottom: 40px;
+    img {
+      margin-top: 0;
+    }
   }
 }
 /*********************
