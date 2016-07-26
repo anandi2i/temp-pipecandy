@@ -50,18 +50,15 @@
         thead > tr > th, tbody > tr > td {
           height: 65px;
           border-bottom: $border-1px;
-          &.name, &.field {
+          &.name {
             min-width: 130px;
-            max-width: 180px;
           }
-          &.email {
+          &.email, &.field {
             min-width: 180px;
-            max-width: 280px;
           }
           &.icon {
             text-align: center;
             min-width: 60px;
-            max-width: 70px;
           }
         }
         thead > tr {
