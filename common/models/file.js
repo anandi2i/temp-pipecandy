@@ -518,30 +518,6 @@ module.exports = function(File) {
   };
 
   /**
-   * If there exist an email for the current list, then update the person for
-   * the current list
-   * @param  {[oldPerson]} oldPerson
-   * @param  {[newPerson]} newPerson
-   * @param  {[function]} updatePersonCB
-   * @return {[person]}
-   * @author Aswin Raj A
-   */
-  /*let updatePersonForCurrentList = (oldPerson, newPerson, updatePersonCB) => {
-    async.waterfall([
-      async.apply(File.app.models.person.generateAuditPersonObj,
-        oldPerson, newPerson),
-      File.app.models.person.savePersonAudit,
-      File.app.models.person.updatePersonWithNewData
-    ], (asyncErr, person) => {
-      if(asyncErr){
-        logger.error("Error while updating person for current list", asyncErr);
-        updatePersonCB(asyncErr);
-      }
-      updatePersonCB(null, person);
-    });
-  };*/
-
-  /**
    * If there exist an email in different list, then update the person for
    * another list
    * Associate the person to the new list

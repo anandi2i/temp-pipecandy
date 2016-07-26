@@ -250,62 +250,16 @@ module.exports = function(List) {
             person);
         });
       } else {
-        people[0].lists((listFindErr, list) => {
-          if(listFindErr){
-            logger.error("Error while finding list for person", {
-              person: people[0],
-              error: listFindErr,
-              stack: listFindErr.stack
-            });
-            createOrUpdatePersonCB(listFindErr);
+        updatePersonForDifferentList(listId, people[0], newPerson,
+          (updateErr, updatedPerson) => {
+          if(updateErr){
+            logger.error(updateErr);
+            return createOrUpdatePersonCB(updateErr);
           }
-          if(list[0].id === listId){
-            updatePersonForList(people[0], newPerson,
-              (updateErr, updatedPerson) => {
-              if(updateErr){
-                logger.error(updateErr);
-                return createOrUpdatePersonCB(updateErr);
-              }
-              return createOrUpdatePersonCB(null, updatedPerson.id, listId,
-                newAdditionalFields, updatedPerson);
-            });
-          } else {
-            updatePersonForDifferentList(listId, people[0], newPerson,
-              (updateErr, updatedPerson) => {
-              if(updateErr){
-                logger.error(updateErr);
-                return createOrUpdatePersonCB(updateErr);
-              }
-              return createOrUpdatePersonCB(null, updatedPerson.id, listId,
-                newAdditionalFields, updatedPerson);
-            });
-          }
+          return createOrUpdatePersonCB(null, updatedPerson.id, listId,
+            newAdditionalFields, updatedPerson);
         });
       }
-    });
-  };
-
-  /**
-   * If there exist an email for the current list, then update the person for
-   * the current list
-   * @param  {[oldPerson]} oldPerson
-   * @param  {[newPerson]} newPerson
-   * @param  {[function]} updatePersonForListCB
-   * @return {[person]}
-   * @author Aswin Raj A
-   */
-  let updatePersonForList = (oldPerson, newPerson, updatePersonForListCB) => {
-    async.waterfall([
-      async.apply(List.app.models.person.generateAuditPersonObj,
-        oldPerson, newPerson),
-      List.app.models.person.savePersonAudit,
-      List.app.models.person.updatePersonWithNewData
-    ], (asyncErr, person) => {
-      if(asyncErr){
-        logger.error(asyncErr);
-        return updatePersonForListCB(asyncErr);
-      }
-      return updatePersonForListCB(null, person);
     });
   };
 
