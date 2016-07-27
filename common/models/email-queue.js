@@ -234,7 +234,7 @@ EmailQueue.assembleEmails = (campaign, assembleEmailsCB) => {
                  campaign, statusCodes.readyToSend),
   ], (getPoepleAndGenerateEmailErr, results) => {
     return assembleEmailsCB(getPoepleAndGenerateEmailErr,
-      "Generated emails for campginId:" + campaign.id);
+      "Generated emails for campaignId:" + campaign.id);
   });
   //campaign.findById
 };

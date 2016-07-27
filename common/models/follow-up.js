@@ -420,6 +420,74 @@ const createCampaignTemplate = (createdFollowUp, campaign,
       });
   };
 
+  /**
+   * API to reSchedule the followUps with the new date from now
+   * @param  {[campaignId]} campaignId
+   * @param  {[function]} reScheduleCB
+   * @return {[result]}
+   * @author Aswin Raj A
+   */
+  FollowUp.reScheduleFollowUps = (campaignId, reScheduleCB) => {
+    async.waterfall([
+      getAllFollowUpsForCampaign,
+      scheduleFollowUps
+    ], (asyncErr, result) => {
+      reScheduleCB(asyncErr, result);
+    });
+  };
+
+  /**
+   * Get all the followUps for the current campaign id
+   * @param  {[campaignId]} campaignId
+   * @param  {[function]} getFolloupsCB
+   * @return {[followUps]}
+   * @author Aswin Raj A
+   */
+  const getAllFollowUpsForCampaign = (campaignId, getFolloupsCB) => {
+    FollowUp.find({
+      where : {
+        campaignId: campaignId
+      }
+    }, (followUpsFindErr, followUps) => {
+      if(followUpsFindErr || lodash.isEmpty(followUps)){
+        const errParam = followUpsFindErr || new Error("No followUps for the\
+          campaign");
+        logger.error(errParam.msg, {
+          input: {campaignId: campaignId},
+          stack: followUpsFindErr ? followUpsFindErr.stack : ""
+        });
+        return getFolloupsCB(followUpsFindErr);
+      }
+      return getFolloupsCB(null, followUps);
+    });
+  };
+
+
+  /**
+   * To update all the followUps with the new followUp date
+   * @param  {[followUps]} followUps
+   * @param  {[campaign]} campaign
+   * @param  {[scheduleCB]} scheduleCB
+   * @return {[response]}
+   * @author Aswin Raj A
+   */
+  const scheduleFollowUps = (followUps, campaign, scheduleCB) => {
+    let oldScheduledDate = null;
+    async.eachSeries(followUps, (followUp, followUpCB) => {
+      async.waterfall([
+        async.apply(calculateNextFollowupdate, oldScheduledDate, followUp),
+        updateFollowUp
+      ], (asyncErr, prevFollowUpDate) => {
+        if(asyncErr) return followUpCB(asyncErr);
+        oldScheduledDate = prevFollowUpDate;
+        return followUpCB(null);
+      });
+    }, (eachSeriesErr) => {
+      if(eachSeriesErr) return scheduleCB(eachSeriesErr);
+      return scheduleCB(null, "Scheduled followUps successfully!");
+    });
+  };
+
 //observers
   /**
    * Updates the updatedAt column with current Time

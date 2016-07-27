@@ -1,0 +1,43 @@
+{
+  "name": "campaignStatusAudit",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "perviousStatus": {
+      "type": "number",
+      "required": true
+    },
+    "currentStatus": {
+      "type": "number",
+      "required": true
+    },
+    "updatedBy": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "campaigns": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": "campaignId"
+    }
+  },
+  "acls": [{
+    "principalType": "ROLE",
+    "principalId": "$everyone",
+    "permission": "ALLOW",
+    "property": "createAudit"
+  }],
+  "methods": {}
+}

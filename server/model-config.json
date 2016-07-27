@@ -163,5 +163,9 @@
   "followUpMetric": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "campaignStatusAudit": {
+    "dataSource": "psqlDs",
+    "public": false
   }
 }

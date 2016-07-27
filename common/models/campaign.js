@@ -78,336 +78,435 @@ module.exports = function(Campaign) {
    */
   Campaign.saveCampaignElements = (ctx, id, reqParams,
     saveCampaignElementsCB) => {
-      async.waterfall([
-        async.apply(validateSaveCampaignTemplate, ctx, id, reqParams),
-        getCampaign,
-        updateCampaign,
-        reCreateCampaignElements,
-        enqueueToMailAssembler
-      ], (asyncErr, result) => {
-        if(asyncErr){
-          return saveCampaignElementsCB(asyncErr);
-        }
-        return saveCampaignElementsCB(null, result);
-      });
-    };
+    async.waterfall([
+      async.apply(validateSaveCampaignTemplate, ctx, id, reqParams),
+      getCampaign,
+      updateCampaign,
+      reCreateCampaignElements,
+      enqueueToMailAssembler
+    ], (asyncErr, result) => {
+      return saveCampaignElementsCB(asyncErr, result);
+    });
+  };
 
-    Campaign.remoteMethod(
-      "stop",
-      {
-        description: "Save the campaign tempalate and associates with list",
-        accepts: [
-          {arg: "ctx", type: "object", http: {source: "context"}},
-          {arg: "id", type: "number", required: true, http: {source: "path"}}
-        ],
-        returns: {arg: "campaign", type: "campaign", root: true},
-        http: {verb: "put", path: "/:id/stop"}
+  Campaign.remoteMethod(
+    "stop",
+    {
+      description: "Save the campaign tempalate and associates with list",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "id", type: "number", required: true, http: {source: "path"}}
+      ],
+      returns: {arg: "campaign", type: "campaign", root: true},
+      http: {verb: "put", path: "/:id/stop"}
+    }
+  );
+
+  /**
+   * Stops the Campaign
+   * Campaign Status will be updated to Stop
+   *
+   * @param  {Context} ctx [Context object to get accessToken]
+   * @param  {number} id [campaign id]
+   * @param  {Function} callback
+   * @return {Campaign} [Persisted Campaign Object]
+   * @author Syed Sulaiman M
+   */
+  Campaign.stop = (ctx, id, callback) => {
+    Campaign.find({
+      where: {
+        and: [
+          {createdBy:ctx.req.accessToken.userId},
+          {id:id}
+        ]
       }
-    );
-
-    /**
-     * Stops the Campaign
-     * Campaign Status will be updated to Stop
-     *
-     * @param  {Context} ctx [Context object to get accessToken]
-     * @param  {number} id [campaign id]
-     * @param  {Function} callback
-     * @return {Campaign} [Persisted Campaign Object]
-     * @author Syed Sulaiman M
-     */
-    Campaign.stop = (ctx, id, callback) => {
-      Campaign.find({
-        where: {
-          and: [
-            {createdBy:ctx.req.accessToken.userId},
-            {id:id}
-          ]
-        }
-      }, (campaignsErr, campaigns) => {
-        if(campaignsErr || lodash.isEmpty(campaigns)) {
-          const errorMessage = lodash.isEmpty(campaigns) ?
-              errorMessages.INVALID_CAMPAIGN_ID : errorMessages.SERVER_ERROR;
+    }, (campaignsErr, campaigns) => {
+      if(campaignsErr || lodash.isEmpty(campaigns)) {
+        const errorMessage = lodash.isEmpty(campaigns) ?
+            errorMessages.INVALID_CAMPAIGN_ID : errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      let campaign = campaigns[0];
+      campaign.updateAttribute("statusCode", statusCodes.campaignStopped,
+          (updateErr, updatedCampaign) => {
+        if(updateErr) {
+          const errorMessage = errorMessages.SERVER_ERROR;
           return callback(errorMessage);
         }
-        let campaign = campaigns[0];
-        campaign.updateAttribute("statusCode", statusCodes.campaignStopped,
-            (updateErr, updatedCampaign) => {
+        Campaign.app.models.followUp
+            .updateStoppedByCampaignId(updatedCampaign.id, true,
+            (updateErr, result) => {
           if(updateErr) {
             const errorMessage = errorMessages.SERVER_ERROR;
             return callback(errorMessage);
           }
-          Campaign.app.models.followUp
-              .updateStoppedByCampaignId(updatedCampaign.id, true,
-              (updateErr, result) => {
-            if(updateErr) {
-              const errorMessage = errorMessages.SERVER_ERROR;
-              return callback(errorMessage);
-            }
-            return callback(null, updatedCampaign);
-          });
+          return callback(null, updatedCampaign);
         });
       });
-    };
+    });
+  };
 
-    Campaign.remoteMethod(
-      "openClickRate",
-      {
-        description: "Save the campaign tempalate and associates with list",
-        accepts: [{
-          arg: "ctx", type: "object", http: {source: "context"}
-        }, {
-          arg: "id", type: "any", required: true, http: {source: "path"}
-        }],
-        returns: {arg: "object", type: "object", root: true},
-        http: {
-          verb: "get", path: "/:id/openClickRate"
-        }
+
+
+  Campaign.remoteMethod(
+    "resume",
+    {
+      description: "To Resume the campaign",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "campaignId", type: "number", required: true,
+          http: {source: "path"}}
+      ],
+      returns: {arg: "campaign", type: "campaign", root: true},
+      http: {verb: "put", path: "/:campaignId/resume"}
+    }
+  );
+
+  /**
+   * API to resume the campaign
+   * if the campaign is resumed after its scheduled date, campaign will be
+   * assembled and sent with the current time
+   * if the campaign is resumed before its scheduled date, campaign will be
+   * updated from isStopped true to false and it will be assembled and
+   * scheduled again
+   * @param  {Context} ctx [Context object to get accessToken]
+   * @param  {number} campaignId [campaign id]
+   * @param  {Function} resumeCB
+   * @return {Campaign} [Persisted Campaign Object]
+   * @author Aswin Raj A
+   */
+  Campaign.resume = (ctx, campaignId, resumeCB) => {
+    const resumeStatusCode = statusCodes.campaignResumed;
+    getCampaign(ctx, campaignId, null, (err, campaign) => {
+      if(err) {
+        return resumeCB(err);
       }
-    );
-
-    /**
-     * API to get Open and Click Rate for Emails
-     * @param  {context}   ctx      [description]
-     * @param  {Number}   id       CampaignId
-     * @param  {Function} callback
-     * @return {Object}      Object conatins Open and Click rate for Emails
-     * @author Syed Sulaiman M
-     */
-    Campaign.openClickRate = (ctx, id, callback) => {
-        Campaign.findById(id, (campaignErr, campaign) => {
-          if(campaignErr) {
-            logger.error("Error while getting campaign", {error: campaignErr,
-              stack: campaignErr.stack, input:{campaignId:id}});
-            const errorMessage = errorMessages.SERVER_ERROR;
-            return callback(errorMessage);
-          }
-          if(!campaign) {
-            const errorMessage = errorMessages.CAMPAIGN_NOT_FOUND;
-            return callback(errorMessage);
-          }
-          async.parallel({
-            clickRate: getClickedEmailLinkRate.bind(null, campaign),
-            openRate: getOpenedEmailRate.bind(null, campaign)
-          }, (parallelErr, result) => {
-            if(parallelErr) {
-              logger.error("Error while processing campaign for rate",
-                {error: campaignErr, stack: campaignErr.stack,
-                input:{campaignId:id}});
-              const errorMessage = errorMessages.SERVER_ERROR;
-              return callback(errorMessage);
-            }
-            let rate = {
-              openRate: result.openRate,
-              clickRate: result.clickRate
-            };
-            return callback(null, rate);
-          });
-        });
-      };
-
-    /**
-     * validates the request param object
-     * @param  {[Object]} reqParams
-     * @param  {[function]} validateSaveCB [callback]
-     * @return {[void]}
-     */
-    const validateSaveCampaignTemplate = (ctx, id, reqParams,
-      validateSaveCB) => {
-      if(!reqParams.hasOwnProperty("listIds")){
-        let error = new Error();
-        error.message = "listIds not found in the input object";
-        error.name = "listIdsNotFound";
-        return validateSaveCB(error);
-      }
-      if(!reqParams.hasOwnProperty("campaignTemplates")) {
-        let error = new Error();
-        error.message = "campaignTemplates not found in the input object";
-        error.name = "campaignTemplatesNotFound";
-        return validateSaveCB(error);
-      }
-      return validateSaveCB(null, ctx, id, reqParams);
-    };
-
-    /**
-     * Get the campaign for the campaign id and for the current user
-     * @param  {[ctx]} ctx
-     * @param  {[id]} id
-     * @param  {[reqParams]} reqParams
-     * @param  {[function]} getCampaignCB
-     * @return {[campaign, reqParams]}
-     * @author Ramanavel Selvaraju
-     */
-    const getCampaign = (ctx, id, reqParams, getCampaignCB) => {
-      Campaign.find({
-         where: {id: id, createdBy: ctx.req.accessToken.userId}
-       }, (campaignErr, campaign) => {
-         if(campaignErr | lodash.isEmpty(campaign)) {
-           logger.error("Error in getting campaign for id : ",
-           {
-               campginId: id,
-               reqParams:reqParams,
-               error: campaignErr,
-               stack: campaignErr ? campaignErr.stack : ""
-           });
-           return getCampaignCB(campaignErr);
-         }
-         return getCampaignCB(null, campaign[0], reqParams);
-      });
-    };
-
-
-    /**
-     * Update the current campaign with the scheduledAt, address, optText,
-     * isAddressNeeded and isOptTextNeeded
-     * @param  {[campaign]} campaign
-     * @param  {[reqParams]} reqParams
-     * @param  {[function]} updateCampaignCB
-     * @return {[updatedCampaign, reqParams]}
-     */
-    const updateCampaign = (campaign, reqParams, updateCampaignCB) => {
-
-      const campaignUpdateElements = {
-        "address" : reqParams.campaign.address,
-        "optText" : reqParams.campaign.optText,
-        "isAddressNeeded": reqParams.campaign.isAddressNeeded,
-        "isOptTextNeeded": reqParams.campaign.isOptTextNeeded,
-        "statusCode": statusCodes.updated
-      };
-      if(reqParams.campaign.scheduledAt) {
-        campaignUpdateElements.scheduledAt = reqParams.campaign.scheduledAt;
-      }
-      campaign.updateAttributes(campaignUpdateElements,
-        (campaignUpdateErr, updatedCampaign) => {
-        if(campaignUpdateErr){
-          logger.error("Error in updating campaign:", {
-              error: campaignUpdateErr,
-              stack: campaignUpdateErr.stack
-          });
-          return updateCampaignCB(campaignUpdateErr);
-        }
-        return updateCampaignCB(null, updatedCampaign, reqParams);
-      });
-    };
-
-
-    /**
-     * Function to convert the date string and time string into timeStamp formated Date
-     * @param  {[dateString]} dateString
-     * @param  {[timeString]} timeString
-     * @return {[formatedDate]}
-     */
-    /*const formatDate = (dateString, timeString) => {
-      const formatedDate = new Date(dateString + " " + timeString + " " +
-       systemTimeZone);
-      return formatedDate;
-    };*/
-
-
-    /**
-     * To update the campaign elements when the user does some modifications to
-     * the campaign we are deleting and recreating the campaign elements
-     * - destroy the campaign elements such as emailQueue, campaignTemplate and
-     *   followUp
-     * - create the list, campaignTemplates and followUp
-     * @param  {[campaign]} campaign
-     * @param  {[reqParams]} reqParams
-     * @param  {[function]} reCreateCampaignElementsCB
-     * @return {[campaign]}
-     */
-    const reCreateCampaignElements = (campaign, reqParams,
-      reCreateCampaignElementsCB) => {
-      async.series({
-        destroy: destroyCampaignElements.bind(null, campaign),
-        create: createCampaignElements.bind(null, campaign, reqParams)
-      }, (asyncErr, results) => {
+      async.waterfall([
+        async.apply(validateStatusCode, campaign),
+        enqueueToMailAssembler,
+        (response, passParamsCB) => {
+          passParamsCB(null, campaign.id);
+        },
+        Campaign.app.models.followUp.reScheduleFollowUps,
+        (response, passParamsCB) => {
+          passParamsCB(null, campaign, resumeStatusCode);
+        },
+        updateStatusProcess
+      ], (asyncErr, result) => {
         if(asyncErr){
-          logger.error("Error on reCreateCampaignElements : ",
-               {campginId: campaign.id, reqParams:reqParams,
-                 error: asyncErr, stack: asyncErr.stack});
-           return reCreateCampaignElementsCB(asyncErr);
+          resumeCB(asyncErr);
         }
-        reCreateCampaignElementsCB(null, campaign);
+        resumeCB(null, result);
       });
-    };
+    });
+  };
 
+  const validateStatusCode = (campaign, validateStatusCodeCB) => {
+    if(campaign.statusCode === statusCodes.campaignStopped) {
+      return validateStatusCodeCB(null, campaign, "resumed");
+    }
+    return validateStatusCodeCB("Invalid previous status code");
+  };
 
-    /**
-     * In the recreation of the campaign, we need to delete the campaign
-     * elements before updating
-     * @param  {[campaign]} campaign
-     * @param  {[function]} destroyCampaignElementsCB
-     */
-    const destroyCampaignElements = (campaign, destroyCampaignElementsCB) => {
+  Campaign.remoteMethod(
+    "openClickRate",
+    {
+      description: "Save the campaign tempalate and associates with list",
+      accepts: [{
+        arg: "ctx", type: "object", http: {source: "context"}
+      }, {
+        arg: "id", type: "any", required: true, http: {source: "path"}
+      }],
+      returns: {arg: "object", type: "object", root: true},
+      http: {
+        verb: "get", path: "/:id/openClickRate"
+      }
+    }
+  );
+
+  /**
+   * API to get Open and Click Rate for Emails
+   * @param  {context}   ctx      [description]
+   * @param  {Number}   id       CampaignId
+   * @param  {Function} callback
+   * @return {Object}      Object conatins Open and Click rate for Emails
+   * @author Syed Sulaiman M
+   */
+  Campaign.openClickRate = (ctx, id, callback) => {
+    Campaign.findById(id, (campaignErr, campaign) => {
+      if(campaignErr) {
+        logger.error("Error while getting campaign", {error: campaignErr,
+          stack: campaignErr.stack, input:{campaignId:id}});
+        const errorMessage = errorMessages.SERVER_ERROR;
+        return callback(errorMessage);
+      }
+      if(!campaign) {
+        const errorMessage = errorMessages.CAMPAIGN_NOT_FOUND;
+        return callback(errorMessage);
+      }
       async.parallel({
-        emailQueue: Campaign.app.models.emailQueue.destroyByCampaign
-        .bind(null, campaign),
-        campaignTemplate: Campaign.app.models.campaignTemplate.destroyByCampaign
-        .bind(null, campaign),
-        followUp: Campaign.app.models.followUp.destroyByCampaign
-        .bind(null, campaign)
-      }, (asyncErr, results) => {
-        if(asyncErr){
-          logger.error("Error while destroying campaign elements",
-          {error: asyncErr, stack: asyncErr.stack});
-          return destroyCampaignElementsCB(asyncErr);
+        clickRate: getClickedEmailLinkRate.bind(null, campaign),
+        openRate: getOpenedEmailRate.bind(null, campaign)
+      }, (parallelErr, result) => {
+        if(parallelErr) {
+          logger.error("Error while processing campaign for rate",
+            {error: campaignErr, stack: campaignErr.stack,
+            input:{campaignId:id}});
+          const errorMessage = errorMessages.SERVER_ERROR;
+          return callback(errorMessage);
         }
-        return destroyCampaignElementsCB(null);
+        let rate = {
+          openRate: result.openRate,
+          clickRate: result.clickRate
+        };
+        return callback(null, rate);
       });
+    });
+  };
+
+  /**
+   * validates the request param object
+   * @param  {[Object]} reqParams
+   * @param  {[function]} validateSaveCB [callback]
+   * @return {[void]}
+   */
+  const validateSaveCampaignTemplate = (ctx, id, reqParams,
+    validateSaveCB) => {
+    if(!reqParams.hasOwnProperty("listIds")){
+      let error = new Error();
+      error.message = "listIds not found in the input object";
+      error.name = "listIdsNotFound";
+      return validateSaveCB(error);
+    }
+    if(!reqParams.hasOwnProperty("campaignTemplates")) {
+      let error = new Error();
+      error.message = "campaignTemplates not found in the input object";
+      error.name = "campaignTemplatesNotFound";
+      return validateSaveCB(error);
+    }
+    return validateSaveCB(null, ctx, id, reqParams);
+  };
+
+  /**
+   * Get the campaign for the campaign id and for the current user
+   * @param  {[ctx]} ctx
+   * @param  {[id]} id
+   * @param  {[reqParams]} reqParams
+   * @param  {[function]} getCampaignCB
+   * @return {[campaign, reqParams]}
+   * @author Ramanavel Selvaraju
+   */
+  const getCampaign = (ctx, id, reqParams, getCampaignCB) => {
+    Campaign.find({
+       where: {id: id, createdBy: ctx.req.accessToken.userId}
+     }, (campaignErr, campaign) => {
+       if(campaignErr | lodash.isEmpty(campaign)) {
+         logger.error("Error in getting campaign for id : ",
+         {
+             campginId: id,
+             reqParams:reqParams,
+             error: campaignErr,
+             stack: campaignErr ? campaignErr.stack : ""
+         });
+         return getCampaignCB(campaignErr);
+       }
+       return getCampaignCB(null, campaign[0], reqParams);
+    });
+  };
+
+
+  /**
+   * Update the current campaign with the scheduledAt, address, optText,
+   * isAddressNeeded and isOptTextNeeded
+   * @param  {[campaign]} campaign
+   * @param  {[reqParams]} reqParams
+   * @param  {[function]} updateCampaignCB
+   * @return {[updatedCampaign, reqParams]}
+   */
+  const updateCampaign = (campaign, reqParams, updateCampaignCB) => {
+
+    const campaignUpdateElements = {
+      "address" : reqParams.campaign.address,
+      "optText" : reqParams.campaign.optText,
+      "isAddressNeeded": reqParams.campaign.isAddressNeeded,
+      "isOptTextNeeded": reqParams.campaign.isOptTextNeeded,
+      "statusCode": statusCodes.updated
     };
-
-
-    /**
-     * After deleting the campaign elements we need to create the campign
-     * elements with the updated objects
-     * List, Campaign Template and FollowUp needs to be updated
-     * @param  {[campaign]} campaign
-     * @param  {[reqParams]} reqParams
-     * @param  {[type]} reCreateCampaignElementsCB
-     */
-    const createCampaignElements = (campaign, reqParams,
-      reCreateCampaignElementsCB) => {
-      async.parallel({
-      list: Campaign.app.models.list.associateList
-      .bind(null, campaign, reqParams.listIds),
-      templates: Campaign.app.models.campaignTemplate.saveTemplates
-      .bind(null, campaign, reqParams.campaignTemplates),
-      followUp: Campaign.app.models.followUp.createFollowUpElements
-      .bind(null, campaign, reqParams.followUps)
-      }, (parallelErr, response) => {
-        if(parallelErr){
-          logger.error("Error on saveCampaignTemplate : ",
-          {campginId: campaign.id, reqParams:reqParams, error: parallelErr,
-            stack: parallelErr ? parallelErr.stack : ""});
-           return reCreateCampaignElementsCB(parallelErr);
-        }
-        return reCreateCampaignElementsCB(null, response);
-      });
-    };
-
-
-    /**
-     * Once the campaign elements are created, enqueue the campaign to the
-     * mail assembler
-     * @param  {[campaign]} campaign
-     * @param  {[function]} enqueueToMailAssemblerCB
-     */
-    const enqueueToMailAssembler = (campaign, enqueueToMailAssemblerCB) => {
-      let queueName = "emailAssembler";
-      queueUtil.enqueueMail(JSON.stringify(campaign), queueName,
-        () => {
-          campaign.updateAttribute("statusCode", statusCodes.enqueued,
-          (campaignUpdateErr, updatedCampaign) => {
-            if(campaignUpdateErr){
-              logger.error("Error on updating campaign : ", {campaign: campaign,
-                 error: campaignUpdateErr, stack: campaignUpdateErr.stack});
-               return enqueueToMailAssemblerCB(campaignUpdateErr);
-            }
-          });
-          return enqueueToMailAssemblerCB(null,
-            "Campaign details saved successfully!");
+    if(reqParams.campaign.scheduledAt) {
+      campaignUpdateElements.scheduledAt = reqParams.campaign.scheduledAt;
+    }
+    campaign.updateAttributes(campaignUpdateElements,
+      (campaignUpdateErr, updatedCampaign) => {
+      if(campaignUpdateErr){
+        logger.error("Error in updating campaign:", {
+            error: campaignUpdateErr,
+            stack: campaignUpdateErr.stack
         });
-    };
+        return updateCampaignCB(campaignUpdateErr);
+      }
+      return updateCampaignCB(null, updatedCampaign, reqParams);
+    });
+  };
 
+
+  /**
+   * Function to convert the date string and time string into timeStamp formated Date
+   * @param  {[dateString]} dateString
+   * @param  {[timeString]} timeString
+   * @return {[formatedDate]}
+   */
+  /*const formatDate = (dateString, timeString) => {
+    const formatedDate = new Date(dateString + " " + timeString + " " +
+     systemTimeZone);
+    return formatedDate;
+  };*/
+
+
+  /**
+   * To update the campaign elements when the user does some modifications to
+   * the campaign we are deleting and recreating the campaign elements
+   * - destroy the campaign elements such as emailQueue, campaignTemplate and
+   *   followUp
+   * - create the list, campaignTemplates and followUp
+   * @param  {[campaign]} campaign
+   * @param  {[reqParams]} reqParams
+   * @param  {[function]} reCreateCampaignElementsCB
+   * @return {[campaign]}
+   */
+  const reCreateCampaignElements = (campaign, reqParams,
+    reCreateCampaignElementsCB) => {
+    async.series({
+      destroy: destroyCampaignElements.bind(null, campaign),
+      create: createCampaignElements.bind(null, campaign, reqParams)
+    }, (asyncErr, results) => {
+      if(asyncErr){
+        logger.error("Error on reCreateCampaignElements : ",
+             {campginId: campaign.id, reqParams:reqParams,
+               error: asyncErr, stack: asyncErr.stack});
+         return reCreateCampaignElementsCB(asyncErr);
+      }
+      reCreateCampaignElementsCB(null, campaign, "assembler");
+    });
+  };
+
+
+  /**
+   * In the recreation of the campaign, we need to delete the campaign
+   * elements before updating
+   * @param  {[campaign]} campaign
+   * @param  {[function]} destroyCampaignElementsCB
+   */
+  const destroyCampaignElements = (campaign, destroyCampaignElementsCB) => {
+    async.parallel({
+      emailQueue: Campaign.app.models.emailQueue.destroyByCampaign
+      .bind(null, campaign),
+      campaignTemplate: Campaign.app.models.campaignTemplate.destroyByCampaign
+      .bind(null, campaign),
+      followUp: Campaign.app.models.followUp.destroyByCampaign
+      .bind(null, campaign)
+    }, (asyncErr, results) => {
+      if(asyncErr){
+        logger.error("Error while destroying campaign elements",
+        {error: asyncErr, stack: asyncErr.stack});
+        return destroyCampaignElementsCB(asyncErr);
+      }
+      return destroyCampaignElementsCB(null);
+    });
+  };
+
+
+  /**
+   * After deleting the campaign elements we need to create the campign
+   * elements with the updated objects
+   * List, Campaign Template and FollowUp needs to be updated
+   * @param  {[campaign]} campaign
+   * @param  {[reqParams]} reqParams
+   * @param  {[type]} reCreateCampaignElementsCB
+   */
+  const createCampaignElements = (campaign, reqParams,
+    reCreateCampaignElementsCB) => {
+    async.parallel({
+    list: Campaign.app.models.list.associateList
+    .bind(null, campaign, reqParams.listIds),
+    templates: Campaign.app.models.campaignTemplate.saveTemplates
+    .bind(null, campaign, reqParams.campaignTemplates),
+    followUp: Campaign.app.models.followUp.createFollowUpElements
+    .bind(null, campaign, reqParams.followUps)
+    }, (parallelErr, response) => {
+      if(parallelErr){
+        logger.error("Error on saveCampaignTemplate : ",
+        {campginId: campaign.id, reqParams:reqParams, error: parallelErr,
+          stack: parallelErr ? parallelErr.stack : ""});
+         return reCreateCampaignElementsCB(parallelErr);
+      }
+      return reCreateCampaignElementsCB(null, response);
+    });
+  };
+
+
+  /**
+   * Once the campaign elements are created, enqueue the campaign to the
+   * mail assembler
+   * @param  {[campaign]} campaign
+   * @param  {[function]} enqueueToMailAssemblerCB
+   */
+  const enqueueToMailAssembler = (campaign, transit,
+    enqueueToMailAssemblerCB) => {
+    let queueName = "emailAssembler";
+    let queueData = {
+      campaign: campaign,
+      action: transit === "assembler" ? "assembled" : "resumed"
+    };
+    queueUtil.enqueueMail(JSON.stringify(queueData), queueName,
+      (err, response) => {
+      if(err) return enqueueMailCB(err);
+      return enqueueMailCB(null, "Enqueued successfully!");
+    });
+  };
+
+
+  /**
+   * Method to update the status audit table and set the isStopped status for the
+   * campaign to false
+   * @param  {[campaign]} campaign
+   * @param  {[resumeStatusCode]} resumeStatusCode
+   * @param  {[function]} updateCB
+   * @return {[result]}
+   * @author Aswin Raj A
+   */
+  const updateStatusProcess = (campaign, resumeStatusCode, updateCB) => {
+    async.parallel({
+      updateAudit: Campaign.app.models.campaignStatusAudit.createAudit
+        .bind(null, campaign, resumeStatusCode),
+      setStatus: Campaign.setStatus.bind(null, campaign, resumeStatusCode)
+    }, (parallelErr) => {
+      if(parallelErr, result){
+        updateCB(parallelErr);
+      }
+      updateCB(null, result);
+    });
+  };
+
+  /**
+   * Method to update the statusCode for the current campaign
+   * @param  {[campaign]} campaign
+   * @param  {[statusCode]} statusCode
+   * @param  {[function]} setStatusCB
+   * @return {[response]}
+   * @author Aswin Raj A
+   */
+  Campaign.setStatus = (campaign, statusCode, setStatusCB) => {
+    campaign.updateAttribute("statusCode", statusCode,
+    (statusUpdateErr, updatedStatus) => {
+      if(statusUpdateErr){
+        logger.error("Error on updating campaign : ", {
+          input: {campaign: campaign.id},
+           error: statusUpdateErr, stack: statusUpdateErr.stack});
+         return setStatusCB(statusUpdateErr);
+      }
+      return setStatusCB(null, "Status updated successfully!");
+    });
+  };
 
   /**
    * Returns Uniq People using campaignId
