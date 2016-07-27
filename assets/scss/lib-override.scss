@@ -17,7 +17,6 @@
     }
   }
 }
-
 /***********************************
   '@' mention dropdown autocomplete
 ***********************************/
@@ -44,5 +43,42 @@ span#autocomplete {
   }
   #autocomplete-searchtext {
     padding: 0 4px 0 2px;
+  }
+}
+
+.mce-window {
+  background-color: $white;
+  left: 25% !important;
+  width: 50% !important;
+  .mce-foot {
+    width: 100% !important;
+  }
+  .mce-container-body {
+    background-color: $white;
+    width: 100% !important;
+  }
+  .mce-combobox input {
+    border: 0;
+    border-bottom: 2px solid $light-border;
+  }
+  button:focus {
+    background-color: transparent;
+  }
+}
+
+/*********************
+  Media Query Classes
+**********************/
+@media only screen and (max-width: 1000px) {
+  .mce-window {
+    width: 70% !important;
+    left: 15% !important;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .mce-window {
+    width: 90% !important;
+    left: 5% !important;
   }
 }
