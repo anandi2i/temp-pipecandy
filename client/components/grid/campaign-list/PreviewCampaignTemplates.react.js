@@ -5,7 +5,6 @@ import EmailListActions from "../../../actions/EmailListActions";
 import EmailListStore from "../../../stores/EmailListStore";
 import Spinner from "../../Spinner.react";
 
-
 class PreviewCampaignTemplates extends React.Component {
   constructor(props) {
     super(props);
@@ -87,9 +86,9 @@ class PreviewCampaignTemplates extends React.Component {
                         return (
                           <div className="template-content animated flipInX" key={key}>
                             <div className="preview-mail-container">
-                              { val.followUpId
+                              { key
                                 ? <div className="col s12 head">
-                                    Followup {--val.followUpId}
+                                    Followup {key}
                                   </div>
                                 : <div>
                                     <div className="col s12 head">Subject</div>
