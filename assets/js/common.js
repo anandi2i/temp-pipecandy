@@ -170,11 +170,13 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
           if(editorId === "emailSubject") {
             content = "Subject";
           } else if (editorId === "optOutAddress") {
-            content = "Address";
+            content = null;
           } else {
             content = "content";
           }
-          editor.setContent(tinymcePlaceholder(content));
+          if(content) {
+            editor.setContent(tinymcePlaceholder(content));
+          }
         }
       });
     }

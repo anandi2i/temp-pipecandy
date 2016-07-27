@@ -95,8 +95,7 @@ class ScheduleEmail extends React.Component {
     }
     setTimeout(function() {
       tinyMCE.get("emailSubject").setContent(tinymcePlaceholder("Subject"));
-      tinyMCE.get("optOutAddress").setContent(address ||
-        tinymcePlaceholder("Address"));
+      tinyMCE.get("optOutAddress").setContent(address);
       tinyMCE.get("emailContent").setContent(mainContent);
     }, tinyMceDelayTime);
   }
@@ -414,12 +413,18 @@ class ScheduleEmail extends React.Component {
   const {isOptText, isAddress, optText, address,
     displayScheduleCampaign} = this.state;
   const element = this.el;
+  let addressDom = $(document.createElement("div"));
+  _.each($.parseHTML(address), (el, i) => {
+    if(el.nodeName === "P") {
+      addressDom.append($(el).css("margin", "0px"));
+    }
+  });
   let campaignDetails = {
     id: this.props.campaignId,
     isOptTextNeeded: isOptText,
     isAddressNeeded: isAddress,
     optText: optText,
-    address: address
+    address: addressDom
   };
   if(displayScheduleCampaign) {
     //campaignDetails.scheduledDate = element.find(".datepicker").val();
@@ -678,7 +683,7 @@ class ScheduleEmail extends React.Component {
                     onChange={() => this.toggleSetState("isOptText")} />
                   <label htmlFor="optOutText">Opt-Out-Text</label>
                   <div className="input-field" style={{display: isOptText}}>
-                    <input id="optOutText" placeholder="Opt-Out-Text"
+                    <input id="optOutText"
                       type="text"
                       value={this.state.optText}
                       className="border-input"

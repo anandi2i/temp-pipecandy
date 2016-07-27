@@ -607,9 +607,9 @@ module.exports = function(Campaign) {
     }
     let bottomContent = email.content;
     let bottom = `<div style="width: 100%;border-top: 1px solid #c2c2c2;\
-    padding-top: 0;margin-top: 20px;"><table style="width:100%"><tbody>\
-    <tr style="color:#c2c2c2;"><td style="width: 50%;float: left;padding: 0;">\
-    ${campaign.isAddressNeeded ? campaign.address : ""}\
+    padding-top: 0;margin-top: 20px;"><table style="width: 100%; margin-top:\
+    10px;"><tbody><tr style="color:#c2c2c2;"><td style="width: 50%;float: left;\
+    padding: 0;">${campaign.isAddressNeeded ? campaign.address : ""}\
     </td></td><td style="width:50%;text-align:right;padding: 0;">`;
     if(campaign.isOptTextNeeded) {
       let url = `${serverUrl}/api/`;
