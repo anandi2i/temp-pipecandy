@@ -309,7 +309,8 @@ function processMailResponse(App, param, mailResponse, sentMail, callback) {
 function updateRelatedTables(App, param, mailResponse, sentMail, callback) {
   async.parallel([
     updateSentMailBox.bind(null, App, param, mailResponse, sentMail),
-    updateInboxMail.bind(null, App, param, mailResponse, sentMail)
+    updateInboxMail.bind(null, App, param, mailResponse, sentMail),
+    updateFollowUpEligibility.bind(null, App, sentMail, mailResponse)
   ], function(err, results) {
     callback(err, results);
   });
@@ -371,6 +372,30 @@ function updateInboxMail(App, param, mailResponse, sentMail, callback) {
       callback(null, param, mailResponse, sentMail);
     });
   });
+}
+
+/**
+ * Update FollowUp Eligibility in Campaign Audit table
+ * @param  {SentMailBox}   sentMail
+ * @param  {MailResponse} mailResponse
+ * @param  {Function} callback
+ * @author Syed Sulaiman M
+ */
+function updateFollowUpEligibility(App, sentMail, mailResponse, callback) {
+  let isSent = mailResponse.labels.includes("SENT");
+  if(!isSent) {
+    App.campaignAudit.updateFollowUpEligiblity(sentMail.campaignId,
+        sentMail.toPersonId, function (err, campaignAudit) {
+      if(err) {
+        console.error("Error updating FollowUp Eligibility in Campaign Audit",
+          {error: err, stack: err.stack, input:
+          {campaignId: sentMail.campaignId, personId: sentMail.toPersonId}});
+      }
+      return callback(null, campaignAudit);
+    });
+  } else {
+    return callback(null);
+  }
 }
 
 /**

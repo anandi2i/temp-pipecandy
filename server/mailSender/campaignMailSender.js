@@ -427,18 +427,23 @@ function sendEmail(base64EncodedEmail, oauth2Client, emailQueue, mailContent,
  */
 function updateRelatedTables(emailQueue, mailContent, sentMailResp,
       updateRelatedTablesCB) {
-  async.parallel([
-    createAudit.bind(null, emailQueue, mailContent, sentMailResp),
-    updateCampaignMetric.bind(null, emailQueue, mailContent, sentMailResp),
-    updateListMetric.bind(null, emailQueue, mailContent, sentMailResp),
-    updateSentMailBox.bind(null, emailQueue, mailContent, sentMailResp),
-    updateCampaignLastRunAt.bind(null, emailQueue, mailContent, sentMailResp)
-  ],
+  async.parallel({
+    audit: createAudit.bind(null, emailQueue, mailContent, sentMailResp),
+    campaignMetric:
+        updateCampaignMetric.bind(null, emailQueue, mailContent, sentMailResp),
+    listMetric:
+        updateListMetric.bind(null, emailQueue, mailContent, sentMailResp),
+    sentMailBox:
+        updateSentMailBox.bind(null, emailQueue, mailContent, sentMailResp),
+  },
   function(err, results) {
     if (err) {
       console.error("Error while Updating related tables: " + err);
     }
-    updateRelatedTablesCB(null);
+    updateCampaign(emailQueue, results.campaignMetric,
+        function(error, campaign) {
+      updateRelatedTablesCB(null);
+    });
   });
 }
 
@@ -464,7 +469,7 @@ function createAudit(emailQueue, mailContent, sentMailResp, createAuditCB) {
   campaignAuditInst.mailId = sentMailResp.id;
   campaignAuditInst.threadId = sentMailResp.threadId;
   App.campaignAudit.create(campaignAuditInst, function(err, response) {
-    createAuditCB(null, emailQueue, mailContent, sentMailResp);
+    createAuditCB(null, response);
   });
 }
 
@@ -497,7 +502,7 @@ function updateCampaignMetric(emailQueue, mailContent, sentMailResp,
       if (err) {
         console.error("Error in updating Campaign Metric", err);
       }
-      updateMetricCB(null, emailQueue, mailContent, sentMailResp);
+      updateMetricCB(null, response);
     });
   });
 }
@@ -514,31 +519,33 @@ function updateListMetric(emailQueue, mailContent, sentMailResp,
       updateMetricCB) {
   App.campaign.getCampaignListForPerson(emailQueue.campaignId,
       emailQueue.personId, function(err, lists) {
-      async.each(lists, (list, listCB) => {
-        App.listMetric.findByListIdAndCampaignId(
-            list.id, emailQueue.campaignId, (err, listMetric) => {
-          let listMetricInst = {};
-          listMetricInst.sentEmails = 1;
-          listMetricInst.listId = list.id;
-          listMetricInst.campaignId = emailQueue.campaignId;
-          if(listMetric) {
-            listMetricInst = listMetric;
-            listMetricInst.sentEmails = ++listMetric.sentEmails;
-          }
-          App.listMetric.upsert(listMetricInst, function(err, response) {
-            if (err) {
-              console.error("Error in updating List Metric", err);
-            }
-            listCB(null, response);
-          });
-        });
-      }, function(err) {
-        if (err) {
-          console.error("Error in updating List Metric", err);
+    let updatedLists = [];
+    async.each(lists, (list, listCB) => {
+      App.listMetric.findByListIdAndCampaignId(
+          list.id, emailQueue.campaignId, (err, listMetric) => {
+        let listMetricInst = {};
+        listMetricInst.sentEmails = 1;
+        listMetricInst.listId = list.id;
+        listMetricInst.campaignId = emailQueue.campaignId;
+        if(listMetric) {
+          listMetricInst = listMetric;
+          listMetricInst.sentEmails = ++listMetric.sentEmails;
         }
-        return updateMetricCB(null, emailQueue, mailContent, sentMailResp);
+        updatedLists.push(listMetricInst);
+        App.listMetric.upsert(listMetricInst, function(err, response) {
+          if (err) {
+            console.error("Error in updating List Metric", err);
+          }
+          listCB(null, response);
+        });
       });
+    }, function(err) {
+      if (err) {
+        console.error("Error in updating List Metric", err);
+      }
+      return updateMetricCB(null, updatedLists);
     });
+  });
 }
 
 /**
@@ -566,12 +573,12 @@ function updateSentMailBox(emailQueue, mailContent, sentMailResp,
     sentDate: new Date()
   };
   App.sentMailBox.saveOrUpdate(sentMailBoxInst, function(err, response) {
-    updateSentMailBoxCB(null, emailQueue, mailContent, sentMailResp);
+    updateSentMailBoxCB(null, response);
   });
 }
 
 /**
- * Update Campaign Last Run At
+ * Update Campaign Last Run At and Status
  *
  * @param  {Object} emailQueue
  * @param  {Object} mailContent
@@ -579,12 +586,19 @@ function updateSentMailBox(emailQueue, mailContent, sentMailResp,
  * @param  {Function} createAuditCB
  * @author Syed Sulaiman M
  */
-function updateCampaignLastRunAt(emailQueue, mailContent, sentMailResp,
-    updateCampaignCB) {
+function updateCampaign(emailQueue, campaignMetric, updateCampaignCB) {
   App.campaign.findById(emailQueue.campaignId, function(err, campaign) {
-    campaign.updateAttribute("lastRunAt", new Date(),
-        function(err, updatedCampaign) {
-      updateCampaignCB(null, emailQueue, mailContent, sentMailResp);
+    let updateProperties = {
+      lastRunAt: new Date(),
+      statusCode: statusCodes.default.executingCampaign
+    };
+    if(campaignMetric.assembled ===
+        (campaignMetric.sentEmails + campaignMetric.failedEmails)) {
+      updateProperties.isSent = true;
+      updateProperties.statusCode = statusCodes.default.campaignSent;
+    }
+    campaign.updateAttributes(updateProperties, function(err, updatedCampaign) {
+      updateCampaignCB(null, updatedCampaign);
     });
   });
 }

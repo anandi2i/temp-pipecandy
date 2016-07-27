@@ -61,16 +61,17 @@ module.exports = function(OpenedEmail) {
               stack: openedEmailNewEntryErr.stack});
             return res.redirect("/images/1x1.png");
           }
-          OpenedEmail.app.models.campaignAudit
-            .updateFollowUpEligiblity(campaignId, personId, (updateErr) => {
-            if(updateErr){
-              logger.error("Error while updating follow up eligibility", {
-                input: {"campaignId": campaignId, "personId": personId
-                }, error: updateErr, stack: updateErr.stack});
-              return res.redirect("/images/1x1.png");
-            }
-            return res.redirect("/images/1x1.png");
-          });
+          return res.redirect("/images/1x1.png");
+          // OpenedEmail.app.models.campaignAudit
+          //   .updateFollowUpEligiblity(campaignId, personId, (updateErr) => {
+          //   if(updateErr){
+          //     logger.error("Error while updating follow up eligibility", {
+          //       input: {"campaignId": campaignId, "personId": personId
+          //       }, error: updateErr, stack: updateErr.stack});
+          //     return res.redirect("/images/1x1.png");
+          //   }
+          //   return res.redirect("/images/1x1.png");
+          // });
         });
       }
     });

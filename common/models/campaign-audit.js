@@ -71,6 +71,7 @@ module.exports = function(CampaignAudit) {
         });
         return updateCB(auditFindErr);
       }
+      let updatedCampaignAudits = [];
       async.each(campaignAudits, (campaignAudit, auditEachCB) => {
         campaignAudit.updateAttribute("isEligibleToFollowUp", false,
           (auditUpdateErr, updatedAudit) => {
@@ -82,6 +83,7 @@ module.exports = function(CampaignAudit) {
             });
             return auditEachCB(auditUpdateErr);
           }
+          updatedCampaignAudits.push(updatedAudit);
           return auditEachCB(null);
         });
       }, (err) => {
@@ -90,7 +92,7 @@ module.exports = function(CampaignAudit) {
            campaignAudit");
            return updateCB(err);
         }
-        return updateCB(null);
+        return updateCB(null, updatedCampaignAudits);
       });
     });
   };

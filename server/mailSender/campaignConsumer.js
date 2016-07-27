@@ -30,7 +30,7 @@ const app = Consumer.create({
   queueUrl: queue.url[queueName],
   handleMessage: function(message, done) {
     let campaign = JSON.parse(message.Body);
-    console.log("Recived Message : ", campaign);
+    console.log("Received Message : ", campaign);
     App.campaign.findById(campaign.id, (campaignErr, campaign) => {
       if(campaignErr || lodash.isEmpty(campaign)) {
         console.error("Error while getting campaign",

@@ -79,15 +79,16 @@ module.exports = function(EmailLink) {
               stack: updateMetricsErr.stack});
             return res.redirect(config.redirectURL);
           }
-          EmailLink.app.models.campaignAudit
-            .updateFollowUpEligiblity(campaignId, personId,
-              (updateErr) => {
-            if(updateErr){
-              logger.error(updateErr);
-              res.redirect(config.redirectURL);
-            }
-            res.redirect(link.linkurl);
-          });
+          res.redirect(link.linkurl);
+          // EmailLink.app.models.campaignAudit
+          //   .updateFollowUpEligiblity(campaignId, personId,
+          //     (updateErr) => {
+          //   if(updateErr){
+          //     logger.error(updateErr);
+          //     res.redirect(config.redirectURL);
+          //   }
+          //   res.redirect(link.linkurl);
+          // });
         });
       } else{
         res.redirect(link.linkurl);
