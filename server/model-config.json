@@ -157,7 +157,11 @@
     "public": true
   },
   "deletedCampaignPerson": {
-   "dataSource": "psqlDs",
-   "public": true
- }
+    "dataSource": "psqlDs",
+    "public": true
+  },
+  "followUpMetric": {
+    "dataSource": "psqlDs",
+    "public": true
+  }
 }

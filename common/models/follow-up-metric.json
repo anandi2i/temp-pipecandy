@@ -1,6 +1,6 @@
 {
-  "name": "campaignMetric",
-  "plural": "campaignMetrics",
+  "name": "followUpMetric",
+  "plural": "followUpMetrics",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -16,10 +16,6 @@
       "default": 0
     },
     "opened": {
-      "type": "number",
-      "default": 0
-    },
-    "responded": {
       "type": "number",
       "default": 0
     },
@@ -51,22 +47,6 @@
       "type": "number",
       "default": 0
     },
-    "outOfOffice": {
-      "type": "number",
-      "default": 0
-    },
-    "actionable": {
-      "type": "number",
-      "default": 0
-    },
-    "nurture": {
-      "type": "number",
-      "default": 0
-    },
-    "negative": {
-      "type": "number",
-      "default": 0
-    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"
@@ -77,10 +57,10 @@
   },
   "validations": [],
   "relations": {
-    "campaign": {
+      "followUp": {
       "type": "belongsTo",
-      "model": "campaign",
-      "foreignKey": "campaignId"
+      "model": "followUp",
+      "foreignKey": "followUpId"
     }
   },
   "acls": [],

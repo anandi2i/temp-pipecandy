@@ -19,6 +19,7 @@ module.exports = function(CampaignMetric) {
       async.apply(CampaignMetric.updateMertricsOnGen, campaign),
       async.apply(CampaignMetric.app.models.listMetric.updateListMetricOnGen,
                     campaign),
+      // async.apply(CampaignMetric.app.models.followUpMetric.updateMertricsOnGen)
     ], (parallelErr) => {
       return createMetricsOnGenCB(parallelErr);
     });

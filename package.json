@@ -124,6 +124,7 @@
     }
   ],
   "pre-commit": [
-    "sassLint", "lint"
+    "sassLint",
+    "lint"
   ]
 }
