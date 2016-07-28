@@ -22,7 +22,7 @@ function downloadErrorCsvList(invalidData) {
   const encodedUri = encodeURI(csvContent);
   let link = document.createElement("a");
   link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "my_data.csv");
+  link.setAttribute("download", `ErrorEmailList-${new Date().getTime()}.csv`);
   document.body.appendChild(link); // Required for FF
   link.click();
 }
