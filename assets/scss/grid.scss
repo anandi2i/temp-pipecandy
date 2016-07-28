@@ -92,6 +92,15 @@
             }
           }
         }
+        &.all-email-list {
+          thead {
+            display: none;
+          }
+          td {
+            border: 0 !important;
+            text-align: center;
+          }
+        }
       }
       .footer-container {
         position: absolute;

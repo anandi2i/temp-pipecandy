@@ -43,3 +43,14 @@ export const SuccessMessages = {
   "successSelectTemplate": "has been selected",
   "successAddAdditionalField": "Additional field added successfully"
 };
+
+/**
+ * Has a list of alert messages on empty results
+ * @type {object} alert messages
+ */
+export const resultsEmpty = {
+  "allLists": "Oops! You don't seem to have any email list here. " +
+    "Do you want to add a new list?",
+  "allListsOnSearch": "It's never easy to say 'No!' when you ask for " +
+    "something, but I can't find that list!"
+};

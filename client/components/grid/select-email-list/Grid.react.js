@@ -5,26 +5,34 @@ import CustomRowComponent from "./CustomRowComponent.react";
 import CustomPagerComponent from "../CustomGridPagination.react";
 import CustomFilterComponent from "../CustomGridFilter.react";
 import EmailListStore from "../../../stores/EmailListStore";
+import {resultsEmpty} from "../../../utils/UserAlerts.js";
 
 class SelectEmailListGrid extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      selectedRowIds: []
+      selectedRowIds: [],
+      isResultEmpty: true,
+      noDataMessage: resultsEmpty.allLists
     };
   }
 
   getCustomGridFilterer = (results, filter) => {
     // customfilter only filter the list name
     // result.name means the listname
-    let check = 0;
-    return _.filter(results, (result) => {
+    const check = 0;
+    const filteredData = _.filter(results, (result) => {
       let name = result.name;
       return (
         name.toString().toLowerCase().indexOf(filter.toLowerCase()) >= check
       );
     });
+    this.setState({
+      isResultEmpty: filteredData.length ? true : false,
+      noDataMessage: resultsEmpty.allListsOnSearch
+    });
+    return filteredData;
   }
 
   toggleSelectRow = (row, isChecked) => {
@@ -67,6 +75,12 @@ class SelectEmailListGrid extends React.Component {
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      isResultEmpty: nextProps.results.length ? true : false
+    });
+  }
+
   render() {
     let resultsPerPage = 7;
     return (
@@ -76,7 +90,7 @@ class SelectEmailListGrid extends React.Component {
         useGriddleStyles={false}
         selectedRowIds={this.state.selectedRowIds}
 
-        useCustomRowComponent={true}
+        useCustomRowComponent={this.state.isResultEmpty}
         customRowComponent={CustomRowComponent}
 
         showPager={true}
@@ -90,7 +104,10 @@ class SelectEmailListGrid extends React.Component {
         customFilterComponent={CustomFilterComponent}
         useCustomFilterer={true}
         customFilterer={this.getCustomGridFilterer}
-        globalData={this.getGlobalData} />
+        globalData={this.getGlobalData}
+
+        noDataMessage={this.state.noDataMessage}
+        tableClassName={"all-email-list"} />
     );
   }
 

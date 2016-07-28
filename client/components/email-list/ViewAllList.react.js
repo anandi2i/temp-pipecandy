@@ -4,8 +4,6 @@ import Spinner from "../Spinner.react";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 import EmailListGrid from "../grid/select-email-list/Grid.react";
-import NoDataComponent
-  from "../grid/select-email-list/CustomNoDataComponent.react";
 
 function getAllEmailList() {
   EmailListActions.getAllEmailList();
@@ -16,7 +14,6 @@ class ListView extends React.Component {
     super(props);
     this.state={
       allEmailLists: [],
-      noDataBlock: false,
       spinning: true
     };
   }
@@ -35,7 +32,6 @@ class ListView extends React.Component {
     let emailLists = EmailListStore.getAllList();
     this.setState({
       allEmailLists: emailLists,
-      noDataBlock: emailLists.length ? false : true,
       spinning: false
     });
   }
@@ -59,18 +55,8 @@ class ListView extends React.Component {
           <div className="spaced" style={{display: this.state.spinning ? "block" : "none"}}>
             <Spinner />
           </div>
-          {
-            this.state.noDataBlock
-            ?
-              <NoDataComponent />
-            :
-            this.state.allEmailLists.length
-            ?
-              <EmailListGrid results={this.state.allEmailLists}
-                globalData={this.getGlobalData} />
-            :
-              ""
-          }
+          <EmailListGrid results={this.state.allEmailLists}
+            globalData={this.getGlobalData} />
         </div>
       </div>
     );
