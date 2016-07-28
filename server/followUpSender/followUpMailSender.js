@@ -4,8 +4,8 @@ var async = require("async");
 var CronJob = require("cron").CronJob;
 var lodash = require("lodash");
 var constants = require("../../server/utils/constants");
-require("console-stamp")(console, 
-  {pattern : constants.default.TIME_FORMAT});
+var statusCodes = require("../../server/utils/status-codes");
+require("console-stamp")(console, {pattern : constants.default.TIME_FORMAT});
 
 const appConfig = process.cwd() + "/server/server.js";
 const dataSource = require(appConfig).dataSources.psqlDs;
@@ -93,8 +93,11 @@ function sendFollowUpMail(followUps, callback) {
  */
 function updateFollowUps(followUps, callback) {
   async.each(followUps, (followUp, followUpCB) => {
-    followUp.updateAttribute("isFollowUpGenerated", true, 
-        (updateErr, updatedInst) => {
+    let properties = {
+      isFollowUpGenerated: true,
+      statusCode: statusCodes.default.executingFollowUp
+    };
+    followUp.updateAttributes(properties, (updateErr, updatedInst) => {
       followUpCB(updateErr, updatedInst);
     });
   }, (asyncError) => {

@@ -4,6 +4,7 @@ import async from "async";
 import lodash from "lodash";
 import logger from "../../server/log";
 import moment from "moment-timezone";
+import statusCodes from "../../server/utils/status-codes";
 
 module.exports = function(FollowUp) {
 
@@ -116,7 +117,8 @@ FollowUp.updateStoppedByCampaignId = (campaignId, isStopped, callback) => {
   FollowUp.updateAll({
     campaignId : campaignId
   }, {
-    isStopped : isStopped
+    isStopped : isStopped,
+    statusCode: statusCodes.followUpStopped
   }, (updateErr, info) => {
     if(updateErr) {
       logger.error("Error while updating followUps",
@@ -257,6 +259,30 @@ FollowUp.createFollowUpElements = (campaign, followUpObjects,
   });
 };
 
+/**
+ * Get FollowUps from List of FollowUp Ids
+ * @param  {[Number]} followUpIds  List of FollowUp Ids
+ * @param  {Function} callback
+ * @return {[FollowUp]} List of FollowUp Objects
+ * @author Syed Sulaiman M
+ */
+FollowUp.getFollowUps = (followUpIds, callback) => {
+  FollowUp.find({
+    where: {
+      id: {
+        inq: followUpIds
+      }
+    }
+  }, (followUpsErr, followUps) => {
+    if(followUpsErr) {
+      logger.error("Error while getting followUp by Ids: ",
+      {error: followUpsErr, stack: followUpsErr.stack, input:
+      {followUpIds: followUpIds}});
+      return callback(followUpsErr);
+    }
+    return callback(null, followUps);
+  });
+};
 
 /**
  * Create the followUp for the current campaign, as per what is got from

@@ -863,6 +863,7 @@ module.exports = function(Campaign) {
           email.content = result.content ? email.content + result.content
                                          : email.content;
           email.threadId = audit ? audit.threadId : null;
+          email.followUpId = followup.id;
         }
         return preapreFollowUpCB(null, campaign, followup, person, email);
       });

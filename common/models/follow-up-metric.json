@@ -57,10 +57,15 @@
   },
   "validations": [],
   "relations": {
-      "followUp": {
+    "followUp": {
       "type": "belongsTo",
       "model": "followUp",
       "foreignKey": "followUpId"
+    },
+    "campaign": {
+      "type": "belongsTo",
+      "model": "campaign",
+      "foreignKey": "campaignId"
     }
   },
   "acls": [],

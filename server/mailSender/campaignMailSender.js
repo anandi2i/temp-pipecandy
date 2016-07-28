@@ -9,8 +9,7 @@ var lodash = require("lodash");
 var config = require("../../server/config.json");
 var statusCodes = require("../../server/utils/status-codes");
 var constants = require("../../server/utils/constants");
-require("console-stamp")(console, 
-  {pattern : constants.default.TIME_FORMAT});
+require("console-stamp")(console, {pattern : constants.default.TIME_FORMAT});
 
 var gmailClass = google.gmail("v1");
 
@@ -48,12 +47,13 @@ function generateAndSendEmail(queuedMails, callback) {
         getReqParamsCB(null, queuedMails);
       },
       filterEmailQueue,
+      updateFailedMetricCount,
       generateCredentials
     ],
     function(error) {
       if (error) {
         console.error("Error while Generate and Send Mail: " + error);
-        return callback(callback);
+        return callback(error);
       }
       console.log("All Mails Sent");
       return callback(null);
@@ -65,23 +65,16 @@ function generateAndSendEmail(queuedMails, callback) {
  * @param  {Function} filterEmailCB callback function
  * @author Syed Sulaiman M
  */
-function filterEmailQueue(emailQueue, filterEmailCB) {
-  const groupedEmailQueue = lodash.groupBy(emailQueue, "campaignId");
-  const campaignIds = lodash.keys(groupedEmailQueue);
-  App.campaign.getCampaigns(campaignIds, function (campaignsErr, campaigns) {
-    if(campaignsErr) {
-      return filterEmailCB(campaignsErr);
-    }
-    async.waterfall([
-      function getReqParams(getReqParamsCB) {
-        getReqParamsCB(null, emailQueue, campaigns, groupedEmailQueue);
-      },
-      filterCampaignByStatus,
-      filterUnsubscribePerson
-    ],
-    function(err, result) {
-      filterEmailCB(null, result);
-    });
+function filterEmailQueue(queuedMails, filterEmailCB) {
+  async.waterfall([
+    function getReqParams(getReqParamsCB) {
+      getReqParamsCB(null, queuedMails);
+    },
+    filterEmailQueueByStatus,
+    filterUnsubscribePerson
+  ],
+  function(err, result) {
+    filterEmailCB(null, queuedMails, result);
   });
 }
 
@@ -153,14 +146,15 @@ function getUserCredentialsFromCache(userId, callback) {
 /**
  * Method to Update Error And Stopped Flag for EmailQueue
  * @param  {[Object]}   campaignsNotToRun
- * @param  {[Object]}   groupedEmailQueue
+ * @param  {String}   stoppedBy
+ * @param  {Boolean}   isError
+ * @param  {String}   reason
  * @param  {Function} callback
  * @author Syed Sulaiman M
  */
 function updateStoppedFlag(emailQueueToStop, stoppedBy, isError, reason,
     callback) {
-  async.each(emailQueueToStop,
-        function(emailQueueInst, emailQueueInstCB) {
+  async.each(emailQueueToStop, function(emailQueueInst, emailQueueInstCB) {
     let emailQueueUpdateElements = {
       isStopped: true,
       isError: isError,
@@ -179,13 +173,61 @@ function updateStoppedFlag(emailQueueToStop, stoppedBy, isError, reason,
   });
 }
 
+
+/**
+ * Method to Filter EmailQueue by statusCode
+ *
+ * @param  {[Campaign]}   campaigns
+ * @param  {[Object]}   grpdEmailQueueByCamp
+ * @param  {Function} callback
+ * @author Syed Sulaiman M
+ */
+function filterEmailQueueByStatus(emailQueue, callback) {
+  const zero = 0;
+
+  let campaignMails = lodash.filter(emailQueue, (o) => {
+    return (!o.followUpId) ? true : false;
+  });
+  let followUpMails = lodash.filter(emailQueue, (o) => {
+    return (o.followUpId) ? true : false;
+  });
+
+  let grpdEmailQueueByCamp = lodash.groupBy(campaignMails, "campaignId");
+  let campaignIds = lodash.keys(grpdEmailQueueByCamp);
+  campaignIds = lodash.filter(campaignIds, (o) => { return (o !== null); });
+  campaignIds = lodash.isEmpty(campaignIds) ? [zero] : campaignIds;
+
+  let grpdEmailQueueByFollowUp = lodash.groupBy(followUpMails, "followUpId");
+  let followUpIds = lodash.keys(grpdEmailQueueByFollowUp);
+  followUpIds = lodash.filter(followUpIds, (o) => { return (o !== null); });
+  followUpIds = lodash.isEmpty(followUpIds) ? [zero] : followUpIds;
+
+  async.parallel({
+    campaigns: async.apply(App.campaign.getCampaigns, campaignIds),
+    followUps: async.apply(App.followUp.getFollowUps, followUpIds)
+  }, function(err, result) {
+    async.parallel({
+      filteredQByCamp : async.apply(filterCampaignByStatus,
+          emailQueue, result.campaigns, grpdEmailQueueByCamp),
+      filteredQByFollowUp: async.apply(filterFollowUpByStatus,
+          emailQueue, result.followUps, grpdEmailQueueByFollowUp)
+    },
+    function(err, result) {
+      emailQueue = lodash.intersectionBy(result.filteredQByCamp,
+        result.filteredQByFollowUp, "id");
+      callback(null, emailQueue);
+    });
+  });
+}
+
+
 /**
  * Method to Filter Out Unsubscribed Persons From Email List
  * @param  {[Object]}   emailQueue
  * @param  {Function} callback
  * @author Syed Sulaiman M
  */
-function filterUnsubscribePerson(emailQueue, campaigns, groupedEmailQueue,
+function filterUnsubscribePerson(emailQueue,
     callback) {
   const emailQueueGroupByUser = lodash.groupBy(emailQueue, "userId");
   const userIds = lodash.keys(emailQueueGroupByUser);
@@ -237,12 +279,13 @@ function filterUnsubscribePerson(emailQueue, campaigns, groupedEmailQueue,
 /**
  * Method to Filter Campaign by statusCode
  *
+ * @param  {[EmailQueue]}   emailQueue
  * @param  {[Campaign]}   campaigns
- * @param  {[Object]}   groupedEmailQueue
+ * @param  {[Object]}   grpdEmailQueueByCamp
  * @param  {Function} callback
  * @author Syed Sulaiman M
  */
-function filterCampaignByStatus(emailQueue, campaigns, groupedEmailQueue,
+function filterCampaignByStatus(emailQueue, campaigns, grpdEmailQueueByCamp,
       callback) {
   const campaignsNotToRun = lodash.filter(campaigns, function(o) {
     return (o.statusCode !== statusCodes.default.readyToSend)
@@ -252,14 +295,14 @@ function filterCampaignByStatus(emailQueue, campaigns, groupedEmailQueue,
   let emailsStopped = lodash.flatMap(campaignsNotToRun, function(o) {
     let isStatusStopped =
       (o.statusCode === statusCodes.default.campaignStopped);
-    return isStatusStopped ? groupedEmailQueue[o.id] : null;
+    return isStatusStopped ? grpdEmailQueueByCamp[o.id] : null;
   });
   emailsStopped = lodash.filter(emailsStopped, function(o) {
     return (o !== null);
   });
 
   let emailQueueToStop = lodash.flatMap(campaignsNotToRun, function(o) {
-    return groupedEmailQueue[o.id];
+    return grpdEmailQueueByCamp[o.id];
   });
   emailQueueToStop = lodash.differenceBy(emailQueueToStop, emailsStopped, "id");
 
@@ -285,7 +328,62 @@ function filterCampaignByStatus(emailQueue, campaigns, groupedEmailQueue,
   ], function(err, results) {
     let emailQsStopped = lodash.unionBy(emailsStopped, emailQueueToStop, "id");
     emailQueue = lodash.differenceBy(emailQueue, emailQsStopped, "id");
-    callback(null, emailQueue, campaigns, groupedEmailQueue);
+    callback(null, emailQueue);
+  });
+}
+
+/**
+ * Method to Filter FollowUp by statusCode
+ *
+ * @param  {[EmailQueue]}   emailQueue
+ * @param  {[FollowUp]}   followUps
+ * @param  {[Object]}   grpdEmailQueueByCamp
+ * @param  {Function} callback
+ * @author Syed Sulaiman M
+ */
+function filterFollowUpByStatus(emailQueue, followUps, grpdEmailQueueByFollowUp,
+      callback) {
+  const followUpsNotToRun = lodash.filter(followUps, function(o) {
+    return (o.statusCode !== statusCodes.default.executingFollowUp);
+  });
+
+  let emailsStopped = lodash.flatMap(followUpsNotToRun, function(o) {
+    let isStatusStopped =
+      (o.statusCode === statusCodes.default.campaignStopped);
+    return isStatusStopped ? grpdEmailQueueByFollowUp[o.id] : null;
+  });
+  emailsStopped = lodash.filter(emailsStopped, function(o) {
+    return (o !== null);
+  });
+
+  let emailQueueToStop = lodash.flatMap(followUpsNotToRun, function(o) {
+    return grpdEmailQueueByFollowUp[o.id];
+  });
+  emailQueueToStop = lodash.differenceBy(emailQueueToStop, emailsStopped, "id");
+
+  async.parallel([
+    function(errorQueueCB) {
+      const stoppedBy = constants.default.SYSTEM;
+      const isError = true;
+      const reason = constants.default.STATUS_NOT_SUPPORTED;
+      updateStoppedFlag(emailQueueToStop, stoppedBy, isError, reason,
+          function(error) {
+        errorQueueCB(error, emailQueueToStop);
+      });
+    },
+    function(stoppedQueueCallback) {
+      const stoppedBy = constants.default.USER;
+      const isError = false;
+      const reason = constants.default.USER_STOPPED_CAMPAIGN;
+      updateStoppedFlag(emailsStopped, stoppedBy, isError, reason,
+          function(error) {
+        stoppedQueueCallback(error, emailsStopped);
+      });
+    }
+  ], function(err, results) {
+    let emailQsStopped = lodash.unionBy(emailsStopped, emailQueueToStop, "id");
+    emailQueue = lodash.differenceBy(emailQueue, emailQsStopped, "id");
+    callback(null, emailQueue);
   });
 }
 
@@ -304,9 +402,7 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
     updateRelatedTables
   ],
   function(err) {
-    if (err) {
-      console.error("waterfallErr: " + err);
-    }
+    if (err) console.error("waterfallErr: " + err);
     mailSenderCB(null);
   });
 }
@@ -435,13 +531,19 @@ function updateRelatedTables(emailQueue, mailContent, sentMailResp,
         updateListMetric.bind(null, emailQueue, mailContent, sentMailResp),
     sentMailBox:
         updateSentMailBox.bind(null, emailQueue, mailContent, sentMailResp),
-  },
-  function(err, results) {
+    followUpMetric:
+        updateFollowUpMetric.bind(null, emailQueue, mailContent, sentMailResp),
+  }, function(err, results) {
     if (err) {
       console.error("Error while Updating related tables: " + err);
     }
-    updateCampaign(emailQueue, results.campaignMetric,
-        function(error, campaign) {
+    async.parallel({
+      campaign: async.apply(updateCampaign,
+          emailQueue, results.campaignMetric, results.followUpMetric),
+      followUp: async.apply(updateFollowUp,
+          emailQueue, results.campaignMetric, results.followUpMetric)
+    }, function(err, results) {
+      if (err) console.error("Error while Updating related tables: " + err);
       updateRelatedTablesCB(null);
     });
   });
@@ -483,6 +585,7 @@ function createAudit(emailQueue, mailContent, sentMailResp, createAuditCB) {
  */
 function updateCampaignMetric(emailQueue, mailContent, sentMailResp,
   updateMetricCB) {
+  if(emailQueue.followUpId) return updateMetricCB(null);
   let campaignMetricInst = {};
   campaignMetricInst.sentEmails = 1;
   campaignMetricInst.campaignId = emailQueue.campaignId;
@@ -508,6 +611,42 @@ function updateCampaignMetric(emailQueue, mailContent, sentMailResp,
 }
 
 /**
+ * Update Campaign Metric for sent mail
+ * @param  {Object} emailQueue     Email Queue Object
+ * @param  {Object} mailContent    Sent Mail Content
+ * @param  {Object} sentMailResp   Sent Mail Response
+ * @param  {Function} updateMetricCB callback function
+ * @author Syed Sulaiman M
+ */
+function updateFollowUpMetric(emailQueue, mailContent, sentMailResp,
+    updateMetricCB) {
+  if(!emailQueue.followUpId) return updateMetricCB(null);
+  let followUpMetricInst = {};
+  followUpMetricInst.sentEmails = 1;
+  followUpMetricInst.followUpId = emailQueue.followUpId;
+  followUpMetricInst.campaignId = emailQueue.campaignId;
+  App.followUpMetric.find({
+    where: {
+      followUpId: emailQueue.followUpId
+    }
+  }, (followUpMetricErr, followUpMetric) => {
+    if (followUpMetricErr) {
+      console.error("Error in updating FollowUp Metric", followUpMetricErr);
+    }
+    if (!lodash.isEmpty(followUpMetric)) {
+      followUpMetricInst = followUpMetric[0];
+      followUpMetricInst.sentEmails = ++followUpMetric[0].sentEmails;
+    }
+    App.followUpMetric.upsert(followUpMetricInst, function(err, response) {
+      if (err) {
+        console.error("Error in updating FollowUp Metric", err);
+      }
+      updateMetricCB(null, response);
+    });
+  });
+}
+
+/**
  * Update List Metric for sent mail
  * @param  {Object} emailQueue     Email Queue Object
  * @param  {Object} mailContent    Sent Mail Content
@@ -517,6 +656,7 @@ function updateCampaignMetric(emailQueue, mailContent, sentMailResp,
  */
 function updateListMetric(emailQueue, mailContent, sentMailResp,
       updateMetricCB) {
+  if(emailQueue.followUpId) return updateMetricCB(null);
   App.campaign.getCampaignListForPerson(emailQueue.campaignId,
       emailQueue.personId, function(err, lists) {
     let updatedLists = [];
@@ -586,20 +726,222 @@ function updateSentMailBox(emailQueue, mailContent, sentMailResp,
  * @param  {Function} createAuditCB
  * @author Syed Sulaiman M
  */
-function updateCampaign(emailQueue, campaignMetric, updateCampaignCB) {
+function updateCampaign(emailQueue, campaignMetric, followUpMetric,
+    updateCampaignCB) {
   App.campaign.findById(emailQueue.campaignId, function(err, campaign) {
     let updateProperties = {
       lastRunAt: new Date(),
       statusCode: statusCodes.default.executingCampaign
     };
-    if(campaignMetric.assembled ===
-        (campaignMetric.sentEmails + campaignMetric.failedEmails)) {
-      updateProperties.isSent = true;
-      updateProperties.statusCode = statusCodes.default.campaignSent;
+    if(campaignMetric) {
+      if(campaignMetric.assembled ===
+          (campaignMetric.sentEmails + campaignMetric.failedEmails)) {
+        updateProperties.isSent = true;
+        updateProperties.statusCode = statusCodes.default.campaignSent;
+      }
+    }
+    if(followUpMetric) {
+      if(followUpMetric.assembled ===
+          (followUpMetric.sentEmails + followUpMetric.failedEmails)) {
+        updateProperties.statusCode = statusCodes.default.campaignExecuted;
+      }
     }
     campaign.updateAttributes(updateProperties, function(err, updatedCampaign) {
       updateCampaignCB(null, updatedCampaign);
     });
+  });
+}
+
+/**
+ * Update FollowUp Status
+ *
+ * @param  {Object} emailQueue
+ * @param  {CampaignMetric} campaignMetric
+ * @param  {FollowUpMetric} followUpMetric
+ * @param  {Function} updateFollowUpCB
+ * @author Syed Sulaiman M
+ */
+function updateFollowUp(emailQueue, campaignMetric, followUpMetric,
+    updateFollowUpCB) {
+  if(!emailQueue.followUpId) return updateFollowUpCB(null);
+  if(followUpMetric.assembled ===
+      (followUpMetric.sentEmails + followUpMetric.failedEmails)) {
+    App.followUp.findById(emailQueue.followUpId, function(err, followUp) {
+      let updateProperties = {
+        statusCode: statusCodes.default.followUpSent
+      };
+      followUp.updateAttributes(updateProperties,
+          function(err, updatedFollowUp) {
+        updateFollowUpCB(null, updatedFollowUp);
+      });
+    });
+  } else {
+    updateFollowUpCB(null);
+  }
+}
+
+/**
+ * Method to Update Failed Count in Metrics
+ * @param  {Function} filterEmailCB callback function
+ * @author Syed Sulaiman M
+ */
+function updateFailedMetricCount(queuedMails, emailQueue, callback) {
+  const filteredOutEmailQs = lodash.differenceBy(queuedMails, emailQueue, "id");
+  async.parallel({
+    campaignMetric:
+        updateCampaignMetricFailedCount.bind(null, filteredOutEmailQs),
+    listMetric:
+        updateListMetricFailedCount.bind(null, filteredOutEmailQs),
+    followUpMetric:
+        updateFollowUpMetricFailedCount.bind(null, filteredOutEmailQs),
+  }, function(err, results) {
+    if (err) {
+      console.error("Error while Updating related tables: " + err);
+    }
+    callback(null, emailQueue);
+  });
+}
+
+/**
+ * Update Campaign Metric for sent mail
+ * @param  {Object} filteredOutEmailQs     Email Queue Object
+ * @param  {Object} mailContent    Sent Mail Content
+ * @param  {Object} sentMailResp   Sent Mail Response
+ * @param  {Function} updateMetricCB callback function
+ * @author Syed Sulaiman M
+ */
+function updateCampaignMetricFailedCount(filteredOutEmailQs, callback) {
+
+  let campaignMails = lodash.filter(filteredOutEmailQs, (o) => {
+    return (!o.followUpId) ? true : false;
+  });
+  let grpdEmailQueueByCamp = lodash.groupBy(campaignMails, "campaignId");
+  let campaignIds = lodash.keys(grpdEmailQueueByCamp);
+  campaignIds = lodash.filter(campaignIds, (o) => { return (o !== null); });
+
+  if(lodash.isEmpty(campaignIds)) return callback(null);
+  let campaignMetrics = [];
+  async.each(campaignMails, (campaignMail, campaignMailCB) => {
+    let campaignMetricInst = {};
+    campaignMetricInst.failedEmails = 1;
+    campaignMetricInst.campaignId = campaignMail.campaignId;
+    App.campaignMetric.find({
+      where: {
+        campaignId: campaignMail.campaignId
+      }
+    }, (campaignMetricErr, campaignMetric) => {
+      if (campaignMetricErr) {
+        console.error("Error in updating Campaign Metric", campaignMetricErr);
+      }
+      if (!lodash.isEmpty(campaignMetric)) {
+        campaignMetricInst = campaignMetric[0];
+        campaignMetricInst.failedEmails = ++campaignMetric[0].failedEmails;
+      }
+      App.campaignMetric.upsert(campaignMetricInst, function(err, response) {
+        if (err) console.error("Error in updating Campaign Metric", err);
+        campaignMetrics.push(response);
+        campaignMailCB(null, response);
+      });
+    });
+  }, function(err) {
+    if (err) console.error("Error in updating List Metric", err);
+    callback(null, campaignMetrics);
+  });
+}
+
+/**
+ * Update Campaign Metric for Failed Count
+ * @param  {Object} filteredOutEmailQs     Email Queue Object
+ * @param  {Object} mailContent    Sent Mail Content
+ * @param  {Object} sentMailResp   Sent Mail Response
+ * @param  {Function} updateMetricCB callback function
+ * @author Syed Sulaiman M
+ */
+function updateFollowUpMetricFailedCount(filteredOutEmailQs, callback) {
+
+  let followUpMails = lodash.filter(filteredOutEmailQs, (o) => {
+    return (o.followUpId) ? true : false;
+  });
+  let grpdEmailQueueByFollowUp = lodash.groupBy(followUpMails, "followUpId");
+  let followUpIds = lodash.keys(grpdEmailQueueByFollowUp);
+  followUpIds = lodash.filter(followUpIds, (o) => { return (o !== null); });
+
+  if(lodash.isEmpty(followUpIds)) return callback(null);
+  let followUpMetrics = [];
+  async.each(followUpMails, (followUpMail, followUpMailCB) => {
+    let followUpMetricInst = {};
+    followUpMetricInst.failedEmails = 1;
+    followUpMetricInst.followUpId = followUpMail.followUpId;
+    followUpMetricInst.campaignId = followUpMail.campaignId;
+    App.followUpMetric.find({
+      where: {
+        followUpId: followUpMail.followUpId
+      }
+    }, (followUpMetricErr, followUpMetric) => {
+      if (followUpMetricErr) {
+        console.error("Error in updating FollowUp Metric", followUpMetricErr);
+      }
+      if (!lodash.isEmpty(followUpMetric)) {
+        followUpMetricInst = followUpMetric[0];
+        followUpMetricInst.failedEmails = ++followUpMetric[0].failedEmails;
+      }
+      App.followUpMetric.upsert(followUpMetricInst, function(err, response) {
+        if (err) console.error("Error in updating FollowUp Metric", err);
+        followUpMetrics.push(response);
+        followUpMailCB(null);
+      });
+    });
+  }, function(err) {
+    if (err) console.error("Error in updating List Metric", err);
+    callback(null, followUpMetrics);
+  });
+}
+
+/**
+ * Update List Metric for Failed Count
+ * @param  {Object} filteredOutEmailQs     Email Queue Object
+ * @param  {Object} mailContent    Sent Mail Content
+ * @param  {Object} sentMailResp   Sent Mail Response
+ * @param  {Function} updateMetricCB callback function
+ * @author Syed Sulaiman M
+ */
+function updateListMetricFailedCount(filteredOutEmailQs, callback) {
+
+  let campaignMails = lodash.filter(filteredOutEmailQs, (o) => {
+    return (!o.followUpId) ? true : false;
+  });
+
+  if(lodash.isEmpty(campaignMails)) return callback(null);
+
+  let updatedLists = [];
+  async.each(campaignMails, (campaignMail, campaignMailCB) => {
+    App.campaign.getCampaignListForPerson(campaignMail.campaignId,
+        campaignMail.personId, function(err, lists) {
+      async.each(lists, (list, listCB) => {
+        App.listMetric.findByListIdAndCampaignId(
+            list.id, campaignMail.campaignId, (err, listMetric) => {
+          let listMetricInst = {};
+          listMetricInst.failedEmails = 1;
+          listMetricInst.listId = list.id;
+          listMetricInst.campaignId = campaignMail.campaignId;
+          if(listMetric) {
+            listMetricInst = listMetric;
+            listMetricInst.failedEmails = ++listMetric.failedEmails;
+          }
+          updatedLists.push(listMetricInst);
+          App.listMetric.upsert(listMetricInst, function(err, response) {
+            if (err) console.error("Error in updating List Metric", err);
+            listCB(null, response);
+          });
+        });
+      }, function(err) {
+        if (err) console.error("Error in updating List Metric", err);
+        campaignMailCB(null);
+      });
+    });
+  }, function(err) {
+    if (err) console.error("Error in updating List Metric", err);
+    callback(null, updatedLists);
   });
 }
 

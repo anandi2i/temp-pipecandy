@@ -39,6 +39,10 @@
     },
     "time": {
       "type": "string"
+    },
+    "statusCode": {
+      "type": "number",
+      "default": 0
     }
   },
   "validations": [],
