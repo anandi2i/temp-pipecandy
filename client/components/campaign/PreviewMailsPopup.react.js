@@ -200,7 +200,7 @@ class PreviewMailsPopup extends React.Component {
                     this.state.followupsList.map(function(followup, key) {
                       return (
                         <div key={key} className="preview-mail-container">
-                          <h3>followUp {++key}</h3>
+                          <h3>Follow up {++key}</h3>
                           <div className="col s12 head">Email</div>
                           <div className="col s12 mail-content content" dangerouslySetInnerHTML={{__html: followup.content}} />
                         </div>

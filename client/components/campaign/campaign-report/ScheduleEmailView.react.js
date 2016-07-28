@@ -51,7 +51,7 @@ class ScheduleEmailView extends React.Component {
   render() {
     const emailContent = this.state.emailContent;
     const scheduledAt = moment(emailContent.scheduledAt)
-      .format("MMMM Do YYYY, h:mm:ss a");
+      .format("MMMM Do YYYY, h:mm a");
     return (
       <div className="modal modal-fixed-header modal-fixed-footer lg-modal">
         <i className="mdi mdi-close" onClick={this.closeModal}></i>

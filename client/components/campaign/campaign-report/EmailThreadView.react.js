@@ -87,7 +87,7 @@ class EmailThreadView extends React.Component {
               {
                 emailContent.map(function(email, key){
                   const receivedDate = moment(email.receivedDate)
-                    .format("DD MMM YYYY");
+                    .format("MMMM Do YYYY, h:mm a");
                   let active = "";
                   if(emailContent.length === (key + initVal)){
                     active = "active";
