@@ -642,7 +642,6 @@ module.exports = function(user) {
     async.each(campaigns, (campaign, campaignEachCB) => {
       async.parallel({
         listSentTo : getCampaignListCount.bind(null, campaign),
-        status : getCampaignStatus.bind(null, campaign),
         replies : getCampaignReplyCount.bind(null, campaign),
         progress : getCampaignProgress.bind(null, campaign)
       }, (parallelErr, campaignMetrics) => {
@@ -655,6 +654,7 @@ module.exports = function(user) {
         }
         campaignMetrics.campaignId = campaign.id;
         campaignMetrics.campaign = campaign.name;
+        campaignMetrics.statusCode = campaign.statusCode;
         campaignList.push(campaignMetrics);
         campaignEachCB(null);
       });
@@ -688,49 +688,6 @@ module.exports = function(user) {
     });
   };
 
-  /**
-   * To get the campaign status whether it has been
-   *  - scheduled || sent || failed || in progress || partially sent
-   * @param  {[campaign]} campaign
-   * @param  {[getStatusCB]} getStatusCB
-   * @return {[status]}
-   * @author Aswin Raj A
-   */
-  const getCampaignStatus = (campaign, getStatusCB) => {
-    if(!campaign.isSent){
-      getStatusCB(null, "Scheduled");
-    } else {
-      user.app.models.campaignMetric.find({
-        where : {
-          campaignId : campaign.id
-        }
-      }, (metricFindErr, campaignMetrics) => {
-        if(metricFindErr){
-          logger.error("Error while finding campaign metric", {
-            input: {campaignId : campaign.id},
-            error: metricFindErr, stack: metricFindErr.stack
-          });
-          getStatusCB(metricFindErr);
-        }
-        const processedMail = campaignMetrics[0].sent +
-          campaignMetrics[0].failedEmails + campaignMetrics[0].erroredEmails;
-        const failedEmails = campaignMetrics[0].failedEmails +
-          campaignMetrics[0].erroredEmails;
-        if(campaignMetrics[0].assembled === processedMail){
-          if(campaignMetrics[0].erroredEmails !== emptyCount ||
-            campaignMetrics[0].failedEmails !== emptyCount){
-            getStatusCB(null, "Partially Sent");
-          } else if(campaignMetrics[0].assembled === failedEmails){
-            getStatusCB(null, "Failed");
-          } else {
-            getStatusCB(null, "Sent");
-          }
-        } else {
-            getStatusCB(null, "Sending");
-        }
-      });
-    }
-  };
 
   /**
    * To get the total count of response for the current campaign
