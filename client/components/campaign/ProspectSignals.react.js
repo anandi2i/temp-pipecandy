@@ -93,19 +93,19 @@ class ProspectSignals extends React.Component {
           <div className="col s8 sig-in-cntr">
             <div className="prospect-signals"
               style={{display: isProspectSignals ? "block" : "none"}}>
-              <div className="animated flipInX">
+              <div>
                 <div className="title">Common Connections:</div>
                 <div className="content">You & John Smith have 1 common connection via Mark Suster. Mark Suster & John Smith worked together in Yahoo! Drop this reference in your email to John Smith.</div>
               </div>
-              <div className="animated flipInX">
+              <div>
                 <div className="title">Job Change:</div>
                 <div className="content">Mike Pearson has moved from Johnson & Johnson to Procter & Gamble as their 'Chief Digital Experience Officer'. Volga Nelson is the outgoing Chief Digital Officer of Procter & Gamble. Refer about your conversations with Volga to Mike Pearson.</div>
               </div>
-              <div className="animated flipInX">
+              <div>
                 <div className="title">Job Postings:</div>
                 <div className="content">You had emailed Will Connor of Stripe. Stripe has 5 job openings in Indeed.com. Click here to see all job postings from Stripe. Discuss this with Will Connor.</div>
               </div>
-              <div className="animated flipInX">
+              <div>
                 <div className="title">Tech Used:</div>
                 <div className="content">Stripe is using Angular 1.5.6. Send them an email about version 2.0 upgrade.</div>
               </div>

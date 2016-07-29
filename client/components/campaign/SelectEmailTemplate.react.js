@@ -40,7 +40,6 @@ class SelectEmailTemplate extends React.Component {
   constructor(props) {
     super(props);
     this.state={
-      index: 2,
       activeTab: 0
     };
   }
@@ -54,7 +53,7 @@ class SelectEmailTemplate extends React.Component {
   render() {
     const scheduleEmailIndex = 3;
     return (
-      <div className="container" style={{display: this.props.active === this.state.index ? "block" : "none"}}>
+      <div className="container">
         <div className="row sub-head-container m-lr-0">
           <div className="head">Start drafting your email(s)</div>
         </div>

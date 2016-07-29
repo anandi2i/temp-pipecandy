@@ -8,16 +8,17 @@ import WordaiPreviewPopup from "./WordaiPreviewPopup.react";
 import PreviewMailsPopup from "./PreviewMailsPopup.react";
 import ProspectSignals from "./ProspectSignals.react";
 import CampaignStore from "../../stores/CampaignStore";
+import EmailListStore from "../../stores/EmailListStore";
 import UserStore from "../../stores/UserStore";
 import UserAction from "../../actions/UserAction";
 import CampaignActions from "../../actions/CampaignActions";
 import {ErrorMessages} from "../../utils/UserAlerts";
+import Spinner from "../Spinner.react";
 
 class ScheduleEmail extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      index: 3,
       clicked: true,
       followups: [],
       followupsMaxLen: 8,
@@ -42,23 +43,37 @@ class ScheduleEmail extends React.Component {
       address: "",
       isOptText: true,
       isAddress: true,
-      spamRating: ""
+      spamRating: "",
+      isEditorReady: false
     };
   }
 
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
+    const selectedEmailListIds = EmailListStore.getSelectedEmailListIds();
     CampaignStore.addEmailListChangeListener(this.onStoreChange);
     CampaignStore.addSpamScoreChangeListener(this.onSpamScoreChange);
+    CampaignStore.addSpamScoreChangeListener(this.onSpamScoreChange);
+    CampaignActions.getSelectedEmailList(selectedEmailListIds);
     enabledropDownBtnByID("#insertSmartTags");
     this.el.find("select").material_select();
+    this.el.find(".tooltipped").tooltip({delay: 50});
     initDatePicker(this.el.find(".datepicker"));
     initTimePicker(this.el.find(".timepicker"));
-    this.el.find(".tooltipped").tooltip({delay: 50});
+    initTinyMCE("#optOutAddress", "", "", "", false, this.tinyMceAddressCb);
   }
 
   componentWillUnmount() {
     this.el.find("select").material_select("destroy");
+    if(tinymce.get("emailSubject")) {
+      tinyMCE.execCommand("mceRemoveEditor", true, "emailSubject");
+    }
+    if(tinymce.get("optOutAddress")) {
+      tinyMCE.execCommand("mceRemoveEditor", true, "optOutAddress");
+    }
+    if(tinymce.get("emailContent")) {
+      tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
+    }
     CampaignStore.removeEmailListChangeListener(this.onStoreChange);
     CampaignStore.removeSpamScoreChangeListener(this.onSpamScoreChange);
   }
@@ -68,19 +83,9 @@ class ScheduleEmail extends React.Component {
  *
  * @param  {object} allTags - It contains collection of unique smart-tags based on selected list
  */
-  initTinyMCE = () => {
+  initTinyMceEditors = () => {
     const {getAllTags, address} = this.state;
-    if(tinymce.get("emailSubject")) {
-      tinyMCE.execCommand("mceRemoveEditor", true, "emailSubject");
-    }
     initTinyMCE("#emailSubject", "", "", getAllTags, false, this.tinyMceSubCb);
-    if(tinymce.get("optOutAddress")) {
-      tinyMCE.execCommand("mceRemoveEditor", true, "optOutAddress");
-    }
-    initTinyMCE("#optOutAddress", "", "", "", false, this.tinyMceAddressCb);
-    if(tinymce.get("emailContent")) {
-      tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
-    }
     initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", getAllTags, true,
       this.tinyMceCb);
     let mainContent = this.props.selectedTemplate;
@@ -93,10 +98,14 @@ class ScheduleEmail extends React.Component {
     } else {
       mainContent = tinymcePlaceholder("content");
     }
+    const _this = this;
     setTimeout(function() {
       tinyMCE.get("emailSubject").setContent(tinymcePlaceholder("Subject"));
       tinyMCE.get("optOutAddress").setContent(address);
       tinyMCE.get("emailContent").setContent(mainContent);
+      _this.setState({
+        isEditorReady: true
+      });
     }, tinyMceDelayTime);
   }
 
@@ -168,7 +177,7 @@ class ScheduleEmail extends React.Component {
       this.setState({
         getAllTags: CampaignStore.constructSmartTags(allTags)
       }, () => {
-        this.initTinyMCE();
+        this.initTinyMceEditors();
       });
     });
   }
@@ -430,8 +439,8 @@ class ScheduleEmail extends React.Component {
     //campaignDetails.scheduledDate = element.find(".datepicker").val();
     //campaignDetails.scheduledTime = element.find(".timepicker").val();
     const scheduledAt =
-        new Date(element.find(".datepicker").val() + " "
-                  + element.find(".timepicker").val());
+      new Date(element.find(".datepicker").val() + " "
+        + element.find(".timepicker").val());
     campaignDetails.scheduledAt = scheduledAt.toUTCString();
   }
   return campaignDetails;
@@ -521,19 +530,34 @@ class ScheduleEmail extends React.Component {
 
   render() {
     let selectEmailListIndex = 1;
-    let displayIndex =
-      (this.props.active === this.state.index ? "block" : "none");
+    let {
+      errorCount,
+      isEditorReady,
+      followups,
+      followupsMaxLen,
+      displayScheduleCampaign,
+      isOptText,
+      optText,
+      isAddress,
+      clicked,
+      emailText,
+      emailList,
+      emailSubject,
+      emailContent,
+      personIssues,
+      allFields,
+      getAllTags,
+      getAllPeopleList,
+      previewMainTemplate,
+      previewFollowups
+    } = this.state;
     let displayAddFollowup =
-      (this.state.followups.length < this.state.followupsMaxLen
-        ? "block" : "none");
-    let displaySchedule = this.state.displayScheduleCampaign
-      ? "block" : "none";
-    let isOptText = this.state.isOptText ? "block" : "none";
-    let isAddress = this.state.isAddress ? "block" : "none";
-    let className = this.state.clicked
-      ? "mdi mdi-chevron-up"
-      : "mdi mdi-chevron-up in-active";
-    const {errorCount} = this.state;
+      (followups.length < followupsMaxLen ? "block" : "none");
+    let displaySchedule = displayScheduleCampaign ? "block" : "none";
+    let isOptTextDisplay = isOptText ? "block" : "none";
+    let isAddressDisplay = isAddress ? "block" : "none";
+    let className =
+      clicked ? "mdi mdi-chevron-up" : "mdi mdi-chevron-up in-active";
     // TODO hide for Demo
     // const {spamRating, errorCount} = this.state;
     // let spamClass = "spam-result safe";
@@ -544,209 +568,214 @@ class ScheduleEmail extends React.Component {
     // }
 
     return (
-      <div className="container" style={{display: displayIndex}}>
-        <div className="row sub-head-container m-lr-0">
-          <div className="head">Let's Draft an Email</div>
-          <div className="sub-head">
-            <a className="btn blue m-r-20" onClick={() => this.openPreviewModal("preview")}>Preview</a>
-            <a className="btn blue" onClick={this.saveCampaignInfo}>Save & Send</a>
-          </div>
+      <div className="container">
+        <div className="spinner-container" style={{display: isEditorReady ? "none" : "block"}}>
+          <Spinner />
         </div>
-        {/* Draft Email starts here*/}
-        <div className="row draft-container m-t-50 m-lr-0">
-          <div className="head" onClick={this.toggleEditContainer}>
-            <div className="col s4 m4 l4"><h3>1. First Email</h3></div>
-            <div className="col s6 m6 l6 editor-text">
-              &nbsp;
-              {this.state.emailText}
-            </div>
-            <div className="col s2 m2 l2">
-              <i className={className}>
-              </i>
+        <div style={{display: isEditorReady ? "block" : "none"}}>
+          <div className="row sub-head-container m-lr-0">
+            <div className="head">Let's Draft an Email</div>
+            <div className="sub-head">
+              <a className="btn blue m-r-20" onClick={() => this.openPreviewModal("preview")}>Preview</a>
+              <a className="btn blue" onClick={this.saveCampaignInfo}>Save & Send</a>
             </div>
           </div>
-          <div id="mainTemplate" className="col s12 m12 l10 offset-l1 draft-template">
-              {/* email to list */}
-              <div className="row m-lr-0">
-                <div className="col s12 p-lr-0">
-                  <input onChange={() => this.toggleSetState("displayScheduleCampaign")}
-                    type="checkbox" className="filled-in"
-                    id="filled-in-box" defaultChecked="" />
-                  <label htmlFor="filled-in-box">Schedule campaign for later</label>
-                </div>
+          {/* Draft Email starts here*/}
+          <div className="row draft-container m-t-50 m-lr-0">
+            <div className="head" onClick={this.toggleEditContainer}>
+              <div className="col s4 m4 l4"><h3>1. First Email</h3></div>
+              <div className="col s6 m6 l6 editor-text">
+                &nbsp;
+                {emailText}
               </div>
-              <div className="row m-lr-0 schedule-time" style={{display: displaySchedule}}>
-                <div className="col s12 m4 l3">
-                  <label>Date</label>
-                  <input type="date" className="datepicker border-input"
-                    placeholder="DD Month, year"
-                    onChange={(e) => this.onChange(e, "scheduledDate")} />
-                </div>
-                <div className="col s12 m4 l3">
-                  <label>Time</label>
-                  <input type="text" placeholder="00:00 AM"
-                    className="timepicker border-input"
-                    onChange={(e) => this.onChange(e, "scheduledTime")} />
-                </div>
+              <div className="col s2 m2 l2">
+                <i className={className}>
+                </i>
               </div>
-              <div className="row email-to m-lr-0">
-                <div className="left-part">
-                  To
+            </div>
+            <div id="mainTemplate" className="col s12 m12 l10 offset-l1 draft-template">
+                {/* email to list */}
+                <div className="row m-lr-0">
+                  <div className="col s12 p-lr-0">
+                    <input onChange={() => this.toggleSetState("displayScheduleCampaign")}
+                      type="checkbox" className="filled-in"
+                      id="filled-in-box" defaultChecked="" />
+                    <label htmlFor="filled-in-box">Schedule campaign for later</label>
+                  </div>
                 </div>
-                <div className="right-part">
-                  {
-                    this.state.emailList.map(function(list, key) {
-                      return (
-                        <div key={key} className="chip">
-                          <div className="title-wrapper">
-                            <span className="title">{list.name}</span>
+                <div className="row m-lr-0 schedule-time" style={{display: displaySchedule}}>
+                  <div className="col s12 m4 l3">
+                    <label>Date</label>
+                    <input type="date" className="datepicker border-input"
+                      placeholder="DD Month, year"
+                      onChange={(e) => this.onChange(e, "scheduledDate")} />
+                  </div>
+                  <div className="col s12 m4 l3">
+                    <label>Time</label>
+                    <input type="text" placeholder="00:00 AM"
+                      className="timepicker border-input"
+                      onChange={(e) => this.onChange(e, "scheduledTime")} />
+                  </div>
+                </div>
+                <div className="row email-to m-lr-0">
+                  <div className="left-part">
+                    To
+                  </div>
+                  <div className="right-part">
+                    {
+                      emailList.map(function(list, key) {
+                        return (
+                          <div key={key} className="chip">
+                            <div className="title-wrapper">
+                              <span className="title">{list.name}</span>
+                            </div>
+                            <span className="count">{list.peopleCount}</span>
+                            <i onClick={(e) => this.deleteList(e, list.id)}
+                              className="mdi mdi-close remove-list"></i>
                           </div>
-                          <span className="count">{list.peopleCount}</span>
-                          <i onClick={(e) => this.deleteList(e, list.id)}
-                            className="mdi mdi-close remove-list"></i>
-                        </div>
-                      );
-                    }, this)
-                  }
+                        );
+                      }, this)
+                    }
+                  </div>
+                  <div className="right-part"
+                     style={{display: emailList.length ?
+                     "none" : "block"}}>
+                     <span className="error-chip" onClick={ () => this.props.handleClick(selectEmailListIndex)}>
+                       Select your email list
+                     </span>
+                  </div>
                 </div>
-                <div className="right-part"
-                   style={{display: this.state.emailList.length ?
-                   "none" : "block"}}>
-                   <span className="error-chip" onClick={ () => this.props.handleClick(selectEmailListIndex)}>
-                     Select your email list
-                   </span>
+                {/* email subject */}
+                <div className="row email-subject m-lr-0">
+                  <div id="emailSubject" className="email-body inline-tiny-mce" />
                 </div>
-              </div>
-              {/* email subject */}
-              <div className="row email-subject m-lr-0">
-                <div id="emailSubject" className="email-body inline-tiny-mce" />
-              </div>
-              <div className="row m-lr-0">
-                <ProspectSignals />
-              </div>
-              <div className="row email-content m-lr-0">
-                <div className="tiny-toolbar" id="mytoolbar">
-                  {/*<div className="right smart-tag-container">
-                    <div id="insertSmartTags" className="btn btn-dflt dropdown-button sm-icon-btn" data-activates="dropdown">
-                      <i className="left mdi mdi-code-tags"></i>
-                      <span>Insert Smart Tags</span>
-                    </div>
-                      <ul id="dropdown" className="dropdown-content">
-                        {
-                          this.state.commonSmartTags.map(function(tag, key) {
-                            return (
-                              <li key={key}>
-                                <a className="common" href="javascript:;">{tag}</a>
-                              </li>
-                            );
-                          })
-                        }
-                        {
-                          this.state.unCommonSmartTags.map(function(tag, key) {
-                            return (
-                              <li key={key}>
-                                <a className="un-common" href="javascript:;">{tag}</a>
-                              </li>
-                            );
-                          })
-                        }
-                      </ul>
+                <div className="row m-lr-0">
+                  <ProspectSignals />
+                </div>
+                <div className="row email-content m-lr-0">
+                  <div className="tiny-toolbar" id="mytoolbar">
+                    {/*<div className="right smart-tag-container">
+                      <div id="insertSmartTags" className="btn btn-dflt dropdown-button sm-icon-btn" data-activates="dropdown">
+                        <i className="left mdi mdi-code-tags"></i>
+                        <span>Insert Smart Tags</span>
+                      </div>
+                        <ul id="dropdown" className="dropdown-content">
+                          {
+                            commonSmartTags.map(function(tag, key) {
+                              return (
+                                <li key={key}>
+                                  <a className="common" href="javascript:;">{tag}</a>
+                                </li>
+                              );
+                            })
+                          }
+                          {
+                            unCommonSmartTags.map(function(tag, key) {
+                              return (
+                                <li key={key}>
+                                  <a className="un-common" href="javascript:;">{tag}</a>
+                                </li>
+                              );
+                            })
+                          }
+                        </ul>
+                    </div> */}
+                  </div>
+                  <div id="emailContent" className="email-body" />
+                </div>
+                {/* Preview button */}
+                <div className="row r-btn-container m-lr-0">
+                  {/* TODO hide for demo
+                    <div className={spamClass}
+                    style={{display: spamRating ? "inline-block": "none"}}>
+                    SPAM RATING: {spamRating}
+                  </div>
+                  <div onClick={this.checkSpam} className="btn btn-dflt btn-blue"
+                    style={{display: spamRating ? "none": "inline-block"}}>
+                    Check Spam
+                  </div>
+                  <div onClick={this.checkWordIo}
+                    className="btn btn-dflt btn-blue" >
+                    Check Email Variations
                   </div> */}
-                </div>
-                <div id="emailContent" className="email-body" />
-              </div>
-              {/* Preview button */}
-              <div className="row r-btn-container m-lr-0">
-                {/* TODO hide for demo
-                  <div className={spamClass}
-                  style={{display: spamRating ? "inline-block": "none"}}>
-                  SPAM RATING: {spamRating}
-                </div>
-                <div onClick={this.checkSpam} className="btn btn-dflt btn-blue"
-                  style={{display: spamRating ? "none": "inline-block"}}>
-                  Check Spam
-                </div>
-                <div onClick={this.checkWordIo}
-                  className="btn btn-dflt btn-blue" >
-                  Check Email Variations
-                </div> */}
-                <div onClick={() => this.openPreviewModal("issues")}
-                  style={{display: errorCount ? "inline-block": "none"}}
-                  className="btn btn-dflt error-btn" >
-                  {errorCount} Issues Found
-                </div>
-              </div>
-              <div className="row opt-text">
-                <div className="col s12 m-lr-0">
-                  <input type="checkbox" className="filled-in" id="optOutText"
-                    defaultChecked="checked"
-                    onChange={() => this.toggleSetState("isOptText")} />
-                  <label htmlFor="optOutText">Opt-Out-Text</label>
-                  <div className="input-field" style={{display: isOptText}}>
-                    <input id="optOutText"
-                      type="text"
-                      value={this.state.optText}
-                      className="border-input"
-                      onChange={(e) => this.onChange(e, "optText")}
-                      name="optOutText" />
+                  <div onClick={() => this.openPreviewModal("issues")}
+                    style={{display: errorCount ? "inline-block": "none"}}
+                    className="btn btn-dflt error-btn" >
+                    {errorCount} Issues Found
                   </div>
                 </div>
-              </div>
-              <div className="row opt-text">
-                <div className="col s12 m-lr-0">
-                  <input type="checkbox" className="filled-in" id="optOutAddrs"
-                    defaultChecked="checked"
-                    onChange={() => this.toggleSetState("isAddress")} />
-                  <label htmlFor="optOutAddrs">Address</label>
-                  <div className="row m-lr-0" style={{display: isAddress}}>
-                    <div id="optOutAddress" className="inline-tiny-mce opt-out-address" />
+                <div className="row opt-text">
+                  <div className="col s12 m-lr-0">
+                    <input type="checkbox" className="filled-in" id="optOutText"
+                      defaultChecked="checked"
+                      onChange={() => this.toggleSetState("isOptText")} />
+                    <label htmlFor="optOutText">Opt-Out-Text</label>
+                    <div className="input-field" style={{display: isOptTextDisplay}}>
+                      <input id="optOutText"
+                        type="text"
+                        value={optText}
+                        className="border-input"
+                        onChange={(e) => this.onChange(e, "optText")}
+                        name="optOutText" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              {/* Popup starts here*/}
-                <CampaignIssuesPreviewPopup
-                  emailSubject={this.state.emailSubject}
-                  emailContent={this.state.emailContent}
-                  peopleList={this.state.getAllPeopleList}
-                  personIssues={this.state.personIssues}
-                  allFields={this.state.allFields}
-                  closeCallback={this.closeCallback}
-                  ref="issues"
-                />
-              {/* Popup ends here*/}
+                <div className="row opt-text">
+                  <div className="col s12 m-lr-0">
+                    <input type="checkbox" className="filled-in" id="optOutAddrs"
+                      defaultChecked="checked"
+                      onChange={() => this.toggleSetState("isAddress")} />
+                    <label htmlFor="optOutAddrs">Your Company's Address</label>
+                    <div className="row m-lr-0" style={{display: isAddressDisplay}}>
+                      <div id="optOutAddress" className="inline-tiny-mce opt-out-address" />
+                    </div>
+                  </div>
+                </div>
+                {/* Popup starts here*/}
+                  <CampaignIssuesPreviewPopup
+                    emailSubject={emailSubject}
+                    emailContent={emailContent}
+                    peopleList={getAllPeopleList}
+                    personIssues={personIssues}
+                    allFields={allFields}
+                    closeCallback={this.closeCallback}
+                    ref="issues"
+                  />
+                {/* Popup ends here*/}
+            </div>
           </div>
+          {
+            followups.map(function (followUp, key) {
+              let followUpNumber = _.clone(key);
+              return (
+                <AddFollowups followupId={followUp.id}
+                  content={followUp.content}
+                  getAllTags={getAllTags}
+                  deleteFollowUp={this.deleteFollowUp}
+                  peopleList={getAllPeopleList}
+                  id={key} key={followUp.id}
+                  followUpNumber={++followUpNumber}
+                  ref={`addFollowups${followUp.id}`} />
+              );
+            }, this)
+          }
+          <div className="fixed-action-btn horizontal tooltipped" onClick={this.addFollowups}
+            style={{display: displayAddFollowup}}
+            data-position="left" data-tooltip="Add Follow up">
+            <a className="btn-floating btn-medium blue">
+              <i className="large material-icons">add</i>
+            </a>
+          </div>
+          <PreviewMailsPopup
+            peopleList={getAllPeopleList}
+            mainEmailContent={previewMainTemplate}
+            followupsEmailContent={previewFollowups}
+            emailSubject={emailSubject}
+            emailContent={emailContent}
+            getOptText={this.getOptText}
+            ref="preview" />
+          <WordaiPreviewPopup ref="wordai" />
         </div>
-        {
-          this.state.followups.map(function (followUp, key) {
-            let followUpNumber = _.clone(key);
-            return (
-              <AddFollowups followupId={followUp.id}
-                content={followUp.content}
-                getAllTags={this.state.getAllTags}
-                deleteFollowUp={this.deleteFollowUp}
-                peopleList={this.state.getAllPeopleList}
-                id={key} key={followUp.id}
-                followUpNumber={++followUpNumber}
-                ref={`addFollowups${followUp.id}`} />
-            );
-          }, this)
-        }
-        <div className="fixed-action-btn horizontal tooltipped" onClick={this.addFollowups}
-          style={{display: displayAddFollowup}}
-          data-position="left" data-tooltip="Add Follow up">
-          <a className="btn-floating btn-medium blue">
-            <i className="large material-icons">add</i>
-          </a>
-        </div>
-        <PreviewMailsPopup
-          peopleList={this.state.getAllPeopleList}
-          mainEmailContent={this.state.previewMainTemplate}
-          followupsEmailContent={this.state.previewFollowups}
-          emailSubject={this.state.emailSubject}
-          emailContent={this.state.emailContent}
-          getOptText={this.getOptText}
-          ref="preview" />
-        <WordaiPreviewPopup ref="wordai" />
       </div>
     );
   }

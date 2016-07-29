@@ -4,6 +4,7 @@ import Griddle from "griddle-react";
 import CustomRowComponent from "./CustomRowComponent.react";
 import CustomPagerComponent from "../CustomGridPagination.react";
 import CustomFilterComponent from "../CustomGridFilter.react";
+import EmailListStore from "../../../stores/EmailListStore";
 
 class SelectEmailListGrid extends React.Component {
 
@@ -41,6 +42,8 @@ class SelectEmailListGrid extends React.Component {
     }
     this.setState({
       selectedRowIds: selectedRowIds
+    }, () => {
+      EmailListStore.saveSelectedEmailListIds(this.state.selectedRowIds);
     });
   }
 

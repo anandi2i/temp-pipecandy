@@ -16,8 +16,7 @@ class SelectEmailList extends React.Component {
     this.state = {
       allEmailLists: [],
       noDataBlock: false,
-      spinning: true,
-      index: 1
+      spinning: true
     };
   }
 
@@ -41,13 +40,13 @@ class SelectEmailList extends React.Component {
 
   render() {
     return (
-      <div className="container" style={{display: this.props.active === this.state.index ? "block" : "none"}}>
+      <div className="container">
         <h4> Select Email List </h4>
         <div className="spaced" style={{display: this.state.spinning ? "block" : "none"}}>
           <Spinner />
         </div>
         {
-          this.state.noDataBlock 
+          this.state.noDataBlock
           ?
             <NoDataComponent />
           :

@@ -27,6 +27,7 @@ class ListView extends React.Component {
   }
 
   componentWillUnmount() {
+    EmailListStore.removeSelectedEmailListIds();
     EmailListStore.removeChangeListener(this.onStoreChange);
   }
 

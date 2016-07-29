@@ -17,6 +17,7 @@ let _success = "";
 let _getFields = {};
 let _csvListDetails = {};
 let _campaignTemplatePreview = {};
+let _selectedEmailListIds = [];
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const EmailListStore = _.extend({}, EventEmitter.prototype, {
@@ -169,6 +170,21 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
   // Set empty value for template preview in campaign grid
   removeCampaignTemplatePreview() {
     _campaignTemplatePreview = "";
+  },
+
+  // Store selected email list ids
+  saveSelectedEmailListIds(listIds) {
+    _selectedEmailListIds = listIds;
+  },
+
+  // Return selected email list ids
+  getSelectedEmailListIds() {
+    return _selectedEmailListIds;
+  },
+
+  // Remove selected email list ids
+  removeSelectedEmailListIds() {
+    _selectedEmailListIds = [];
   }
 
 });
