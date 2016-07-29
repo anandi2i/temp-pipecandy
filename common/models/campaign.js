@@ -1259,8 +1259,10 @@ module.exports = function(Campaign) {
             break;
           case "BOUNCED":
             campaignMetricObj.title = "bounced";
-            campaignMetricObj.percentage = (campaignMetricsData.bounced
-              / campaignMetricsData.sentEmails) * hundredPercent || "0";
+            let bouncedRate = (campaignMetricsData.bounced
+              / campaignMetricsData.sentEmails) * hundredPercent;
+            let roundbouncedRate = Math.round(parseFloat(bouncedRate));
+            campaignMetricObj.percentage = roundbouncedRate || "0";
             campaignMetricObj.count = campaignMetricsData.bounced || "0";
             campaignMetricObj.class = "red";
             campaignMetricObj.status = "7";
@@ -1268,9 +1270,11 @@ module.exports = function(Campaign) {
             break;
           case "UNSUBSCRIBED":
             campaignMetricObj.title = "unsubscribed";
-            campaignMetricObj.percentage = (campaignMetricsData.unsubscribed
+            let unsubscribedRate = (campaignMetricsData.unsubscribed
               / (campaignMetricsData.sentEmails - campaignMetricsData.bounced)
-            ) * hundredPercent || "0";
+            ) * hundredPercent;
+            let roundunsubscribeRate = Math.round(parseFloat(unsubscribedRate));
+            campaignMetricObj.percentage = roundunsubscribeRate || "0";
             campaignMetricObj.count = campaignMetricsData.unsubscribed || "0";
             campaignMetricObj.class = "green";
             campaignMetricObj.status = "7";
@@ -1278,9 +1282,11 @@ module.exports = function(Campaign) {
             break;
           case "SPAM":
             campaignMetricObj.title = "spam";
-            campaignMetricObj.percentage = (campaignMetricsData.spammed /
+            let spamRate = (campaignMetricsData.spammed /
               (campaignMetricsData.sentEmails - campaignMetricsData.bounced)
-            ) * hundredPercent || "0";
+            ) * hundredPercent;
+            let roundspamRate = Math.round(parseFloat(spamRate));
+            campaignMetricObj.percentage = roundspamRate || "0";
             campaignMetricObj.count = campaignMetricsData.spammed || "0";
             campaignMetricObj.class = "green";
             campaignMetricObj.status = "7";
