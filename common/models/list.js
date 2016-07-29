@@ -134,16 +134,129 @@ module.exports = function(List) {
    * @author Ramanavel Selvaraju
    */
   List.peopleWithFields = (ctx, list, peopleWithFieldsCB) => {
+    async.waterfall([
+      async.apply(getFieldsForList, ctx, list),
+      (listWithFields, lists, passParamCB) => {
+        passParamCB(null, listWithFields, lists[0]);
+      },
+      getPersonForList,
+      getFieldsForPeople,
+      generatePeopleWithFields
+    ], (asyncErr, result) => {
+      if(asyncErr){
+        peopleWithFieldsCB(asyncErr);
+      }
+      peopleWithFieldsCB(null, result);
+    });
+  };
+
+  /**
+   * Step 1/ peopleWithFields
+   * To get all the fields for the current list created by the current user
+   * @param  {[ctx]} ctx
+   * @param  {[list]} list
+   * @param  {[function]} getFieldsForListCB
+   * @return {[listWithFields, lists]}
+   * @author Aswin Raj A
+   */
+  const getFieldsForList = (ctx, list, getFieldsForListCB) => {
     List.find({
-       where: {id: {inq: list.ids}, createdBy: ctx.req.accessToken.userId},
-       include: ["fields", {"people": ["fieldValues"]}]
+       where: {id: {inq: list.ids}, createdBy: ctx.req.accessToken.userId}
      }, (ListErr, lists) => {
-       if(ListErr) {
-         logger.error("Error in getting people data for lists", list);
-         return peopleWithFieldsCB(ListErr);
+       if(ListErr || lodash.isEmpty(lists)) {
+         const errParam = ListErr || new Error("No list for list id");
+         logger.error(errParam.msg, {
+           input: {listId : list.ids},
+           stack: ListErr ? ListErr.stack : ""
+         });
+         return getFieldsForListCB(ListErr);
        }
-      return peopleWithFieldsCB(null, lists);
+       lists[0].fields((fieldsFindErr, fields) => {
+         if(fieldsFindErr){
+           return getFieldsForListCB(fieldsFindErr);
+         }
+         let listWithFields = JSON.parse(JSON.stringify(lists[0]));
+         listWithFields.fields = fields;
+         return getFieldsForListCB(null, listWithFields, lists);
+       });
      });
+  };
+
+/**
+ * Step 2/ peopleWithFields
+ * To get all the people for the current list
+ * @param  {[listWithFields]} listWithFields
+ * @param  {[lists]} lists
+ * @param  {[function]} getPersonForListCB
+ * @return {[people, lists, listWithFields]}
+ * @author Aswin Raj A
+ */
+  const getPersonForList = (listWithFields, list, getPersonForListCB) => {
+    list.people((peopleFindErr, people) => {
+      if(peopleFindErr){
+        logger.error("Error while finding people for list", {
+          input: {listId: list.id},
+          error: peopleFindErr,
+          stack: peopleFindErr ? peopleFindErr.stack: ""});
+        getPersonForListCB(peopleFindErr);
+      }
+      getPersonForListCB(null, people, list, listWithFields);
+    });
+  };
+
+  /**
+   * Step 3/ peopleWithFields
+   * To get all the fields for each person associated with the current list
+   * @param  {[people]} people
+   * @param  {[list]} list
+   * @param  {[listWithFields]} listWithFields
+   * @param  {[function]} getFieldsForPeopleCB
+   * @return {[listWithFields, peopleObj]}
+   * @author Aswin Raj A
+   */
+  const getFieldsForPeople = (people, list, listWithFields,
+    getFieldsForPeopleCB) => {
+    const listId = list.id;
+    let peopleObj = [];
+    async.eachSeries(people, (person, personCB) => {
+      List.app.models.additionalFieldValue.find({
+        where: {and: [{personId: person.id}, {listId: listId}]}
+      }, (fieldsFindErr, fields) => {
+        if(fieldsFindErr){
+          logger.error("Error while finding list", {
+            input: {personId: person.id, listId: listId},
+            error: fieldsFindErr, stack: fieldsFindErr.stack
+          });
+          personCB(fieldsFindErr);
+        }
+        person = JSON.parse(JSON.stringify(person));
+        person.fieldValues = fields;
+        peopleObj.push(person);
+        personCB(null);
+      });
+    }, (asyncErr) => {
+      if(asyncErr){
+        getFieldsForPeopleCB(asyncErr);
+      }
+      getFieldsForPeopleCB(null, listWithFields, peopleObj);
+    });
+  };
+
+  /**
+   * Stpe 4/ peopleWithFields
+   * To generate the peopleWithFields object that is to be returned in the
+   * callback
+   * @param  {[listWithFields]} listWithFields
+   * @param  {[peopleObj]} peopleObj
+   * @param  {[function]} generateCB
+   * @return {[peopleWithFields]}
+   * @author Aswin Raj A
+   */
+  const generatePeopleWithFields = (listWithFields, peopleObj, generateCB) => {
+    let peopleWithFields = [];
+    listWithFields.people = peopleObj;
+    peopleWithFields.push(listWithFields);
+    return generateCB(null, peopleWithFields);
   };
 
   List.remoteMethod(
