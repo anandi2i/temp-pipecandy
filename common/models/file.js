@@ -408,12 +408,14 @@ module.exports = function(File) {
         if(lodash.isEmpty(invalidData)){
           savePersonWithAdditionalFieldsCB(null, {
             responseMsg : "All fields are saved successfully!",
-            invalidData : invalidData
+            invalidData : invalidData,
+            dataCount: streamData.length
           });
         } else{
           savePersonWithAdditionalFieldsCB(null, {
             responseMsg : "There seems to be some invalid data!",
-            invalidData : invalidData
+            invalidData : invalidData,
+            dataCount: streamData.length
           });
         }
       });
