@@ -11,7 +11,7 @@ class CustomPreviewComponent extends React.Component {
       isPreview: false
     };
   }
-  
+
   /**
    * After click the eye icon it call the props openmodal function
    * to open preview popup
@@ -38,7 +38,7 @@ class CustomPreviewComponent extends React.Component {
     let {isPreview} = this.state;
     return (
       <div>
-        <a onClick={() => this.handleClick()}>
+        <a title="Preview Email" onClick={() => this.handleClick()}>
           <i className="mdi mdi-eye"></i>
         </a>
         {

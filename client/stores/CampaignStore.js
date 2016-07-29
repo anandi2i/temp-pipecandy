@@ -9,7 +9,7 @@ import {browserHistory} from "react-router";
 
 let _error = "";
 let _isExistCampaignId = false;
-let _getAllCampaigns = {};
+let allCampaigns = {};
 let _allEmailTemplates = [];
 let _campaignMetrics = [];
 let _campaignDetails = {};
@@ -152,25 +152,34 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   },
 
   getAllCampaigns() {
-    let initialRange = 1;
-    let endRange = 10;
-    let _allCampaignListFlattenData = [];
-    _.each(_getAllCampaigns, (obj, index) => {
-      let randomVal = _.random(initialRange, endRange);
-      _allCampaignListFlattenData.push({
-        id: obj.id,
-        name: obj.name || "",
-        listSentTo: _.random(initialRange, endRange),
-        campaignStatus: obj.campaignStatus || "Sent",
-        campaignReplies: _.random(initialRange, endRange),
-        campaignProgressDone: _.random(initialRange, randomVal),
-        campaignProgressTotal: randomVal,
-        campaignProgress: obj.campaignProgress || "50%",
-        campaignAction: obj.campaignAction || "Pass",
-        campaignRun: obj.campaignRun || "cRun"
+    const edit = ["0"];
+    const pause = ["8", "9", "10", "49", "50", "60", "63", "71", "73", "75",
+      "77", "79", "81", "83", "85"];
+    const resume = ["62", "70", "72", "74", "76", "78", "80", "82", "84"];
+    let allCampaignList = [];
+    allCampaigns.map(campaign => {
+      const statusCode = campaign.statusCode.toString();
+      let status;
+      if(edit.includes(statusCode)) {
+        status = "In Draft";
+      } else if (pause.includes(statusCode)) {
+        status = "Pause";
+      } else if (resume.includes(statusCode)) {
+        status = "Resume";
+      } else {
+        status = "Sent";
+      }
+      allCampaignList.push({
+        id: campaign.campaignId,
+        name: campaign.campaign,
+        listSentTo: campaign.listSentTo,
+        status: status,
+        replies: campaign.replies,
+        progress: `${campaign.progress}%`,
+        action: status
       });
     });
-    return _allCampaignListFlattenData;
+    return allCampaignList;
   },
 
   getAllEmailTemplates() {
@@ -356,7 +365,7 @@ AppDispatcher.register(function(payload) {
       break;
     case Constants.GET_ALL_CAMPAIGN:
       CampaignApi.getAllCampaign().then((response) => {
-        _getAllCampaigns = response.data;
+        allCampaigns = response.data;
         _error = "";
         CampaignStore.emitChange();
       }, (err) => {

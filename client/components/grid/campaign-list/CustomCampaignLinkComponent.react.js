@@ -2,7 +2,7 @@ import React from "react";
 import {Link} from "react-router";
 
 class CustomCampaignLinkComponent extends React.Component {
-  
+
   constructor(props) {
     super(props);
   }

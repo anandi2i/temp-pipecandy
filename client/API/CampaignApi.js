@@ -5,7 +5,7 @@ const CampaignApi = {
     return api.post("/api/users/createCampaign", data);
   },
   getAllCampaign() {
-    return api.get(`/api/users/${getCookie("userId")}/campaigns`);
+    return api.get(`/api/users/${getCookie("userId")}/campaignList`);
   },
   getAllEmailTemplates() {
     return api.get("/api/defaultTemplates");

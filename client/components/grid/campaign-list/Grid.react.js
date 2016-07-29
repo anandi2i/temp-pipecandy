@@ -3,9 +3,8 @@ import Griddle from "griddle-react";
 import CustomPagerComponent from "../CustomGridPagination.react";
 import CustomPreviewComponent from "./CustomPreviewComponent.react";
 import CustomCampaignLinkComponent from "./CustomCampaignLinkComponent.react";
-import CustomCampaignRunComponent from "./CustomCampaignRunComponent.react";
-import CustomCampaignProgressComponent from
-  "./CustomCampaignProgressComponent.react";
+import CustomCampaignActionComponent from
+  "./CustomCampaignActionComponent.react";
 
 let columnMeta = [{
     "columnName": "id",
@@ -33,14 +32,15 @@ let columnMeta = [{
     "sortable": false,
     "cssClassName" : ""
   }, {
-    "columnName": "campaignStatus",
+    "columnName": "status",
     "order": 4,
     "locked": true,
     "visible": true,
     "displayName": "Status",
+    "sortable": false,
     "cssClassName" : ""
   }, {
-    "columnName": "campaignReplies",
+    "columnName": "replies",
     "order": 5,
     "locked": true,
     "visible": true,
@@ -48,7 +48,7 @@ let columnMeta = [{
     "cssClassName": "replies",
     "sortable": false
   }, {
-    "columnName": "campaignProgress",
+    "columnName": "progress",
     "order": 6,
     "locked": true,
     "visible": true,
@@ -56,23 +56,14 @@ let columnMeta = [{
     "sortable": false,
     "cssClassName" : ""
   }, {
-    "columnName": "campaignAction",
+    "columnName": "action",
     "order": 7,
     "locked": true,
     "visible": true,
     "displayName": "Actions",
     "sortable": false,
     "cssClassName" : "",
-    "customComponent": CustomCampaignProgressComponent
-  }, {
-    "columnName": "campaignRun",
-    "order": 8,
-    "locked": true,
-    "visible": true,
-    "displayName": " ",
-    "sortable": false,
-    "cssClassName": "campaign-run-btn",
-    "customComponent": CustomCampaignRunComponent
+    "customComponent": CustomCampaignActionComponent
   }];
 
 class CampaignGrid extends React.Component {
@@ -91,9 +82,8 @@ class CampaignGrid extends React.Component {
             useGriddleStyles={false}
             columnMetadata={columnMeta}
             columns={["id", "name", "listSentTo",
-              "campaignStatus", "campaignReplies",
-              "campaignProgress", "campaignAction",
-              "campaignRun"]}
+              "status", "replies",
+              "progress", "action"]}
             metadataColumns={[]}
             showPager={true}
             resultsPerPage="7"

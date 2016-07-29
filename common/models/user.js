@@ -575,7 +575,8 @@ module.exports = function(user) {
       }],
       returns: {
         arg: "campaignsList",
-        type: "object"
+        type: "object",
+        root: true
       },
       http: {
         verb: "get",
