@@ -9,7 +9,7 @@ import publicEmailProviders from "../../server/utils/public-email-providers";
 import validator from "../../server/utils/validatorUtility";
 import constants from "../../server/utils/constants";
 import config from "../../server/config.json";
-
+import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 const emptyCount = 0;
 const percent = 100;
 module.exports = function(user) {
@@ -397,13 +397,16 @@ module.exports = function(user) {
     user.app.models.Campaign.find({
       where: campaignObj
     }, (campaignFindErr, campaigns) => {
-      if(campaignFindErr || !lodash.isEmpty(campaigns)) {
-        let errMsg = campaignFindErr || "Campaign already exists!";
-        logger.error({
-          input : {campaignObj},
-          error: errMsg, stack: campaignFindErr ? campaignFindErr.stack : ""
-        });
-        return checkForDuplicateCampaignCB(errMsg);
+      if(campaignFindErr) {
+        logger.error("Error while finding campaign", {
+          input: {campaignObj},
+          error: campaignFindErr, stack: campaignFindErr.stack});
+        return checkForDuplicateCampaignCB(campaignFindErr);
+      }
+      if(!lodash.isEmpty(campaigns)) {
+        logger.error("Campaign already exists!", campaignObj.name);
+        const errorMessage = errorMessages.CAMPAIGN_EXISTS;
+        return checkForDuplicateCampaignCB(errorMessage);
       }
       return checkForDuplicateCampaignCB(null, campaignObj);
     });
@@ -494,13 +497,16 @@ module.exports = function(user) {
     user.app.models.list.find({
         where: listNameObj
     }, (listFindErr, lists) => {
-      if(listFindErr || !lodash.isEmpty(lists)) {
-        let errMsg = listFindErr || "List already exists!";
-        logger.error({
-          input : {listNameObj},
-          error: errMsg, stack: listFindErr ? listFindErr.stack : ""
-        });
-        return checkForDuplicateEmailListCB(errMsg);
+      if(listFindErr) {
+        logger.error("Error while finding list", {
+          input: {listNameObj},
+          error: listFindErr, stack: listFindErr.stack});
+        return checkForDuplicateEmailListCB(listFindErr);
+      }
+      if(!lodash.isEmpty(lists)) {
+        logger.error("List already exists!", listNameObj.name);
+        const errorMessage = errorMessages.LIST_EXISTS;
+        return checkForDuplicateEmailListCB(errorMessage);
       }
       return checkForDuplicateEmailListCB(null, listNameObj);
     });
