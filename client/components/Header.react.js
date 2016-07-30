@@ -60,7 +60,10 @@ class Header extends React.Component {
                 <li><Link to="/profile">Profile</Link></li>
                 <li><Link onClick={this.logout} to="/login" activeClassName="active">Logout</Link></li>
               </ul>
-              <a activeClassName="active" data-activates="main-side-nav" className="side-nav-btn"><i className="mdi mdi-menu"></i></a>
+              <Link to="#" activeClassName="active" data-activates="main-side-nav"
+                className="side-nav-btn">
+                <i className="mdi mdi-menu"></i>
+              </Link>
             </div>
           </nav>
         </div>
