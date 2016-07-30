@@ -712,8 +712,9 @@ module.exports = function(user) {
         }
         return getReplyCountCB(null, campaignMetrics[0].responded);
       });
+    } else {
+      return getReplyCountCB(null, emptyCount);
     }
-    return getReplyCountCB(null, emptyCount);
   };
 
   /**
@@ -742,8 +743,9 @@ module.exports = function(user) {
         progress = Math.round(parseFloat(progress*percent));
         return getProgressCB(null, progress);
       });
+    } else {
+      return getProgressCB(null, emptyCount);
     }
-    return getProgressCB(null, emptyCount);
   };
 
   /**
