@@ -235,15 +235,32 @@ function initTinyMCEPopUp(id, toolBar, isToolbar, cb) {
 window.initTinyMCEPopUp = initTinyMCEPopUp;
 
 /**
+ * convert date to 12hr format
+ * @param  {object} date - new Date
+ * @return {string}      - 12hrs time
+ */
+function formatAMPM(date) {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0'+minutes : minutes;
+  let strTime = hours + ':' + minutes + ampm;
+  return strTime;
+}
+window.formatAMPM = formatAMPM;
+
+/**
  * init material time picker
  * @param  {boject} element - dom element to show time value.
  */
 function initTimePicker(element) {
   const date = new Date();
   const index = 2;
-  const defaultTime = date.getHours() + `:` + (`0${date.getMinutes()}`).slice(-index);
+  const defaultTime = formatAMPM(date);
   element.pickatime({
-    twelvehour: false,
+    twelvehour: true,
     default: "now",
     init: function(){
       element.val(defaultTime);

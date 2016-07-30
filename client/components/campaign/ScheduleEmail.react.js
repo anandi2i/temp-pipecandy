@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import update from "react-addons-update";
 import _ from "underscore";
+import moment from "moment";
 import AddFollowups from "./AddFollowups.react";
 import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
 import WordaiPreviewPopup from "./WordaiPreviewPopup.react";
@@ -409,9 +410,18 @@ class ScheduleEmail extends React.Component {
       daysAfter: el.find(`#dayPicker${followup.props.followupId} input`).val()
         .split("")[0],
       stepNo: followup.props.followUpNumber,
-      time: el.find(".timepicker").val()
+      time: this.convertMeridian(el.find(".timepicker").val())
     };
     return followupCampaignDetails;
+  }
+
+  /**
+   * Convert 12 to 24 hrs format
+   * @param  {string} time - 12hrs time format
+   * @return {string}      - 24hrs time format
+   */
+  convertMeridian(time) {
+    return moment(time, ["h:mm A"]).format("HH:mm");
   }
 
 /**
@@ -438,9 +448,8 @@ class ScheduleEmail extends React.Component {
   if(displayScheduleCampaign) {
     //campaignDetails.scheduledDate = element.find(".datepicker").val();
     //campaignDetails.scheduledTime = element.find(".timepicker").val();
-    const scheduledAt =
-      new Date(element.find(".datepicker").val() + " "
-        + element.find(".timepicker").val());
+    const scheduledAt = new Date(element.find(".datepicker").val() + " "
+      + this.convertMeridian(element.find(".timepicker").val()));
     campaignDetails.scheduledAt = scheduledAt.toUTCString();
   }
   return campaignDetails;
@@ -583,7 +592,7 @@ class ScheduleEmail extends React.Component {
           {/* Draft Email starts here*/}
           <div className="row draft-container m-t-50 m-lr-0">
             <div className="head" onClick={this.toggleEditContainer}>
-              <div className="col s4 m4 l4"><h3>1. First Email</h3></div>
+              <div className="col s4 m4 l4"><h3>First Email</h3></div>
               <div className="col s6 m6 l6 editor-text">
                 &nbsp;
                 {emailText}

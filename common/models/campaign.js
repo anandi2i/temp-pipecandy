@@ -39,7 +39,7 @@ module.exports = function(Campaign) {
                               campaignId: id}
                       });
         return previewCB(asyncErr.status ? asyncErr
-                                         : userrorMessages.SERVER_ERROR);
+                                         : errorMessages.SERVER_ERROR);
       }
       return previewCB(null, response);
     });
