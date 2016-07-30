@@ -9,7 +9,7 @@ import {browserHistory} from "react-router";
 
 let _error = "";
 let _isExistCampaignId = false;
-let allCampaigns = {};
+let allCampaigns = [];
 let _allEmailTemplates = [];
 let _campaignMetrics = [];
 let _campaignDetails = {};
@@ -163,9 +163,9 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
       if(edit.includes(statusCode)) {
         status = "In Draft";
       } else if (pause.includes(statusCode)) {
-        status = "Pause";
+        status = "Scheduled";
       } else if (resume.includes(statusCode)) {
-        status = "Resume";
+        status = "Paused";
       } else {
         status = "Sent";
       }
