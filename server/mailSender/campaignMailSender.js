@@ -85,7 +85,7 @@ function filterEmailQueue(queuedMails, filterEmailCB) {
  * @return void
  */
 function generateCredentials(emailQueue, generateCredentialsCB) {
-  async.each(emailQueue, function(emailQueueEntry, emailQueueCB) {
+  async.eachSeries(emailQueue, function(emailQueueEntry, emailQueueCB) {
       let mailContent = {
         mailId: emailQueueEntry.id,
         personEmail: emailQueueEntry.email,
@@ -289,7 +289,8 @@ function filterCampaignByStatus(emailQueue, campaigns, grpdEmailQueueByCamp,
       callback) {
   const campaignsNotToRun = lodash.filter(campaigns, function(o) {
     return (o.statusCode !== statusCodes.default.readyToSend)
-        && (o.statusCode !== statusCodes.default.executingCampaign);
+        && (o.statusCode !== statusCodes.default.executingCampaign)
+        && (o.statusCode !== statusCodes.default.campaignResumed);
   });
 
   let emailsStopped = lodash.flatMap(campaignsNotToRun, function(o) {

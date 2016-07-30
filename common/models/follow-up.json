@@ -26,10 +26,6 @@
       "type": "boolean",
       "default": false
     },
-    "isStopped": {
-      "type": "boolean",
-      "default": false
-    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"

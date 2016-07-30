@@ -133,26 +133,77 @@ module.exports = function(Campaign) {
         return callback(errorMessage);
       }
       let campaign = campaigns[0];
-      campaign.updateAttribute("statusCode", statusCodes.campaignStopped,
-          (updateErr, updatedCampaign) => {
-        if(updateErr) {
-          const errorMessage = errorMessages.SERVER_ERROR;
-          return callback(errorMessage);
-        }
-        Campaign.app.models.followUp
-            .updateStoppedByCampaignId(updatedCampaign.id, true,
-            (updateErr, result) => {
-          if(updateErr) {
-            const errorMessage = errorMessages.SERVER_ERROR;
-            return callback(errorMessage);
-          }
-          return callback(null, updatedCampaign);
+      const stoppedStatusCode = statusCodes.campaignStopped;
+      const sentStatusCode = statusCodes.campaignSent;
+      if(campaign.statusCode === stoppedStatusCode) {
+        return callback(null, campaign);
+      }
+      if(campaign.statusCode === sentStatusCode) {
+        stopFollowUps(campaign, (stopError, followUps) => {
+          if(stopError) return callback(errorMessages.SERVER_ERROR);
+          return callback(null, campaign);
         });
-      });
+      } else {
+        campaign.updateAttribute("statusCode", statusCodes.campaignStopped,
+            (updateErr, updatedCampaign) => {
+          if(updateErr) return callback(errorMessages.SERVER_ERROR);
+          stopFollowUps(campaign, (stopError, followUps) => {
+            if(stopError) return callback(errorMessages.SERVER_ERROR);
+            return callback(null, campaign);
+          });
+        });
+      }
     });
   };
 
+  /**
+   * Method to Stop FollowUps in a Campaign
+   * @param  {Campaign}   campaign
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  const stopFollowUps = (campaign, callback) => {
+    const stoppedStatusCode = statusCodes.followUpStopped;
+    async.autoInject({
+      followUps: [async.apply(getFollowUpsToBeStopped, campaign)],
+      updateFollowUps: (followUps, callback) => {
+        Campaign.app.models.followUp.updateFollowUpsStatus(followUps,
+            stoppedStatusCode, (err, updatedFollowUps) => {
+          callback(err, updatedFollowUps);
+        });
+      }
+    }, (error, results) => {
+      if(error){
+        return callback(error);
+      }
+      return callback(null, results.updateFollowUps);
+    });
+  };
 
+  /**
+   * Method to Get FollowUps for a Campaign
+   * @param  {Campaign}   campaign
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  const getFollowUpsToBeStopped = (campaign, callback) => {
+    const stoppedStatusCode = statusCodes.followUpStopped;
+    const sentStatusCode = statusCodes.followUpSent;
+    Campaign.app.models.followUp.getFollowUpsCampaignId(campaign.id,
+        (followUpsErr, followUps) => {
+      if(followUpsErr) {
+        logger.error("Error while getting Follow Ups for Campaign", {
+          error: followUpsErr, stack: followUpsErr.stack, input:
+          {campaignId: campaign.id}});
+        return callback(err);
+      }
+      followUps = lodash.filter(followUps, (o) => {
+        return o.statusCode !== stoppedStatusCode
+          && o.statusCode !== sentStatusCode;
+      });
+      return callback(null, followUps);
+    });
+  };
 
   Campaign.remoteMethod(
     "resume",
@@ -308,17 +359,17 @@ module.exports = function(Campaign) {
 
     if(lodash.isEmpty(pastFollowUps)) {
       Campaign.app.models.followUp.updateFollowUpsStatus(followUps,
-          resumedStatusCode, false, (updateErr, updatedFollowUps) => {
+          resumedStatusCode, (updateErr, updatedFollowUps) => {
         if(updateErr) return callback(updateErr);
         return callback(null, updatedFollowUps);
       });
     } else {
-      Campaign.app.models.followUp.scheduleFollowUps(pastFollowUps, campaign,
+      Campaign.app.models.followUp.scheduleFollowUps(pastFollowUps,
           (err, response) => {
         if(err) return callback(err);
         let followUps = lodash.unionBy(pastFollowUps, futureFollowUps, "id");
         Campaign.app.models.followUp.updateFollowUpsStatus(followUps,
-            resumedStatusCode, false, (updateErr, updatedFollowUps) => {
+            resumedStatusCode, (updateErr, updatedFollowUps) => {
           if(updateErr) return callback(updateErr);
           return callback(null, updatedFollowUps);
         });
@@ -597,8 +648,8 @@ module.exports = function(Campaign) {
       updateAudit: Campaign.app.models.campaignStatusAudit.createAudit
         .bind(null, campaign, resumeStatusCode),
       setStatus: Campaign.setStatus.bind(null, campaign, resumeStatusCode)
-    }, (parallelErr) => {
-      if(parallelErr, result){
+    }, (parallelErr, result) => {
+      if(parallelErr){
         updateCB(parallelErr);
       }
       updateCB(null, result);

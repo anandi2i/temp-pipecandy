@@ -7,8 +7,7 @@ var mailEnqueue = require("../../server/emailReader/mailEnqueue");
 var emojiStrip = require("emoji-strip");
 var googleTokenHandler = require("../../server/utils/googleTokenHandler");
 var constants = require("../../server/utils/constants");
-require("console-stamp")(console, 
-  {pattern : constants.default.TIME_FORMAT});
+require("console-stamp")(console, {pattern : constants.default.TIME_FORMAT});
 
 // Regular expression to extract reply message alone
 const regExBody = "On ((Sun|Mon|Tue|Wed|Thu|Fri|Sat),|([0-3]*))(.*)wrote:";
@@ -226,8 +225,8 @@ function constructResponse(userId, sentMail, payload, response) {
   if (body) {
     let mailBody = new Buffer(body, "base64");
     mailBody = mailBody.toString();
-    let mailBodyTmp = mailBody.replace(/\r?\n|\r/g, " ");
-    mailBodyTmp = mailBodyTmp.toString();
+    let mailBodyTmp = mailBody.replace(/\r|\n|\r/g, " ");
+    mailBodyTmp = mailBodyTmp.toString().trim();
     let regExIndex = mailBodyTmp.match(regExBody);
     let replyMsg = mailBody.trim();
     if (regExIndex) {

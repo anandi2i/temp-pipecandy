@@ -94,39 +94,15 @@ FollowUp.prepareScheduledAt = (campaignId, prepareScheduledAtCB) => {
 FollowUp.getFolloUpsToSent = (callback) => {
   FollowUp.find({
     where: {
-      scheduledAt: {
-        lte: Date.now()
-      },
-      isFollowUpGenerated: false,
-      isStopped: false
+      and: [
+        {scheduledAt: {lte: Date.now()}},
+        {isFollowUpGenerated: false},
+        {statusCode: {neq: statusCodes.followUpStopped}}
+      ]
     },
     limit: 100
   }, function(followUpsErr, followUps) {
     callback(followUpsErr, followUps);
-  });
-};
-
-/**
- * Update the followUp isStopped flag value
- * @param  {[followUp]} followUp
- * @param  {[followUpScheduledDate]} followUpScheduledDate
- * @param  {[function]} updateFollowUpCB
- * @author Syed Sulaiman M
- */
-FollowUp.updateStoppedByCampaignId = (campaignId, isStopped, callback) => {
-  FollowUp.updateAll({
-    campaignId : campaignId
-  }, {
-    isStopped : isStopped,
-    statusCode: statusCodes.followUpStopped
-  }, (updateErr, info) => {
-    if(updateErr) {
-      logger.error("Error while updating followUps",
-        {error: updateErr, stack: updateErr.stack,
-          input: {campaignId: campaignId}});
-      return callback(updateErr);
-    }
-    return callback(null, info);
   });
 };
 
@@ -454,11 +430,22 @@ const createCampaignTemplate = (createdFollowUp, campaign,
    * @author Aswin Raj A
    */
   FollowUp.reScheduleFollowUps = (campaignId, reScheduleCB) => {
-    async.waterfall([
-      getAllFollowUpsForCampaign,
-      FollowUp.scheduleFollowUps
-    ], (asyncErr, result) => {
-      reScheduleCB(asyncErr, result);
+    async.autoInject({
+      followUps: [async.apply(getAllFollowUpsForCampaign, campaignId)],
+      scheduledFollowUps: (followUps, callback) => {
+        FollowUp.scheduleFollowUps(followUps, (err, followUps) => {
+          callback(null, followUps);
+        });
+      },
+      updatedFollowUps: (scheduledFollowUps, callback) => {
+        const resumedStatusCode = statusCodes.followUpResumed;
+        FollowUp.updateFollowUpsStatus(scheduledFollowUps, resumedStatusCode,
+            (err, updatedFollowUps) => {
+          callback(null, updatedFollowUps);
+        });
+      }
+    }, (asyncErr, result) => {
+      reScheduleCB(asyncErr, result.updatedFollowUps);
     });
   };
 
@@ -525,7 +512,7 @@ const createCampaignTemplate = (createdFollowUp, campaign,
    * @return {[response]}
    * @author Aswin Raj A
    */
-  FollowUp.scheduleFollowUps = (followUps, campaign, scheduleCB) => {
+  FollowUp.scheduleFollowUps = (followUps, scheduleCB) => {
     let oldScheduledDate = null;
     async.eachSeries(followUps, (followUp, followUpCB) => {
       async.waterfall([
@@ -538,7 +525,7 @@ const createCampaignTemplate = (createdFollowUp, campaign,
       });
     }, (eachSeriesErr) => {
       if(eachSeriesErr) return scheduleCB(eachSeriesErr);
-      return scheduleCB(null, "Scheduled followUps successfully!");
+      return scheduleCB(null, followUps);
     });
   };
 
@@ -549,13 +536,11 @@ const createCampaignTemplate = (createdFollowUp, campaign,
    * @param  {[function]} updateFollowUpCB
    * @author Syed Sulaiman M
    */
-  FollowUp.updateFollowUpsStatus = (followUps, statusCode, isStopped,
-      callback) => {
+  FollowUp.updateFollowUpsStatus = (followUps, statusCode, callback) => {
     let updatedFollowUps = [];
     async.each(followUps, (followUp, followUpCB) => {
       let properties = {
-        statusCode: statusCode,
-        isStopped: isStopped
+        statusCode: statusCode
       };
       followUp.updateAttributes(properties,
           (followUpUpdateErr, updatedFollowUp) => {
@@ -569,6 +554,32 @@ const createCampaignTemplate = (createdFollowUp, campaign,
       });
     }, (err) => {
       return callback(err, updatedFollowUps);
+    });
+  };
+
+  /**
+   * Get FollowUps for Campaign Id
+   * @param  {[campaignId]} campaignId
+   * @param  {[function]} callback
+   * @return {[followUps]}
+   * @author Syed Sulaiman M
+   */
+  FollowUp.getFollowUpsCampaignId = (campaignId, callback) => {
+    FollowUp.find({
+      where : {
+        campaignId: campaignId
+      }
+    }, (followUpsFindErr, followUps) => {
+      if(followUpsFindErr || lodash.isEmpty(followUps)) {
+        const errParam = followUpsFindErr || new Error("No followUps for the\
+          campaign");
+        logger.error(errParam.msg, {
+          input: {campaignId: campaignId},
+          stack: followUpsFindErr ? followUpsFindErr.stack : ""
+        });
+        return callback(followUpsFindErr);
+      }
+      return callback(null, followUps);
     });
   };
 
