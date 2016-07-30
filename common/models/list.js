@@ -160,6 +160,9 @@ module.exports = function(List) {
    * @author Aswin Raj A
    */
   const getFieldsForList = (ctx, list, getFieldsForListCB) => {
+    if(lodash.isEmpty(list.ids)){
+      return getFieldsForListCB("No Lists selected");
+    }
     List.find({
        where: {id: {inq: list.ids}, createdBy: ctx.req.accessToken.userId}
      }, (ListErr, lists) => {

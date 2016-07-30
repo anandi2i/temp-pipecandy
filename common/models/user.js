@@ -598,10 +598,9 @@ module.exports = function(user) {
       generateCampaignMetric
     ], (asyncErr, campaignsList) => {
       if(asyncErr){
-        logger.error("", asyncErr);
-        campaignListCB(asyncErr);
+        return campaignListCB(asyncErr);
       }
-      campaignListCB(null, campaignsList);
+      return campaignListCB(null, campaignsList);
     });
   };
 
@@ -619,15 +618,15 @@ module.exports = function(user) {
       }
     }, (campaignFindErr, campaigns) => {
       if(campaignFindErr || lodash.isEmpty(campaigns)) {
-        logger.error("Error while finding campaigns", {
+        let errParam = campaignFindErr || "No campaign for user";
+        logger.error(errParam, {
           input : {userId: userId},
           error: campaignFindErr,
           stack: campaignFindErr ? campaignFindErr.stack : ""
         });
-        let errParam = campaignFindErr || "No campaign for user";
-        getAllcampaignsForUser(errParam);
+        return getAllcampaignsForUser(errParam);
       }
-      getAllcampaignsForUser(null, campaigns);
+      return getAllcampaignsForUser(null, campaigns);
     });
   };
 
@@ -651,21 +650,21 @@ module.exports = function(user) {
             input : {campaignId: campaign.id},
             error: parallelErr, stack: parallelErr.stack
           });
-          campaignEachCB(parallelErr);
+          return campaignEachCB(parallelErr);
         }
         campaignMetrics.campaignId = campaign.id;
         campaignMetrics.campaign = campaign.name;
         campaignMetrics.statusCode = campaign.statusCode;
         campaignList.push(campaignMetrics);
-        campaignEachCB(null);
+        return campaignEachCB(null);
       });
     }, (eachErr) => {
       if(eachErr){
         logger.error("Error while generating campaign list with metrics", {
           error: eachErr, stack: eachErr.stack});
-        generateCB(eachErr);
+        return generateCB(eachErr);
       }
-      generateCB(null, campaignList);
+      return generateCB(null, campaignList);
     });
   };
 
@@ -683,9 +682,9 @@ module.exports = function(user) {
           input : {campaignId: campaign.id},
           error: listFindErr, stack: listFindErr.stack
         });
-        getCountCB(listFindErr);
+        return getCountCB(listFindErr);
       }
-      getCountCB(null, lists.length);
+      return getCountCB(null, lists.length);
     });
   };
 
@@ -698,9 +697,7 @@ module.exports = function(user) {
    * @author Aswin Raj A
    */
   const getCampaignReplyCount = (campaign, getReplyCountCB) => {
-    if(!campaign.isSent){
-      getReplyCountCB(null, emptyCount);
-    } else {
+    if(campaign.isSent){
       user.app.models.campaignMetric.find({
         where : {
           campaignId : campaign.id
@@ -711,11 +708,12 @@ module.exports = function(user) {
             input: {campaignId : campaign.id},
             error: metricFindErr, stack: metricFindErr.stack
           });
-          getReplyCountCB(metricFindErr);
+          return getReplyCountCB(metricFindErr);
         }
-        getReplyCountCB(null, campaignMetrics[0].responded);
+        return getReplyCountCB(null, campaignMetrics[0].responded);
       });
     }
+    return getReplyCountCB(null, emptyCount);
   };
 
   /**
@@ -726,9 +724,7 @@ module.exports = function(user) {
    * @author Aswin Raj A
    */
   const getCampaignProgress = (campaign, getProgressCB) => {
-    if(!campaign.isSent){
-      getProgressCB(null, emptyCount);
-    } else {
+    if(campaign.isSent){
       user.app.models.campaignMetric.find({
         where : {
           campaignId : campaign.id
@@ -741,11 +737,13 @@ module.exports = function(user) {
           });
           return getProgressCB(metricFindErr);
         }
-        let progress = campaignMetrics[0].sent / campaignMetrics[0].assembled;
+        let progress = campaignMetrics[0].sentEmails /
+          campaignMetrics[0].assembled;
         progress = Math.round(parseFloat(progress*percent));
         return getProgressCB(null, progress);
       });
     }
+    return getProgressCB(null, emptyCount);
   };
 
   /**
