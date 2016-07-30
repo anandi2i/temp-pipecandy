@@ -105,11 +105,28 @@ class AddFollowups extends React.Component {
       : "mdi mdi-chevron-up in-active";
     let checkErrorCount = this.state.errorCount
       ? "email-body" : "email-body clear-err-count";
+    let followUpCountTxt;
+    let firstFollowup = 1, secondFollowup = 2, thirdFollowup = 3;
     return(
       <div className="row draft-container m-lr-0">
         <div className="head" onClick={this.toggleEditContainer}>
           <div className="col s4 m4 l4">
-            <h3>{followUpCount}. Follow up {followUpCount}</h3>
+            <h3>
+              {
+                (() => {
+                  if(followUpCount === firstFollowup) {
+                    followUpCountTxt = "1st Followup";
+                  } else if (followUpCount === secondFollowup){
+                    followUpCountTxt = "2nd Followup";
+                  } else if (followUpCount === thirdFollowup){
+                    followUpCountTxt = "3rd Followup";
+                  } else {
+                    followUpCountTxt = `${followUpCount}th Followup`;
+                  }
+                  return followUpCountTxt;
+                })()
+              }
+            </h3>
           </div>
           <div className="col s6 m6 l6 editor-text">
             &nbsp;
