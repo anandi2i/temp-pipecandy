@@ -26,8 +26,9 @@ const statusCodes = {
   "followUpStopped-8": 84,
   "followUpResumed-8": 85,
   "followUpStopped" : 91, // Status represents FollowUp Emails of Campaign is Stopped
-  "executingFollowUp" : 92, // Status represents Sending FollowUp Emails of Campaign is Inprogress
-  "followUpSent" : 93, // Status represents All FollowUp Emails of Campaign is Sent
+  "followUpResumed" : 92, // Status represents FollowUp Emails of Campaign is Resumed
+  "executingFollowUp" : 93, // Status represents Sending FollowUp Emails of Campaign is Inprogress
+  "followUpSent" : 94, // Status represents All FollowUp Emails of Campaign is Sent
   "campaignExecuted" : 100
 };
 

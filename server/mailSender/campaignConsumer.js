@@ -32,7 +32,7 @@ const app = Consumer.create({
     let msgBody = JSON.parse(message.Body);
     const campaign = msgBody.campaign;
     console.log("Recived Message : ", campaign);
-    if(msgBody.action === "assembler"){
+    if(msgBody.action === "assembled"){
       assembleCampaignProcess(campaign, (err, data) => {
         if(err) return done(err);
         return done();

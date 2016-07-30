@@ -456,7 +456,7 @@ const createCampaignTemplate = (createdFollowUp, campaign,
   FollowUp.reScheduleFollowUps = (campaignId, reScheduleCB) => {
     async.waterfall([
       getAllFollowUpsForCampaign,
-      scheduleFollowUps
+      FollowUp.scheduleFollowUps
     ], (asyncErr, result) => {
       reScheduleCB(asyncErr, result);
     });
@@ -473,7 +473,8 @@ const createCampaignTemplate = (createdFollowUp, campaign,
     FollowUp.find({
       where : {
         campaignId: campaignId
-      }
+      },
+      order: "stepNo ASC",
     }, (followUpsFindErr, followUps) => {
       if(followUpsFindErr || lodash.isEmpty(followUps)){
         const errParam = followUpsFindErr || new Error("No followUps for the\
@@ -488,6 +489,33 @@ const createCampaignTemplate = (createdFollowUp, campaign,
     });
   };
 
+  /**
+   * Get Stopped followUps for the current campaign id
+   * @param  {[campaignId]} campaignId
+   * @param  {[function]} getFolloupsCB
+   * @return {[followUps]}
+   * @author Syed Sulaiman M
+   */
+  FollowUp.getFollowUpsByStatusAndCampaignId = (campaignId, statusCode,
+      callback) => {
+    FollowUp.find({
+      where : {
+        campaignId: campaignId,
+        statusCode: statusCode
+      }
+    }, (followUpsFindErr, followUps) => {
+      if(followUpsFindErr || lodash.isEmpty(followUps)) {
+        const errParam = followUpsFindErr || new Error("No followUps for the\
+          campaign");
+        logger.error(errParam.msg, {
+          input: {campaignId: campaignId},
+          stack: followUpsFindErr ? followUpsFindErr.stack : ""
+        });
+        return callback(followUpsFindErr);
+      }
+      return callback(null, followUps);
+    });
+  };
 
   /**
    * To update all the followUps with the new followUp date
@@ -497,7 +525,7 @@ const createCampaignTemplate = (createdFollowUp, campaign,
    * @return {[response]}
    * @author Aswin Raj A
    */
-  const scheduleFollowUps = (followUps, campaign, scheduleCB) => {
+  FollowUp.scheduleFollowUps = (followUps, campaign, scheduleCB) => {
     let oldScheduledDate = null;
     async.eachSeries(followUps, (followUp, followUpCB) => {
       async.waterfall([
@@ -511,6 +539,36 @@ const createCampaignTemplate = (createdFollowUp, campaign,
     }, (eachSeriesErr) => {
       if(eachSeriesErr) return scheduleCB(eachSeriesErr);
       return scheduleCB(null, "Scheduled followUps successfully!");
+    });
+  };
+
+  /**
+   * Update the followUp Status
+   * @param  {[followUp]} followUp
+   * @param  {[followUpScheduledDate]} followUpScheduledDate
+   * @param  {[function]} updateFollowUpCB
+   * @author Syed Sulaiman M
+   */
+  FollowUp.updateFollowUpsStatus = (followUps, statusCode, isStopped,
+      callback) => {
+    let updatedFollowUps = [];
+    async.each(followUps, (followUp, followUpCB) => {
+      let properties = {
+        statusCode: statusCode,
+        isStopped: isStopped
+      };
+      followUp.updateAttributes(properties,
+          (followUpUpdateErr, updatedFollowUp) => {
+        if(followUpUpdateErr) {
+          logger.error("Error while updating followUps",
+          {error: followUpUpdateErr, stack: followUpUpdateErr.stack});
+          return updateFollowUpCB(followUpUpdateErr);
+        }
+        updatedFollowUps.push(updatedFollowUp);
+        followUpCB(null, updatedFollowUp);
+      });
+    }, (err) => {
+      return callback(err, updatedFollowUps);
     });
   };
 

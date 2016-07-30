@@ -83,7 +83,13 @@ module.exports = function(Campaign) {
       getCampaign,
       updateCampaign,
       reCreateCampaignElements,
-      enqueueToMailAssembler
+      (campaign, transit, passParamsCB) => {
+        enqueueToMailAssembler(campaign, transit, (err, response) => {
+          if(err) return passParamsCB(err);
+          return passParamsCB(null, campaign, statusCodes.enqueued);
+        });
+      },
+      Campaign.setStatus
     ], (asyncErr, result) => {
       return saveCampaignElementsCB(asyncErr, result);
     });
@@ -176,28 +182,80 @@ module.exports = function(Campaign) {
    * @author Aswin Raj A
    */
   Campaign.resume = (ctx, campaignId, resumeCB) => {
-    const resumeStatusCode = statusCodes.campaignResumed;
     getCampaign(ctx, campaignId, null, (err, campaign) => {
       if(err) {
         return resumeCB(err);
       }
-      async.waterfall([
-        async.apply(validateStatusCode, campaign),
-        enqueueToMailAssembler,
-        (response, passParamsCB) => {
-          passParamsCB(null, campaign.id);
-        },
-        Campaign.app.models.followUp.reScheduleFollowUps,
-        (response, passParamsCB) => {
-          passParamsCB(null, campaign, resumeStatusCode);
-        },
-        updateStatusProcess
-      ], (asyncErr, result) => {
-        if(asyncErr){
-          resumeCB(asyncErr);
-        }
-        resumeCB(null, result);
-      });
+      if(!campaign) {
+        const errorMessage = errorMessages.INVALID_CAMPAIGN_ID;
+        return resumeCB(errorMessage);
+      }
+      if(campaign.statusCode === statusCodes.campaignSent) {
+        resumeFollowUps(campaign, (err, response) => {
+          if(err) {
+            logger.error("Error while resuming campaign followUps",
+            {error: err, stack: err.stack, input:{campaignId:campaignId}});
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return resumeCB(errorMessage);
+          }
+          return resumeCB(null, response);
+        });
+      } else {
+        resumeCampaign(campaign, (err, response) => {
+          if(err) {
+            logger.error("Error while resuming campaign",
+            {error: err, stack: err.stack, input:{campaignId:campaignId}});
+            const errorMessage = errorMessages.SERVER_ERROR;
+            return resumeCB(errorMessage);
+          }
+          return resumeCB(null, response);
+        });
+      }
+    });
+  };
+
+  /**
+   * Method to Resume Campaign
+   * @param  {Campaign}   campaign
+   * @param  {Function} callback
+   * @author Aswin Raj A, Syed Sulaiman M(modified)
+   */
+  const resumeCampaign = (campaign, callback) => {
+    const resumeStatusCode = statusCodes.campaignResumed;
+    async.waterfall([
+      async.apply(validateStatusCode, campaign),
+      enqueueToMailAssembler,
+      (response, passParamsCB) => {
+        passParamsCB(null, campaign.id);
+      },
+      Campaign.app.models.followUp.reScheduleFollowUps,
+      (response, passParamsCB) => {
+        passParamsCB(null, campaign, resumeStatusCode);
+      },
+      updateStatusProcess
+    ], (asyncErr, result) => {
+      if(asyncErr){
+        callback(asyncErr);
+      }
+      callback(null, result);
+    });
+  };
+
+  /**
+   * Method to Resume FollowUps in a Campaign
+   * @param  {Campaign}   campaign
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  const resumeFollowUps = (campaign, callback) => {
+    async.waterfall([
+      async.apply(getStoppedFollowUpsForCampaign, campaign),
+      scheduleFollowUps
+    ], (asyncErr, result) => {
+      if(asyncErr){
+        return callback(asyncErr);
+      }
+      return callback(null, result);
     });
   };
 
@@ -206,6 +264,66 @@ module.exports = function(Campaign) {
       return validateStatusCodeCB(null, campaign, "resumed");
     }
     return validateStatusCodeCB("Invalid previous status code");
+  };
+
+  /**
+   * Method to Get Stopped FollowUps for a Campaign
+   * @param  {Campaign}   campaign
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  const getStoppedFollowUpsForCampaign = (campaign, callback) => {
+    const stoppedStatusCode = statusCodes.followUpStopped;
+    Campaign.app.models.followUp.getFollowUpsByStatusAndCampaignId(campaign.id,
+        stoppedStatusCode, (followUpsErr, followUps) => {
+      if(followUpsErr) {
+        logger.error("Error while getting Follow Ups for Campaign", {
+          error: followUpsErr, stack: followUpsErr.stack, input:
+          {campaignId: campaign.id}});
+        return callback(err);
+      }
+      return callback(null, followUps, campaign);
+    });
+  };
+
+  /**
+   * Method to Get Stopped FollowUps for a Campaign
+   * @param  {Campaign}   campaign
+   * @param  {Function} callback
+   * @param {[FollowUp]} List of Updated FollowUps
+   * @author Syed Sulaiman M
+   */
+  const scheduleFollowUps = (followUps, campaign, callback) => {
+    if(lodash.isEmpty(followUps)) return callback(null, []);
+    const resumedStatusCode = statusCodes.followUpResumed;
+    let pastFollowUps = lodash.filter(followUps, (o) => {
+      return o.scheduledAt < Date.now();
+    });
+    pastFollowUps = lodash.sortBy(pastFollowUps, "stepNo");
+
+    let futureFollowUps = lodash.filter(followUps, (o) => {
+      return o.scheduledAt > Date.now();
+    });
+    futureFollowUps = lodash.sortBy(futureFollowUps, "stepNo");
+
+    if(lodash.isEmpty(pastFollowUps)) {
+      Campaign.app.models.followUp.updateFollowUpsStatus(followUps,
+          resumedStatusCode, false, (updateErr, updatedFollowUps) => {
+        if(updateErr) return callback(updateErr);
+        return callback(null, updatedFollowUps);
+      });
+    } else {
+      Campaign.app.models.followUp.scheduleFollowUps(pastFollowUps, campaign,
+          (err, response) => {
+        if(err) return callback(err);
+        let followUps = lodash.unionBy(pastFollowUps, futureFollowUps, "id");
+        Campaign.app.models.followUp.updateFollowUpsStatus(followUps,
+            resumedStatusCode, false, (updateErr, updatedFollowUps) => {
+          if(updateErr) return callback(updateErr);
+          return callback(null, updatedFollowUps);
+        });
+      });
+    }
   };
 
   Campaign.remoteMethod(
@@ -451,7 +569,7 @@ module.exports = function(Campaign) {
    * @param  {[function]} enqueueToMailAssemblerCB
    */
   const enqueueToMailAssembler = (campaign, transit,
-    enqueueToMailAssemblerCB) => {
+      callback) => {
     let queueName = "emailAssembler";
     let queueData = {
       campaign: campaign,
@@ -459,8 +577,8 @@ module.exports = function(Campaign) {
     };
     queueUtil.enqueueMail(JSON.stringify(queueData), queueName,
       (err, response) => {
-      if(err) return enqueueMailCB(err);
-      return enqueueMailCB(null, "Enqueued successfully!");
+      if(err) return callback(err);
+      return callback(null, "Enqueued successfully!");
     });
   };
 
