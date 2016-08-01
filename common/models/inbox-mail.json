@@ -26,6 +26,10 @@
     "subject": {
       "type": "string"
     },
+    "isMailReceived": {
+      "type": "boolean",
+      "default": false
+    },
     "class": {
       "type": "string"
     },

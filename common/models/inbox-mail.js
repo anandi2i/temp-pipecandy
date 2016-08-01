@@ -141,13 +141,13 @@ module.exports = function(InboxMail) {
       whereQry = {
         and: [
           {campaignId: campaignId},
-          {count: {gt: 1}}
+          {isMailReceived: true}
         ]};
     } else {
       whereQry = {
         and: [
           {campaignId: campaignId},
-          {count: {gt: 1}},
+          {isMailReceived: true},
           {class: classification}
         ]};
     }

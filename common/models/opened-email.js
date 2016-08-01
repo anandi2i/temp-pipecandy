@@ -1,6 +1,7 @@
 import async from "async";
 import lodash from "lodash";
 import logger from "../../server/log";
+import config from "../../server/config.json";
 
 module.exports = function(OpenedEmail) {
 
@@ -25,10 +26,14 @@ module.exports = function(OpenedEmail) {
    * @return void
    */
   OpenedEmail.trackEmail = (campaignId, personId, res, req) => {
+    if(req.headers.referer === config.emailHost) {
+      return res.redirect("/images/1x1.png");
+    }
     OpenedEmail.find({
       where: {
         "campaignId": campaignId,
-        "personId": personId
+        "personId": personId,
+        "followUpId": null
       }
     }, (openedEmailEntryErr, openedEmailEntry) => {
       if(openedEmailEntryErr){
@@ -62,16 +67,69 @@ module.exports = function(OpenedEmail) {
             return res.redirect("/images/1x1.png");
           }
           return res.redirect("/images/1x1.png");
-          // OpenedEmail.app.models.campaignAudit
-          //   .updateFollowUpEligiblity(campaignId, personId, (updateErr) => {
-          //   if(updateErr){
-          //     logger.error("Error while updating follow up eligibility", {
-          //       input: {"campaignId": campaignId, "personId": personId
-          //       }, error: updateErr, stack: updateErr.stack});
-          //     return res.redirect("/images/1x1.png");
-          //   }
-          //   return res.redirect("/images/1x1.png");
-          // });
+        });
+      }
+    });
+  };
+
+  OpenedEmail.remoteMethod(
+    "trackFollowUp", {
+      accepts: [
+        {arg: "campaignId", type: "number"},
+        {arg: "personId", type: "number"},
+        {arg: "followUpId", type: "number"},
+        {arg: "res", type: "object", "http": {source: "res"}},
+        {arg: "req", type: "object", "http": {source: "req"}}
+      ],
+      http:
+        {path: "/campaign/:campaignId/person/:personId/followUp/:followUpId/"
+            + "trackFollowUp", verb: "GET"}
+    }
+  );
+  /**
+   * API to track whether the follow email has been opened by the prospect
+   * http://localhost:3000/api/openedEmails/trackEmail/:campaignId/:personId/followUp/:followUpId/trackFollowUp
+   * @param  {[number]} campaignId
+   * @param  {[number]} personId
+   * @param  {[number]} followUpId
+   * @param  trackEmailCB (Callback)
+   * @return void
+   */
+  OpenedEmail.trackFollowUp = (campaignId, personId, followUpId, res, req) => {
+    if(req.headers.referer === config.emailHost) {
+      return res.redirect("/images/1x1.png");
+    }
+    OpenedEmail.find({
+      where: {
+        "campaignId": campaignId,
+        "personId": personId,
+        "followUpId": followUpId
+      }
+    }, (openedEmailEntryErr, openedEmailEntry) => {
+      if(openedEmailEntryErr){
+        logger.error("Error while finding open email entry", {
+          input: {"campaignId": campaignId, "personId": personId,
+          "followUpId": followUpId}, error: openedEmailEntryErr,
+          stack: openedEmailEntryErr.stack});
+        return res.redirect("/images/1x1.png");
+      }
+      if(lodash.isEmpty(openedEmailEntry)) {
+        async.series({
+          openedEmail: async.apply(openedFollowUpEntry,
+              campaignId, personId, followUpId),
+          followUpMetric: async.apply(createFollowUpMetric,
+              campaignId, followUpId)
+        }, (asyncErr, results) => {
+          if (asyncErr) {
+            logger.error({error: asyncErr, stack: asyncErr});
+            return res.redirect("/images/1x1.png");
+          }
+          return res.redirect("/images/1x1.png");
+        });
+      } else {
+        openedFollowUpEntry(campaignId, personId, followUpId,
+            (err, openedEmail) => {
+          return res.redirect("/images/1x1.png");
         });
       }
     });
@@ -94,6 +152,34 @@ module.exports = function(OpenedEmail) {
         return openedEmailsEntryCB(openedEmailNewEntryErr);
       }
       return openedEmailsEntryCB(null, campaignId, personId);
+    });
+  };
+
+  /**
+   * - Create an entry in the openedEmail table when a person opens the followUp Email
+   *
+   * @param  {campaignId} campaignId
+   * @param  {personId} personId
+   * @param  {followUp} followUpId
+   * @param  {function} callback
+   * @return {OpenedEmail}
+   * @author Syed Sulaiman M
+   */
+  const openedFollowUpEntry = (campaignId, personId, followUpId, callback) => {
+    OpenedEmail.create({
+      "campaignId": campaignId,
+      "personId": personId,
+      "followUpId": followUpId,
+      "count": 1
+    }, (openedEmailErr, openedEmail) => {
+      if (openedEmailErr) {
+        logger.error("Error while creating open followUp entry", {
+          input: {"campaignId": campaignId, "personId": personId,
+          "followUpId": followUpId}, error: openedEmailErr,
+          stack: openedEmailErr.stack});
+        return callback(openedEmailErr);
+      }
+      return callback(null, openedEmail);
     });
   };
 
@@ -236,6 +322,51 @@ module.exports = function(OpenedEmail) {
           return campaignMetricEntryCB(null);
         });
       }
+    });
+  };
+
+  /**
+   * Create an entry in the followUp Metric table
+   *
+   * @param  {Number} campaignId
+   * @param  {Function} callback
+   * @return {[type]}
+   * @author Syed Sulaiman M
+   */
+  const createFollowUpMetric = (campaignId, followUpId, callback) => {
+    OpenedEmail.app.models.followUpMetric.find({
+      where: {
+        "followUpId": followUpId,
+        "campaignId": campaignId
+      }
+    }, (metricErr, metricEntry) => {
+      if (metricErr) {
+        logger.error("Error while finding FollowUp Metric", {
+          input: {"followUpId": followUpId, "campaignId": campaignId},
+          error: metricErr, stack: metricErr.stack
+        });
+        return callback(metricErr);
+      }
+      let followUpMetricInst = {
+        campaignId: campaignId,
+        followUpId: followUpId,
+        opened: 1
+      };
+      if (!lodash.isEmpty(metricEntry)) {
+        followUpMetricInst = metricEntry[0];
+        followUpMetricInst.opened = ++metricEntry[0].opened;
+      }
+      OpenedEmail.app.models.followUpMetric.upsert(
+          followUpMetricInst, function(err, response) {
+        if (err) {
+          logger.error("Error while create/update FollowUp Metric", {
+            input: {"followUpId": followUpId, "campaignId": campaignId},
+            error: err, stack: err.stack
+          });
+          return callback(err);
+        }
+        return callback(null, response);
+      });
     });
   };
 

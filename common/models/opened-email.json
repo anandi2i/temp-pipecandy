@@ -29,6 +29,11 @@
       "type": "belongsTo",
       "model": "campaign",
       "foreignKey": "campaignId"
+    },
+    "followUp": {
+      "type": "belongsTo",
+      "model": "followUp",
+      "foreignKey": "followUpId"
     }
   },
   "acls": [
@@ -37,6 +42,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "trackEmail"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "trackFollowUp"
     }
   ],
   "methods": {}

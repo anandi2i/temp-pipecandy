@@ -366,6 +366,10 @@ function updateInboxMail(App, param, mailResponse, sentMail, callback) {
     campaignId: sentMail.campaignId,
     userId: param.userId
   };
+  let isSent = mailResponse.labels.includes("SENT");
+  if(!isSent) {
+    inboxMailInst.isMailReceived = true;
+  }
   App.inboxMail.saveOrUpdate(inboxMailInst, function(err, response) {
     updateMetricForResponded(App, response, function (err, result) {
       callback(null, param, mailResponse, sentMail);

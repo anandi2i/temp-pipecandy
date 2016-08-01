@@ -72,6 +72,11 @@
       "type": "hasMany",
       "model": "emailQueue",
       "foreignKey": ""
+    },
+    "openedEmail": {
+      "type": "hasMany",
+      "model": "openedEmail",
+      "foreignKey": ""
     }
 
   },

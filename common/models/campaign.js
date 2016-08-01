@@ -501,7 +501,7 @@ module.exports = function(Campaign) {
       "isOptTextNeeded": reqParams.campaign.isOptTextNeeded,
       "statusCode": statusCodes.updated,
       "userDate": reqParams.campaign.userDate,
-      "isTTSEnabled" : true
+      "isTTSEnabled" : false
     };
     if(reqParams.campaign.isTTSEnabled) {
       campaignUpdateElements.isTTSEnabled = reqParams.campaign.isTTSEnabled;
@@ -912,9 +912,11 @@ module.exports = function(Campaign) {
     applyOpenTrackCB) => {
     let trackerContent = email.content;
     let url = `${serverUrl}/api/openedEmails/campaign/${campaign.id}/person/` +
-      `${person.id}/trackEmail`;
+      `${person.id}`;
     if(followup) {
-      url += `?followUpId=${followup.id}`;
+      url += `/followUp/${followup.id}/trackFollowUp`;
+    } else {
+      url += "/trackEmail";
     }
     let trackerTag = `<img src='${url}'/>`;
     trackerContent += trackerTag;
