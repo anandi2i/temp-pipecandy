@@ -67,7 +67,13 @@
       "type": "hasMany",
       "model": "followUpMetric",
       "foreignKey": ""
+    },
+    "emailQueues": {
+      "type": "hasMany",
+      "model": "emailQueue",
+      "foreignKey": ""
     }
+
   },
   "acls": [],
   "methods": {}

@@ -3,6 +3,7 @@ import async from "async";
 
 module.exports = function(CampaignAudit) {
 
+//npm run calls
   /**
    * Get Audit By Person And Campaign Id
    * @param {Number} personId
@@ -22,15 +23,40 @@ module.exports = function(CampaignAudit) {
     });
   };
 
-//npm run calls
+  /**
+   * Checks the email is already sent or not. for that we have to find
+   * CampaignAudit model with campaignId and personId and followUpId
+   *
+   * @param  {[Campaign]} campaign           [current campaign Object]
+   * @param  {[Person]} person
+   * @param  {[function]} checkEmailExistsCB [callback]
+   * @return {[boolean]}[if email Exists return false else it will return true]
+   * @author Ramanavel Selvaraju
+   */
+   CampaignAudit.checkEmailExists = (campaign, followup, person,
+     emailExistsCB) => {
+    CampaignAudit.find({where: {and: [{campaignId: campaign.id},
+      {personId: person.id}, {followUpId: followup ? followup.id : null}]}
+    }, (checkEmailExistsFindErr, emails)=>{
+      if(checkEmailExistsFindErr) {
+        logger.error("Check Email Exists in CampaignAudit Find Error", {
+          error: checkEmailExistsFindErr,
+          stack: checkEmailExistsFindErr.stack,
+          input: {campaign: campaign, followUp: followup, person: person}
+        });
+        return emailExistsCB(checkEmailExistsFindErr);
+      }
+    return emailExistsCB(null, lodash.isEmpty(emails));
+    }); //EmailQueue.find
+  }; //checkEmailExists
+
   /**
    * Checks whether the person is valid to generating followup or not
    *
-   * @param  {[type]}  campaign                [description]
-   * @param  {[type]}  person                  [description]
-   * @param  {[type]}  followup                [description]
-   * @param  {Boolean} isEligibleForFollowupCB [description]
-   * @return {[type]}                          [description]
+   * @param  {Campaign}  campaign
+   * @param  {Person}  person
+   * @param  {followUp}  followup
+   * @param  {function} isEligibleForFollowupCB
    * @author Ramanavel Selvaraju
    */
   CampaignAudit.isEligibleForFollowup = (campaign, person, followup,

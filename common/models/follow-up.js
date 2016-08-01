@@ -33,53 +33,71 @@ module.exports = function(FollowUp) {
         return getStepNoCB(null, stepNos);
     });
   };
-
+  /**
+   * gets the campagin object and followup object parallel manner using campaignId
+   *
+   * @param  {number}   campaignId
+   * @param  {Function} callback
+   * @author Ramanavel Selvaraju
+   */
+  FollowUp.getCampaignAndFollowUps = (campaignId, callback) => {
+    async.parallel({
+      followUps: (followUpsCB) => {
+        FollowUp.find({where : {campaignId : campaignId}, order: "stepNo ASC"},
+         (followUpsFindErr, followUps) => {
+          if(followUpsFindErr || lodash.isEmpty(followUps)){
+            logger.error("Error while finding followups", {
+              error: followUpsFindErr, input: {campaignId: campaignId},
+              stack: followUpsFindErr ? followUpsFindErr.stack : null});
+            const notFound = "Campaign not Found";
+            return followUpsCB(followUpsFindErr || new Error(notFound));
+          }
+          return followUpsCB(null, followUps);
+        });
+      },
+      campaign: (campaignCB) => {
+        FollowUp.app.models.campaign.findById(campaignId,
+          (campaignfindErr, campaign) => {
+          if(campaignfindErr){
+            logger.error("Error while finding campaign",
+            {error: campaignfindErr, stack: campaignfindErr.stack,
+             input: {campaignId: campaignId}});
+            return campaignCB(campaignfindErr);
+          }
+          return campaignCB(null, campaign);
+        });
+      }
+    }, (parallelErr, results) => {
+      if(parallelErr) return callback(parallelErr);
+      return callback(null, results.followUps, results.campaign);
+    });
+  };
 /**
  * To update each of the followUps for the current campaign with the scheduled date
  * @param  {[campaignId]} campaignId
  * @param  {[function]} prepareScheduledAtCB
  * @return void
- * @author Aswin Raj A
+ * @author Aswin Raj A, Ramanavel Selvaraju(Modified)
  */
 FollowUp.prepareScheduledAt = (campaignId, prepareScheduledAtCB) => {
-  FollowUp.find({
-    where : {
-      campaignId : campaignId
-    },
-    order: "stepNo ASC",
-  }, (followUpsFindErr, followUps) => {
-    if(followUpsFindErr || lodash.isEmpty(followUps)){
-      logger.error("Error while finding followups", {error: followUpsFindErr,
-        stack: followUpsFindErr ? followUpsFindErr.stack : null});
-      const notFound = "Campaign not Found";
-      return prepareScheduledAtCB(followUpsFindErr,
-          new Error(notFound));
-    }
+  FollowUp.getCampaignAndFollowUps(campaignId, (err, followUps, campaign) => {
+    if(err) return prepareScheduledAtCB(err);
     let previousScheduledDate = null;
     async.eachSeries(followUps, (followUp, followUpCB) => {
+      if(!previousScheduledDate) previousScheduledDate = campaign.scheduledAt;
       async.waterfall([
-        function setParams(setParamsCB) {
-          setParamsCB(null, followUp, campaignId, previousScheduledDate);
-        },
-        getPreviousScheduledDate,
-        calculateNextFollowupdate,
+        async.apply(calculateNextFollowupdate, previousScheduledDate, followUp,
+          campaign),
         updateFollowUp
       ], (asyncErr, newFollowupDate) => {
         if(asyncErr){
-          logger.error("Error while updating followups", {error: asyncErr,
-            stack: asyncErr.stack});
           return followUpCB(asyncErr);
         }
         previousScheduledDate = newFollowupDate;
-        followUpCB(null);
+        return followUpCB(null);
       });
     }, (asyncErr) => {
-      if(asyncErr){
-        logger.error("Error while updating followups", {error: asyncErr,
-          stack: asyncErr.stack});
-        prepareScheduledAtCB(asyncErr);
-      }
-      prepareScheduledAtCB(null);
+        return prepareScheduledAtCB(asyncErr);
     });
   });
 };
@@ -107,33 +125,6 @@ FollowUp.getFolloUpsToSent = (callback) => {
 };
 
 /**
- * To get the previousScheduledDate for the current follow up,
- * if previousScheduledDate is not empty, use it
- * if previousScheduledDate is empty, use the campaign's scheduled date
- * @param  {[followUp]} followUp
- * @param  {[campaignId]} campaignId
- * @param  {[function]} getPreviousScheduledDateCB
- * @return {[previousScheduledDate, followUp]}
- * @author Aswin Raj A
- */
-const getPreviousScheduledDate = (followUp, campaignId, previousScheduledDate,
-  getPreviousScheduledDateCB) => {
-  if(previousScheduledDate){
-    return getPreviousScheduledDateCB(null, previousScheduledDate, followUp);
-  }
-  FollowUp.app.models.campaign.findById(campaignId,
-    (campaignfindErr, campaign) => {
-    if(campaignfindErr){
-      logger.error("Error while finding campaign",
-      {error: campaignfindErr, stack: campaignfindErr.stack});
-      return getPreviousScheduledDateCB(campaignfindErr);
-    }
-    previousScheduledDate = campaign.scheduledAt;
-    getPreviousScheduledDateCB(null, previousScheduledDate, followUp);
-  });
-};
-
-/**
  * Calculate the next followUp date
  * get the scheduledDate and add the number of days to it and append the time to it
  * convert the datetime to system timezone using moment
@@ -143,7 +134,7 @@ const getPreviousScheduledDate = (followUp, campaignId, previousScheduledDate,
  * @return {[nextFolloupDate]}
  * @author Aswin Raj A
  */
-const calculateNextFollowupdate = (scheduledDate, followUp,
+const calculateNextFollowupdate = (scheduledDate, followUp, campaign,
   calculateNextFollowupdateCB) => {
   const systemTimeZone = moment().format("Z");
   try {
@@ -156,8 +147,11 @@ const calculateNextFollowupdate = (scheduledDate, followUp,
     const newformatedDate = new Date(newDate);
     const dateString = (newformatedDate.getMonth()+one) + " " +
     newformatedDate.getDate() + " " + newformatedDate.getFullYear();
+    const five = 5;
+    const userTimeZone = campaign.userDate ?
+      campaign.userDate.split(" ")[five] : systemTimeZone;
     const newFollowupDate = new Date(dateString + " " + followUp.time +
-    " " + systemTimeZone);
+    " " + userTimeZone);
 
     calculateNextFollowupdateCB(null, followUp, newFollowupDate);
   } catch (err) {
@@ -331,23 +325,27 @@ const createCampaignTemplate = (createdFollowUp, campaign,
    * @author Ramanavel Selvaraju
    */
   FollowUp.assembleEmails = (followup, assembleEmailsCB) => {
-
     followup.campaign((campaignErr, campaign) => {
-
       if(campaignErr) {
        logger.error("Error on FollowUp.assembleEmails : ",
           {followup: followup, error: campaignErr, stack: campaignErr.stack});
        return assembleEmailsCB(campaignErr);
       }
-
-      FollowUp.app.models.list.getListAndSaveEmail(campaign, followup,
-      (getPoepleAndGenerateEmailErr) => {
-        return assembleEmailsCB(getPoepleAndGenerateEmailErr,
-          "Generated emails for followup:" + followup);
-      });//list.getListAndSaveEmail
-
-    });//followup.campaign
-
+      async.series([
+        async.apply(FollowUp.app.models.campaign.updateStatusCode,
+          followup, statusCodes.followUpProcessing),
+        async.apply(FollowUp.app.models.emailQueue.destroyByFollowUp, followup),
+        async.apply(FollowUp.app.models.followUpMetric.updateMertricsOnGen,
+          followup),
+        async.apply(FollowUp.app.models.list.getListAndSaveEmail,
+          campaign, followup),
+        async.apply(FollowUp.app.models.campaign.updateStatusCode,
+          followup, statusCodes.followUpReadyToSend),
+      ], (assembleErr) => {
+        return assembleEmailsCB(assembleErr,
+          "Generated emails for followupId: " + followup.id);
+      });
+    });
   };
 
   /**
@@ -516,7 +514,8 @@ const createCampaignTemplate = (createdFollowUp, campaign,
     let oldScheduledDate = null;
     async.eachSeries(followUps, (followUp, followUpCB) => {
       async.waterfall([
-        async.apply(calculateNextFollowupdate, oldScheduledDate, followUp),
+        async.apply(calculateNextFollowupdate, oldScheduledDate, followUp,
+          campaign),
         updateFollowUp
       ], (asyncErr, prevFollowUpDate) => {
         if(asyncErr) return followUpCB(asyncErr);

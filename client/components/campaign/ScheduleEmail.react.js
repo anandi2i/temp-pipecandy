@@ -443,7 +443,8 @@ class ScheduleEmail extends React.Component {
     isOptTextNeeded: isOptText,
     isAddressNeeded: isAddress,
     optText: optText,
-    address: addressDom.html()
+    address: addressDom.html(),
+    userDate: new Date().toString()
   };
   if(displayScheduleCampaign) {
     //campaignDetails.scheduledDate = element.find(".datepicker").val();

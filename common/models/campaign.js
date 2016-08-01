@@ -499,8 +499,13 @@ module.exports = function(Campaign) {
       "optText" : reqParams.campaign.optText,
       "isAddressNeeded": reqParams.campaign.isAddressNeeded,
       "isOptTextNeeded": reqParams.campaign.isOptTextNeeded,
-      "statusCode": statusCodes.updated
+      "statusCode": statusCodes.updated,
+      "userDate": reqParams.campaign.userDate,
+      "isTTSEnabled" : true
     };
+    if(reqParams.campaign.isTTSEnabled) {
+      campaignUpdateElements.isTTSEnabled = reqParams.campaign.isTTSEnabled;
+    }
     if(reqParams.campaign.scheduledAt) {
       campaignUpdateElements.scheduledAt = reqParams.campaign.scheduledAt;
     }
@@ -715,18 +720,19 @@ module.exports = function(Campaign) {
    * @param  {[function]} generateEmailCB [callback]
    * @author Ramanavel Selvaraju
    */
-  Campaign.generateEmail = (campaign, person, listIds, followup,
+  Campaign.generateEmail = (campaign, person, listIds, followup, ttsMetaMap,
      generateEmailCB) => {
     async.waterfall([
-      function(setArgs) {
-        setArgs(null, campaign, person, listIds, followup);
-      },
+      async.apply(preaprePersonObject, campaign, person, listIds, followup),
       preaprePersonObject,
       getTemplate,
       applySmartTags,
       appendOpenTracker,
       appendLinkClickTracker,
       appendBottomPart,
+      function(campaign, followup, person, email, setArgs) {
+        setArgs(null, campaign, followup, person, email, ttsMetaMap);
+      },
       prepareScheduledAt,
       preapreFollowUp,
       sendToEmailQueue,
@@ -965,28 +971,48 @@ module.exports = function(Campaign) {
    * @param function prepare ScheduledAt Callback
    * @author Ramanavel Selvaraju
    */
-  const prepareScheduledAt = (campaign, followup, person, email,
+  const prepareScheduledAt = (campaign, followup, person, email, ttsMetaMap,
     prepareScheduledAtCB) => {
     const scheduledAtFromUser = followup ? followup.scheduledAt
                                        : campaign.scheduledAt;
-    let scheduledAt = new Date();
+    ttsMetaMap.default = ttsMetaMap.default ? ttsMetaMap.default : new Date();
+    let scheduledAt = null;
+    const ttsInterval = 3;
     try {
       if (scheduledAtFromUser) {
         if (person.time_zone) {
-          const personZoneTime = moment(scheduledAtFromUser)
-                            .tz(person.time_zone).format("YYYY-MM-DDTHH:mm:ss");
-          scheduledAt = new Date(personZoneTime + moment().format("Z"));
-          const ten = -10;
-          const diff = scheduledAt
-                            - new Date(moment(new Date()).add(ten, "minutes"));
-          const zero = 0;
-          const one = 1;
-          if(!lodash.gt(diff, zero)) {
+          if (ttsMetaMap[person.time_zone]) {
+            scheduledAt = ttsMetaMap[person.time_zone];
+          } else {
+            const personZoneTime = moment(scheduledAtFromUser)
+              .tz(person.time_zone).format("YYYY-MM-DDTHH:mm:ss");
+            scheduledAt = new Date(personZoneTime + moment().format("Z"));
+            const ten = -10;
+            const diff = scheduledAt
+              - new Date(moment(new Date()).add(ten, "minutes"));
+            const zero = 0;
+            const one = 1;
+           if(!lodash.gt(diff, zero))
             scheduledAt = new Date(moment(scheduledAt).add(one, "days").format);
           }
+
+          if(campaign.isTTSEnabled)
+            ttsMetaMap[person.time_zone] = new Date(
+              moment(scheduledAt).add(lodash.random(ttsInterval), "minutes"));
         } else {
-          scheduledAt = new Date(scheduledAtFromUser);
+          if(!ttsMetaMap.scheduledAtFromUser)
+            ttsMetaMap.scheduledAtFromUser = new Date(scheduledAtFromUser);
+          scheduledAt = ttsMetaMap.scheduledAtFromUser;
+          if(campaign.isTTSEnabled)
+            ttsMetaMap.scheduledAtFromUser = new Date(
+              moment(scheduledAt).add(lodash.random(ttsInterval), "minutes"));
         }
+      }
+      if (!scheduledAt) {
+        scheduledAt = ttsMetaMap.default;
+        if(campaign.isTTSEnabled)
+        ttsMetaMap.default = new Date(
+          moment(scheduledAt).add(lodash.random(ttsInterval), "minutes"));
       }
       email.scheduledAt = scheduledAt;
       prepareScheduledAtCB(null, campaign, followup, person, email);
@@ -1066,6 +1092,7 @@ module.exports = function(Campaign) {
 
   /**
    * increments the camapain and list metrics assmebled count
+   * if it is a followup increments followup also
    *
    * @param  {[Campaign]} campaign
    * @param  {[FollowUp]} followup
@@ -1076,19 +1103,25 @@ module.exports = function(Campaign) {
    */
   const incrementAssmebedCountInMetrics = (campaign, followup, person,
       email, callback) => {
-    if(followup) return callback(null);
     const property = email.isError ? "errorInAssmebler" : "assembled";
-    async.parallel([
-      async.apply(Campaign.app.models.campaignMetric.getAndIncrementByProperty,
-                          campaign, property),
-      async.apply(Campaign.app.models.listMetric.getAndIncrementByProperty,
-                          campaign, person, property)
-    ], (parallelErr) => {
-      if(parallelErr) {
-        return callback(parallelErr);
-      }
-      return callback(null);
-    });
+    if(followup) {
+      Campaign.app.models.followUpMetric.getAndIncrementByProperty(
+        followup, property, (followUpMetricErr) => {
+          return callback(followUpMetricErr);
+      });
+    } else {
+      async.parallel([
+       async.apply(Campaign.app.models.campaignMetric.getAndIncrementByProperty,
+         campaign, property),
+       async.apply(Campaign.app.models.listMetric.getAndIncrementByProperty,
+         campaign, person, property)
+      ], (parallelErr) => {
+        if(parallelErr) {
+          return callback(parallelErr);
+        }
+        return callback(null);
+      });
+    }
   };
 
   /**
@@ -1116,11 +1149,13 @@ module.exports = function(Campaign) {
    * @author Ramanavel Selvaraju
    */
   Campaign.validateStatus = (campaign, followup, statusCheckCB) => {
-    const msg = `Status not Matching Aborting! CampaignId : ${campaign.id}`;
+    let msg = `Status not Matching Aborting! CampaignId : ${campaign.id}`;
+    if(followup) msg += ` FollowUpId : ${followup.id}`;
     let error = new Error(msg);
     error.name = "StatusMismatchError";
     if(followup) {
-      if(campaign.statusCode < statusCodes.readyToSend){
+      if(campaign.statusCode < statusCodes.readyToSend ||
+        followup.statusCode !== statusCodes.followUpProcessing) {
         return statusCheckCB(error);
       }
     } else {

@@ -1,4 +1,51 @@
+"use strict";
+
+import async from "async";
+import lodash from "lodash";
+import logger from "../../server/log";
+
 module.exports = function(FollowUpMetric) {
+
+//npm run calls
+  /**
+   * gets Followup metric and incremntes the assembled count
+   *
+   * @param  {FollowUp}   followup
+   * @param  {String} property [metric property like sent, assembled, bounced]
+   * @param  {Function} cb       [callback]
+   * @author Ramanavel Selvaraju
+   */
+  FollowUpMetric.getAndIncrementByProperty =
+    (followUp, property, cb) => {
+    getFollowUpMetrics(followUp, (findErr, followUp, metric) => {
+      if(findErr) return cb(findErr);
+      FollowUpMetric.app.models.campaignMetric.incrementMetric(
+        metric, property, (incrementErr) => {
+        return cb(incrementErr);
+      });
+    });
+  };
+
+  /**
+   * returns followUp metrics for a followUp Object
+   *
+   * @param  {followUp} followUp
+   * @param  {function} getCampaignMetricsCB [callback]
+   * @author Ramanavel Selvaraju
+   */
+  const getFollowUpMetrics = (followUp, getFollowUpMetricsCB) => {
+    FollowUpMetric.find({where: {followUpId: followUp.id}
+    }, (findErr, followUpMetrics) => {
+      if(findErr) {
+        logger.error({error: findErr, stack: findErr.stack,
+                      input: {followUp: followUp}});
+        return getFollowUpMetricsCB(findErr);
+      }
+      return getFollowUpMetricsCB(null, followUp,
+                  lodash.isEmpty(followUpMetrics) ? null : followUpMetrics[0]);
+    });
+  };
+
 
   /**
    * updaets the followup metrics campagin metrics not found it will create
@@ -18,26 +65,6 @@ module.exports = function(FollowUpMetric) {
     });
   };
 
-
-  /**
-   * returns followUp metrics for a followupObject
-   *
-   * @param  {[followUp]} followUp
-   * @param  {[function]} getFollowUpMetricsCB
-   * @author Aswin Raj A
-   */
-  const getFollowUpMetrics = (followUp, getFollowUpMetricsCB) => {
-    FollowUpMetric.find({where: {followUpId: followUp.id}
-    }, (findErr, followUpMetrics) => {
-      if(findErr) {
-        logger.error({error: findErr, stack: findErr.stack,
-                      input: {followUp: followUp}});
-        return getFollowUpMetricsCB(findErr);
-      }
-      return getFollowUpMetricsCB(null, followUp,
-                  lodash.isEmpty(followUpMetrics) ? null : followUpMetrics[0]);
-    });
-  };
 
   /**
    * if metrics object null creates metrics object

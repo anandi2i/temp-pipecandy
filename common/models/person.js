@@ -45,6 +45,7 @@ module.exports = function(Person) {
    */
   Person.getPoepleAndGenerateEmail = (campaign, list, listIds, followup,
     getPoepleAndGenerateEmailCB) => {
+    let ttsMetaMap = {};
     list.people((peopleFindErr, people) => {
       if (peopleFindErr) {
         logger.error("Error on fing the people using list", {
@@ -66,7 +67,7 @@ module.exports = function(Person) {
               return peopleEachCB(null);
             }
             Person.app.models.campaign.generateEmail(campaign, person,
-              listIds, followup, (generateEmailErr) => {
+              listIds, followup, ttsMetaMap, (generateEmailErr) => {
                 peopleEachCB(generateEmailErr);
               }); //campaign.generateEmail
 
@@ -103,13 +104,15 @@ module.exports = function(Person) {
                       .eligibilityCheck.bind(null, campaign, person),
       unsubscribed: Person.app.models.unsubscribe.eligibleCheck.bind(null,
                       campaign, person),
+      campaignAudit: Person.app.models.campaignAudit.checkEmailExists.bind(
+        null, campaign, followup, person),
       eligible: isEligibleToGenerate.bind(null, campaign, person, followup)
     }, (seriesErr, results) => {
       if(seriesErr) {
         return validateCB(seriesErr);
       }
       const valid = results.unsubscribed && results.eligible
-                                         && results.deletedEmailCheck;
+        && results.deletedEmailCheck && results.campaignAudit;
       return validateCB(seriesErr, valid);
     });
   };

@@ -100,6 +100,26 @@ module.exports = function(EmailQueue) {
     });
   };
 
+  /**
+   * destoys the emails associated with the followup from the email queue
+   *
+   * @param  {FollowUp}   followup
+   * @param  {Function} callback
+   * @return {void}
+   * @author Ramanavel Selvaraju
+   */
+  EmailQueue.destroyByFollowUp = (followUp, destroyByFollowUpCB) => {
+    followUp.emailQueues.destroyAll((emailQueueDestroyErr) => {
+      if(emailQueueDestroyErr){
+        logger.error("Error while destroying emailsQueue for FollowUp: ",
+        {input: {followUpId: followUp.id},
+          error: emailQueueDestroyErr, stack: emailQueueDestroyErr.stack});
+        return destroyByFollowUpCB(emailQueueDestroyErr);
+      }
+      return destroyByFollowUpCB(null, "Deleted successfully!");
+    });
+  };
+
   EmailQueue.remoteMethod(
     "scheduledMails", {
       description: "Get Scheduled Mails",
