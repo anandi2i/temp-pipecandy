@@ -6,7 +6,6 @@ import async from "async";
 import lodash from "lodash";
 import logger from "../../server/log";
 import publicEmailProviders from "../../server/utils/public-email-providers";
-import validator from "../../server/utils/validatorUtility";
 import constants from "../../server/utils/constants";
 import config from "../../server/config.json";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
@@ -341,7 +340,7 @@ module.exports = function(user) {
    * @param  {[campaign]} campaign
    * @param  {[function]} createCampaignCB
    * @return {[createdCampaign]}
-   * @author Aswin Raj A
+   * @author Aswin Raj A,Naveen Kumar(modified)
    */
   user.createCampaign = function(ctx, campaign, createCampaignCB) {
     async.waterfall([
@@ -370,7 +369,7 @@ module.exports = function(user) {
    * @author Aswin Raj A
    */
   const validateCampaignName = (ctx, campaign, validateCampaignNameCB) => {
-    let campaignName = validator.validateStringWithNumber(campaign.name);
+    let campaignName = campaign.name.trim();
     if (campaignName.length > constants.EMPTYARRAY) {
       return validateCampaignNameCB(null, campaignName, ctx);
     }
@@ -467,10 +466,10 @@ module.exports = function(user) {
    * @param  {[list]} list
    * @param  {[function]} validateEmailListNameCB
    * @return {[listName, ctx]}
-   * @author Aswin Raj A
+   * @author Aswin Raj A,Naveen Kumar(modified)
    */
   const validateEmailListName = (ctx, list, validateEmailListNameCB) => {
-    let listName = validator.validateStringWithNumber(list.name);
+    let listName = list.name.trim();
     if(listName.length > constants.EMPTYARRAY) {
       return validateEmailListNameCB(null, listName, ctx);
     }
