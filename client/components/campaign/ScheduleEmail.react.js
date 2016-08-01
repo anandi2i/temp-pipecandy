@@ -45,7 +45,8 @@ class ScheduleEmail extends React.Component {
       isOptText: true,
       isAddress: true,
       spamRating: "",
-      isEditorReady: false
+      isEditorReady: false,
+      improveDelivery: true
     };
   }
 
@@ -430,7 +431,7 @@ class ScheduleEmail extends React.Component {
  */
  campaignDetails() {
   const {isOptText, isAddress, optText, address,
-    displayScheduleCampaign} = this.state;
+    displayScheduleCampaign, improveDelivery} = this.state;
   const element = this.el;
   let addressDom = $(document.createElement("div"));
   _.each($.parseHTML(address), (el, i) => {
@@ -444,7 +445,8 @@ class ScheduleEmail extends React.Component {
     isAddressNeeded: isAddress,
     optText: optText,
     address: addressDom.html(),
-    userDate: new Date().toString()
+    userDate: new Date().toString(),
+    isTTSEnabled: improveDelivery
   };
   if(displayScheduleCampaign) {
     //campaignDetails.scheduledDate = element.find(".datepicker").val();
@@ -538,6 +540,15 @@ class ScheduleEmail extends React.Component {
     this.refs.wordai.openModal(emailRawText);
   }
 
+  /**
+   * Toggle Improve Delivery option
+   */
+  toggleImproveDelivery = () => {
+    this.setState({
+      improveDelivery: !this.state.improveDelivery
+    });
+  }
+
   render() {
     let selectEmailListIndex = 1;
     let {
@@ -559,7 +570,8 @@ class ScheduleEmail extends React.Component {
       getAllTags,
       getAllPeopleList,
       previewMainTemplate,
-      previewFollowups
+      previewFollowups,
+      improveDelivery
     } = this.state;
     let displayAddFollowup =
       (followups.length < followupsMaxLen ? "block" : "none");
@@ -586,6 +598,13 @@ class ScheduleEmail extends React.Component {
           <div className="row sub-head-container m-lr-0">
             <div className="head">Let's Draft an Email</div>
             <div className="sub-head">
+              <div className="switch">
+                <label>
+                  Improve Delivery
+                  <input type="checkbox" checked={improveDelivery} onChange={() => this.toggleImproveDelivery()}/>
+                  <span className="lever"></span>
+                </label>
+              </div>
               <a className="btn blue m-r-20" onClick={() => this.openPreviewModal("preview")}>Preview</a>
               <a className="btn blue" onClick={this.saveCampaignInfo}>Save & Send</a>
             </div>

@@ -212,6 +212,20 @@ h3 {
   border-bottom: 1px solid $light-border;
   color: $dflt-txt-clr;
 }
+.switch {
+  display: inline;
+  label {
+    .lever {
+      background-color: $gray-bg-clr;
+    }
+    input[type=checkbox]:checked+.lever {
+      background-color: $gray-bg-clr;
+      &:after{
+        background-color: $blue-clr;
+      }
+    }
+  }
+}
 /*********************
   Media Query Classes
 **********************/
