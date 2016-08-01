@@ -671,6 +671,9 @@ a {
 .m-t-10 {
   margin-top: 10px;
 }
+.m-b-20 {
+  margin-bottom: 20px;
+}
 .m-b-30 {
   margin-bottom: 30px;
 }
@@ -1401,12 +1404,16 @@ $lines-to-show: 8;
   background-color: $lit-gray-bg;
 }
 .modal {
-  &.min-model {
+  &.min-modal {
     top: 25% !important;
     width: 35%;
     .modal-header {
       min-height: 20px;
       padding: 0;
+    }
+    .alert {
+      padding: 20px;
+      text-align: center;
     }
   }
   .modal-header {
@@ -1828,7 +1835,7 @@ $lines-to-show: 8;
     }
   }
   .modal {
-    &.min-model {
+    &.min-modal {
       width: 60%;
     }
   }
@@ -1873,7 +1880,7 @@ $lines-to-show: 8;
     }
   }
   .modal {
-    &.min-model {
+    &.min-modal {
       width: 60%;
     }
     &.lg-modal {
@@ -1945,7 +1952,7 @@ $lines-to-show: 8;
 }
 @media only screen and (max-width: 460px) {
   .modal {
-    &.min-model {
+    &.min-modal {
       width: 90%;
     }
   }

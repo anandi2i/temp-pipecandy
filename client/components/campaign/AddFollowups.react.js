@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import AlertModal from "../AlertModal.react";
 import CampaignStore from "../../stores/CampaignStore";
 import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
 
@@ -13,7 +14,8 @@ class AddFollowups extends React.Component {
       personIssues: [],
       emailText: "",
       emailContent: "",
-      emailRawText: ""
+      emailRawText: "",
+      deleteCampaignId: null
     };
   }
 
@@ -62,20 +64,23 @@ class AddFollowups extends React.Component {
   }
 
   toggleEditContainer = (e) => {
-    this.setState({
-      clicked: !this.state.clicked
-    }, () => {
-      this.el.find(".draft-template").slideToggle("slow");
-      if(!this.state.clicked) {
-        this.setState({
-          emailText: this.state.emailRawText
-        });
-      } else {
-        this.setState({
-          emailText: ""
-        });
-      }
-    });
+    //Ignore delete icon click
+    if(e.target.className !== "mdi mdi-delete-forever") {
+      this.setState({
+        clicked: !this.state.clicked
+      }, () => {
+        this.el.find(".draft-template").slideToggle("slow");
+        if(!this.state.clicked) {
+          this.setState({
+            emailText: this.state.emailRawText
+          });
+        } else {
+          this.setState({
+            emailText: ""
+          });
+        }
+      });
+    }
   }
 
   openPreviewModal = () => {
@@ -88,6 +93,36 @@ class AddFollowups extends React.Component {
     }, () => this.refs.issues.openModal());
   }
 
+  /**
+   * Call alert confirm modal popup and set followupid to state variable
+   * @param  {number} id followupid to delete
+   */
+  getConfirmation = (id) => {
+    this.setState({
+      deleteCampaignId: id
+    }, () => {
+      this.refs.confirmBox.openModal();
+    });
+  }
+
+  /**
+   * Delete followup container based on id and
+   * set deleteCampaignId state to null
+   */
+  deleteCampaignFollowUp = () => {
+    this.props.deleteFollowUp(this.state.deleteCampaignId);
+    this.cancelDeleteCampaign();
+  }
+
+  /**
+   * Set deleteCampaignId state to null
+   */
+  cancelDeleteCampaign = () => {
+    this.setState({
+      deleteCampaignId: null
+    });
+  }
+
   closeCallback = () => {
     if(!this.refs.issues.state.personIssues.length){
       this.setState((state) => ({
@@ -97,7 +132,7 @@ class AddFollowups extends React.Component {
   }
 
   render() {
-    const {followupId, id, deleteFollowUp, content, peopleList} = this.props;
+    const {followupId, id, content, peopleList} = this.props;
     let indexInc = 1;
     let followUpCount = id + indexInc;
     let className = this.state.clicked
@@ -136,7 +171,7 @@ class AddFollowups extends React.Component {
             <i className={className}>
             </i>
             <i className="mdi mdi-delete-forever"
-              onClick={() => deleteFollowUp(id)}>
+              onClick={() => this.getConfirmation(id)}>
             </i>
           </div>
         </div>
@@ -187,6 +222,13 @@ class AddFollowups extends React.Component {
             />
             {/* Popup ends here*/}
         </div>
+        {/* Alert Box modal */}
+        <AlertModal ref="confirmBox"
+          message={"You took some effort doing this. Are you sure?"}
+          successBtn={"Confirm"}
+          cancelBtn={"Cancel"}
+          successCb={this.deleteCampaignFollowUp}
+          errorCb={this.cancelDeleteCampaign}/>
       </div>
     );
   }

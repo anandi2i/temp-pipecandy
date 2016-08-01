@@ -80,7 +80,7 @@ class CsvFileUploade extends React.Component {
   render() {
     const {uploadCsvDetails} = this.state;
     return (
-      <div className="modal min-model modal-fixed-header">
+      <div className="modal min-modal modal-fixed-header">
         <i className="mdi mdi-close" onClick={this.closeModal}></i>
         <div className="modal-header">
           <div className="head"></div>
