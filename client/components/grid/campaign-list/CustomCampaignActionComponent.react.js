@@ -18,9 +18,9 @@ class CustomCampaignActionComponent extends React.Component {
                 Run
               </Link>
             );
-          } else if(status === "Pause") {
+          } else if(status === "Scheduled") {
             return <a>Pause</a>;
-          } else if(status === "Resume") {
+          } else if(status === "Paused") {
             return <a>Resume</a>;
           } else if(status === "Sent") {
             return (
