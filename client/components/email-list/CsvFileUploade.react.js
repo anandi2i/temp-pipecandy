@@ -57,9 +57,6 @@ class CsvFileUploade extends React.Component {
       this.el.openModal({
         dismissible: false
       });
-      this.el.find(".preview-modal-content").mCustomScrollbar({
-        theme:"minimal-dark"
-      });
     });
   }
 
@@ -81,42 +78,43 @@ class CsvFileUploade extends React.Component {
     const {uploadCsvDetails} = this.state;
     return (
       <div className="modal min-modal modal-fixed-header">
-        <i className="mdi mdi-close" onClick={this.closeModal}></i>
-        <div className="modal-header">
-          <div className="head"></div>
-        </div>
-        <div className="preview-modal-content">
+        <div className="alert">
           <div className="col s12">
-            <div className="modal-content m-b-30 m-t-10">
+            <div className="modal-content p-0">
               {
                 uploadCsvDetails
                 ?
                   uploadCsvDetails.invalidData.length
                     ?
                       <div className="center">
-                        Oops!
-                        <strong>{uploadCsvDetails.invalidData.length}</strong>
-                        (out of 500) records have some missing fields
-                        (like first name, last name, email).
-                        Would you mind updating them?
-                        <br/><br/>
+                        <div className="m-b-20">
+                          Oops!
+                          <strong> {uploadCsvDetails.invalidData.length} </strong>
+                          (out of { uploadCsvDetails.invalidData.length +
+                            uploadCsvDetails.dataCount}) records have some
+                            missing fields
+                          (like first name, last name, email).
+                          Would you mind updating them?
+                        </div>
                         <a onClick={() => this.errorCsvList()}
                           className="btn btn-dflt blue sm-icon-btn p-1-btn">
                           <i className="left mdi mdi-download"></i>
                           Download problem records
                         </a>
                         <a onClick={this.closeModal}
-                          className="btn btn-dflt red sm-icon-btn p-1-btn">
+                          className="btn btn-dflt red sm-icon-btn">
                           Skip
                         </a>
                       </div>
                     :
                       <div className="center">
-                        Success! All the (number) records got uploaded.
-                        Turn around & do a fist bump!
-                        <br/><br/>
+                        <div className="m-b-20">
+                          Success! All the (
+                          <strong>{uploadCsvDetails.dataCount}</strong>) records got uploaded.
+                          <br/>Turn around & do a fist bump!
+                        </div>
                         <a onClick={this.closeModal}
-                          className="btn btn-dflt blue sm-icon-btn p-1-btn">
+                          className="btn btn-dflt blue sm-icon-btn">
                           Ok
                         </a>
                       </div>
