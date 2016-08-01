@@ -1,11 +1,17 @@
 import Joi from "joi";
-var minPassLength = 6;
-var maxPassLength = 100;
-var validatorObj = {
+const minPassLength = 6;
+const maxPassLength = 100;
+//const namePattern = /^[a-zA-Z][a-zA-Z0-9-_ ]*$/;
+const namePattern = /^\S.*$/;
+const validatorObj = {
   firstName: Joi.string().alphanum().required().label("first name").options({
     language: {
       any: {
         empty: "!! Oops. Seems like you forgot to fill your first name!",
+      },
+      string: {
+        alphanum: "!! Hmm. That doesn\'t seem like a valid first name, "+
+            "at least to me!"
       }
     }
   }),
@@ -40,27 +46,49 @@ var validatorObj = {
     language: {
       any: {
         empty: "!! Oops. Seems like you forgot to fill your last name!",
+      },
+      string: {
+        alphanum: "!! Hmm. That doesn\'t seem like a valid last name, "+
+            "at least to me!"
       }
     }
   }),
-  campaignName: Joi.string().label("Campaign Name").options({
+  campaignName: Joi.string().regex(namePattern).label("Campaign Name").options({
     language: {
       any: {
         empty: "!! Oops. Seems like you forgot to fill your campaign name!",
+      },
+      string: {
+        regex: {
+          base:"!! Hmm. That doesn\'t seem like a valid campaign name, "+
+            "at least to me!",
+        }
       }
     }
   }),
-  listName: Joi.string().label("List Name").options({
+  listName: Joi.string().regex(namePattern).label("List Name").options({
     language: {
       any: {
         empty: "!! Oops. Seems like you forgot to fill your list name!",
+      },
+      string: {
+        regex: {
+          base:"!! Hmm. That doesn\'t seem like a valid list name, "+
+            "at least to me!",
+        }
       }
     }
   }),
-  fieldName: Joi.string().label("Field Name").options({
+  fieldName: Joi.string().regex(namePattern).label("Field Name").options({
     language: {
       any: {
         empty: "!! Oops. Seems like you forgot to fill the field name!",
+      },
+      string: {
+        regex: {
+          base:"!! Hmm. That doesn\'t seem like a valid field name, "+
+            "at least to me!",
+        }
       }
     }
   })

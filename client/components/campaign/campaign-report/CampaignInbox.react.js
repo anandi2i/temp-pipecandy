@@ -116,7 +116,7 @@ class CampaignInbox extends React.Component {
     if(activeTabId !== "all") {
       this.setState({
         inboxMails: _.reject(inboxMails,
-          inbox => selectedInboxIds.includes(inbox.id)
+          inbox => _.contains(selectedInboxIds, inbox.id)
         ),
         selectedInboxIds: []
       });

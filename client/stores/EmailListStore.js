@@ -274,7 +274,7 @@ AppDispatcher.register(function(payload) {
     case Constants.DELETE_PERSONS:
       EmailListApi.deletePersons(action.data).then((response) => {
         _getEmailList[0].people = _.reject(_getEmailList[0].people,
-          person => action.data.peopleIds.includes(person.id)
+          person => _.contains(action.data.peopleIds, person.id)
         );
         _success = SuccessMessages.successDelete;
         EmailListStore.emitChange();

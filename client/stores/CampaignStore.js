@@ -160,11 +160,11 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     allCampaigns.map(campaign => {
       const statusCode = campaign.statusCode.toString();
       let status;
-      if(edit.includes(statusCode)) {
+      if(_.contains(edit, statusCode)) {
         status = "In Draft";
-      } else if (pause.includes(statusCode)) {
+      } else if (_.contains(pause, statusCode)) {
         status = "Scheduled";
-      } else if (resume.includes(statusCode)) {
+      } else if (_.contains(resume, statusCode)) {
         status = "Paused";
       } else {
         status = "Sent";
