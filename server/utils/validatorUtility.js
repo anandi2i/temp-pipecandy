@@ -1,5 +1,25 @@
 "use strict";
 
+import moment from "moment-timezone";
+import logger from "../../server/log";
+
+/**
+ * validates the person time zone from CSV
+ *
+ * @param  {String} timeZone
+ * @author Ramanavel Selvaraju
+ */
+const validateTimeZone = (timeZone) => {
+  if(!timeZone) return false;
+  if(timeZone.trim() === "") return false;
+  try {
+    return moment.tz.zone(timeZone) ? true : false;
+  } catch (e) {
+    logger.error({error: e, stack: e.stack, input: {timeZone}});
+    return false;
+  }
+};
+
 /**
  * Method to check if the given email is valid or not
  * @param  {[email]} email
@@ -40,5 +60,6 @@ const validateStringWithNumber = (string) => {
 module.exports = {
   validateEmail: validateEmail,
   validateString: validateString,
-  validateStringWithNumber: validateStringWithNumber
+  validateStringWithNumber: validateStringWithNumber,
+  validateTimeZone: validateTimeZone
 };

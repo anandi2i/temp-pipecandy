@@ -150,7 +150,7 @@ module.exports = function(MailResponse) {
           middleName: mailResponseJSON.person.middleName,
           lastName: mailResponseJSON.person.lastName,
           email: mailResponseJSON.person.email,
-          timeZone: mailResponseJSON.person.time_zone
+          timeZone: mailResponseJSON.person.timeZone
         };
         delete response.labels;
         responses.push(response);

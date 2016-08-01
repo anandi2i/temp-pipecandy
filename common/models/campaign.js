@@ -982,12 +982,12 @@ module.exports = function(Campaign) {
     const ttsInterval = 3;
     try {
       if (scheduledAtFromUser) {
-        if (person.time_zone) {
-          if (ttsMetaMap[person.time_zone]) {
-            scheduledAt = ttsMetaMap[person.time_zone];
+        if (person.timeZone) {
+          if (ttsMetaMap[person.timeZone]) {
+            scheduledAt = ttsMetaMap[person.timeZone];
           } else {
             const personZoneTime = moment(scheduledAtFromUser)
-              .tz(person.time_zone).format("YYYY-MM-DDTHH:mm:ss");
+              .tz(person.timeZone).format("YYYY-MM-DDTHH:mm:ss");
             scheduledAt = new Date(personZoneTime + moment().format("Z"));
             const ten = -10;
             const diff = scheduledAt
@@ -999,7 +999,7 @@ module.exports = function(Campaign) {
           }
 
           if(campaign.isTTSEnabled)
-            ttsMetaMap[person.time_zone] = new Date(
+            ttsMetaMap[person.timeZone] = new Date(
               moment(scheduledAt).add(lodash.random(ttsInterval), "minutes"));
         } else {
           if(!ttsMetaMap.scheduledAtFromUser)

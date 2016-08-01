@@ -171,7 +171,7 @@ module.exports = function(InboxMail) {
           middleName: inboxMailJSON.person.middleName,
           lastName: inboxMailJSON.person.lastName,
           email: inboxMailJSON.person.email,
-          timeZone: inboxMailJSON.person.time_zone
+          timeZone: inboxMailJSON.person.timeZone
         };
         responses.push(response);
         inboxMailCB(null);

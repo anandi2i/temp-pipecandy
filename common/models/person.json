@@ -25,7 +25,7 @@
       "type": "string",
       "required": true
     },
-    "time_zone": {
+    "timeZone": {
       "type": "string"
     },
     "createdAt": {

@@ -165,7 +165,7 @@ module.exports = function(EmailQueue) {
             middleName: person.middleName,
             lastName: person.lastName,
             email: person.email,
-            timeZone: person.time_zone
+            timeZone: person.timeZone
           };
           responses.push(response);
           emailQueueCB(null);

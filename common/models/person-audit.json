@@ -19,7 +19,7 @@
     "salutation": {
       "type": "string"
     },
-    "time_zone": {
+    "timeZone": {
       "type": "string"
     },
     "createdAt": {

@@ -52,7 +52,8 @@ dataSource.autoupdate(function(err) {
       {name: "Middle Name", type: "String", isApproved: true },
       {name: "Last Name", type: "String", isApproved: true },
       {name: "Email", type: "String", isApproved: true },
-      {name: "Salutation", type: "String", isApproved: true }
+      {name: "Salutation", type: "String", isApproved: true },
+      {name: "Time Zone", type: "String", isApproved: true }
     ], function(err, additionalFields) {
       if(err) {
         console.log("err in data creation defaultFields:: ", err);

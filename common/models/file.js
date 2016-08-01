@@ -291,8 +291,6 @@ module.exports = function(File) {
     });
   };
 
-
-
   /**
    * To check if there is any data missing for the manadatory fields,
    * if missing and if the email already exist, amend the fields with
@@ -310,6 +308,9 @@ module.exports = function(File) {
     if(isValidEmail){
       File.app.models.person.getPersonForEmail(newPerson.Email,
         (personGetErr, person) => {
+        if(personGetErr)
+          logger.error({error: personGetErr, stack: personGetErr.stack,
+                        input: {email: newPerson.Email}});
         if(person){
           newPerson["First Name"] =
             validator.validateString(newPerson["First Name"]).trim() !== "" ?
@@ -323,6 +324,9 @@ module.exports = function(File) {
             validator.validateString(newPerson["Middle Name"]).trim() !== "" ?
               validator.validateString(newPerson["Middle Name"]) :
                 person.middleName;
+          newPerson["Time Zone"] =
+              validator.validateTimeZone(newPerson["Time Zone"]) ?
+                newPerson["Time Zone"] : person.timeZone;
         } else {
           newPerson["First Name"] =
             validator.validateString(newPerson["First Name"]).trim() !=="" ?
@@ -332,7 +336,10 @@ module.exports = function(File) {
               validator.validateString(newPerson["Last Name"]) : "";
           newPerson["Middle Name"] =
             validator.validateString(newPerson["Middle Name"]).trim() !=="" ?
-              validator.validateString(newPerson["Middle Name"]) : "";
+              validator.validateString(newPerson["Middle Name"]) : null;
+          newPerson["Time Zone"] =
+              validator.validateTimeZone(newPerson["Time Zone"]) ?
+                newPerson["Time Zone"] : null;
         }
         if(newPerson["First Name"].trim() === "" ||
           newPerson["Last Name"].trim() === ""){
@@ -341,8 +348,11 @@ module.exports = function(File) {
             person : newPersonObj,
           });
         } else {
-          newPerson["Middle Name"] =
-            validator.validateString(newPerson["Middle Name"]).trim();
+          if(newPerson["Middle Name"])
+            newPerson["Middle Name"] =
+              validator.validateString(newPerson["Middle Name"]).trim();
+          if(newPerson.Salutation.trim() === "")
+            newPerson.Salutation = null;
           amendDataCB(null, {
             isValid : true,
             person : newPerson,
@@ -439,6 +449,7 @@ module.exports = function(File) {
           firstName : personData["First Name"],
           lastName : personData["Last Name"],
           middleName : personData["Middle Name"],
+          timeZone : personData["Time Zone"],
           salutation : personData.Salutation,
           email : personData.Email
         };
