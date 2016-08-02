@@ -57,9 +57,34 @@ const validateStringWithNumber = (string) => {
   return string.replace(/[^a-zA-Z0-9 ]/g, "").trim();
 };
 
+/**
+ * Validates name string and return if valid or not based on
+ * following conditions
+ * 1) Is the first character not a number
+ * 2) Does the string not contain special characters
+ * @param  {[string]} string
+ * @return {[boolean true or false]}
+ * @author Naveen Kumar
+ */
+const validateFieldName = (string) => {
+  if(string.length) {
+    let stringCheck = string[0].replace(/[0-9 ]/g, "").trim();
+    if(!stringCheck.length) {
+      return false;
+    }
+    stringCheck = string.replace(/[^a-zA-Z0-9 ]/g, "");
+    if(string.length !== stringCheck.length) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+};
+
 module.exports = {
   validateEmail: validateEmail,
   validateString: validateString,
   validateStringWithNumber: validateStringWithNumber,
+  validateFieldName: validateFieldName,
   validateTimeZone: validateTimeZone
 };

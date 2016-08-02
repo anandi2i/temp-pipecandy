@@ -6,6 +6,7 @@ import async from "async";
 import _ from "underscore";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 import constants from "../../server/utils/constants";
+import validator from "../../server/utils/validatorUtility";
 
 module.exports = function(List) {
   /**
@@ -310,11 +311,12 @@ module.exports = function(List) {
    * @param  {[Object]} reqParam [Exmaple of an reqParam shown above]
    * @param  {[function]} savePersonWithFieldsCB [description]
    * @return {[person]} [Persisted person with fields and values]
-   * @author Ramanavel Selvaraju, Aswin Raj A(Modified)
+   * @author Ramanavel Selvaraju, Aswin Raj A(Modified), Naveen Kumar(Modified)
    */
   List.savePersonWithFields = (ctx, id, reqParams, savePersonWithFieldsCB) => {
     async.waterfall([
-      async.apply(createOrUpdatePerson, ctx, reqParams, id),
+      async.apply(validateNames, ctx, reqParams, id),
+      createOrUpdatePerson,
       createOrUpdateFields,
       getSavedPersonWithFields
     ], (asyncErr, savedPersonWithFields) => {
@@ -324,6 +326,39 @@ module.exports = function(List) {
       }
       savePersonWithFieldsCB(null, savedPersonWithFields);
     });
+  };
+
+  /**
+   * Validates the following condition
+   * Do the field names not start with a nuber, do the field names not have
+   * special characters
+   * @param  {[ctx]} ctx
+   * @param  {[reqParams]} reqParams
+   * @param  {[listId]} listId
+   * @param  {[function]} createOrUpdatePersonCB
+   * @return {[ctx, reqParams, listId]}
+   * @author Naveen Kumar
+   */
+  const validateNames = (ctx, reqParams, id, validateNamesCB) => {
+    let isValidFlag = true;
+    isValidFlag = validator.validateFieldName(reqParams.person.firstName)
+      ? isValidFlag : false;
+    isValidFlag = validator.validateFieldName(reqParams.person.lastName)
+      ? isValidFlag : false;
+    isValidFlag = validator.validateFieldName(reqParams.person.middleName)
+      ? isValidFlag : false;
+    isValidFlag = reqParams.person.firstName.trim().length
+      ? isValidFlag : false;
+    isValidFlag = reqParams.person.lastName.trim().length
+      ? isValidFlag : false;
+    if(!isValidFlag) {
+      logger.error("Invalid Data", {
+        input: reqParams.person
+      });
+      const errorMessage = errorMessages.INVALID_DATA;
+      return validateNamesCB(errorMessage);
+    }
+    return validateNamesCB(null, ctx, reqParams, id);
   };
 
   /**
