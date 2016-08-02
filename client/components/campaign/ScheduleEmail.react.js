@@ -634,13 +634,13 @@ class ScheduleEmail extends React.Component {
                 </div>
                 <div className="row m-lr-0 schedule-time" style={{display: displaySchedule}}>
                   <div className="col s12 m4 l3">
-                    <label>Date</label>
+                    <label>Deliver on</label>
                     <input type="date" className="datepicker border-input"
                       placeholder="DD Month, year"
                       onChange={(e) => this.onChange(e, "scheduledDate")} />
                   </div>
                   <div className="col s12 m4 l3">
-                    <label>Time</label>
+                    <label>At local time</label>
                     <input type="text" placeholder="00:00 AM"
                       className="timepicker border-input"
                       onChange={(e) => this.onChange(e, "scheduledTime")} />
