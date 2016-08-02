@@ -92,7 +92,8 @@
             }
           }
         }
-        &.all-email-list {
+        &.all-email-list,
+        &.all-campaigns-list {
           thead {
             display: none;
           }

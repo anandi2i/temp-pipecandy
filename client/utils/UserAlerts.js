@@ -55,5 +55,9 @@ export const resultsEmpty = {
   "allLists": "Oops! You don't seem to have any email list here. " +
     "Do you want to add a new list?",
   "allListsOnSearch": "It's never easy to say 'No!' when you ask for " +
-    "something, but I can't find that list!"
+    "something, but I can't find that list!",
+  "allCampaigns": "Oops! You don't seem to have any campaigns here. " +
+    "Do you want to add a new campaign?",
+  "allCampaignsOnSearch": "I don't seem to find any campaign by that name. " +
+    "Could you double-check for me, please?"
 };

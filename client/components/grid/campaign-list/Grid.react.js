@@ -1,10 +1,12 @@
 import React from "react";
+import _ from "underscore";
 import Griddle from "griddle-react";
 import CustomPagerComponent from "../CustomGridPagination.react";
 import CustomPreviewComponent from "./CustomPreviewComponent.react";
 import CustomCampaignLinkComponent from "./CustomCampaignLinkComponent.react";
 import CustomCampaignActionComponent from
   "./CustomCampaignActionComponent.react";
+import {resultsEmpty} from "../../../utils/UserAlerts.js";
 
 let columnMeta = [{
     "columnName": "id",
@@ -70,6 +72,31 @@ class CampaignGrid extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      isResultEmpty: true,
+      noDataMessage: resultsEmpty.allCampaigns
+    };
+  }
+
+  getCustomGridFilterer = (results, filter) => {
+    const check = 0;
+    const filteredData = _.filter(results, (result) => {
+      const name = result.name;
+      return (
+        name.toString().toLowerCase().indexOf(filter.toLowerCase()) >= check
+      );
+    });
+    this.setState({
+      isResultEmpty: filteredData.length ? true : false,
+      noDataMessage: resultsEmpty.allCampaignsOnSearch
+    });
+    return filteredData;
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      isResultEmpty: nextProps.results.length ? true : false
+    });
   }
 
   render() {
@@ -78,7 +105,7 @@ class CampaignGrid extends React.Component {
         <div className="container">
           <Griddle
             results={this.props.results}
-            tableClassName="responsive-table"
+            tableClassName="responsive-table all-campaigns-list"
             useGriddleStyles={false}
             columnMetadata={columnMeta}
             columns={["id", "name", "listSentTo",
@@ -91,6 +118,9 @@ class CampaignGrid extends React.Component {
             customPagerComponent={CustomPagerComponent}
             showFilter={true}
             filterPlaceholderText="SEARCH CAMPAIGNS"
+            useCustomFilterer={true}
+            customFilterer={this.getCustomGridFilterer}
+            noDataMessage={this.state.noDataMessage}
             sortDefaultComponent={
               <span className="mdi mdi-arrow-up"></span>
             }

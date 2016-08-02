@@ -10,7 +10,6 @@ class CampaignListView extends React.Component {
     super(props);
     this.state = {
       allCampaignLists: [],
-      noDataBlock: false,
       spinning: true
     };
   }
@@ -28,14 +27,13 @@ class CampaignListView extends React.Component {
     let CampaignLists = CampaignStore.getAllCampaigns();
     this.setState({
       allCampaignLists: CampaignLists,
-      noDataBlock: CampaignLists.length ? false : true,
       spinning: false
     });
     displayError(CampaignStore.getError());
   }
 
   render() {
-    const {spinning, noDataBlock, allCampaignLists} = this.state;
+    const {spinning, allCampaignLists} = this.state;
     return (
       <div>
         <div className="container">
@@ -50,26 +48,7 @@ class CampaignListView extends React.Component {
             <Spinner />
           </div>
         </div>
-          {
-            noDataBlock
-            ?
-              <div className="container">
-                <div className="row card">
-                  <div className="col s12 center card-content">
-                    <p>
-                      Oops! You don't seem to have any campaigns here.
-                      Do you want to add a new campaign?
-                    </p>
-                  </div>
-                </div>
-              </div>
-            :
-            allCampaignLists && allCampaignLists.length
-            ?
-              <CampaignGrid results={allCampaignLists} />
-            :
-              ""
-          }
+        <CampaignGrid results={allCampaignLists} />
       </div>
     );
   }
