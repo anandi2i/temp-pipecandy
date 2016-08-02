@@ -90,9 +90,9 @@ class CsvFileUploade extends React.Component {
                         <div className="m-b-20">
                           Oops!
                           <strong> {uploadCsvDetails.invalidData.length} </strong>
-                          (out of { uploadCsvDetails.invalidData.length +
-                            uploadCsvDetails.dataCount}) records have some
-                            missing fields
+                          (out of { uploadCsvDetails.dataCount -
+                            uploadCsvDetails.invalidData.length}) records have 
+                            some missing fields
                           (like first name, last name, email).
                           Would you mind updating them?
                         </div>

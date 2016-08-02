@@ -767,7 +767,11 @@ a {
       white-space: nowrap;
       width: 100%;
       &.active {
-        background-color: $pinck-clr;
+        background-color: $pinck-clr-drk;
+        color: $white;
+      }
+      &:hover {
+        background-color: $pinck-clr-drk;
         color: $white;
       }
       &:nth-child(2) {

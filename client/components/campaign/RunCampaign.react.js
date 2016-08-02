@@ -12,15 +12,15 @@ class TabsNav extends React.Component {
     this.state={
       selectEmailList: {
         index: 1,
-        name: "select email list(s)"
+        name: "Select Email Lists"
       },
       selectTemplate: {
         index: 2,
-        name: "draft email(s)"
+        name: "Draft Email(s)"
       },
       ScheduleEmail: {
         index: 3,
-        name: "schedule / send email"
+        name: "Schedule/Send Email(s)"
       }
     };
   }
