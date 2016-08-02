@@ -100,6 +100,19 @@ const UserAction = {
       actionType: Constants.RESET_PASSSWORD,
       data: password
     });
+  },
+
+  /**
+   * Unsubscribe campaign
+   *
+   * @param {object} data - Unsubscribe user details
+   * @emits {Constants.UNSUBSCRIBE_CAMPAIGN}
+   */
+  unsubscribe(data) {
+    AppDispatcher.handleAction({
+      actionType: Constants.UNSUBSCRIBE_CAMPAIGN,
+      data: data
+    });
   }
 };
 

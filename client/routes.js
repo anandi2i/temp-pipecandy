@@ -41,6 +41,9 @@ import CampaignSentbox from
 //Dashboard
 import Dashboard from "./components/campaign/Dashboard.react";
 
+//Unsubscribe
+import Unsubscribe from "./components/Unsubscribe.react";
+
 function requireAuth(nextState, replace) {
   UserStore.setPrevLocation(nextState.location.pathname);
   if(!($.isEmptyObject(UserStore.getUser()))) {
@@ -91,6 +94,7 @@ const routes = (
   <Route path="forgot-password" component={ForgotPassword} />
   <Route path="reset-password/:accessToken" component={ResetPassword} />
   <Route path="forgot-password-response" component={PasswordResponse} />
+  <Route path="unsubscribe" component={Unsubscribe} />
 </Router>
 );
 

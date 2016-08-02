@@ -166,6 +166,13 @@ AppDispatcher.register(function(payload) {
         UserStore.emitChange();
       });
       break;
+    case Constants.UNSUBSCRIBE_CAMPAIGN:
+      UserApi.unsubscribe(action.data).then((response) => {
+        //TODO need to hadle success res
+      }, (err) => {
+        //TODO need to hadle err
+      });
+      break;
     default:
       return true;
   }

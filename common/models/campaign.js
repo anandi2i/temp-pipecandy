@@ -886,10 +886,8 @@ module.exports = function(Campaign) {
     padding: 0;">${campaign.isAddressNeeded ? campaign.address : ""}\
     </td></td><td style="width:50%;text-align:right;padding: 0;">`;
     if(campaign.isOptTextNeeded) {
-      let url = `${serverUrl}/api/`;
-      url += `people/${person.id}/`;
-      url += `user/${campaign.createdBy}/`;
-      url += `campaign/${campaign.id}/unsubscribe`;
+      let url = `${serverUrl}/unsubscribe/?people=${person.id}&`;
+      url += `user=${campaign.createdBy}&campaign=${campaign.id}`;
       const optText = campaign.optText ? campaign.optText : Unsubscribe;
       bottom += `<a href="${url}">${optText}</a>`;
     }

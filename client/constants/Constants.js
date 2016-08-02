@@ -38,5 +38,6 @@ export default keyMirror({
   GET_EMAIL_THREAD: null,
   MOVE_INBOX_MAILS: null,
   GET_CAMPAIGN_PREVIEW_TEMPLATE: null,
-  REMOVE_PEOPLE_QUEUE: null
+  REMOVE_PEOPLE_QUEUE: null,
+  UNSUBSCRIBE_CAMPAIGN: null
 });
