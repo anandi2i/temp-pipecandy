@@ -138,11 +138,6 @@ module.exports = function(List) {
   List.peopleWithFields = (ctx, list, peopleWithFieldsCB) => {
     async.waterfall([
       async.apply(getFieldsForList, ctx, list),
-      (listWithFields, lists, passParamCB) => {
-        passParamCB(null, listWithFields, lists[0]);
-      },
-      getPersonForList,
-      getFieldsForPeople,
       generatePeopleWithFields
     ], (asyncErr, result) => {
       if(asyncErr){
@@ -162,6 +157,7 @@ module.exports = function(List) {
    * @author Aswin Raj A
    */
   const getFieldsForList = (ctx, list, getFieldsForListCB) => {
+    let listWithFieldsForIds = [];
     if(lodash.isEmpty(list.ids)){
       return getFieldsForListCB("No Lists selected");
     }
@@ -176,51 +172,94 @@ module.exports = function(List) {
          });
          return getFieldsForListCB(ListErr);
        }
-       lists[0].fields((fieldsFindErr, fields) => {
-         if(fieldsFindErr){
+       async.eachSeries(lists, (list, listCB) => {
+        list.fields((fieldsFindErr, fields) => {
+          if(fieldsFindErr){
+           logger.error("Error while finding list", {
+             input: {listId: list.id},
+             error: fieldsFindErr, stack: fieldsFindErr.stack});
            return getFieldsForListCB(fieldsFindErr);
-         }
-         let listWithFields = JSON.parse(JSON.stringify(lists[0]));
-         listWithFields.fields = fields;
-         return getFieldsForListCB(null, listWithFields, lists);
+          }
+          let listWithFields = JSON.parse(JSON.stringify(list));
+          listWithFields.fields = fields;
+          listWithFieldsForIds.push(listWithFields);
+          return listCB(null);
+         });
+       }, (asyncEachErr) => {
+         return getFieldsForListCB(asyncEachErr, listWithFieldsForIds, lists);
        });
      });
   };
 
+  /**
+   * Step 2/ peopleWithFields
+   * Iterate through all the list and generate people with fields for each list
+   * @param  {[listWithFieldsForIds]} listWithFieldsForIds
+   * @param  {[lists]} lists
+   * @param  {[function]} generateCB
+   * @return {[peopleWithFieldsForIds]}
+   * @author Aswin Raj A
+   */
+  const generatePeopleWithFields = (listWithFieldsForIds, lists,
+    generateCB) => {
+    let peopleWithFieldsForIds = [];
+      async.eachSeries(listWithFieldsForIds, (listWithFields, listCB) => {
+      List.findById(listWithFields.id, (listFindErr, list) => {
+        if(listFindErr) {
+          logger.error("Error while finding list", {input: {listId: list.id},
+          error: listFindErr, stack: listFindErr.stack});
+          generateCB(listFindErr);
+        }
+        async.waterfall([
+          async.apply(getPeopleForList, list),
+          getFieldsForPeople
+        ], (asyncErr, peopleObj) => {
+          if(asyncErr){
+            return listCB(asyncErr);
+          }
+          listWithFields = JSON.parse(JSON.stringify(listWithFields));
+          listWithFields.people = peopleObj;
+          peopleWithFieldsForIds.push(listWithFields);
+          return listCB(null);
+        });
+      });
+    }, (asyncErr) => {
+      return generateCB(asyncErr, peopleWithFieldsForIds);
+    });
+  };
+
+
 /**
- * Step 2/ peopleWithFields
+ * Step 1/ generatePeopleWithFields
  * To get all the people for the current list
- * @param  {[listWithFields]} listWithFields
- * @param  {[lists]} lists
- * @param  {[function]} getPersonForListCB
- * @return {[people, lists, listWithFields]}
+ * @param  {[list]} list
+ * @param  {[function]} getPeopleForListCB
+ * @return {[people, list]}
  * @author Aswin Raj A
  */
-  const getPersonForList = (listWithFields, list, getPersonForListCB) => {
+  const getPeopleForList = (list, getPeopleForListCB) => {
     list.people((peopleFindErr, people) => {
       if(peopleFindErr){
         logger.error("Error while finding people for list", {
           input: {listId: list.id},
           error: peopleFindErr,
           stack: peopleFindErr ? peopleFindErr.stack: ""});
-        return getPersonForListCB(peopleFindErr);
+        return getPeopleForListCB(peopleFindErr);
       }
-      return getPersonForListCB(null, people, list, listWithFields);
+      return getPeopleForListCB(null, people, list);
     });
   };
 
   /**
-   * Step 3/ peopleWithFields
+   * Step 2/ generatePeopleWithFields
    * To get all the fields for each person associated with the current list
    * @param  {[people]} people
    * @param  {[list]} list
-   * @param  {[listWithFields]} listWithFields
    * @param  {[function]} getFieldsForPeopleCB
-   * @return {[listWithFields, peopleObj]}
+   * @return {[peopleObj]}
    * @author Aswin Raj A
    */
-  const getFieldsForPeople = (people, list, listWithFields,
-    getFieldsForPeopleCB) => {
+  const getFieldsForPeople = (people, list, getFieldsForPeopleCB) => {
     const listId = list.id;
     let peopleObj = [];
     async.eachSeries(people, (person, personCB) => {
@@ -243,26 +282,10 @@ module.exports = function(List) {
       if(asyncErr){
         getFieldsForPeopleCB(asyncErr);
       }
-      getFieldsForPeopleCB(null, listWithFields, peopleObj);
+      getFieldsForPeopleCB(null, peopleObj);
     });
   };
 
-  /**
-   * Stpe 4/ peopleWithFields
-   * To generate the peopleWithFields object that is to be returned in the
-   * callback
-   * @param  {[listWithFields]} listWithFields
-   * @param  {[peopleObj]} peopleObj
-   * @param  {[function]} generateCB
-   * @return {[peopleWithFields]}
-   * @author Aswin Raj A
-   */
-  const generatePeopleWithFields = (listWithFields, peopleObj, generateCB) => {
-    let peopleWithFields = [];
-    listWithFields.people = peopleObj;
-    peopleWithFields.push(listWithFields);
-    return generateCB(null, peopleWithFields);
-  };
 
   List.remoteMethod(
     "savePersonWithFields",
