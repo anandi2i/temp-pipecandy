@@ -364,16 +364,21 @@ module.exports = function(List) {
    */
   const validateNames = (ctx, reqParams, id, validateNamesCB) => {
     let isValidFlag = true;
-    isValidFlag = validator.validateFieldName(reqParams.person.firstName)
-      ? isValidFlag : false;
-    isValidFlag = validator.validateFieldName(reqParams.person.lastName)
-      ? isValidFlag : false;
-    isValidFlag = validator.validateFieldName(reqParams.person.middleName)
-      ? isValidFlag : false;
-    isValidFlag = reqParams.person.firstName.trim().length
-      ? isValidFlag : false;
-    isValidFlag = reqParams.person.lastName.trim().length
-      ? isValidFlag : false;
+    const currentPerson = reqParams.person;
+    if(currentPerson.firstName && currentPerson.lastName) {
+      isValidFlag = currentPerson.firstName.trim().length ? isValidFlag : false;
+      isValidFlag = currentPerson.lastName.trim().length ? isValidFlag : false;
+      isValidFlag = validator.validateFieldName(currentPerson.firstName)
+       ? isValidFlag : false;
+      isValidFlag = validator.validateFieldName(currentPerson.lastName)
+        ? isValidFlag : false;
+    } else {
+      isValidFlag = false;
+    }
+    if(currentPerson.middleName) {
+      isValidFlag = validator.validateFieldName(currentPerson.middleName)
+        ? isValidFlag : false;
+    }
     if(!isValidFlag) {
       logger.error("Invalid Data", {
         input: reqParams.person
@@ -1039,6 +1044,9 @@ module.exports = function(List) {
    * @author Syed Sulaiman M
    */
   List.createField = (ctx, id, additionalFieldReq, callback) => {
+    if(!additionalFieldReq.name)
+      return callback(errorMessages.INVALID_FIELD_NAME);
+    additionalFieldReq.name = additionalFieldReq.name.trim();
     var fieldName = additionalFieldReq.name;
     var firstChar = fieldName.charAt(constants.ZERO);
     var index = firstChar.search(/[a-z]/i);

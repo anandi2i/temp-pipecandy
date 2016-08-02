@@ -78,7 +78,7 @@ const validateFieldName = (string) => {
     }
     return true;
   }
-  return false;
+  return true;
 };
 
 module.exports = {
