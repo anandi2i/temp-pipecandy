@@ -400,7 +400,8 @@ class ListView extends React.Component {
       placeholder: "Field Name",
       value: fieldName,
       onChange: (event, fieldName) => this.onChange(event, fieldName),
-      className: "validate"
+      className: this.props.isValid("fieldName") ? "validate" : "invalid",
+      onBlur: this.props.handleValidation("fieldName")
     };
     return (
       <div>

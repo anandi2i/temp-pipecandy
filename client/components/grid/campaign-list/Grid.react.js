@@ -100,12 +100,13 @@ class CampaignGrid extends React.Component {
   }
 
   render() {
+    const hideHeader = this.state.isResultEmpty ? "" : "all-campaigns-list";
     return (
       <div className="row" id="campaign_list">
         <div className="container">
           <Griddle
             results={this.props.results}
-            tableClassName="responsive-table all-campaigns-list"
+            tableClassName={`responsive-table ${hideHeader}`}
             useGriddleStyles={false}
             columnMetadata={columnMeta}
             columns={["id", "name", "listSentTo",

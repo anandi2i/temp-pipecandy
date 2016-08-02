@@ -3,6 +3,7 @@ const minPassLength = 6;
 const maxPassLength = 100;
 //const namePattern = /^[a-zA-Z][a-zA-Z0-9-_ ]*$/;
 const namePattern = /^\S.*$/;
+const fieldNamePattern = /^[a-zA-Z].*$/;
 const validatorObj = {
   firstName: Joi.string().alphanum().required().label("first name").options({
     language: {
@@ -79,7 +80,7 @@ const validatorObj = {
       }
     }
   }),
-  fieldName: Joi.string().regex(namePattern).label("Field Name").options({
+  fieldName: Joi.string().regex(fieldNamePattern).label("Field Name").options({
     language: {
       any: {
         empty: "!! Oops. Seems like you forgot to fill the field name!",
