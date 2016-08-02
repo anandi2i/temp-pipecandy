@@ -165,6 +165,16 @@ const CampaignActions = {
       actionType: Constants.MOVE_INBOX_MAILS,
       data: data
     });
+  },
+  /**
+   * Remove the selected persons from queue
+   * @param  {Object} peopleIds
+   */
+  removePeopleQueue(peopleIds) {
+    AppDispatcher.handleAction({
+      actionType: Constants.REMOVE_PEOPLE_QUEUE,
+      peopleIds: peopleIds
+    });
   }
 };
 

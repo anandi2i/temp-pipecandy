@@ -138,6 +138,13 @@ const CampaignApi = {
   moveMails(data) {
     const {classification, inboxIds} = data;
     return api.put(`/api/inboxMails/${classification}`, inboxIds);
+  },
+  /**
+   * Remove the selected emails from queue
+   * @param {object} peopleIds
+   */
+  removePeopleQueue(peopleIds) {
+    return api.post("/api/emailsQueue/people", peopleIds);
   }
 };
 

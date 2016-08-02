@@ -637,6 +637,14 @@ AppDispatcher.register(function(payload) {
         CampaignStore.emitMoveMailsChange();
       });
       break;
+    case Constants.REMOVE_PEOPLE_QUEUE:
+      CampaignApi.removePeopleQueue(action.peopleIds).then((response) => {
+        CampaignStore.emitMoveMailsChange();
+      }, (err) => {
+        _error = err;
+        CampaignStore.emitMoveMailsChange();
+      });
+      break;
     default:
       return true;
   }

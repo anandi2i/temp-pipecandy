@@ -14,7 +14,7 @@ module.exports = function(EmailQueue) {
       accepts: [{arg: "ctx", type: "object", http: {source: "context"}},
                 {arg: "reqParams", type: "object", http: {source: "body"}}],
       returns: {arg: "person", type: "person", root: true},
-      http: {verb: "delete", path: "/people"}
+      http: {verb: "post", path: "/people"}
     }
   );
 
@@ -35,7 +35,7 @@ module.exports = function(EmailQueue) {
      deleteEmailsFromQueue
     ], (asyncErr) => {
       if(asyncErr) {
-        return deletePeopleCB(userrorMessages.SERVER_ERROR);
+        return deletePeopleCB(errorMessages.SERVER_ERROR);
       }
       return deletePeopleCB(null, "Deleted Successfully!");
     });

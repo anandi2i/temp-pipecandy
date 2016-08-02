@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import update from "react-addons-update";
 import moment from "moment";
+import _ from "underscore";
 import CampaignFooter from "./CampaignFooter.react";
 import CampaignReportHead from "../CampaignReportHead.react";
 import ScheduleEmailView from "./ScheduleEmailView.react";
@@ -23,9 +25,8 @@ class CampaignSchedulebox extends React.Component {
     this.state = {
       requestSent: false,
       isEmailPreview: false,
-      scheduledMails : {
-        data: []
-      }
+      scheduledMails: [],
+      selectedIds: []
     };
   }
 
@@ -41,6 +42,7 @@ class CampaignSchedulebox extends React.Component {
     this.el = $(ReactDOM.findDOMNode(this));
     this.el.find("select").material_select();
     CampaignStore.addMailboxChangeListener(this.onStoreChange);
+    CampaignStore.addMoveMailsChangeListener(this.removeSelectedMailsChange);
     window.addEventListener("scroll", this.handleOnScroll);
     CampaignActions.getScheduledMails({
       id: this.props.params.id,
@@ -56,6 +58,7 @@ class CampaignSchedulebox extends React.Component {
   componentWillUnmount() {
     this.el.find("select").material_select("destroy");
     CampaignStore.removeMailboxChangeListener(this.onStoreChange);
+    CampaignStore.removeMoveMailsChangeListener(this.removeSelectedMailsChange);
     window.removeEventListener("scroll", this.handleOnScroll);
   }
 
@@ -65,12 +68,25 @@ class CampaignSchedulebox extends React.Component {
   onStoreChange = () => {
     const scheduledMails = CampaignStore.getScheduledMails();
     this.setState({
-      scheduledMails: {
-        data: this.state.scheduledMails.data.concat(scheduledMails)
-      },
+      scheduledMails: this.state.scheduledMails.concat(scheduledMails),
       requestSent: false
     });
     displayError(CampaignStore.getError());
+  }
+
+  /**
+   * Remove the selected mails after moving
+   * Uncheck all checkboxes
+   */
+  removeSelectedMailsChange = () => {
+    const {scheduledMails, selectedIds} = this.state;
+    this.el.find(".filled-in").attr("checked", false);
+    this.setState({
+      scheduledMails: _.reject(scheduledMails,
+        scheduledMail => _.contains(selectedIds, scheduledMail.id)
+      ),
+      selectedIds: []
+    });
   }
 
   /**
@@ -87,7 +103,7 @@ class CampaignSchedulebox extends React.Component {
     const clientHeight = docEl.clientHeight || window.innerHeight;
     const scrolledToBtm = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
     const next = 1;
-    const nextStartRange = scheduledMails.data.length + next;
+    const nextStartRange = scheduledMails.length + next;
     const limit = 10;
     if(scrolledToBtm) {
       if (requestSent) {
@@ -115,7 +131,7 @@ class CampaignSchedulebox extends React.Component {
    */
   emailPreview(keyId) {
     this.setState({
-      emailContent: this.state.scheduledMails.data[keyId],
+      emailContent: this.state.scheduledMails[keyId],
       isEmailPreview: true
     }, () => {
       this.refs.emailPreview.openModal();
@@ -131,6 +147,33 @@ class CampaignSchedulebox extends React.Component {
     });
   }
 
+  deleteScheduled() {
+    CampaignActions.removePeopleQueue({
+      "ids": this.state.selectedIds
+    });
+  }
+
+  /**
+   * Add the checkbox if not exists else remove it
+   * Push/Splice the selected inbox id to selectedIds array
+   * @param  {number} ScheduledId selected inbox id
+   */
+  handleCheckboxChange(ScheduledId) {
+    const {selectedIds} = this.state;
+    const idx = selectedIds.indexOf(ScheduledId);
+    const notExist = -1;
+    const howMany = 1;
+    if(idx === notExist) {
+      this.setState({
+        selectedIds: selectedIds.concat(ScheduledId)
+      });
+    } else {
+      this.setState({
+        selectedIds: update(selectedIds, {$splice: [[idx, howMany]]})
+      });
+    }
+  }
+
   /**
    * render
    * @see http://stackoverflow.com/questions/28320438/react-js-create-loop-through-array
@@ -144,7 +187,7 @@ class CampaignSchedulebox extends React.Component {
       isEmailPreview
     } = this.state;
     const campaignId = this.props.params.id;
-    const showEmptymsg = scheduledMails.data.length || requestSent;
+    const showEmptymsg = scheduledMails.length || requestSent;
     return (
       <div>
         <div className="m-b-120">
@@ -160,22 +203,32 @@ class CampaignSchedulebox extends React.Component {
                   className="col s12 m8"
                   onChange={this.handleChange} />
               </div>
+              <div className="col s12 m6 l6 p-lr-0">
+                <div className="right">
+                  <a className="btn btn-dflt blue sm-icon-btn dropdown-button"
+                    onClick={() => this.deleteScheduled()}>
+                    <i className="left mdi mdi-delete"></i> Delete
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
           <div className="container">
             {
-              scheduledMails.data.map((scheduled, key) => {
+              scheduledMails.map((scheduled, key) => {
                 const subject = $(`<div>${scheduled.subject}</div>`).text();
                 const content = $(`<div>${scheduled.content}</div>`).text();
                 const scheduledAt = moment(scheduled.scheduledAt)
                   .format("MMM Do YY, h:mm a");
+                  const id = scheduled.id;
                 return (
                   <div key={key} className="camp-repo-grid waves-effect animated flipInX">
                     <div className="row">
                       <div className="content">
                         <input type="checkbox" className="filled-in"
-                          id={key} defaultChecked="" />
-                        <label htmlFor={key} className="full-w" />
+                          onChange={() => this.handleCheckboxChange(id)}
+                          id={id} defaultChecked="" />
+                        <label htmlFor={id} className="full-w" />
                         <div className="mail-sub-content" onClick={() => this.emailPreview(key)}>
                           <div className="data-info col s8 m3 l2 person-name">
                             <span>{scheduled.person.firstName}</span>
