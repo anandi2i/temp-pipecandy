@@ -213,23 +213,23 @@ class CampaignIssuesPreviewPopup extends React.Component {
         let isMatch = currentIssueTags.issuesTags.equals(findIssues.issuesTags);
         if(isMatch && getPersonInfo) {
           if(count) {
-            let subj = CampaignStore.constructEmailTemplate(getSubject.content);
-            let mail = CampaignStore.constructEmailTemplate(getContent.content);
-            let getUsedTagIds = CampaignStore.usedTagIds(subj.concat(mail));
-            let missingTagIds = _.difference(this.state.usedTagIdsArr,
-              getUsedTagIds.usedTagIdsArr).join().replace(/,/g, "|");
-            issuePerson.subject = CampaignStore.applySmartTagsValue(
-              subj, getPersonInfo);
-            issuePerson.content = CampaignStore.applySmartTagsValue(
-              mail, getPersonInfo);
+            issuePerson.subject =
+              CampaignStore.constructEmailTemplate(getSubject.content);
+            issuePerson.content =
+              CampaignStore.constructEmailTemplate(getContent.content);
+            let getUsedTagIds = CampaignStore.usedTagIds(issuePerson.subject
+              .concat(issuePerson.content));
             issuePerson.usedTagIds = getUsedTagIds.usedTagIds;
-            issuePerson.missingTagIds = missingTagIds;
+            issuePerson.missingTagIds = _.difference(this.state.usedTagIdsArr,
+              getUsedTagIds.usedTagIdsArr).join().replace(/,/g, "|");
             issuePerson.userId = getCookie("userId");
             myList.push(issuePerson);
           }
           previewList.push({
-            subject: issuePerson.subject,
-            content: issuePerson.content,
+            subject: CampaignStore.applySmartTagsValue(issuePerson.subject,
+              getPersonInfo),
+            content: CampaignStore.applySmartTagsValue(issuePerson.content,
+              getPersonInfo),
             personId: getPersonInfo.id
           });
           count = false;
