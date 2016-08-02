@@ -1117,8 +1117,12 @@ $lines-to-show: 8;
     }
     .date {
       float: right;
-      max-width: 75px;
+      max-width: 200px;
+      overflow: hidden;
       padding: 0;
+      text-align: right;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
   &:hover {

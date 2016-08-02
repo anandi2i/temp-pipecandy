@@ -311,7 +311,7 @@ class CampaignInbox extends React.Component {
                   const subject = $(`<div>${inbox.subject}</div>`).text();
                   const content = $(`<div>${inbox.content}</div>`).text();
                   const receivedDate = moment(inbox.receivedDate)
-                    .format("DD MMM YYYY");
+                    .format("MMM Do YY, h:mm a");
                   return (
                     <div key={key} className="camp-repo-grid waves-effect animated flipInX">
                       <div className="row">

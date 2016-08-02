@@ -168,7 +168,7 @@ class CampaignSchedulebox extends React.Component {
                 const subject = $(`<div>${scheduled.subject}</div>`).text();
                 const content = $(`<div>${scheduled.content}</div>`).text();
                 const scheduledAt = moment(scheduled.scheduledAt)
-                  .format("DD MMM YYYY");
+                  .format("MMM Do YY, h:mm a");
                 return (
                   <div key={key} className="camp-repo-grid waves-effect animated flipInX">
                     <div className="row">
