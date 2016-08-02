@@ -27,7 +27,8 @@ export const ErrorMessages = {
   "InValidFileType": "Please upload file of type csv/xls",
   "SamePasswordUpdate": "Please update new different password",
   "EmptyEmailList": "Email list should not be empty",
-  "SmartTagIssues": "Fix all smart tag issues"
+  "SmartTagIssues": "Fix all smart tag issues",
+  "INVALID_FIELD_NAME": "Invalid Field Name"
 };
 
 /**

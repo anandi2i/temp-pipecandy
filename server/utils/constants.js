@@ -1,3 +1,9 @@
+const ONE = 1;
+const TWO = 2;
+const THREE = 3;
+const FOUR = 4;
+const FIVE = 5;
+
 const constants = {
   "EMPTYOBJECT" : "10",
   "EMPTYARRAY" : 0,
@@ -6,10 +12,13 @@ const constants = {
   "USER_STOPPED_CAMPAIGN" : "User has Stopped the Campaign",
   "USER": "USER",
   "SYSTEM": "SYSTEM",
-  "ONE": 1,
+  "ONE": ONE,
+  "ZERO": 0,
+  "MINUS_ONE": -1,
   "TIME_FORMAT": "dd/mm/yyyy HH:MM:ss.l",
   "CLASSIFICATIONS" : ["bounced", "out-of-office", "actionable",
-    "nurture", "negative"]
+    "nurture", "negative"],
+  "LIST_DEFAULT_FIELDS": [ONE, TWO, THREE, FOUR, FIVE]
 };
 
 //export default constants;

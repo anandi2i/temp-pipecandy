@@ -72,7 +72,7 @@ module.exports = function(EmailLink) {
       }
       // If the request is not from www.pipecandy.com alone process it, else just
       // redirect it
-      if(req.headers.referer !== config.emailHost){
+      if(req.headers.host !== config.emailHost){
         updateMetrics(reqParams, link, (updateMetricsErr) => {
           if(updateMetricsErr) {
             logger.error("Update Metrics Error:", {error: updateMetricsErr,

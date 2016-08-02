@@ -58,7 +58,7 @@ const EmailListApi = {
    * @return {object} Promise
    */
   saveAdditionalField(data) {
-    return api.post(`/api/lists/${data.listId}/fields`, data);
+    return api.post(`/api/lists/${data.listId}/createField`, data);
   },
   /**
    * Api to relate meta field to list
@@ -66,7 +66,7 @@ const EmailListApi = {
    * @return {object} Promise
    */
   relateAdditionalField(data) {
-    return api.put(`/api/lists/${data.id}/fields/rel/${data.fk}`);
+    return api.put(`/api/lists/${data.id}/field/${data.fk}`);
   },
   /**
    * Api to get campaign templates for preview in grid view

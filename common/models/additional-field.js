@@ -105,6 +105,48 @@ module.exports = function(AdditionalField) {
     });
   };
 
+  /**
+   * Method to get AdditionalField by Like search in FieldName
+   * @param  {String}   fieldName
+   * @param  {Function} callback
+   * @return {AdditionalField}
+   * @author Syed Sulaiman M
+   */
+  AdditionalField.getByFieldNameLike = (fieldName, callback) => {
+    var pattern = new RegExp("^" + fieldName + "$", "i");
+    AdditionalField.findOne({
+      where: {
+        name : pattern
+      }
+    }, (err, additionalField) => {
+      if(err) {
+        logger.error("Error finding additionalFields : ",
+          {error: err, stack: err.stack, input: {name: fieldName}});
+        return callback(err);
+      }
+      return callback(null, additionalField);
+    });
+  };
+
+  /**
+   * Method to update AdditionalField Name
+   * @param  {AdditionalField}   additionalField
+   * @param  {String}   fieldName
+   * @param  {Function} callback
+   * @return {AdditionalField}
+   * @author Syed Sulaiman M
+   */
+  AdditionalField.updateFieldName = (additionalField, fieldName, callback) => {
+    additionalField.updateAttribute("name", fieldName,
+        (err, additionalField) => {
+      if(err) {
+        logger.error("Error updating additionalField Name : ",
+          {error: err, stack: err.stack, input: {name: fieldName}});
+        return callback(err);
+      }
+      return callback(null, additionalField);
+    });
+  };
 
   /**
    * Updates the updatedAt column with current Time

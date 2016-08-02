@@ -26,7 +26,7 @@ module.exports = function(OpenedEmail) {
    * @return void
    */
   OpenedEmail.trackEmail = (campaignId, personId, res, req) => {
-    if(req.headers.referer === config.emailHost) {
+    if(req.headers.host === config.emailHost) {
       return res.redirect("/images/1x1.png");
     }
     OpenedEmail.find({
@@ -96,7 +96,7 @@ module.exports = function(OpenedEmail) {
    * @return void
    */
   OpenedEmail.trackFollowUp = (campaignId, personId, followUpId, res, req) => {
-    if(req.headers.referer === config.emailHost) {
+    if(req.headers.host === config.emailHost) {
       return res.redirect("/images/1x1.png");
     }
     OpenedEmail.find({

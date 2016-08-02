@@ -5,6 +5,7 @@ import lodash from "lodash";
 import async from "async";
 import _ from "underscore";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
+import constants from "../../server/utils/constants";
 
 module.exports = function(List) {
   /**
@@ -794,9 +795,12 @@ module.exports = function(List) {
           (callback) => {
             list.listMetrics((error, listMetrics) => {
               if (!lodash.isEmpty(listMetrics)) {
+                const sentEmails = lodash.sumBy(listMetrics, "sentEmails");
+                const bounced = lodash.sumBy(listMetrics, "bounced");
+                const opened = lodash.sumBy(listMetrics, "opened");
+                const clicked = lodash.sumBy(listMetrics, "clicked");
+                const spammed = lodash.sumBy(listMetrics, "spammed");
                 const hundred = 100;
-                const {sentEmails, bounced, opened, clicked,
-                  spammed} = listMetrics[0];
                 const totalEmailReached = sentEmails - bounced;
                 listResponse.openPercentage =
                   lodash.round((opened / totalEmailReached) * hundred);
@@ -815,10 +819,17 @@ module.exports = function(List) {
           (callback) => {
             list.campaigns((campaignErr, campaigns) => {
               if (!lodash.isEmpty(campaigns)) {
-                campaigns = lodash.sortBy(campaigns, "lastRunAt");
-                let sizeToDec = 1;
-                let campaign = campaigns[campaigns.length - sizeToDec];
-                listResponse.lastRunAt = campaign.lastRunAt;
+                campaigns = lodash.filter(campaigns, (o) => {
+                  return (o.lastRunAt !== null);
+                });
+                if (!lodash.isEmpty(campaigns)) {
+                  campaigns = lodash.sortBy(campaigns, "lastRunAt");
+                  let sizeToDec = 1;
+                  let campaign = campaigns[campaigns.length - sizeToDec];
+                  listResponse.lastRunAt = campaign.lastRunAt;
+                } else {
+                  listResponse.lastRunAt = null;
+                }
               } else {
                 listResponse.lastRunAt = null;
               }
@@ -838,36 +849,14 @@ module.exports = function(List) {
   List.remoteMethod(
     "removePeople", {
       description: "Removes people from given list id",
-      accepts: [{
-        arg: "ctx",
-        type: "object",
-        http: {
-          source: "context"
-        }
-      }, {
-        arg: "listId",
-        type: "number",
-        required: true,
-        http: {
-          source: "path"
-        }
-      }, {
-        arg: "peopleIds",
-        type: "array",
-        required: true,
-        http: {
-          source: "body"
-        }
-      }],
-      returns: {
-        arg: "status",
-        type: "string",
-        root: true
-      },
-      http: {
-        verb: "post",
-        path: "/removePeople/:listId"
-      }
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "listId", type: "number", required: true, http: {source: "path"}},
+        {arg: "peopleIds", type: "array", required: true,
+            http: {source: "body"}}
+      ],
+      returns: {arg: "status", type: "string", root: true},
+      http: {verb: "post", path: "/removePeople/:listId"}
     }
   );
   /**
@@ -918,6 +907,190 @@ module.exports = function(List) {
     });
   };
 
+  List.remoteMethod(
+    "createField",
+    {
+      description: "To Create Field for List",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "id", type: "number", required: true, http: {source: "path"}},
+        {arg: "additionalField", type: "additionalField",
+            required: true, http: {source: "body"}}
+      ],
+      returns: {arg: "additionalField", type: "additionalField", root: true},
+      http: {verb: "post", path: "/:id/createField"}
+    }
+  );
+  /**
+   * Method to create Additional field for a List
+   * @param  {Context} ctx
+   * @param  {Number} id  listId
+   * @param  {Function}     callback
+   * @return {AdditionalField}
+   * @author Syed Sulaiman M
+   */
+  List.createField = (ctx, id, additionalFieldReq, callback) => {
+    var fieldName = additionalFieldReq.name;
+    var firstChar = fieldName.charAt(constants.ZERO);
+    var index = firstChar.search(/[a-z]/i);
+    if(index === constants.MINUS_ONE)
+      return callback(errorMessages.INVALID_FIELD_NAME);
+    async.parallel({
+      additionalField: async.apply(
+        List.app.models.additionalField.getByFieldNameLike, fieldName),
+      list: (listCB) => {
+        List.findById(id, (listErr, list) => {
+          return listCB(listErr, list);
+        });
+      }
+    }, (asyncErr, results) => {
+      if(asyncErr) {
+        logger.error("Error creating Field for List : ",
+          {error: asyncErr, stack: asyncErr.stack, input: {listId: id}});
+        return callback(errorMessages.SERVER_ERROR);
+      }
+      if(!results.list) return callback(errorMessages.INVALID_LIST_ID);
+      createOrAssocField(results.list, additionalFieldReq,
+          results.additionalField, (err, additionalField) => {
+        if(err) {
+          logger.error("Error creating Field for List : ",
+            {error: err, stack: err.stack, input: {listId: id}});
+          return callback(errorMessages.SERVER_ERROR);
+        }
+        return callback(null, additionalField);
+      });
+    });
+  };
+
+  List.remoteMethod(
+    "associateField",
+    {
+      description: "To Associate Field to List",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "id", type: "number", required: true, http: {source: "path"}},
+        {arg: "fieldId", type: "number", required: true, http:{source: "path"}},
+      ],
+      returns: {arg: "additionalField", type: "additionalField",
+          root: true},
+      http: {verb: "put", path: "/:id/field/:fieldId"}
+    }
+  );
+  /**
+   * Method to create Additional field for a List
+   * @param  {Context} ctx
+   * @param  {Number} id  listId
+   * @param  {Function}     callback
+   * @return {AdditionalField}
+   * @author Syed Sulaiman M
+   */
+  List.associateField = (ctx, id, fieldId, callback) => {
+    async.parallel({
+      additionalField: (additionalFieldCB) => {
+        List.app.models.additionalField.findById(fieldId, (fieldErr, field) => {
+          return additionalFieldCB(fieldErr, field);
+        });
+      },
+      list: (listCB) => {
+        List.findById(id, (listErr, list) => {
+          return listCB(listErr, list);
+        });
+      }
+    }, (asyncErr, results) => {
+      if(asyncErr) {
+        logger.error("Error associating Field to List : ",
+          {error: asyncErr, stack: asyncErr.stack, input: {listId: id}});
+        return callback(errorMessages.SERVER_ERROR);
+      }
+      let list = results.list;
+      let additionalField = results.additionalField;
+      if(!list) return callback(errorMessages.INVALID_LIST_ID);
+      if(!additionalField) return callback(errorMessages.INVALID_FIELD_ID);
+      let include = lodash.includes(constants.LIST_DEFAULT_FIELDS,
+        additionalField.id);
+      if(include) return callback(null, additionalField);
+      list.fields.findById(additionalField.id, function(err, field) {
+        if(field) return callback(null, field);
+        assocAdditionalField(list, additionalField,
+            (associatedFieldErr, associatedField) => {
+          if(associatedFieldErr) {
+            logger.error("Error associating Field to List : ",
+              {error: associatedFieldErr, stack: associatedFieldErr.stack});
+            return callback(errorMessages.SERVER_ERROR);
+          }
+          return callback(null, additionalField);
+        });
+      });
+    });
+  };
+
+  /**
+   * Method to create or associate AdditionalField to List
+   * @param  {[type]}   additionalField [description]
+   * @param  {Function} callback        [description]
+   * @return {[type]}                   [description]
+   * @author Syed Sulaiman M
+   */
+  const createOrAssocField = (list, additionalFieldReq, additionalField,
+      callback) => {
+    if(additionalField) {
+      let include = lodash.includes(constants.LIST_DEFAULT_FIELDS,
+          additionalField.id);
+      if(include) return callback(null, additionalField);
+      list.fields.findById(additionalField.id, function(err, field) {
+        if(field) return callback(null, field);
+        assocAdditionalField(list, additionalField,
+            (associatedFieldErr, associatedField) => {
+          if(associatedFieldErr) return callback(associatedFieldErr);
+          return callback(null, additionalField);
+        });
+      });
+    } else {
+      createAdditionalField(list, additionalFieldReq,
+        (additionalFieldErr, additionalField) => {
+        if(additionalFieldErr) return callback(additionalFieldErr);
+        return callback(null, additionalField);
+      });
+    }
+  };
+
+  /**
+   * Method to create and associate AdditionalField to List
+   * @param  {[type]}   additionalField [description]
+   * @param  {Function} callback        [description]
+   * @return {[type]}                   [description]
+   * @author Syed Sulaiman M
+   */
+  const createAdditionalField = (list, additionalField, callback) => {
+    list.fields.create(additionalField,
+        (additionalFieldErr, additionalField) => {
+      if(additionalFieldErr) {
+        logger.error("Error creating additionalField for list : ",
+          {error: additionalFieldErr, stack: additionalFieldErr.stack});
+        return callback(errorMessages.SERVER_ERROR);
+      }
+      return callback(null, additionalField);
+    });
+  };
+
+  /**
+   * Method to associate AdditionalField to List
+   * @param  {[type]}   additionalField [description]
+   * @param  {Function} callback        [description]
+   * @return {[type]}                   [description]
+   * @author Syed Sulaiman M
+   */
+  const assocAdditionalField = (list, additionalField, callback) => {
+    list.fields.add(additionalField,
+        (associatedFieldErr, associatedField) => {
+      if(associatedFieldErr) {
+        logger.error("Error associatng additionalField for list : ",
+          {error: associatedFieldErr, stack: associatedFieldErr.stack});
+        return callback(errorMessages.SERVER_ERROR);
+      }
+      return callback(null, associatedField);
+    });
+  };
 
   /**
    * Associating the ListIds with campgin
