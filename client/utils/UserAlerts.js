@@ -28,7 +28,8 @@ export const ErrorMessages = {
   "SamePasswordUpdate": "Please update new different password",
   "EmptyEmailList": "Email list should not be empty",
   "SmartTagIssues": "Fix all smart tag issues",
-  "INVALID_FIELD_NAME": "Invalid Field Name"
+  "INVALID_FIELD_NAME": "Invalid Field Name",
+  "PERSON_EXISTS_IN_LIST" : "Person already exist in the current list"
 };
 
 /**

@@ -264,6 +264,7 @@ AppDispatcher.register(function(payload) {
           {id:response.data.id});
         _getEmailList[0].people[index] = response.data;
         EmailListStore.emitChange();
+        EmailListActions.getEmailListByID(action.data.listId);
         _success = "";
       }, (err)=> {
         _error = HandleError.evaluateError(err);

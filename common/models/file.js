@@ -351,7 +351,7 @@ module.exports = function(File) {
           if(newPerson["Middle Name"])
             newPerson["Middle Name"] =
               validator.validateString(newPerson["Middle Name"]).trim();
-          if(newPerson.Salutation.trim() === "")
+          if(newPerson.Salutation && newPerson.Salutation.trim() === "")
             newPerson.Salutation = null;
           amendDataCB(null, {
             isValid : true,

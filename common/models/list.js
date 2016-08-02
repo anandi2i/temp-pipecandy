@@ -202,9 +202,9 @@ module.exports = function(List) {
           input: {listId: list.id},
           error: peopleFindErr,
           stack: peopleFindErr ? peopleFindErr.stack: ""});
-        getPersonForListCB(peopleFindErr);
+        return getPersonForListCB(peopleFindErr);
       }
-      getPersonForListCB(null, people, list, listWithFields);
+      return getPersonForListCB(null, people, list, listWithFields);
     });
   };
 
@@ -413,9 +413,9 @@ module.exports = function(List) {
         if(asyncErr){
           logger.error("Error while updating person who exist in another list",
             asyncErr);
-          updatePersonCB(asyncErr);
+          return updatePersonCB(asyncErr);
         }
-        updatePersonCB(null, person);
+        return updatePersonCB(null, person);
       });
     });
   };
@@ -564,20 +564,14 @@ module.exports = function(List) {
    * @param  {[Object]} reqParam [Exmaple of an reqParam shown above]
    * @param  {[function]} savePersonWithFieldsCB [description]
    * @return {[List]} [List with Person, Fields and values]
-   * @author Syed Sulaiman M
+   * @author Syed Sulaiman M, Aswin Raj(Modified)
    */
   List.updatePersonWithFields = (ctx, id, personId, reqParams, callback) => {
-    let params = {
-      userId: ctx.req.accessToken.userId,
-      listId: id,
-      personId: personId,
-      reqParams: reqParams
-    };
+    const userId = ctx.req.accessToken.userId;
+    const listId = id;
     async.waterfall([
-      function getReqParams(getReqParamsCB) {
-        getReqParamsCB(null, params);
-      },
-      updatePersonAndFieldValues,
+      async.apply(updatePersonAndFieldValues, userId, listId, personId,
+        reqParams),
       constructResponse
     ], (error, result) => {
       if (error) {
@@ -592,17 +586,18 @@ module.exports = function(List) {
    * Updates a Person and Associated Field Values
    * @param  {[Object]}   params Contains Details of Person, Fields to be updated
    * @param  {Function} callback
-   * @author Syed Sulaiman M
+   * @author Syed Sulaiman M, Aswin Raj A(Modified)
    */
-  const updatePersonAndFieldValues = (params, callback) => {
+  const updatePersonAndFieldValues = (userId, listId, personId, reqParams,
+    callback) => {
     List.find({
       where: {
-        id: params.listId,
-        createdBy: params.userId
+        id: listId,
+        createdBy: userId
       }
     }, (listsErr, lists) => {
       if (listsErr) {
-        logger.error("Error in getting List for id : ", params.listId);
+        logger.error("Error in getting List for id : ", listId);
         const errorMessage = errorMessages.SERVER_ERROR;
         return callback(errorMessage);
       }
@@ -612,41 +607,11 @@ module.exports = function(List) {
         return callback(errorMessage);
       }
       async.waterfall([
-        function getReqParams(getReqParamsCB) {
-          getReqParamsCB(null, lists[0], params);
-        },
-        updatePerson,
+        async.apply(updatePerson, lists[0], reqParams),
         updateFieldValues
       ], (error, list, person) => {
-        if (error) {
-          logger.error("Error while updating Person & Field Values", error);
-          return callback(error);
-        }
-        return callback(null, list, person);
+        return callback(error, list, person);
       });
-    });
-  };
-
-  /**
-   * Method to construct Response for Update Person with Field Values
-   * @param  {[Object]}  list   List object whose Person to be updated
-   * @param  {[Object]}  person Person object
-   * @param  {Function} callback
-   * @return {[Object]} Object Conatins List with Person and Field Values
-   */
-  const constructResponse = (list, person, callback) => {
-    let personRes = JSON.parse(JSON.stringify(person));
-    List.app.models.additionalFieldValue.find({
-      where: {
-        personId: person.id,
-        listId: list.id,
-      }
-    }, (fieldValuesErr, fieldValues) => {
-      if(fieldValuesErr) {
-        return callback(fieldValuesErr);
-      }
-      personRes.fieldValues = JSON.parse(JSON.stringify(fieldValues));
-      return callback(null, personRes);
     });
   };
 
@@ -655,26 +620,87 @@ module.exports = function(List) {
    * @param  {[Object]}   list
    * @param  {[Object]}   params Contains Details of Person, Fields to be updated
    * @param  {Function} callback
+   * @author Syed Sulaiman M, Aswin Raj A(Modified)
    */
-  const updatePerson = (list, params, callback) => {
-    let person = params.reqParams.person;
-    list.people.findById(person.id, (personErr, personInst) => {
-      if (lodash.isEmpty(personInst)) {
-        logger.error("Error getting Person: ", person.id, "in list", list.id);
-        const errorMessage = errorMessages.PERSON_NOT_FOUND;
+  const updatePerson = (list, reqParams, callback) => {
+    let newPerson = reqParams.person;
+    list.people.findById(newPerson.id, (personErr, oldPerson) => {
+      if (personErr) {
+        logger.error("Error while finding person", {
+          input: {personId: newPerson.id},
+          error: personErr, stack: personErr.stack});
+        const errorMessage = errorMessages.SERVER_ERROR;
         return callback(errorMessage);
       }
-      personInst.updateAttributes(person, (updatedPersonErr, updatedPerson) => {
-        if (updatedPersonErr) {
-          logger.error("Error in saving Person Object : ", personErr);
-          const errorMessage = errorMessages.SERVER_ERROR;
-          return callback(errorMessage);
-        }
-        return callback(null, list, updatedPerson, params);
-      });
+      if (newPerson.email === oldPerson.email) {
+        updatePersonForDifferentList(list.id, oldPerson, newPerson,
+          (error, person) => {
+            return callback(error, list, person, newPerson.fieldValues);
+        });
+      } else {
+        newPerson.fieldValues = newPerson.fieldValues.map(fieldValue => {
+          return _.omit(fieldValue, "id");
+        });
+        List.app.models.person.find({
+          where: {
+            email : newPerson.email
+          }
+        }, (findErr, people) => {
+          if(findErr){
+            logger.error("Error while finding person", {
+              input: {email : newPerson.email}, error: findErr,
+              stack: findErr.stack
+            });
+            callback(findErr);
+          }
+          newPerson = _.omit(newPerson, "id");
+          if(lodash.isEmpty(people)) {
+            list.people.remove(oldPerson, (removeErr) => {
+              if(removeErr) {
+                logger.error("Error while removing person from list", {
+                  input: {person: oldPerson, list: list.id},
+                  error: removeErr, stack: removeErr.stack});
+                return callback(removeErr);
+              }
+              List.app.models.person.createNewPerson(list.id, newPerson,
+                (createErr, person) => {
+                return callback(createErr, list, person, newPerson.fieldValues);
+              });
+            });
+          } else {
+            people[0].lists((listFindErr, lists) => {
+              if(listFindErr) {
+                logger.error("Error while finding the lists for person", {
+                  input: {personId: people[0].id},
+                  error: listFindErr, stack: listFindErr.stack});
+                return callback(listFindErr);
+              }
+              const personsListIds = _.pluck(lists, "id");
+              if(personsListIds.indexOf(list.id) > constants.EMPTYARRAYINDEX){
+                logger.error("Person already exists in the current list", {
+                  input:{personId: people[0].id, listId: list.id}});
+                const errorMessage = errorMessages.PERSON_EXISTS_IN_LIST;
+                return callback(errorMessage);
+              }
+              list.people.remove(oldPerson, (removeErr) => {
+                if(removeErr) {
+                  logger.error("Error while removing person from list", {
+                    input: {person: oldPerson, list: list.id},
+                    error: removeErr, stack: removeErr.stack});
+                  return callback(removeErr);
+                }
+                updatePersonForDifferentList(list.id, people[0], newPerson,
+                  (personUpdateErr, person) => {
+                  return callback(personUpdateErr, list, person,
+                    newPerson.fieldValues);
+                });
+              });
+            });
+          }
+        });
+      }
     });
   };
-
 
   /**
    * Updates Field Values
@@ -682,9 +708,9 @@ module.exports = function(List) {
    * @param  {[Object]}   person
    * @param  {[Object]}   params Contains Details of Person, Fields to be updated
    * @param  {Function} callback
+   * @author Syed Sulaiman M, Aswin Raj A(Modified)
    */
-  const updateFieldValues = (list, person, params, callback) => {
-    let fieldValues = params.reqParams.person.fieldValues;
+  const updateFieldValues = (list, person, fieldValues, callback) => {
     let fieldIds = [];
     async.each(fieldValues, (fieldValue, fieldValueCB) => {
       if (!lodash.has(fieldValue, "id")) {
@@ -704,14 +730,14 @@ module.exports = function(List) {
           List.app.models.additionalFieldValue.create(fieldValue,
               (createdFieldErr, createdField) => {
             fieldIds.push(createdField.id);
-            fieldValueCB(createdFieldErr, createdField);
+            return fieldValueCB(createdFieldErr, createdField);
           });
         });
       } else {
         List.app.models.additionalFieldValue.findById(fieldValue.id,
             (addFieldValueErr, addFieldValue) => {
           if (addFieldValueErr) {
-            fieldValueCB(addFieldValueErr);
+            callback(addFieldValueErr);
           } else {
             if (lodash.isEmpty(addFieldValue)) {
               logger.error("Error in gettig Field Values");
@@ -721,7 +747,7 @@ module.exports = function(List) {
             addFieldValue.updateAttribute("value", fieldValue.value,
                   (updatedFieldErr, updatedField) => {
               fieldIds.push(updatedField.id);
-              fieldValueCB(updatedFieldErr, updatedField);
+              return fieldValueCB(updatedFieldErr, updatedField);
             });
           }
         });
@@ -736,6 +762,31 @@ module.exports = function(List) {
         person.id, list.id, fieldIds, (deleteErr, result) => {
         return callback(null, list, person);
       });
+    });
+  };
+
+
+  /**
+   * Method to construct Response for Update Person with Field Values
+   * @param  {[Object]}  list   List object whose Person to be updated
+   * @param  {[Object]}  person Person object
+   * @param  {Function} callback
+   * @return {[Object]} Object Conatins List with Person and Field Values
+   * @author Syed Sulaiman M, Aswin Raj A(Modified)
+   */
+  const constructResponse = (list, person, callback) => {
+    let personRes = JSON.parse(JSON.stringify(person));
+    List.app.models.additionalFieldValue.find({
+      where: {
+        personId: person.id,
+        listId: list.id,
+      }
+    }, (fieldValuesErr, fieldValues) => {
+      if(fieldValuesErr) {
+        return callback(fieldValuesErr);
+      }
+      personRes.fieldValues = JSON.parse(JSON.stringify(fieldValues));
+      return callback(null, personRes);
     });
   };
 
