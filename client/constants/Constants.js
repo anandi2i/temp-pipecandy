@@ -41,5 +41,6 @@ export default keyMirror({
   REMOVE_PEOPLE_QUEUE: null,
   UNSUBSCRIBE_CAMPAIGN: null,
   PAUSE_CAMPAIGN: null,
-  RESUME_CAMPAIGN: null
+  RESUME_CAMPAIGN: null,
+  CAMPAIGN_PERFORMANCE_GRAPH: null
 });

@@ -161,6 +161,13 @@ const CampaignApi = {
    */
   resumeCampaign(campaignId) {
     return api.put(`/api/campaigns/${campaignId}/resume`);
+  },
+  /**
+   * Get open click rate metrics for campaign
+   * @param {object} campaignId
+   */
+  getCampaignPerformanceGraph(campaignId) {
+    return api.get(`/api/campaigns/${campaignId}/openClickRate`);
   }
 };
 

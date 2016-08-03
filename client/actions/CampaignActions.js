@@ -195,6 +195,16 @@ const CampaignActions = {
       actionType: Constants.RESUME_CAMPAIGN,
       campaignId: campaignId
     });
+  },
+  /**
+   * Get campaign performance graph metrics
+   * @param  {number} campaignId
+   */
+  getCampaignPerformanceGraph(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.CAMPAIGN_PERFORMANCE_GRAPH,
+      campaignId: campaignId
+    });
   }
 };
 

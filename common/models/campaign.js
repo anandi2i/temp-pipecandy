@@ -1268,7 +1268,7 @@ module.exports = function(Campaign) {
       if(lodash.isEmpty(campaigns)){
         return hasRecentCampaignCB(null, false);
       }
-      return hasRecentCampaignCB(null, true);
+      return hasRecentCampaignCB(null, campaigns.id);
     });
   };
 
@@ -1643,6 +1643,8 @@ module.exports = function(Campaign) {
       if(campaignErr){
         getCurrentCampaignDetailsCB(campaignErr);
       }
+      if(!campaign)
+        return getCurrentCampaignDetailsCB(errorMessages.INVALID_CAMPAIGN_ID);
       currentCampaignDetailsObj.campaignName = campaign.name;
       currentCampaignDetailsObj.executedAt = new Date(campaign.lastRunAt);
       campaign.lists((campaignListsErr, campaignList) => {

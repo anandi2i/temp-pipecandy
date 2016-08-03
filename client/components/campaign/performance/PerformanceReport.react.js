@@ -2,7 +2,7 @@ import React from "react";
 import Highcharts from "highcharts";
 import _ from "underscore";
 import CampaignActions from "../../../actions/CampaignActions";
-import CampaignStore from "../../../stores/CampaignStore";
+import CampaignReportStore from "../../../stores/CampaignReportStore";
 
 /**
  * The class PerformanceReport describes Opens and Clicks of the Emails on
@@ -12,53 +12,57 @@ class PerformanceReport extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      count: []
+      isEnable: false
     };
   }
 
   componentDidMount() {
+    CampaignReportStore.addPerformanceGraphListener(this.onStoreChange);
     const {campaignId} = this.props;
-    CampaignStore.addPerformanceStoreListener(this.onStoreChange);
-    if(!campaignId) {
-      CampaignActions.getRecentCampaignMetrics();
-    } else{
-      CampaignActions.getCurrentCampaignMetrics(campaignId);
-    }
-    this.drawGraph();
+    let id = campaignId || CampaignReportStore.getIsExistCampaign();
+    CampaignActions.getCampaignPerformanceGraph(id);
   }
 
   componentWillUnmount() {
-    CampaignStore.removePerformanceStoreListener(this.onStoreChange);
+    CampaignReportStore.removeOpenClickRate();
+    CampaignReportStore.removePerformanceGraphListener(this.onStoreChange);
   }
 
   /**
    * Get Metrics of the Campaign
    */
   onStoreChange = () => {
+    const openClickRate = CampaignReportStore.getOpenClickRate();
+    if(openClickRate.openRate.length) {
       this.setState({
-        count:CampaignStore.getCampaignMetrics()
+        isEnable: true,
+        openClickRate: openClickRate
+      }, () => {
+       this.drawGraph();
       });
+    }
   }
 
   /**
    * Setup Highcharts Properties
    */
   drawGraph = () => {
-    //TODO - Remove static data
-    //TODO - Use variable colours
+    const {openClickRate} = this.state;
+    const date = new Date(openClickRate.openRate[0].date);
     const pointInterval = 86400000;
-    const year = 2016;
-    const month = 0;
-    const day = 1;
-    const pointStart = Date.UTC(year, month, day);
-    const seriesStart = 0;
-    const seriesEnd = 10;
-    const range = 20;
-    const series1 = [];
-    const series2 = [];
-    for(let i = seriesStart; i < seriesEnd; i++) {
-      series1.push(_.random(seriesStart, range));
-      series2.push(_.random(seriesStart, range));
+    const pointStart =
+      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    const openRateCount = [];
+    const clickRateCount = [];
+    if(openClickRate.openRate.length) {
+      _.each(openClickRate.openRate, (val, key) => {
+        openRateCount.push(val.count);
+      });
+    }
+    if(openClickRate.clickRate.length) {
+      _.each(openClickRate.clickRate, (val, key) => {
+        clickRateCount.push(val.count);
+      });
     }
 
     /**
@@ -123,7 +127,7 @@ class PerformanceReport extends React.Component {
       },
       series: [{
           name: "Click rates",
-          data: series1,
+          data: openRateCount,
           color: "#FF6549",
           lineColor: "#FF6549",
           lineWidth: 3,
@@ -136,7 +140,7 @@ class PerformanceReport extends React.Component {
           }
       }, {
           name: "Open rates",
-          data: series2,
+          data: clickRateCount,
           color: "#FFC66D",
           lineColor: "#FFC66D",
           lineWidth: 3,
@@ -156,17 +160,20 @@ class PerformanceReport extends React.Component {
    * @return {ReactElement} - The element which used to render the graph
    */
   render() {
-    const campaignMetrics = this.state.count;
+    const {isEnable} = this.state;
     return (
       <div>
-        <div className="container row camp-chip-container performance-report"
-          style={{visibility:
-            _.isEmpty(campaignMetrics) ? "hidden" : "visible"}}>
-          <div className="row main-head">
-            Performance Report
-          </div>
-          <div id="performanceReport" className="graph-size" />
-        </div>
+        {
+          isEnable
+            ?
+              <div className="container row camp-chip-container performance-report">
+                <div className="row main-head">
+                  Performance Report
+                </div>
+                <div id="performanceReport" className="graph-size" />
+              </div>
+            : ""
+        }
       </div>
     );
   }

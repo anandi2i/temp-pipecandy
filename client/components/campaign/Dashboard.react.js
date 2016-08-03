@@ -27,6 +27,7 @@ class Dashboard extends React.Component {
 
   componentWillUnmount() {
     CampaignReportStore.removeReportViewChangeListener(this.onStoreChange);
+    CampaignReportStore.removeIsExistCampaign();
   }
 
   onStoreChange = () => {
