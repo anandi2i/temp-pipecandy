@@ -72,7 +72,7 @@ module.exports = function(EmailLink) {
       }
       // If the request is not from www.pipecandy.com alone process it, else just
       // redirect it
-      if(req.headers.host !== config.emailHost){
+      if(!req.headers.referer){
         updateMetrics(reqParams, link, (updateMetricsErr) => {
           if(updateMetricsErr) {
             logger.error("Update Metrics Error:", {error: updateMetricsErr,
@@ -80,15 +80,6 @@ module.exports = function(EmailLink) {
             return res.redirect(config.redirectURL);
           }
           res.redirect(link.linkurl);
-          // EmailLink.app.models.campaignAudit
-          //   .updateFollowUpEligiblity(campaignId, personId,
-          //     (updateErr) => {
-          //   if(updateErr){
-          //     logger.error(updateErr);
-          //     res.redirect(config.redirectURL);
-          //   }
-          //   res.redirect(link.linkurl);
-          // });
         });
       } else{
         res.redirect(link.linkurl);

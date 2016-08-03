@@ -26,7 +26,7 @@ module.exports = function(OpenedEmail) {
    * @return void
    */
   OpenedEmail.trackEmail = (campaignId, personId, res, req) => {
-    if(req.headers.host === config.emailHost) {
+    if(req.headers.referer) {
       return res.redirect("/images/1x1.png");
     }
     OpenedEmail.find({
