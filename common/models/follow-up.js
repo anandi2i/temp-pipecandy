@@ -45,13 +45,15 @@ module.exports = function(FollowUp) {
       followUps: (followUpsCB) => {
         FollowUp.find({where : {campaignId : campaignId}, order: "stepNo ASC"},
          (followUpsFindErr, followUps) => {
-          if(followUpsFindErr || lodash.isEmpty(followUps)){
-            logger.error("Error while finding followups", {
+          if(followUpsFindErr){
+            logger.error("Error while finding followups \
+              or followups not found", {
               error: followUpsFindErr, input: {campaignId: campaignId},
-              stack: followUpsFindErr ? followUpsFindErr.stack : null});
-            const notFound = "Campaign not Found";
-            return followUpsCB(followUpsFindErr || new Error(notFound));
+              stack: followUpsFindErr.stack});
+            return followUpsCB(followUpsFindErr);
           }
+          if(lodash.isEmpty(followUps))
+            logger.error("Followups Not Found for Camapain id : ", campaignId);
           return followUpsCB(null, followUps);
         });
       },
