@@ -301,7 +301,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
         <i className="mdi mdi-close" onClick={this.closeModal}></i>
         <div className="modal-header">
           <div className="head">
-            Email preview
+            Email Preview
             <span className="sub-head">( {this.state.personIssues.length} issues found )</span>
           </div>
           <div className="preview-slider">

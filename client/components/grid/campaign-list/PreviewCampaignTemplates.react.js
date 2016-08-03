@@ -71,7 +71,7 @@ class PreviewCampaignTemplates extends React.Component {
             {
               previewTemplate && previewTemplate.campaign
                 ? previewTemplate.campaign.name
-                : "Email preview"
+                : "Email Preview"
             }
           </div>
         </div>

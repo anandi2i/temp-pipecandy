@@ -167,7 +167,7 @@ class PreviewMailsPopup extends React.Component {
         <i className="mdi mdi-close modal-close"></i>
         <div className="modal-header">
           <div className="head">
-            Email preview
+            Email Preview
           </div>
           <div className="preview-slider">
             <i className="mdi waves-effect mdi-chevron-left left blue-txt"
