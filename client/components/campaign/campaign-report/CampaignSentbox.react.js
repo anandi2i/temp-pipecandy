@@ -166,7 +166,7 @@ class CampaignSentbox extends React.Component {
               sentMails.data.map((sentMail, key) => {
                 const subject = $(`<div>${sentMail.subject}</div>`).text();
                 const content = $(`<div>${sentMail.content}</div>`).text();
-                const scheduledAt = moment(sentMail.scheduledAt)
+                const scheduledAt = moment(sentMail.sentDate)
                   .format("MMM Do YY, h:mm a");
                 return (
                   <div key={key} className="camp-repo-grid waves-effect animated flipInX">
