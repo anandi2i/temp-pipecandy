@@ -175,6 +175,26 @@ const CampaignActions = {
       actionType: Constants.REMOVE_PEOPLE_QUEUE,
       peopleIds: peopleIds
     });
+  },
+  /**
+   * Pause the campaign
+   * @param {number} campaignId
+   */
+  pauseCampaign(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.PAUSE_CAMPAIGN,
+      campaignId: campaignId
+    });
+  },
+  /**
+   * Resume the campaign
+   * @param {number} campaignId
+   */
+  resumeCampaign(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.RESUME_CAMPAIGN,
+      campaignId: campaignId
+    });
   }
 };
 

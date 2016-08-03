@@ -145,6 +145,22 @@ const CampaignApi = {
    */
   removePeopleQueue(peopleIds) {
     return api.post("/api/emailsQueue/people", peopleIds);
+  },
+  /**
+   * Pause the campaign
+   * @param {number} campaignId
+   * @return {object} Promise
+   */
+  pauseCampaign(campaignId) {
+    return api.put(`/api/campaigns/${campaignId}/stop`);
+  },
+  /**
+   * Resume the campaign
+   * @param {number} campaignId
+   * @return {object} Promise
+   */
+  resumeCampaign(campaignId) {
+    return api.put(`/api/campaigns/${campaignId}/resume`);
   }
 };
 

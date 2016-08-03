@@ -645,6 +645,30 @@ AppDispatcher.register(function(payload) {
         CampaignStore.emitMoveMailsChange();
       });
       break;
+    case Constants.PAUSE_CAMPAIGN:
+      CampaignApi.pauseCampaign(action.campaignId).then((response) => {
+        const targetCamp = _.findWhere(allCampaigns, {
+          campaignId: response.data.id
+        });
+        targetCamp.statusCode = response.data.statusCode;
+        CampaignStore.emitChange();
+      }, (err) => {
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
+      });
+      break;
+    case Constants.RESUME_CAMPAIGN:
+      CampaignApi.resumeCampaign(action.campaignId).then((response) => {
+        const targetCamp = _.findWhere(allCampaigns, {
+          campaignId: response.data.id
+        });
+        targetCamp.statusCode = response.data.statusCode;
+        CampaignStore.emitChange();
+      }, (err) => {
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
+      });
+      break;
     default:
       return true;
   }
