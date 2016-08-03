@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import update from "react-addons-update";
 import moment from "moment";
 import _ from "underscore";
 import CampaignFooter from "./CampaignFooter.react";
@@ -28,7 +29,7 @@ class CampaignInbox extends React.Component {
      */
     this.state = {
       inboxMails : [],
-      requestSent: false,
+      requestSent: true,
       isEmailThreadView: false,
       threadId: "",
       selectedInboxIds: [],
@@ -224,7 +225,7 @@ class CampaignInbox extends React.Component {
       });
     } else {
       this.setState({
-        selectedInboxIds: selectedInboxIds.splice(inboxId, howMany)
+        selectedInboxIds: update(selectedInboxIds, {$splice: [[idx, howMany]]})
       });
     }
   }
