@@ -3,6 +3,7 @@ import {Link} from "react-router";
 import Spinner from "../Spinner.react";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
+import GridStore from "../../stores/GridStore";
 import EmailListGrid from "../grid/select-email-list/Grid.react";
 
 function getAllEmailList() {
@@ -24,7 +25,7 @@ class ListView extends React.Component {
   }
 
   componentWillUnmount() {
-    EmailListStore.removeSelectedEmailListIds();
+    GridStore.removeSelectedEmailListIds();
     EmailListStore.removeChangeListener(this.onStoreChange);
   }
 

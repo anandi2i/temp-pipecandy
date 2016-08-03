@@ -3,6 +3,7 @@
  */
 
 import React from "react";
+import GridStore from "../../stores/GridStore";
 
 class CustomGridPagination extends React.Component {
 
@@ -15,7 +16,8 @@ class CustomGridPagination extends React.Component {
   }
 
   render() {
-    const {currentPage, maxPage} = this.props;
+    const {currentPage} = this.props;
+    const maxPage = GridStore.getMaxPage() || this.props.maxPage;
     let lists = [];
     const defaultStartIndex = 0;
     const startIndexPoint = 3;

@@ -9,7 +9,7 @@ import WordaiPreviewPopup from "./WordaiPreviewPopup.react";
 import PreviewMailsPopup from "./PreviewMailsPopup.react";
 import ProspectSignals from "./ProspectSignals.react";
 import CampaignStore from "../../stores/CampaignStore";
-import EmailListStore from "../../stores/EmailListStore";
+import GridStore from "../../stores/GridStore";
 import UserStore from "../../stores/UserStore";
 import UserAction from "../../actions/UserAction";
 import CampaignActions from "../../actions/CampaignActions";
@@ -52,7 +52,7 @@ class ScheduleEmail extends React.Component {
 
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
-    const selectedEmailListIds = EmailListStore.getSelectedEmailListIds();
+    const selectedEmailListIds = GridStore.getSelectedEmailListIds();
     CampaignStore.addEmailListChangeListener(this.onStoreChange);
     CampaignStore.addSpamScoreChangeListener(this.onSpamScoreChange);
     CampaignStore.addSpamScoreChangeListener(this.onSpamScoreChange);

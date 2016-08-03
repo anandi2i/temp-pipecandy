@@ -6,6 +6,7 @@ import CustomPreviewComponent from "./CustomPreviewComponent.react";
 import CustomCampaignLinkComponent from "./CustomCampaignLinkComponent.react";
 import CustomCampaignActionComponent from
   "./CustomCampaignActionComponent.react";
+import GridStore from "../../../stores/GridStore";
 import {resultsEmpty} from "../../../utils/UserAlerts.js";
 
 let columnMeta = [{
@@ -78,6 +79,11 @@ class CampaignGrid extends React.Component {
     };
   }
 
+  //Reset the maxpage to null
+  componentWillUnmount() {
+    GridStore.resetMaxPage();
+  }
+
   getCustomGridFilterer = (results, filter) => {
     const check = 0;
     const filteredData = _.filter(results, (result) => {
@@ -90,6 +96,11 @@ class CampaignGrid extends React.Component {
       isResultEmpty: filteredData.length ? true : false,
       noDataMessage: resultsEmpty.allCampaignsOnSearch
     });
+    if(results.length === filteredData.length) {
+      GridStore.resetMaxPage();
+    } else {
+      GridStore.setMaxPage(filteredData.length);
+    }
     return filteredData;
   }
 

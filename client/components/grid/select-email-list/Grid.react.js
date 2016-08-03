@@ -4,7 +4,7 @@ import Griddle from "griddle-react";
 import CustomRowComponent from "./CustomRowComponent.react";
 import CustomPagerComponent from "../CustomGridPagination.react";
 import CustomFilterComponent from "../CustomGridFilter.react";
-import EmailListStore from "../../../stores/EmailListStore";
+import GridStore from "../../../stores/GridStore";
 import {resultsEmpty} from "../../../utils/UserAlerts.js";
 
 class SelectEmailListGrid extends React.Component {
@@ -16,6 +16,11 @@ class SelectEmailListGrid extends React.Component {
       isResultEmpty: true,
       noDataMessage: resultsEmpty.allLists
     };
+  }
+
+  //Reset the maxpage to null  
+  componentWillUnmount() {
+    GridStore.resetMaxPage();
   }
 
   getCustomGridFilterer = (results, filter) => {
@@ -32,6 +37,11 @@ class SelectEmailListGrid extends React.Component {
       isResultEmpty: filteredData.length ? true : false,
       noDataMessage: resultsEmpty.allListsOnSearch
     });
+    if(results.length === filteredData.length) {
+      GridStore.resetMaxPage(filteredData.length);
+    } else {
+      GridStore.setMaxPage(filteredData.length);
+    }
     return filteredData;
   }
 
@@ -51,7 +61,7 @@ class SelectEmailListGrid extends React.Component {
     this.setState({
       selectedRowIds: selectedRowIds
     }, () => {
-      EmailListStore.saveSelectedEmailListIds(this.state.selectedRowIds);
+      GridStore.saveSelectedEmailListIds(this.state.selectedRowIds);
     });
   }
 

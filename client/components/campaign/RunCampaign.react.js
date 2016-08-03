@@ -4,7 +4,7 @@ import SelectEmailList from "./SelectEmailList.react";
 import ScheduleEmail from "./ScheduleEmail.react";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
-import EmailListStore from "../../stores/EmailListStore";
+import GridStore from "../../stores/GridStore";
 
 class TabsNav extends React.Component {
   constructor(props) {
@@ -104,7 +104,7 @@ class RunCampaign extends React.Component {
    * remove change listener
    */
   componentWillUnmount() {
-    EmailListStore.removeSelectedEmailListIds();
+    GridStore.removeSelectedEmailListIds();
     CampaignStore.removeChangeListener(this.onStoreChange);
   }
 
