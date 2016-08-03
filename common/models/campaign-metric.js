@@ -203,6 +203,9 @@ module.exports = function(CampaignMetric) {
       }
     }, (metricsErr, metrics) => {
       if(metricsErr) {
+        logger.error("Error while getting Metric by Id: ",
+        {error: metricsErr, stack: metricsErr.stack, input:
+        {campaignId: campaignId}});
         return callback(metricsErr);
       }
       return callback(null, metrics[0]);

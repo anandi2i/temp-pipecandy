@@ -33,6 +33,31 @@ module.exports = function(FollowUp) {
         return getStepNoCB(null, stepNos);
     });
   };
+
+  /**
+   * Gets followups using campaginId and statuscode
+   *
+   * @param  {number} campaignId
+   * @param  {number} statusCode
+   * @param  {Function} callback
+   * @return {[FollowUp]} List of Follow Ups
+   * @author Naveen Kumar
+   */
+  FollowUp.getFollowUpByCampaignAndStatus = (campaignId,
+     statusCode, callback) => {
+    FollowUp.find({
+      where: {campaignId: campaignId,
+        statusCode: statusCode}
+    }, (followUpsErr, followUps) => {
+      if(followUpsErr) {
+        logger.error("Error while getting followUp by Id and Status: ",
+        {error: followUpsErr, stack: followUpsErr.stack, input:
+        {campaignId: campaignId, statusCode: statusCode}});
+        return callback(followUpsErr);
+      }
+      return callback(null, followUps);
+    });
+  };
   /**
    * gets the campagin object and followup object parallel manner using campaignId
    *

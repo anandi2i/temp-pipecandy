@@ -1708,7 +1708,7 @@ module.exports = function(Campaign) {
    * @param  {Number} id [campaign id]
    * @param  {function} callback
    * @return {Object} Capaign Report
-   * @author Syed Sulaiman M
+   * @author Syed Sulaiman M,Naveen Kumar(Modified)
    */
   Campaign.campaignReport = (ctx, id, callback) => {
     let campaignReport = {
@@ -1726,19 +1726,62 @@ module.exports = function(Campaign) {
         const errorMessage = errorMessages.INVALID_CAMPAIGN_ID;
         return callback(errorMessage);
       }
-      Campaign.app.models.campaignMetric.getMetricByCampaignId(campaign.id,
-          (metricErr, metric) => {
-        if(metricErr) {
+      async.parallel({
+        metric: getMetricByCampaign.bind(null, campaign.id),
+        followup: getFollowUpByCampaign.bind(null, campaign.id,
+          statusCodes.followUpSent)
+      }, (parallelErr, result) => {
+        if(parallelErr) {
           const errorMessage = errorMessages.SERVER_ERROR;
           return callback(errorMessage);
         }
-        if(metric) {
-          campaignReport.sentEmails = metric.sentEmails;
-          campaignReport.deliveredEmails = metric.sentEmails - metric.bounced;
-          campaignReport.warmResponses = metric.actionable + metric.nurture;
+        if(result.metric) {
+          campaignReport.sentEmails = result.metric.sentEmails;
+          campaignReport.deliveredEmails = result.metric.sentEmails
+            - result.metric.bounced;
+          campaignReport.warmResponses = result.metric.actionable
+            + result.metric.nurture;
+          campaignReport.followUpsSent = result.followup.length;
         }
         return callback(null, campaignReport);
       });
+    });
+  };
+
+  /**
+   * Gets metrics for the corresponding campaignId
+   *
+   * @param  {Number} campaignId
+   * @param  {function} callback
+   * @return {Object} Metric
+   * @author Naveen Kumar
+   */
+  const getMetricByCampaign = (campaignId, callback) => {
+    Campaign.app.models.campaignMetric.getMetricByCampaignId(campaignId,
+        (metricErr, metric) => {
+      if(metricErr) {
+        return callback(metricErr);
+      }
+      return callback(null, metric);
+    });
+  };
+
+  /**
+   * Gets followups for the corresponding campaignId and status code
+   *
+   * @param  {Number} campaignId
+   * @param  {Number} statusCode
+   * @param  {function} callback
+   * @return {Object} Followup
+   * @author Naveen Kumar
+   */
+  const getFollowUpByCampaign = (campaignId, statusCode, callback) => {
+    Campaign.app.models.FollowUp.getFollowUpByCampaignAndStatus(campaignId,
+      statusCode, (followupErr, followup) => {
+      if(followupErr) {
+        return callback(followupErr);
+      }
+      return callback(null, followup);
     });
   };
 
