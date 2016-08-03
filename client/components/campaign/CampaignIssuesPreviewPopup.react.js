@@ -199,7 +199,12 @@ class CampaignIssuesPreviewPopup extends React.Component {
       displayError("Please remove all error tags to save changes");
       console.log("Please remove all error tags to save changes");
     } else {
-      let {initCount, personIssues, displayPerson} = this.state;
+      let {
+        initCount,
+        personIssues,
+        displayPerson,
+        previewIssuesCompleted
+      } = this.state;
       let currentPerson = personIssues[displayPerson - initCount];
       let currentIssueTags = this.checkSmartTags(currentPerson);
       let myList = [];
@@ -239,6 +244,8 @@ class CampaignIssuesPreviewPopup extends React.Component {
 
       _.each(fixedPeopleId, (val, key) => {
         personIssues.splice(_.findIndex(personIssues, {id: val}), initCount);
+        previewIssuesCompleted.splice(_.findIndex(previewIssuesCompleted,
+          {id: val}), initCount);
       });
 
       this.setState((state) => ({
