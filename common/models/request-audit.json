@@ -1,0 +1,53 @@
+{
+  "name": "requestAudit",
+  "plural": "requestAudits",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "clientIp": {
+      "type": "string"
+    },
+    "requestPath": {
+      "type": "string"
+    },
+    "isMobile": {
+      "type": "boolean",
+      "default": false
+    },
+    "clientBrowser": {
+      "type": "string"
+    },
+    "requestParams": {
+      "type": "string"
+    },
+    "browserVersion": {
+      "type": "string"
+    },
+    "clientOS": {
+      "type": "string"
+    },
+    "clientPlatform": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "number"
+    },
+    "clientSource": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "updatedAt": {
+      "type": "date"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

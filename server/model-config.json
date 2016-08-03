@@ -167,5 +167,9 @@
   "campaignStatusAudit": {
     "dataSource": "psqlDs",
     "public": false
+  },
+  "requestAudit": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }

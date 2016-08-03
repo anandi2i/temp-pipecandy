@@ -4,6 +4,7 @@ var cookieParser = require("cookie-parser");
 var session = require("express-session");
 var RedisStore = require("connect-redis")(session);
 var path = require("path");
+var useragent = require("express-useragent");
 
 require("babel-core/register");
 
@@ -51,6 +52,7 @@ app.set("view engine", "ejs");
 app.set("views", "server/views");
 app.use(loopback.static("public/assets"));
 app.use(loopback.context());
+app.use(useragent.express());
 
 //Set the currently authenticated user data
 app.use(function (req, res, next) {
@@ -140,6 +142,7 @@ for (var s in config) {
 // If it is true, then redirect it to front-end routes
 app.all("*", function (req, res, next) {
   const firstPosition = 0;
+  app.models.requestAudit.createAudit(req, res);
   if(req.originalUrl.search("/api/") !== firstPosition) {
     res.sendFile(path.resolve("client", "index.html"));
   } else {

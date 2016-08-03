@@ -29,6 +29,8 @@ module.exports = function(OpenedEmail) {
     if(req.headers.referer) {
       return res.redirect("/images/1x1.png");
     }
+    let clientIp = req.ip;
+    let clientBrowser = req.useragent.browser;
     OpenedEmail.find({
       where: {
         "campaignId": campaignId,
@@ -45,7 +47,8 @@ module.exports = function(OpenedEmail) {
       }
       if(lodash.isEmpty(openedEmailEntry)) {
         async.waterfall([
-          async.apply(openedEmailsEntry, campaignId, personId),
+          async.apply(openedEmailsEntry, campaignId, personId, clientIp,
+              clientBrowser),
           listMetricEntry,
           campaignMetricEntry
         ], (asyncErr, results) => {
@@ -57,7 +60,8 @@ module.exports = function(OpenedEmail) {
         });
       } else {
         OpenedEmail.create({
-          "campaignId": campaignId, "personId": personId, "count": 1
+          "campaignId": campaignId, "personId": personId, "count": 1,
+          "clientIp": clientIp, "clientBrowser": clientBrowser
         }, (openedEmailNewEntryErr, openedEmailNewEntry) => {
           if (openedEmailNewEntryErr) {
             logger.error("Error while creating open email entry", {
@@ -99,6 +103,8 @@ module.exports = function(OpenedEmail) {
     if(req.headers.host === config.emailHost) {
       return res.redirect("/images/1x1.png");
     }
+    let clientIp = req.ip;
+    let clientBrowser = req.useragent.browser;
     OpenedEmail.find({
       where: {
         "campaignId": campaignId,
@@ -116,7 +122,7 @@ module.exports = function(OpenedEmail) {
       if(lodash.isEmpty(openedEmailEntry)) {
         async.series({
           openedEmail: async.apply(openedFollowUpEntry,
-              campaignId, personId, followUpId),
+              campaignId, personId, followUpId, clientIp, clientBrowser),
           followUpMetric: async.apply(createFollowUpMetric,
               campaignId, followUpId)
         }, (asyncErr, results) => {
@@ -127,8 +133,8 @@ module.exports = function(OpenedEmail) {
           return res.redirect("/images/1x1.png");
         });
       } else {
-        openedFollowUpEntry(campaignId, personId, followUpId,
-            (err, openedEmail) => {
+        openedFollowUpEntry(campaignId, personId, followUpId, clientIp,
+            clientBrowser, (err, openedEmail) => {
           return res.redirect("/images/1x1.png");
         });
       }
@@ -144,9 +150,11 @@ module.exports = function(OpenedEmail) {
    * @return {[campaignId, personId]}
    * @author Aswin Raj A
    */
-  const openedEmailsEntry = (campaignId, personId, openedEmailsEntryCB) => {
+  const openedEmailsEntry = (campaignId, personId, clientIp, clientBrowser,
+      openedEmailsEntryCB) => {
     OpenedEmail.create({
-      "campaignId": campaignId, "personId": personId, "count": 1
+      "campaignId": campaignId, "personId": personId, "count": 1,
+      "clientIp": clientIp, "clientBrowser": clientBrowser
     }, (openedEmailNewEntryErr, openedEmailNewEntry) => {
       if (openedEmailNewEntryErr) {
         return openedEmailsEntryCB(openedEmailNewEntryErr);
@@ -165,12 +173,15 @@ module.exports = function(OpenedEmail) {
    * @return {OpenedEmail}
    * @author Syed Sulaiman M
    */
-  const openedFollowUpEntry = (campaignId, personId, followUpId, callback) => {
+  const openedFollowUpEntry = (campaignId, personId, followUpId, clientIp,
+      clientBrowser, callback) => {
     OpenedEmail.create({
       "campaignId": campaignId,
       "personId": personId,
       "followUpId": followUpId,
-      "count": 1
+      "count": 1,
+      "clientIp": clientIp,
+      "clientBrowser": clientBrowser
     }, (openedEmailErr, openedEmail) => {
       if (openedEmailErr) {
         logger.error("Error while creating open followUp entry", {

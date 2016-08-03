@@ -13,6 +13,12 @@
     },
     "updatedAt": {
       "type": "date"
+    },
+    "clientIp": {
+      "type": "string"
+    },
+    "clientBrowser": {
+      "type": "string"
     }
   },
   "validations": [],

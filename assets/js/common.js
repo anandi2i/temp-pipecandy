@@ -8,6 +8,8 @@ let isOpenSideNav = false;
 $(document).ready(function() {
   // Set tinymce plugin location
   tinymce.baseURL = "/tinymce";
+  // Init UserAgent
+  var userAgent = new UserAgent().parse(navigator.userAgent);
   if ($(".auth-container").length) {
     let position = $(".auth-container").position();
     let getPosition = 50;

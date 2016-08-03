@@ -454,11 +454,11 @@ const createCampaignTemplate = (createdFollowUp, campaign,
    * @return {[result]}
    * @author Aswin Raj A
    */
-  FollowUp.reScheduleFollowUps = (campaignId, reScheduleCB) => {
+  FollowUp.reScheduleFollowUps = (campaign, reScheduleCB) => {
     async.autoInject({
-      followUps: [async.apply(getAllFollowUpsForCampaign, campaignId)],
+      followUps: [async.apply(getAllFollowUpsForCampaign, campaign.id)],
       scheduledFollowUps: (followUps, callback) => {
-        FollowUp.scheduleFollowUps(followUps, (err, followUps) => {
+        FollowUp.scheduleFollowUps(followUps, campaign, (err, followUps) => {
           callback(null, followUps);
         });
       },
@@ -537,7 +537,7 @@ const createCampaignTemplate = (createdFollowUp, campaign,
    * @return {[response]}
    * @author Aswin Raj A
    */
-  FollowUp.scheduleFollowUps = (followUps, scheduleCB) => {
+  FollowUp.scheduleFollowUps = (followUps, campaign, scheduleCB) => {
     let oldScheduledDate = null;
     async.eachSeries(followUps, (followUp, followUpCB) => {
       async.waterfall([

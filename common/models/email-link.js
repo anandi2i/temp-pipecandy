@@ -57,10 +57,14 @@ module.exports = function(EmailLink) {
    * @author Ramanavel Selvaraju
    */
   EmailLink.track = (campaignId, personId, linkId, res, req) => {
+    let clientIp = req.ip;
+    let clientBrowser = req.useragent.browser;
     let reqParams = {
       campaignId: campaignId,
       personId: personId,
-      emailLinkId: linkId
+      emailLinkId: linkId,
+      clientIp: clientIp,
+      clientBrowser: clientBrowser
     };
     EmailLink.findById(linkId, (linkFindErr, link) => {
       if(linkFindErr || !link) {

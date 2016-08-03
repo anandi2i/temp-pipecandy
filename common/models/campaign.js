@@ -211,11 +211,11 @@ module.exports = function(Campaign) {
       description: "To Resume the campaign",
       accepts: [
         {arg: "ctx", type: "object", http: {source: "context"}},
-        {arg: "campaignId", type: "number", required: true,
+        {arg: "id", type: "number", required: true,
           http: {source: "path"}}
       ],
       returns: {arg: "campaign", type: "campaign", root: true},
-      http: {verb: "put", path: "/:campaignId/resume"}
+      http: {verb: "put", path: "/:id/resume"}
     }
   );
 
@@ -232,8 +232,8 @@ module.exports = function(Campaign) {
    * @return {Campaign} [Persisted Campaign Object]
    * @author Aswin Raj A
    */
-  Campaign.resume = (ctx, campaignId, resumeCB) => {
-    getCampaign(ctx, campaignId, null, (err, campaign) => {
+  Campaign.resume = (ctx, id, resumeCB) => {
+    getCampaign(ctx, id, null, (err, campaign) => {
       if(err) {
         return resumeCB(err);
       }
@@ -245,7 +245,7 @@ module.exports = function(Campaign) {
         resumeFollowUps(campaign, (err, response) => {
           if(err) {
             logger.error("Error while resuming campaign followUps",
-            {error: err, stack: err.stack, input:{campaignId:campaignId}});
+            {error: err, stack: err.stack, input:{campaignId:id}});
             const errorMessage = errorMessages.SERVER_ERROR;
             return resumeCB(errorMessage);
           }
@@ -255,7 +255,7 @@ module.exports = function(Campaign) {
         resumeCampaign(campaign, (err, response) => {
           if(err) {
             logger.error("Error while resuming campaign",
-            {error: err, stack: err.stack, input:{campaignId:campaignId}});
+            {error: err, stack: err.stack, input:{campaignId:id}});
             const errorMessage = errorMessages.SERVER_ERROR;
             return resumeCB(errorMessage);
           }
@@ -277,7 +277,7 @@ module.exports = function(Campaign) {
       async.apply(validateStatusCode, campaign),
       enqueueToMailAssembler,
       (response, passParamsCB) => {
-        passParamsCB(null, campaign.id);
+        passParamsCB(null, campaign);
       },
       Campaign.app.models.followUp.reScheduleFollowUps,
       (response, passParamsCB) => {
@@ -288,7 +288,7 @@ module.exports = function(Campaign) {
       if(asyncErr){
         callback(asyncErr);
       }
-      callback(null, result);
+      callback(null, campaign);
     });
   };
 
@@ -306,7 +306,7 @@ module.exports = function(Campaign) {
       if(asyncErr){
         return callback(asyncErr);
       }
-      return callback(null, result);
+      return callback(null, campaign);
     });
   };
 
@@ -364,7 +364,7 @@ module.exports = function(Campaign) {
         return callback(null, updatedFollowUps);
       });
     } else {
-      Campaign.app.models.followUp.scheduleFollowUps(pastFollowUps,
+      Campaign.app.models.followUp.scheduleFollowUps(pastFollowUps, campaign,
           (err, response) => {
         if(err) return callback(err);
         let followUps = lodash.unionBy(pastFollowUps, futureFollowUps, "id");

@@ -114,7 +114,7 @@ const resumeCampaignProcess = (campaign, resumeProcessCB) => {
 const updateForPastCampaign = (campaign, updateForPastCampaignCB) => {
   async.parallel({
     emailQueue : App.emailQueue.assembleEmails.bind(null, campaign),
-    followUp : App.followUp.reScheduleFollowUps.bind(null, campaign.id)
+    followUp : App.followUp.reScheduleFollowUps.bind(null, campaign)
   }, (parallelErr, result) => {
     if(!parallelErr){
       console.log("Assembled Emails Successfully campaignId: ", campaign.id);
