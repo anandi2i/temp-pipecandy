@@ -80,6 +80,13 @@ const CampaignApi = {
     return api.get(campaignReportURL);
   },
   /**
+   * Get the recent campaign id
+   * @return {object} Promise
+   */
+  hasRecentCampaign() {
+    return api.get("/api/campaigns/hasRecentCampaign");
+  },
+  /**
    * Get is campaignMetrics is available
    * @param  {number|boolean} campaignId - check if campaign id
    * @return {boolean}                   - is available

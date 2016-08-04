@@ -9,6 +9,7 @@ let _otherCampaignMetrics = {};
 let _isExistCampaign;
 let emailThread = [];
 let openClickRate = {};
+let recentCampaignId;
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignReportStore = _.extend({}, EventEmitter.prototype, {
@@ -105,6 +106,21 @@ const CampaignReportStore = _.extend({}, EventEmitter.prototype, {
 
   getError() {
     return _error;
+  },
+
+  /**
+   * Return the recent campaign id
+   * @return {number} recentCampaignId
+   */
+  recentCampaignId() {
+    return recentCampaignId;
+  },
+
+  /**
+   * Reset the recent campaignId
+   */
+  resetRecentCampaignId() {
+    recentCampaignId = null;
   }
 
 });
@@ -121,6 +137,19 @@ AppDispatcher.register(function(payload) {
       }, (err) => {
         _error = err.message;
         CampaignReportStore.emitOtherStatsChange();
+      });
+      break;
+    case Constants.HAS_RECENT_CAMPAIGN:
+      CampaignApi.hasRecentCampaign().then((response) => {
+        _error = "";
+        if(response.data.hasCampaign) {
+          recentCampaignId = response.data.hasCampaign;
+        }
+        CampaignReportStore.emitReportViewChange();
+      }, (err) => {
+        recentCampaignId = null;
+        _error = err.message;
+        CampaignReportStore.emitReportViewChange();
       });
       break;
     case Constants.GET_IS_EXISTING_CAMPAIGN:

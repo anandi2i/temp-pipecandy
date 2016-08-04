@@ -138,6 +138,14 @@ const CampaignActions = {
     });
   },
   /**
+   * Check if recent campaign is available
+   */
+  hasRecentCampaign() {
+    AppDispatcher.handleAction({
+      actionType: Constants.HAS_RECENT_CAMPAIGN
+    });
+  },
+  /**
    * To get is campaign metrics is available
    */
   getIsExistingCampaign(campaignId) {

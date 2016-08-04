@@ -1,21 +1,36 @@
 import React from "react";
 import {Link} from "react-router";
+import _ from "underscore";
+import moment from "moment";
 import UserStore from "../stores/UserStore";
+import CampaignActions from "../actions/CampaignActions";
+import CampaignReportStore from "../stores/CampaignReportStore";
+import CampaignStore from "../stores/CampaignStore";
 
 class Home extends React.Component {
   constructor() {
     super();
     this.state = {
-      userName: UserStore.getUser()
+      userName: UserStore.getUser(),
+      campaignDetails: {},
+      campaignMetrics: {}
     };
+  }
+
+  componentDidMount() {
+    CampaignActions.hasRecentCampaign();
+    UserStore.addChangeListener(this.onStoreChange);
+    CampaignReportStore.addReportViewChangeListener(this.CampaignIdChange);
+    CampaignStore.addReportStoreListener(this.recentStatsChange);
+    CampaignStore.addPerformanceStoreListener(this.campaignMetricsChange);
   }
 
   componentWillUnmount() {
     UserStore.removeChangeListener(this.onStoreChange);
-  }
-
-  componentDidMount() {
-    UserStore.addChangeListener(this.onStoreChange);
+    CampaignReportStore.removeReportViewChangeListener(this.CampaignIdChange);
+    CampaignReportStore.resetRecentCampaignId();
+    CampaignStore.removeReportStoreListener(this.recentStatsChange);
+    CampaignStore.removePerformanceStoreListener(this.campaignMetricsChange);
   }
 
   onStoreChange = () => {
@@ -24,7 +39,50 @@ class Home extends React.Component {
     });
   }
 
+  /**
+   * Get the recent campaign id
+   * Call action to get Campaign details
+   * Call actio to get campaign metrics
+   */
+  CampaignIdChange = () => {
+    const recentCampaignId = CampaignReportStore.recentCampaignId();
+    if(recentCampaignId) {
+      CampaignActions.getCurrentCampaignDetails(recentCampaignId);
+      CampaignActions.getCurrentCampaignMetrics(recentCampaignId);
+    }
+  }
+
+  /**
+   * On campaign details change update the state
+   */
+  recentStatsChange = () => {
+    const campaignDetails = CampaignStore.getCampaignDetails();
+    this.setState({
+      campaignDetails: campaignDetails
+    });
+  }
+
+  /**
+   * On campaign metrics change update the state
+   */
+  campaignMetricsChange = () => {
+    const metricsArray = CampaignStore.getCampaignMetrics();
+    //http://stackoverflow.com/questions/10416424/underscore-js-create-a-map-out-of-list-of-objects-using-a-key-found-in-the-obje
+    const campaignMetricsObj = _.object(_.map(
+      metricsArray, campaign => [campaign.title.replace(/ /g, ""), campaign]
+    ));
+    this.setState({
+      campaignMetrics: campaignMetricsObj
+    });
+  }
+
+  /**
+   * Render HTML element
+   */
   render() {
+    const {campaignDetails, campaignMetrics} = this.state;
+    const executedAt =
+      moment(campaignDetails.executedAt).format("DD MMM YYYY h:mm A");
     return (
       <div>
         <div className="container">
@@ -51,42 +109,64 @@ class Home extends React.Component {
               </div>
             </div>
           </div>
-          <div className="campaign-status-cont">
-            <div className="gray-head"> Recent campaign stats </div>
-            <div className="campaign-status">
-              <ul>
-                <li className="blue-head"> Conference follow-up for west coast participants </li>
-                <li className="blue-txt"><i className="separator">&nbsp;</i> 1908 recipients</li>
-                <li className="blue-txt"><i className="separator">&nbsp;</i>12 Dec 2015 1:10 AM</li>
-              </ul>
-              <div className="campaign-status-info center row">
-                <div className="col s6 m4 l2">
-                  <div className="info">Opened</div>
-                  <div className="status">67</div>
-                </div>
-                <div className="col s6 m4 l2">
-                  <div className="info">responded</div>
-                  <div className="status">06</div>
-                </div>
-                <div className="col s6 m4 l2">
-                  <div className="info">Clicked</div>
-                  <div className="status">12</div>
-                </div>
-                <div className="col s6 m4 l2">
-                  <div className="info">Bounced</div>
-                  <div className="status">12</div>
-                </div>
-                <div className="col s6 m4 l2">
-                  <div className="info">Unsubscribed</div>
-                  <div className="status">09</div>
-                </div>
-                <div className="col s6 m4 l2">
-                  <div className="info">Spam</div>
-                  <div className="status">09</div>
+          {
+            !_.isEmpty(campaignDetails && campaignMetrics) ?
+              <div className="campaign-status-cont">
+                <div className="gray-head"> Recent campaign stats </div>
+                <div className="campaign-status">
+                  <ul>
+                    <li className="blue-head"> {campaignDetails.campaignName} </li>
+                    <li className="blue-txt">
+                      <i className="separator">&nbsp;</i>
+                      {campaignDetails.recepientCount} recipients
+                    </li>
+                    <li className="blue-txt">
+                      <i className="separator">&nbsp;</i>
+                      {executedAt}
+                    </li>
+                  </ul>
+                  <div className="campaign-status-info center row">
+                    <div className="col s6 m4 l2">
+                      <div className="info">Opened</div>
+                      <div className="status">
+                        {campaignMetrics.opened.percentage}
+                      </div>
+                    </div>
+                    <div className="col s6 m4 l2">
+                      <div className="info">responded</div>
+                      <div className="status">
+                        {campaignMetrics.actionableresponses.percentage}
+                      </div>
+                    </div>
+                    <div className="col s6 m4 l2">
+                      <div className="info">Clicked</div>
+                      <div className="status">
+                        {campaignMetrics.clicked.percentage}
+                      </div>
+                    </div>
+                    <div className="col s6 m4 l2">
+                      <div className="info">Bounced</div>
+                      <div className="status">
+                        {campaignMetrics.bounced.percentage}
+                      </div>
+                    </div>
+                    <div className="col s6 m4 l2">
+                      <div className="info">Unsubscribed</div>
+                      <div className="status">
+                        {campaignMetrics.unsubscribed.percentage}
+                      </div>
+                    </div>
+                    <div className="col s6 m4 l2">
+                      <div className="info">Spam</div>
+                      <div className="status">
+                        {campaignMetrics.spam.percentage}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            : null
+          }
         </div>
       </div>
     );
