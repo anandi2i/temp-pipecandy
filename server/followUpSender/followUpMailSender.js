@@ -46,7 +46,7 @@ function initFollowUpWorkflow(callback) {
         console.error("Error while polling folloUp table", err);
     }
     console.log("Follow Ups Processed");
-    callback(err, result);
+    return callback(err, result);
   });
 };
 
@@ -59,7 +59,7 @@ function getFollowUpIds(callback) {
     if(lodash.isEmpty(followUps)) {
       console.error("No Follow Ups to Sent");
     }
-    callback(followUpsErr, followUps);
+    return callback(followUpsErr, followUps);
   });
 }
 
@@ -73,14 +73,14 @@ function sendFollowUpMail(followUps, callback) {
     App.followUp.assembleEmails(followUp, (emailErr, result) => {
       if(emailErr) {
         console.error("Error while assembleEmails", emailErr);
-        followUpCB(emailErr);
+        return followUpCB(emailErr);
       }
       console.log(result);
-      followUpCB(null);
+      return followUpCB(null);
     });
 
   }, function done() {
-    callback(null, followUps);
+    return callback(null, followUps);
   });
 }
 
@@ -98,9 +98,12 @@ function updateFollowUps(followUps, callback) {
       statusCode: statusCodes.default.executingFollowUp
     };
     followUp.updateAttributes(properties, (updateErr, updatedInst) => {
+      if(updateErr){
+        console.error("Error while updating followUp");
+      }
       followUpCB(updateErr, updatedInst);
     });
   }, (asyncError) => {
-    callback(asyncError, followUps);
+    return callback(asyncError, followUps);
   });
 }
