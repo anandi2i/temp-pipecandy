@@ -2,6 +2,7 @@ import async from "async";
 import lodash from "lodash";
 import logger from "../../server/log";
 import config from "../../server/config.json";
+import constants from "../../server/utils/constants";
 
 module.exports = function(OpenedEmail) {
 
@@ -26,7 +27,9 @@ module.exports = function(OpenedEmail) {
    * @return void
    */
   OpenedEmail.trackEmail = (campaignId, personId, res, req) => {
-    if(req.headers.referer) {
+    const referer = req.headers.referer;
+    if(referer
+      && referer.indexOf(config.appHost) > constants.EMPTYARRAYINDEX) {
       return res.redirect("/images/1x1.png");
     }
     let clientIp =
