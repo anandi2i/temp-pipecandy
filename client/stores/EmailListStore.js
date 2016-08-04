@@ -285,6 +285,8 @@ AppDispatcher.register(function(payload) {
         //@todo: This dirty call has to be removed asap
         EmailListActions.getEmailListByID(action.data.listId);
         // EmailListStore.emitChange();
+        _getFields.listFields.push(response.data);
+        EmailListStore.emitFields();
         _success = "";
       }, (err)=> {
         _error = HandleError.evaluateError(err);
@@ -297,6 +299,8 @@ AppDispatcher.register(function(payload) {
         _success = SuccessMessages.successAddAdditionalField;
         //@todo: This dirty call has to be removed asap
         EmailListActions.getEmailListByID(action.data.id);
+        _getFields.listFields.push(response.data);
+        EmailListStore.emitFields();
         _success = "";
       }, (err)=> {
         _error = HandleError.evaluateError(err);

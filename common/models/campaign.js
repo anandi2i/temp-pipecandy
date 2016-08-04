@@ -1268,7 +1268,7 @@ module.exports = function(Campaign) {
       if(lodash.isEmpty(campaigns)){
         return hasRecentCampaignCB(null, false);
       }
-      return hasRecentCampaignCB(null, campaigns.id);
+      return hasRecentCampaignCB(null, campaigns[0].id);
     });
   };
 
