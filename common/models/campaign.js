@@ -1400,7 +1400,6 @@ module.exports = function(Campaign) {
     campaignMetricsData, totalLinks, buildCampaignMetricObjectCB) => {
     let campaignMetricObject = [];
     let openedRate = 0;
-    const emptycount = 0;
     const hundredPercent = 100; //Denotes 100%
 
     async.eachSeries(campaignMetricArray,
@@ -1439,8 +1438,9 @@ module.exports = function(Campaign) {
             break;
           case "CLICKED":
             campaignMetricObj.title = "clicked";
-            let clickRate = (totalLinks < emptycount) ? "0" :
-            (campaignMetricsData.clicked / totalLinks) * hundredPercent;
+            let clickRate = (campaignMetricsData.clicked /
+              (campaignMetricsData.sentEmails - campaignMetricsData.bounced)
+            ) * hundredPercent;
             let roundClickRate = Math.round(parseFloat(clickRate)*
             hundredPercent)/hundredPercent;
             campaignMetricObj.percentage = roundClickRate || "0";

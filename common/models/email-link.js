@@ -77,7 +77,11 @@ module.exports = function(EmailLink) {
       }
       // If the request is not from www.pipecandy.com alone process it, else just
       // redirect it
-      if(!req.headers.referer){
+      const referer = req.headers.referer;
+      if(referer
+        && referer.indexOf(config.appHost) > constants.EMPTYARRAYINDEX) {
+        res.redirect(link.linkurl);
+      } else {
         updateMetrics(reqParams, link, (updateMetricsErr) => {
           if(updateMetricsErr) {
             logger.error("Update Metrics Error:", {error: updateMetricsErr,
@@ -86,8 +90,6 @@ module.exports = function(EmailLink) {
           }
           res.redirect(link.linkurl);
         });
-      } else{
-        res.redirect(link.linkurl);
       }
     });
   };
