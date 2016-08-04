@@ -24,8 +24,10 @@ module.exports = function(ListMetric) {
         async.each(metrics, (metric, cb) => {
           ListMetric.app.models.campaignMetric.incrementMetric(metric, property,
             (incrementErr) => {
-            return callback(incrementErr);
+            return cb(incrementErr);
           });
+        }, (err) => {
+          return callback(err);
         });
     });
   };
@@ -90,10 +92,12 @@ module.exports = function(ListMetric) {
           updateAssemblerMetrics
         ], (waterfallErr) => {
           if(waterfallErr) {
-            return updateListMetricOnGenCB(waterfallErr);
+            return cb(waterfallErr);
           }
-          return updateListMetricOnGenCB(null);
+          return cb(null);
         });
+      }, (asyncEachListErr) => {
+        return updateListMetricOnGenCB(asyncEachListErr);
       });
     });
   };

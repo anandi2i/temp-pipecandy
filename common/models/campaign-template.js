@@ -371,9 +371,10 @@ module.exports = function(CampaignTemplate) {
           spanTagsCB(null);
         } else {
           let error = new Error();
-          error.message = `Tag id: ${fieldId} not found in fieldvalues :
-                                                                ${fieldValues}`;
+          error.message = `Tag id: ${fieldId} not found in fieldvalues`;
           error.name = "smartTagNotFound";
+          logger.error({error: error, stack: error.stack,
+                        input: {fieldValues: fieldValues}});
           return spanTagsCB(error);
         }
       }, (spanTagsErr) => {
