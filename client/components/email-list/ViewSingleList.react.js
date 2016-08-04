@@ -99,6 +99,7 @@ class ListView extends React.Component {
       return false;
     }
     this.setState({
+      spinning: false,
       uploadCsvDetails: csvDetails
     }, () => {
       this.refs.csvDetails.openModal();
@@ -285,6 +286,9 @@ class ListView extends React.Component {
         fileObj: fileObj,
         listId: this.props.params.listId
       };
+      this.setState({
+        spinning: true
+      });
       EmailListActions.uploadFile(data);
     } else {
       displayError(ErrorMessages.InValidFileType);
