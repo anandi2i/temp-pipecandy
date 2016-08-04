@@ -885,7 +885,7 @@ module.exports = function(List) {
       order: "createdAt DESC"
     }, (listsErr, lists) => {
       let listResponses = [];
-      async.each(lists, (list, listsCB) => {
+      async.eachSeries(lists, (list, listsCB) => {
         let listResponse = {};
         listResponse.id = list.id;
         listResponse.name = list.name;

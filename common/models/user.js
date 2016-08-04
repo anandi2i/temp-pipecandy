@@ -618,9 +618,8 @@ module.exports = function(user) {
    */
   const getAllcampaignsForUser = (userId, getAllcampaignsForUser) => {
     user.app.models.campaign.find({
-      where : {
-        createdBy: userId
-      }
+      where : {createdBy: userId},
+      order: "createdAt DESC"
     }, (campaignFindErr, campaigns) => {
       if(campaignFindErr || lodash.isEmpty(campaigns)) {
         let errParam = campaignFindErr || "No campaign for user";
@@ -644,7 +643,7 @@ module.exports = function(user) {
    */
   const generateCampaignMetric = (campaigns, generateCB) => {
     let campaignList = [];
-    async.each(campaigns, (campaign, campaignEachCB) => {
+    async.eachSeries(campaigns, (campaign, campaignEachCB) => {
       async.parallel({
         listSentTo : getCampaignListCount.bind(null, campaign),
         replies : getCampaignReplyCount.bind(null, campaign),
