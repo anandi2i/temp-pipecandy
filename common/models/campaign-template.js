@@ -197,20 +197,23 @@ module.exports = function(CampaignTemplate) {
         }]
       }
     }, function(campaignTemplatesErr, campaignTemplates) {
-
       if (campaignTemplatesErr) {
-        logger.error("Error Occured on campaignTemplates", {
-          campaign: campaign,
-          person: person,
-          error: campaignTemplatesErr
+        logger.error("Error on campaignTemplates", {
+          input: {campignId: campaign.id, personId: person.id,
+            followup: followup ? followup.id : null,
+            additionalValues: additionalValues
+          },
+          error: campaignTemplatesErr,
+          stack: campaignTemplatesErr.stack
         });
         return getPersonTemplateCB(campaignTemplatesErr);
       }
 
       if (lodash.isEmpty(campaignTemplates)) {
         logger.info("campaignTemplates is empty for the Object : ", {
-          campaign: campaign,
-          person: person
+          input: {campignId: campaign.id, personId: person.id,
+            followup: followup ? followup.id : null,
+          }
         });
         return getPersonTemplateCB(null);
       }
@@ -255,8 +258,9 @@ module.exports = function(CampaignTemplate) {
         logger.error({
           error: error,
           stack: error.stack,
-          input: {campign: campaign, person: person,
-            additionalValues: additionalValues, followup: followup
+          input: {campignId: campaign.id, personId: person.id,
+            followup: followup ? followup.id : null,
+            additionalValues: additionalValues
           }
         });
         return getCommonTemplatesCB(error);
@@ -279,8 +283,9 @@ module.exports = function(CampaignTemplate) {
           logger.error({
             error: chooseCommonTempErr,
             stack: chooseCommonTempErr.stack,
-            input: {campign: campaign, person: person,
-              additionalValues: additionalValues, followup: followup
+            input: {campignId: campaign.id, personId: person.id,
+              followup: followup ? followup.id : null,
+              additionalValues: additionalValues
             }
           });
           return getCommonTemplatesCB(chooseCommonTempErr);
@@ -323,7 +328,8 @@ module.exports = function(CampaignTemplate) {
           stack: campaignTemplatesErr.stack,
           error: campaignTemplatesErr,
           input: {
-            campign: campaign, person: person, followup: followup,
+            campignId: campaign.id, personId: person.id,
+            followup: followup ? followup.id : null,
             additionalValues: additionalValues, missingTagIds: missingTagIds
           }
         });
@@ -338,8 +344,9 @@ module.exports = function(CampaignTemplate) {
           error: error,
           stack: error.stack,
           input: {
-            campign: campaign, person: person, followup: followup,
-            additionalValues: additionalValues, missingTagIds: missingTagIds
+           campignId: campaign.id, personId: person.id,
+           followup: followup ? followup.id : null,
+           additionalValues: additionalValues, missingTagIds: missingTagIds
           }
         });
         return getAlternateTemplateCB(error);

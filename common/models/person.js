@@ -156,13 +156,8 @@ module.exports = function(Person) {
   Person.preparePersonWithExtraFields = (campaign, person, listIds,
     preparePersonWithExtraFieldsCB) => {
     Person.app.models.additionalFieldValue.find({
-      where: {
-        personId: person.id,
-        listId: {
-          inq: listIds
-        }
-      },
-      order: "updatedat DESC"
+      where: {and: [{personId: person.id}, {listId: {inq: listIds}}]
+      }, order: "updatedat DESC"
     }, (additionalFieldValueFindErr, fieldValues) => {
       let addtionalFields = lodash.uniqBy(fieldValues, "fieldId");
       personToFieldValues(person, addtionalFields);

@@ -724,7 +724,6 @@ module.exports = function(Campaign) {
      generateEmailCB) => {
     async.waterfall([
       async.apply(preaprePersonObject, campaign, person, listIds, followup),
-      preaprePersonObject,
       getTemplate,
       applySmartTags,
       appendOpenTracker,
