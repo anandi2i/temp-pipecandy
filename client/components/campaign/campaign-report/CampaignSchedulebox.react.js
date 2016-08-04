@@ -23,7 +23,7 @@ class CampaignSchedulebox extends React.Component {
      * @property {boolean} isEmailPreview
      */
     this.state = {
-      requestSent: false,
+      requestSent: true,
       isEmailPreview: false,
       scheduledMails: [],
       selectedIds: []

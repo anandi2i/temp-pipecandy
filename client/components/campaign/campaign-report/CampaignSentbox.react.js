@@ -22,7 +22,7 @@ class CampaignSentbox extends React.Component {
      * @property {string} threadId
      */
     this.state = {
-      requestSent: false,
+      requestSent: true,
       isEmailThreadView: false,
       threadId: "",
       sentMails : {
