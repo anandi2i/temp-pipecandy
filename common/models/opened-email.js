@@ -29,7 +29,8 @@ module.exports = function(OpenedEmail) {
     if(req.headers.referer) {
       return res.redirect("/images/1x1.png");
     }
-    let clientIp = req.ip;
+    let clientIp =
+      req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     let clientBrowser = req.useragent.browser;
     OpenedEmail.find({
       where: {
@@ -103,7 +104,8 @@ module.exports = function(OpenedEmail) {
     if(req.headers.host === config.emailHost) {
       return res.redirect("/images/1x1.png");
     }
-    let clientIp = req.ip;
+    let clientIp =
+      req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     let clientBrowser = req.useragent.browser;
     OpenedEmail.find({
       where: {

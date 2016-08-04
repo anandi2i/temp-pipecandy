@@ -8,9 +8,10 @@ module.exports = function(RequestAudit) {
    * @author Syed Sulaiman M
    */
   RequestAudit.createAudit = (req, res, callback) => {
+    var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     const zero = 0;
     let requestAudit = {
-      clientIp: req.ip,
+      clientIp: ip,
       requestPath: req.path,
       isMobile: req.useragent.isMobile,
       clientBrowser: req.useragent.browser,

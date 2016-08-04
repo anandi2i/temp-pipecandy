@@ -57,7 +57,8 @@ module.exports = function(EmailLink) {
    * @author Ramanavel Selvaraju
    */
   EmailLink.track = (campaignId, personId, linkId, res, req) => {
-    let clientIp = req.ip;
+    let clientIp =
+      req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     let clientBrowser = req.useragent.browser;
     let reqParams = {
       campaignId: campaignId,
