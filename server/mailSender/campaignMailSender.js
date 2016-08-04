@@ -535,13 +535,16 @@ function updateRelatedTables(emailQueue, mailContent, sentMailResp,
         updateSentMailBox.bind(null, emailQueue, mailContent, sentMailResp),
     followUpMetric:
         updateFollowUpMetric.bind(null, emailQueue, mailContent, sentMailResp),
+    followUps:
+        App.followUp.getFollowUpsCampaignId.bind(null, emailQueue.campaignId)
   }, function(err, results) {
     if (err) {
       console.error("Error while Updating related tables: " + err);
     }
     async.parallel({
       campaign: async.apply(updateCampaign,
-          emailQueue, results.campaignMetric, results.followUpMetric),
+          emailQueue, results.campaignMetric, results.followUpMetric,
+          results.followUps),
       followUp: async.apply(updateFollowUp,
           emailQueue, results.campaignMetric, results.followUpMetric)
     }, function(err, results) {
@@ -728,7 +731,7 @@ function updateSentMailBox(emailQueue, mailContent, sentMailResp,
  * @param  {Function} createAuditCB
  * @author Syed Sulaiman M
  */
-function updateCampaign(emailQueue, campaignMetric, followUpMetric,
+function updateCampaign(emailQueue, campaignMetric, followUpMetric, followUps,
     updateCampaignCB) {
   App.campaign.findById(emailQueue.campaignId, function(err, campaign) {
     let updateProperties = {
@@ -739,7 +742,10 @@ function updateCampaign(emailQueue, campaignMetric, followUpMetric,
       if(campaignMetric.assembled ===
           (campaignMetric.sentEmails + campaignMetric.failedEmails)) {
         updateProperties.isSent = true;
-        updateProperties.statusCode = statusCodes.default.campaignSent;
+        let campStatus = statusCodes.default.campaignSent;
+        if(!followUps)
+          campStatus = statusCodes.default.campaignExecuted;
+        updateProperties.statusCode = campStatus;
       }
     }
     if(followUpMetric) {

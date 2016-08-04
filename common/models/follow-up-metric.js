@@ -77,13 +77,21 @@ module.exports = function(FollowUpMetric) {
     if(metric) {
       return createFollowUpMetricsCB(null, followUp, metric);
     }
-    FollowUpMetric.create({followUpId: followUp.id}, (err, metrics) => {
+    followUp.campaign((err, campaign) => {
       if(err) {
         logger.error({error: err, stack: err.stack,
-                      input: {followUp: followUp}});
+          input: {followUp: followUp}});
         return createFollowUpMetricsCB(err);
       }
-      return createFollowUpMetricsCB(null, followUp, metrics);
+      FollowUpMetric.create({followUpId: followUp.id, campaignId: campaign.id},
+          (err, metrics) => {
+        if(err) {
+          logger.error({error: err, stack: err.stack,
+            input: {followUp: followUp}});
+          return createFollowUpMetricsCB(err);
+        }
+        return createFollowUpMetricsCB(null, followUp, metrics);
+      });
     });
   };
 
