@@ -46,7 +46,8 @@ class ScheduleEmail extends React.Component {
       isAddress: true,
       spamRating: "",
       isEditorReady: false,
-      improveDelivery: true
+      improveDelivery: true,
+      isPreview: false
     };
   }
 
@@ -289,12 +290,19 @@ class ScheduleEmail extends React.Component {
         }, this);
         this.setState({
           previewFollowups: followups,
-          previewMainTemplate: mainTemplate
+          previewMainTemplate: mainTemplate,
+          isPreview: true
         }, () => {
           this.refs.preview.openModal();
         });
       }
     }
+  }
+
+  closePreviewCallback = () => {
+    this.setState({
+      isPreview: false
+    });
   }
 
  /**
@@ -571,7 +579,8 @@ class ScheduleEmail extends React.Component {
       getAllPeopleList,
       previewMainTemplate,
       previewFollowups,
-      improveDelivery
+      improveDelivery,
+      isPreview
     } = this.state;
     let displayAddFollowup =
       (followups.length < followupsMaxLen ? "block" : "none");
@@ -596,7 +605,7 @@ class ScheduleEmail extends React.Component {
         </div>
         <div style={{display: isEditorReady ? "block" : "none"}}>
           <div className="row sub-head-container m-lr-0">
-            <div className="head">Let's Draft an Email</div>
+            <div className="head">{"Let's Draft an Email"}</div>
             <div className="sub-head">
               <div className="switch">
                 <label>
@@ -754,7 +763,7 @@ class ScheduleEmail extends React.Component {
                     <input type="checkbox" className="filled-in" id="optOutAddrs"
                       defaultChecked="checked"
                       onChange={() => this.toggleSetState("isAddress")} />
-                    <label htmlFor="optOutAddrs">Your Company's Address</label>
+                    <label htmlFor="optOutAddrs">{"Your Company's Address"}</label>
                     <div className="row m-lr-0" style={{display: isAddressDisplay}}>
                       <div id="optOutAddress" className="inline-tiny-mce opt-out-address" />
                     </div>
@@ -795,14 +804,19 @@ class ScheduleEmail extends React.Component {
               <i className="large material-icons">add</i>
             </a>
           </div>
-          <PreviewMailsPopup
-            peopleList={getAllPeopleList}
-            mainEmailContent={previewMainTemplate}
-            followupsEmailContent={previewFollowups}
-            emailSubject={emailSubject}
-            emailContent={emailContent}
-            getOptText={this.getOptText}
-            ref="preview" />
+          {
+            isPreview
+              ? <PreviewMailsPopup
+                  peopleList={getAllPeopleList}
+                  mainEmailContent={previewMainTemplate}
+                  followupsEmailContent={previewFollowups}
+                  emailSubject={emailSubject}
+                  emailContent={emailContent}
+                  getOptText={this.getOptText}
+                  closePreviewCallback={this.closePreviewCallback}
+                  ref="preview" />
+              : ""
+          }
           <WordaiPreviewPopup ref="wordai" />
         </div>
       </div>

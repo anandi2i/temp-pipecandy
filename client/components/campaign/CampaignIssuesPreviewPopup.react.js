@@ -43,6 +43,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
       emailContent: emailContent,
       allFields: allFields,
       issuesCompletedList: [],
+      previewIssuesCompleted: [],
       selectedPerson: 0,
       displayPerson: 1,
       initCount: 1
@@ -203,7 +204,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
         initCount,
         personIssues,
         displayPerson,
-        previewIssuesCompleted
+        usedTagIdsArr
       } = this.state;
       let currentPerson = personIssues[displayPerson - initCount];
       let currentIssueTags = this.checkSmartTags(currentPerson);
@@ -212,29 +213,30 @@ class CampaignIssuesPreviewPopup extends React.Component {
       let count = true;
       let previewList = [];
       let issuePerson = {};
+      let allUsedTagIds = _.sortBy(usedTagIdsArr, (val) => { return val; });
+      let campaignSub =
+        CampaignStore.constructEmailTemplate(getSubject.content);
+      let campaignEmail =
+        CampaignStore.constructEmailTemplate(getContent.content);
       _.each(personIssues, $.proxy(function(person, key) {
         let getPersonInfo = _.clone(person);
         let findIssues = this.checkSmartTags(getPersonInfo);
         let isMatch = currentIssueTags.issuesTags.equals(findIssues.issuesTags);
         if(isMatch && getPersonInfo) {
           if(count) {
-            issuePerson.subject =
-              CampaignStore.constructEmailTemplate(getSubject.content);
-            issuePerson.content =
-              CampaignStore.constructEmailTemplate(getContent.content);
+            issuePerson.subject = campaignSub;
+            issuePerson.content = campaignEmail;
             let getUsedTagIds = CampaignStore.usedTagIds(issuePerson.subject
               .concat(issuePerson.content));
             issuePerson.usedTagIds = getUsedTagIds.usedTagIds;
-            issuePerson.missingTagIds = _.difference(this.state.usedTagIdsArr,
+            issuePerson.missingTagIds = _.difference(allUsedTagIds,
               getUsedTagIds.usedTagIdsArr).join().replace(/,/g, "|");
             issuePerson.userId = getCookie("userId");
             myList.push(issuePerson);
           }
           previewList.push({
-            subject: CampaignStore.applySmartTagsValue(issuePerson.subject,
-              getPersonInfo),
-            content: CampaignStore.applySmartTagsValue(issuePerson.content,
-              getPersonInfo),
+            subject: campaignSub,
+            content: campaignEmail,
             personId: getPersonInfo.id
           });
           count = false;
@@ -244,8 +246,6 @@ class CampaignIssuesPreviewPopup extends React.Component {
 
       _.each(fixedPeopleId, (val, key) => {
         personIssues.splice(_.findIndex(personIssues, {id: val}), initCount);
-        previewIssuesCompleted.splice(_.findIndex(previewIssuesCompleted,
-          {id: val}), initCount);
       });
 
       this.setState((state) => ({

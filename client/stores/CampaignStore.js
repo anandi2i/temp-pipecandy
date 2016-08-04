@@ -275,12 +275,13 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     let htmlDom = $.parseHTML(contentText);
     let getUsedTagIds = [];
     _.each($(htmlDom).find("span.tag"), function(val, key){
-      getUsedTagIds.push($(val).attr("data-id"));
+      getUsedTagIds.push(parseInt($(val).attr("data-id")));
     });
-    getUsedTagIds = _.sortBy(_.uniq(getUsedTagIds));
+    let uniqUsedTagIds = _.sortBy(_.uniq(getUsedTagIds));
+    getUsedTagIds = uniqUsedTagIds.join().replace(/,/g, "|");
     return {
-      usedTagIds: getUsedTagIds.join().replace(/,/g, "|"),
-      usedTagIdsArr: getUsedTagIds
+      usedTagIds: getUsedTagIds,
+      usedTagIdsArr: uniqUsedTagIds
     };
   },
 

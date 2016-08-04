@@ -52,14 +52,16 @@ class TabsNav extends React.Component {
             onClick={() => this.handleClick(emailListIndex)}>
             {this.state.selectEmailList.name}
           </div>
-          <div className={isTemplate ? activePointer : "position"}>
+          <div className={isTemplate ? activePointer : "position"}
+            style={{left:"33.2%"}}>
             {templateIndex}
           </div>
           <div className={isTemplate ? activeTab : "tabs"}
             onClick={() => this.handleClick(templateIndex)}>
             {this.state.selectTemplate.name}
           </div>
-          <div className={isSchedule ? activePointer : "position"}>
+          <div className={isSchedule ? activePointer : "position"}
+            style={{left:"66.5%"}}>
             {scheduleIndex}
           </div>
           <div className={isSchedule ? activeTab : "tabs"}

@@ -50,6 +50,11 @@ class PreviewMailsPopup extends React.Component {
     });
   }
 
+  closeModal = () => {
+    this.el.closeModal();
+    this.props.closePreviewCallback();
+  }
+
   onChange(event, field) {
     let state = {};
     if(field === "displayPerson") {
@@ -164,7 +169,7 @@ class PreviewMailsPopup extends React.Component {
     };
     return (
       <div id="previewCampaign" className="modal modal-fixed-header modal-fixed-footer lg-modal">
-        <i className="mdi mdi-close modal-close"></i>
+        <i className="mdi mdi-close" onClick={this.closeModal}></i>
         <div className="modal-header">
           <div className="head">
             Email Preview
