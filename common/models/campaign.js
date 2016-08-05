@@ -119,7 +119,7 @@ module.exports = function(Campaign) {
    * @param  {number} id [campaign id]
    * @param  {Function} callback
    * @return {Campaign} [Persisted Campaign Object]
-   * @author Syed Sulaiman M
+   * @author Syed Sulaiman M,Naveen Kumar(Modified)
    */
   Campaign.stop = (ctx, id, callback) => {
     Campaign.find({
@@ -141,10 +141,29 @@ module.exports = function(Campaign) {
       if(campaign.statusCode === stoppedStatusCode) {
         return callback(null, campaign);
       }
-      if(campaign.statusCode === sentStatusCode) {
+      let statusArray = [statusCodes["followUpResumed-1"],
+        statusCodes["followUpResumed-2"],
+        statusCodes["followUpResumed-3"],
+        statusCodes["followUpResumed-4"],
+        statusCodes["followUpResumed-5"],
+        statusCodes["followUpResumed-6"],
+        statusCodes["followUpResumed-7"],
+        statusCodes["followUpResumed-8"],
+        sentStatusCode];
+      let containsCheck = lodash.includes(statusArray, campaign.statusCode);
+      if(containsCheck) {
         stopFollowUps(campaign, (stopError, followUps) => {
           if(stopError) return callback(errorMessages.SERVER_ERROR);
-          return callback(null, campaign);
+          if(followUps.length === constants.EMPTYARRAY) {
+            return callback(null, campaign);
+          }
+          let result = "followUpStopped-"
+            + lodash.minBy(followUps, "stepNo").stepNo;
+          if(!result) return callback(null, campaign);
+          updateStatusProcess(campaign, statusCodes[result], (err, camp) => {
+            if(err) return callback(errorMessages.SERVER_ERROR);
+            return callback(null, campaign);
+          });
         });
       } else {
         campaign.updateAttribute("statusCode", statusCodes.campaignStopped,
@@ -233,7 +252,7 @@ module.exports = function(Campaign) {
    * @param  {number} campaignId [campaign id]
    * @param  {Function} resumeCB
    * @return {Campaign} [Persisted Campaign Object]
-   * @author Aswin Raj A
+   * @author Aswin Raj A,Naveen Kumar(Modified)
    */
   Campaign.resume = (ctx, id, resumeCB) => {
     getCampaign(ctx, id, null, (err, campaign) => {
@@ -244,7 +263,17 @@ module.exports = function(Campaign) {
         const errorMessage = errorMessages.INVALID_CAMPAIGN_ID;
         return resumeCB(errorMessage);
       }
-      if(campaign.statusCode === statusCodes.campaignSent) {
+      let statusArray = [statusCodes["followUpStopped-1"],
+        statusCodes["followUpStopped-2"],
+        statusCodes["followUpStopped-3"],
+        statusCodes["followUpStopped-4"],
+        statusCodes["followUpStopped-5"],
+        statusCodes["followUpStopped-6"],
+        statusCodes["followUpStopped-7"],
+        statusCodes["followUpStopped-8"],
+        statusCodes.campaignSent];
+      let containsCheck = lodash.includes(statusArray, campaign.statusCode);
+      if(containsCheck) {
         resumeFollowUps(campaign, (err, response) => {
           if(err) {
             logger.error("Error while resuming campaign followUps",
@@ -299,17 +328,24 @@ module.exports = function(Campaign) {
    * Method to Resume FollowUps in a Campaign
    * @param  {Campaign}   campaign
    * @param  {Function} callback
-   * @author Syed Sulaiman M
+   * @author Syed Sulaiman M, Naveen Kumar(modified)
    */
   const resumeFollowUps = (campaign, callback) => {
     async.waterfall([
       async.apply(getStoppedFollowUpsForCampaign, campaign),
       scheduleFollowUps
-    ], (asyncErr, result) => {
-      if(asyncErr){
-        return callback(asyncErr);
+    ], (asyncErr, followUps) => {
+      if(asyncErr) return callback(asyncErr);
+      if(followUps.length === constants.EMPTYARRAY) {
+        return callback(null, campaign);
       }
-      return callback(null, campaign);
+      let result = "followUpResumed-" +
+        lodash.minBy(followUps, "stepNo").stepNo;
+      if(!result) return callback(null, campaign);
+      updateStatusProcess(campaign, statusCodes[result], (err, camp) => {
+        if(err) return callback(errorMessages.SERVER_ERROR);
+        return callback(null, campaign);
+      });
     });
   };
 
