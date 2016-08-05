@@ -151,23 +151,27 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     return _isExistCampaignId;
   },
 
+  /**
+   * @see server/utils/status-codes.js
+   * @return {array} allCampaignList
+   */
   getAllCampaigns() {
     const edit = ["0"];
-    const pause = ["8", "9", "10", "49", "50", "60", "63", "71", "73", "75",
-      "77", "79", "81", "83", "85"];
-    const resume = ["62", "70", "72", "74", "76", "78", "80", "82", "84"];
+    const sent = ["96", "100"];
+    const resume = ["62", "66", "70", "72", "74", "76", "78", "80", "82",
+      "84", "90"];
     let allCampaignList = [];
     allCampaigns.map(campaign => {
       const statusCode = campaign.statusCode.toString();
       let status;
       if(_.contains(edit, statusCode)) {
         status = "In Draft";
-      } else if (_.contains(pause, statusCode)) {
-        status = "Scheduled";
+      } else if (_.contains(sent, statusCode)) {
+        status = "Sent";
       } else if (_.contains(resume, statusCode)) {
         status = "Paused";
       } else {
-        status = "Sent";
+        status = "Scheduled";
       }
       allCampaignList.push({
         id: campaign.campaignId,

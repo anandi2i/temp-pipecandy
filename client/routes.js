@@ -1,5 +1,6 @@
 import React from "react";
 import {Router, Route, IndexRoute} from "react-router";
+import _ from "underscore";
 import AppContainer from "./components/AppContainer.react";
 //import IndexPage from "./components/IndexPage.react";
 import Home from "./components/Home.react";
@@ -46,7 +47,7 @@ import Unsubscribe from "./components/Unsubscribe.react";
 
 function requireAuth(nextState, replace) {
   UserStore.setPrevLocation(nextState.location.pathname);
-  if(!($.isEmptyObject(UserStore.getUser()))) {
+  if(!(_.isEmpty(UserStore.getUser()))) {
     return;
   }
   if(getCookie("userId")) {
