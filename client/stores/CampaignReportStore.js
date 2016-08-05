@@ -6,7 +6,7 @@ import CampaignApi from "../API/CampaignApi";
 
 let _error = "";
 let _otherCampaignMetrics = {};
-let _isExistCampaign;
+let _isExistCampaign = 0;
 let emailThread = [];
 let openClickRate = {};
 let recentCampaignId;
@@ -155,11 +155,7 @@ AppDispatcher.register(function(payload) {
     case Constants.GET_IS_EXISTING_CAMPAIGN:
       CampaignApi.getIsExistingCampaign(action.id).then((response) => {
         _error = "";
-        if(response.data.hasCampaign) {
-          _isExistCampaign = "displayReport";
-        } else {
-          _isExistCampaign = "displayMessage";
-        }
+        _isExistCampaign = response.data.hasCampaign;
         CampaignReportStore.emitReportViewChange();
       }, (err) => {
         _error = err.message;

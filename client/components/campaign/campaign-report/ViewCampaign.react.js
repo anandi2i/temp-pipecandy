@@ -19,7 +19,8 @@ class ViewCampaign extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isExistCampaign: ""
+      isSpinner: true,
+      isCampaign: false
     };
   }
 
@@ -30,45 +31,43 @@ class ViewCampaign extends React.Component {
 
   componentWillUnmount() {
     CampaignReportStore.removeReportViewChangeListener(this.onStoreChange);
+    CampaignReportStore.removeIsExistCampaign();
   }
 
   onStoreChange = () => {
     this.setState({
-      isExistCampaign: CampaignReportStore.getIsExistCampaign()
+      isCampaign: CampaignReportStore.getIsExistCampaign(),
+      isSpinner: false
     });
   }
 
   render() {
     const campaignId = this.props.params.id;
-    const isExistCampaign = this.state.isExistCampaign;
+    const {isCampaign, isSpinner} = this.state;
     return (
       <div>
-        <div className="container"
-          style={{display: isExistCampaign ? "none" : "block"}} >
+        <div className="container" style={{display: isSpinner? "block" : "none"}}>
           <div className="spinner-container">
             <Spinner />
           </div>
         </div>
-        {isExistCampaign === "displayReport"
-          ? <div>
-              <div className="m-b-120">
-                {/* Dashboard head */}
-                <CampaignReportHead campaignId={campaignId}/>
-                {/* Performance Compared Menu */}
-                <PerformanceCompare campaignId={campaignId}/>
-                {/* Performance Chart */}
-                <OtherPerformanceStatus campaignId={campaignId}/>
-                {/* Performance Chart */}
-                <PerformanceReport campaignId={campaignId}/>
-                {/* Links Clicked */}
-                <LinksClicked />
+        {
+          isCampaign && !isSpinner
+            ? <div>
+                <div className="m-b-120">
+                  {/* Dashboard head */}
+                  <CampaignReportHead campaignId={campaignId}/>
+                  {/* Performance Compared Menu */}
+                  <PerformanceCompare campaignId={campaignId}/>
+                  {/* Performance Chart */}
+                  <OtherPerformanceStatus campaignId={campaignId}/>
+                  {/* Performance Chart */}
+                  <PerformanceReport campaignId={campaignId}/>
+                  {/* Links Clicked */}
+                  <LinksClicked />
+                </div>
               </div>
-            </div>
-          : ""
-        }
-        {isExistCampaign === "displayMessage"
-          ? <CampaignInfoMsg displayPage="dashboard" />
-          : ""
+            : <CampaignInfoMsg displayPage="dashboard" />
         }
         <CampaignFooter campaignId={campaignId} activePage={"report"}/>
       </div>

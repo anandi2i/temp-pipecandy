@@ -16,7 +16,8 @@ class Dashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isRecentCampaign: ""
+      isSpinner: true,
+      isRecentCampaign: false
     };
   }
 
@@ -32,38 +33,37 @@ class Dashboard extends React.Component {
 
   onStoreChange = () => {
     this.setState({
+      isSpinner: false,
       isRecentCampaign: CampaignReportStore.getIsExistCampaign()
     });
   }
 
   render() {
-    const isRecentCampaign = this.state.isRecentCampaign;
+    const {isSpinner, isRecentCampaign} = this.state;
     return (
       <div>
-        <div className="container"
-          style={{display: isRecentCampaign ? "none" : "block"}} >
+        <div className="container" style={{display: isSpinner? "block" : "none"}}>
           <div className="spinner-container">
             <Spinner />
           </div>
         </div>
-        {isRecentCampaign === "displayReport"
-          ? <div>
-              {/* Dashboard head */}
-              <CampaignReportHead />
-              {/* Performance Compared Menu */}
-              <PerformanceCompare />
-              {/* Performance Chart */}
-              <OtherPerformanceStatus />
-              {/* Performance Chart */}
-              <PerformanceReport />
-              {/* Links Clicked */}
-              <LinksClicked />
-            </div>
-          : ""
-        }
-        {isRecentCampaign === "displayMessage"
-          ? <CampaignInfoMsg displayPage="dashboard" />
-          : ""
+        {
+          isRecentCampaign && !isSpinner
+            ?
+              <div>
+                {/* Dashboard head */}
+                <CampaignReportHead />
+                {/* Performance Compared Menu */}
+                <PerformanceCompare />
+                {/* Performance Chart */}
+                <OtherPerformanceStatus />
+                {/* Performance Chart */}
+                <PerformanceReport />
+                {/* Links Clicked */}
+                <LinksClicked />
+              </div>
+            :
+              <CampaignInfoMsg displayPage="dashboard" />
         }
       </div>
     );

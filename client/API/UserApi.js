@@ -83,7 +83,7 @@ const UserApi = {
    * @return {object} promise
    */
   unsubscribe(data) {
-    return api.get("api/people/" + data.people + "/user/" + data.user +
+    return api.get("/api/people/" + data.people + "/user/" + data.user +
       "/campaign/" + data.campaign + "/unsubscribe");
   }
 };
