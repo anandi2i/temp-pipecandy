@@ -4,6 +4,7 @@ import logger from "../../server/log";
 import async from "async";
 import constants from "../../server/utils/constants";
 import dateUtil from "../../server/utils/dateUtil";
+import {XmlEntities as entities} from "html-entities";
 import lodash from "lodash";
 import moment from "moment-timezone";
 import campaignMetricArray from "../../server/utils/campaign-metric-fields";
@@ -825,6 +826,27 @@ module.exports = function(Campaign) {
     });
   };
 
+  /**
+   * Method to return Campaign with Links
+   * @param  {Number} campaignId
+   * @param  {Function} callback
+   * @author Syed Sulaiman M
+   */
+  Campaign.getCampaignWithEmailLinks = (campaignId, callback) => {
+    Campaign.findById(campaignId, {
+      include: ["emailLinks", "clickedEmailLinks"],
+    }, (campaignError, campaign) => {
+      if (campaignError) {
+        logger.error({
+          error: campaignError, stack: campaignError.stack,
+          input: {campaignId: campaignId}
+        });
+        return callback(campaignError);
+      }
+      return callback(null, campaign);
+    });
+  };
+
 //npm run calls
   /**
    * Generates email content and pushes to email to queue to send.
@@ -1192,6 +1214,7 @@ module.exports = function(Campaign) {
     sendToEmailQueueCB) => {
     email.subject = email.subject.replace(/&nbsp;/g, " ");
     email.subject = lodash.trim(striptags(email.subject));
+    email.subject = entities.decode(email.subject);
     Campaign.app.models.emailQueue.create(email,
       (emailQueueErr, emailQueueObj) => {
       if (emailQueueErr) {

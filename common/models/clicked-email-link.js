@@ -1,5 +1,6 @@
 "use strict";
 
+import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 import logger from "../../server/log";
 import lodash from "lodash";
 
@@ -46,44 +47,36 @@ module.exports = function(ClickedEmailLink) {
    * @return [Object]
    */
   ClickedEmailLink.countReport = (campaignId, res, req, callback) => {
-    ClickedEmailLink.find({
-      include: "emailLink",
-      where: {
-        "campaignId": campaignId
-      }
-    }, (clickedEmailLinkErr, clickedEmailLink) => {
-      if(clickedEmailLinkErr) {
-        logger.error("Error while finding open email entry", {
-          input: {"campaignId": campaignId}, error: clickedEmailLinkErr,
-          stack: clickedEmailLinkErr.stack});
-        return callback(errorMessages.SERVER_ERROR);
-      }
-      let clickedEmailLinkJSON = JSON.parse(JSON.stringify(clickedEmailLink));
+    ClickedEmailLink.app.models.campaign.getCampaignWithEmailLinks(campaignId,
+        (campaignErr, campaign) => {
+      if(!campaign) return callback(errorMessages.INVALID_CAMPAIGN_ID);
+      let campaignJSON = JSON.parse(JSON.stringify(campaign));
+
+      let emailLinks = campaignJSON.emailLinks;
+
       let clickedEmailLinkGrpByLink
-          = lodash.groupBy(clickedEmailLinkJSON, "emailLink.linkurl");
+          = lodash.groupBy(campaignJSON.clickedEmailLinks, "emailLinkId");
       let countReports = [];
-      let linkUrls = lodash.keys(clickedEmailLinkGrpByLink);
-      ClickedEmailLink.app.models.campaignMetric.find({
-        where: {
-          "campaignId": campaignId
-        }
-      }, (campaignMetricErr, campaignMetrics) => {
+      let linkIds = lodash.keys(clickedEmailLinkGrpByLink);
+
+      campaign.campaignMetrics( (campaignMetricErr, campaignMetrics) => {
         let campaignMetric = campaignMetrics[0];
-        if(clickedEmailLinkErr) {
-          logger.error("Error while finding open email entry", {
-            input: {"campaignId": campaignId}, error: clickedEmailLinkErr,
-            stack: clickedEmailLinkErr.stack});
+        if(campaignMetricErr) {
+          logger.error("Error while finding Campaign Metric", {
+            input: {"campaignId": campaign.id}, error: campaignMetricErr,
+            stack: campaignMetricErr.stack});
           return callback(errorMessages.SERVER_ERROR);
         }
         let deliveredEmails = campaignMetric.sentEmails -
             (campaignMetric.bounced + campaignMetric.failedEmails);
-        lodash(linkUrls).forEach((linkUrl) => {
-          let clickCount = clickedEmailLinkGrpByLink[linkUrl].length;
+        lodash(linkIds).forEach((linkId) => {
+          let clickCount =
+            lodash.uniqBy(clickedEmailLinkGrpByLink[linkId], "personId").length;
           const hundred = 100;
           let clickRate = (clickCount / parseInt(deliveredEmails)) * hundred;
           clickRate = Math.round(clickRate * hundred) / hundred;
           countReports.push({
-            link:linkUrl,
+            link: lodash.find(emailLinks, {"id": parseInt(linkId)}).linkurl,
             clickCount: clickCount,
             clickRate: clickRate
           });
