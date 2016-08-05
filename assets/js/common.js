@@ -144,6 +144,7 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
     fixed_toolbar_container: toolBar,
     toolbar: toolbar,
     entity_encoding: "raw",
+    forced_root_block : 'div',
     plugins: [
       "advlist autolink lists link image charmap print preview anchor",
       "insertdatetime media table paste code",
@@ -164,7 +165,7 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
       }).on("focus", (e) => {
         const editorDom =  document.getElementById(editorId);
         if($(editorDom).find("a.tinymce-placeholder").length) {
-          $(editorDom).find("a.tinymce-placeholder").closest("p").remove();
+          $(editorDom).find("a.tinymce-placeholder").closest("div").remove();
         }
       }).on("blur", (e) => {
         if(!editor.getContent()) {
@@ -225,6 +226,7 @@ function initTinyMCEPopUp(id, toolBar, isToolbar, cb) {
     fixed_toolbar_container: toolBar,
     toolbar: toolbar,
     entity_encoding: "raw",
+    forced_root_block : 'div',
     init_instance_callback : function() {
       cb();
     },
