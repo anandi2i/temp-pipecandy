@@ -67,6 +67,7 @@
     "moment": "^2.13.0",
     "moment-timezone": "^0.5.4",
     "node-spamd": "https://github.com/Spicykoala/node-spamd.git",
+    "node-uuid": "^1.4.7",
     "node-xlsx": "^0.7.1",
     "passport": "^0.3.2",
     "passport-google-oauth": "^1.0.0",

@@ -255,34 +255,10 @@ module.exports = function(Person) {
   Person.remoteMethod(
     "unsubscribe", {
       description: "Unsubscribe Person from User",
-      accepts: [{
-        arg: "ctx",
-        type: "object",
-        http: {
-          source: "context"
-        }
-      }, {
-        arg: "id",
-        type: "number",
-        required: true,
-        http: {
-          source: "path"
-        }
-      }, {
-        arg: "userId",
-        type: "number",
-        required: true,
-        http: {
-          source: "path"
-        }
-      }, {
-        arg: "campaignId",
-        type: "number",
-        required: true,
-        http: {
-          source: "path"
-        }
-      }],
+      accepts: [{arg: "ctx", type: "object", http: {source: "context"}},
+      {arg: "unSubscribeToken", type: "string", required: true, http: {
+             source: "path"}}
+      ],
       returns: {
         arg: "person",
         type: "person",
@@ -290,7 +266,7 @@ module.exports = function(Person) {
       },
       http: {
         verb: "get",
-        path: "/:id/user/:userId/campaign/:campaignId/unsubscribe"
+        path: "/unsubscribe/:unSubscribeToken"
       }
     }
   );
@@ -304,12 +280,9 @@ module.exports = function(Person) {
    * @param  {Function} callback   [description]
    * @author Syed Sulaiman M
    */
-  Person.unsubscribe = function(ctx, personId, userId, campaignId, callback) {
+  Person.unsubscribe = function(ctx, unSubscribeToken, callback) {
     async.waterfall([
-      function getReqParams(getReqParamsCB) {
-        getReqParamsCB(null, userId, personId, campaignId);
-      },
-      getCampaignAudit,
+      async.apply(getAuditByUnSubscribeToken, unSubscribeToken),
       getOrSaveUnsubscribe
     ], (error, result) => {
       if (error) {
@@ -322,27 +295,19 @@ module.exports = function(Person) {
   };
 
   /**
-   * Method to get Campaign Audit By UserId and CampaignId
+   * Method to get Campaign Audit By UnSubscribeToken
    *
-   * @param  {Number}  userId
-   * @param  {Number}  personId
-   * @param  {Number}  campaignId
-   * @param  {Function} callback
+   * @param  {String}  unSubscribeToken
    * @return {[Object]} Object with UserId, PersonId, CampaignId and Audit Obj
    */
-  const getCampaignAudit = (userId, personId, campaignId, campaignAuditCB) => {
-    Person.app.models.campaignAudit.getAuditByPersonAndCampaign(
-        personId, campaignId, (auditErr, audit) => {
-      if(auditErr || !audit) {
-        const errorMsg = auditErr ? "Error getting audit" : "Audit not Found";
-        const stack = auditErr ? auditErr.stack : null;
-        logger.error(errorMsg,
-          {error: auditErr, stack: stack, input: {
-            campaignId: campaignId, personId: personId}});
-        const errorMessage = errorMessages.SERVER_ERROR;
-        return campaignAuditCB(errorMessage);
-      }
-      return campaignAuditCB(null, userId, personId, campaignId, audit);
+  const getAuditByUnSubscribeToken = (unSubscribeToken, callback) => {
+    Person.app.models.campaignAudit.getAuditByUnSubscribeToken(
+        unSubscribeToken, (auditErr, audits) => {
+        if(auditErr) return callback(errorMessages.SERVER_ERROR);
+        if(lodash.isEmpty(audits))
+          return callback(errorMessages.INVALID_UNSUBSCRIBETOKEN);
+        return callback(null, audits[0].userId, audits[0].personId,
+          audits[0].campaignId, audits[0]);
     });
   };
 

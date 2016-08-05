@@ -43,6 +43,9 @@
     },
     "updatedAt": {
       "type": "date"
+    },
+    "unSubscribeToken": {
+      "type": "string"
     }
   },
   "validations": [],

@@ -54,6 +54,9 @@
     },
     "threadId": {
       "type": "String"
+    },
+    "unSubscribeToken": {
+      "type": "string"
     }
   },
   "validations": [],

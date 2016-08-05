@@ -24,6 +24,31 @@ module.exports = function(CampaignAudit) {
   };
 
   /**
+   * Get Audit By UnsubscribeToken
+   * @param {String} unSubscribeToken
+   * @param {Function} callback
+   * @author Rahul
+   */
+  CampaignAudit.getAuditByUnSubscribeToken =
+         (unSubscribeToken, callback) => {
+     CampaignAudit.find({
+       where: {
+         unSubscribeToken: unSubscribeToken
+       }
+     }, (campaignAuditsErr, campaignAudits) => {
+       if(campaignAuditsErr) {
+         const errorMsg = "Error while finding campaign audit";
+         logger.error(errorMsg, {error: campaignAuditsErr,
+           input: {unSubscribeToken: unSubscribeToken},
+           stack: campaignAuditsrr.stack
+          });
+          return callback(campaignAuditsErr);
+       }
+       return callback(null, campaignAudits);
+     });
+   };
+
+  /**
    * Checks the email is already sent or not. for that we have to find
    * CampaignAudit model with campaignId and personId and followUpId
    *

@@ -12,6 +12,7 @@ import queueUtil from "../../server/emailReader/mailEnqueue";
 import config from "../../server/config.json";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 import striptags from "striptags";
+import uuid from "node-uuid";
 
 //const systemTimeZone = moment().format("Z");
 const serverUrl = config.appUrl;
@@ -962,8 +963,8 @@ module.exports = function(Campaign) {
     padding: 0;">${campaign.isAddressNeeded ? campaign.address : ""}\
     </td></td><td style="width:50%;text-align:right;padding: 0;">`;
     if(campaign.isOptTextNeeded) {
-      let url = `${serverUrl}/unsubscribe/?people=${person.id}&`;
-      url += `user=${campaign.createdBy}&campaign=${campaign.id}`;
+      email.unSubscribeToken = uuid.v1();
+      const url = `${serverUrl}/unsubscribe/${email.unSubscribeToken}`;
       const optText = campaign.optText ? campaign.optText : Unsubscribe;
       bottom += `<a href="${url}">${optText}</a>`;
     }
