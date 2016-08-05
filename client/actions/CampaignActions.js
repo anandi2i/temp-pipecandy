@@ -213,6 +213,16 @@ const CampaignActions = {
       actionType: Constants.CAMPAIGN_PERFORMANCE_GRAPH,
       campaignId: campaignId
     });
+  },
+  /**
+   * Get all email link clicks for the campaign
+   * @param  {number} campaignId
+   */
+  getEmailLinkClicks(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.EMAIL_LINK_CLICKS,
+      campaignId: campaignId
+    });
   }
 };
 

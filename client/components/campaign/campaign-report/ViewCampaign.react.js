@@ -64,7 +64,7 @@ class ViewCampaign extends React.Component {
                   {/* Performance Chart */}
                   <PerformanceReport campaignId={campaignId}/>
                   {/* Links Clicked */}
-                  <LinksClicked />
+                  <LinksClicked campaignId={campaignId}/>
                 </div>
               </div>
             : <CampaignInfoMsg displayPage="dashboard" />

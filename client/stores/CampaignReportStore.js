@@ -10,6 +10,7 @@ let _isExistCampaign = 0;
 let emailThread = [];
 let openClickRate = {};
 let recentCampaignId;
+let emailLinkClicks = [];
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignReportStore = _.extend({}, EventEmitter.prototype, {
@@ -121,6 +122,14 @@ const CampaignReportStore = _.extend({}, EventEmitter.prototype, {
    */
   resetRecentCampaignId() {
     recentCampaignId = null;
+  },
+
+  /**
+   * Return the email link clicks
+   * @return {array} emailLinkClicks
+   */
+  getEmailLinkClicks() {
+    return emailLinkClicks;
   }
 
 });
@@ -162,27 +171,38 @@ AppDispatcher.register(function(payload) {
         CampaignReportStore.emitReportViewChange();
       });
       break;
-      case Constants.GET_EMAIL_THREAD:
-        CampaignApi.getEmailThread(action.id).then((response) => {
+    case Constants.GET_EMAIL_THREAD:
+      CampaignApi.getEmailThread(action.id).then((response) => {
+        _error = "";
+        emailThread = response.data;
+        CampaignReportStore.emitThreadViewChange();
+      }, (err) => {
+        _error = err.message;
+        CampaignReportStore.emitThreadViewChange();
+      });
+      break;
+    case Constants.CAMPAIGN_PERFORMANCE_GRAPH:
+      CampaignApi.getCampaignPerformanceGraph(action.campaignId)
+        .then((response) => {
           _error = "";
-          emailThread = response.data;
-          CampaignReportStore.emitThreadViewChange();
+          openClickRate = response.data;
+          CampaignReportStore.emitPerformanceGraphChange();
         }, (err) => {
           _error = err.message;
-          CampaignReportStore.emitThreadViewChange();
+          CampaignReportStore.emitPerformanceGraphChange();
         });
-        break;
-      case Constants.CAMPAIGN_PERFORMANCE_GRAPH:
-        CampaignApi.getCampaignPerformanceGraph(action.campaignId)
-          .then((response) => {
-            _error = "";
-            openClickRate = response.data;
-            CampaignReportStore.emitPerformanceGraphChange();
-          }, (err) => {
-            _error = err.message;
-            CampaignReportStore.emitPerformanceGraphChange();
-          });
-        break;
+      break;
+    case Constants.EMAIL_LINK_CLICKS:
+      CampaignApi.getEmailLinkClicks(action.campaignId).then((response) => {
+        _error = "";
+        emailLinkClicks = response.data;
+        CampaignReportStore.emitReportViewChange();
+      }, (err) => {
+        emailLinkClicks = [];
+        _error = err.message;
+        CampaignReportStore.emitReportViewChange();
+      });
+      break;
     default:
       return true;
   }

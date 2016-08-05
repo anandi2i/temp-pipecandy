@@ -1,51 +1,58 @@
 import React from "react";
+import CampaignActions from "../../../actions/CampaignActions";
+import CampaignReportStore from "../../../stores/CampaignReportStore";
 
 /**
  * The class LinksClicked describes the recently clicked links, number of clicks
  *   of the links and click rates on the dashboard
  */
 class LinksClicked extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
+    this.state = {
+      emailLinkClicks: []
+    };
+  }
+
+  componentDidMount() {
+    CampaignActions.getEmailLinkClicks(this.props.campaignId);
+    CampaignReportStore.addReportViewChangeListener(this.onStoreChange);
+  }
+
+  componentWillUnmount() {
+    CampaignReportStore.removeReportViewChangeListener(this.onStoreChange);
+  }
+
+  /**
+   * Update the email links for the campaign
+   */
+  onStoreChange = () => {
+    this.setState({
+      emailLinkClicks: CampaignReportStore.getEmailLinkClicks()
+    });
   }
 
   /**
    * render
    * @return {ReactElement} The element contatins links clicked,
-   *   number of click and click rate
+   * number of click and click rate
    */
   render() {
-    //TODO - Remove static data
-    const linksData = [
-      {
-        link: "http://www.highcharts.com/docs/getting-started/installation",
-        clicks: 6,
-        rate: "50%"
-      },
-      {
-        link: "http://www.highcharts.com/docs/getting-started/installation",
-        clicks: 3,
-        rate: "12%"
-      },
-      {
-        link: "http://www.highcharts.com/docs/getting-started/installation",
-        clicks: 9,
-        rate: "73%"
-      }
-    ];
-    const linksDetails = linksData.map((link, key) => {
+    const {emailLinkClicks} = this.state;
+    const linksDetails = emailLinkClicks.map((link, key) => {
       return (
         <div className="row" key={key}>
           <div className="col s6 m8 links-clicked-data">
             <a target="_blank" href={link.link}>{link.link}</a>
           </div>
-          <div className="col m2 s3">{link.clicks}</div>
-          <div className="col m2 s3">{link.rate}</div>
+          <div className="col m2 s3">{link.clickCount}</div>
+          <div className="col m2 s3 percentage">{link.clickRate}</div>
         </div>
       );
     });
     return (
-      <div className="container links-clicked-container">
+      <div className="container links-clicked-container"
+        style={{display: emailLinkClicks.length? "block": "none"}}>
         <div className="row main-head">
           Links Clicked
         </div>

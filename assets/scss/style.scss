@@ -8,6 +8,11 @@ body {
 a {
   cursor: pointer;
 }
+%percent {
+  &::after {
+    content: '%';
+  }
+}
 .main-head {
   float: left;
   font-size: 24px;
@@ -1682,11 +1687,9 @@ $lines-to-show: 8;
   }
   .count {
     div {
+      @extend %percent;
       color: $blue-clr;
       font-size: 30px;
-      &::after {
-        content: '%';
-      }
     }
     span {
       color: $dflt-txt-clr;
@@ -1709,14 +1712,12 @@ $lines-to-show: 8;
       }
     }
     .count {
+      @extend %percent;
       bottom: -5px;
       display: inline-block;
       font-size: 15px;
       line-height: 37px;
       position: absolute;
-      &::after {
-        content: '%';
-      }
     }
   }
 }
@@ -1778,6 +1779,9 @@ $lines-to-show: 8;
     overflow-x: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .percentage {
+    @extend %percent;
   }
 }
 .performance-report {

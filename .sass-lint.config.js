@@ -32,7 +32,7 @@ var sassLint = function() {
     "no-disallowed-properties": 2,
     "no-duplicate-properties": 1,
     "no-empty-rulesets": 2,
-    "no-extends": 2,
+    "no-extends": 0,
     "no-ids": 2,
     "no-important": 0,
     "no-invalid-hex": 2,

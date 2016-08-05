@@ -175,6 +175,13 @@ const CampaignApi = {
    */
   getCampaignPerformanceGraph(campaignId) {
     return api.get(`/api/campaigns/${campaignId}/openClickRate`);
+  },
+  /**
+  * Get email link clicks for campaign
+  * @param {object} campaignId
+   */
+  getEmailLinkClicks(campaignId) {
+    return api.get(`/api/clickedEmailLinks/campaign/${campaignId}`);
   }
 };
 
