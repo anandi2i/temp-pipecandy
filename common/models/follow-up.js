@@ -452,7 +452,7 @@ const createCampaignTemplate = (createdFollowUp, campaign,
    * @param  {[campaignId]} campaignId
    * @param  {[function]} reScheduleCB
    * @return {[result]}
-   * @author Aswin Raj A
+   * @author Aswin Raj A, Syed(modified)
    */
   FollowUp.reScheduleFollowUps = (campaign, reScheduleCB) => {
     async.autoInject({

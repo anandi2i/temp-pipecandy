@@ -20,30 +20,38 @@ module.exports = function(List) {
    * @author Ramanavel Selvaraju
    */
   List.getListAndSaveEmail = (campaign, followup, getListAndSaveEmailCB) => {
-    campaign.lists((listErr, lists) => {
-      if(listErr) {
-        logger.error("Error on getting the lists for a  campaign", {
-          campaign: campaign, followup:followup,
-          error: listErr, stack: listErr.stack
-        });
-        return getListAndSaveEmailCB(listErr);
+    List.app.models.campaign.findById(campaign.id,
+      (campaignFindErr, campaign) => {
+      if(campaignFindErr){
+        logger.error("Error while finding campaign", {
+          input:{campaignId: campaign.id}, error: campaignFindErr,
+          stack: campaignFindErr.stack});
+        return getListAndSaveEmailCB(campaignFindErr);
       }
-
-      const listIds = _.pluck(lists, "id");
-      async.eachSeries(lists, (list, listsCB) => {
-        List.app.models.person.getPoepleAndGenerateEmail(campaign, list,
-          listIds, followup, (getPoepleByListForEmailErr) => {
-            if(getPoepleByListForEmailErr) {
-              if(getPoepleByListForEmailErr.name === "StatusMismatchError") {
-                  return getListAndSaveEmailCB(getPoepleByListForEmailErr);
-              }
-            }
-            return listsCB(getPoepleByListForEmailErr);
+      campaign.lists((listErr, lists) => {
+        if(listErr) {
+          logger.error("Error on getting the lists for a  campaign", {
+            campaign: campaign, followup:followup,
+            error: listErr, stack: listErr.stack
           });
-      }, (asyncEachErr) => {
-        return getListAndSaveEmailCB(asyncEachErr);
+          return getListAndSaveEmailCB(listErr);
+        }
+        const listIds = _.pluck(lists, "id");
+        async.eachSeries(lists, (list, listsCB) => {
+          List.app.models.person.getPoepleAndGenerateEmail(campaign, list,
+            listIds, followup, (getPoepleByListForEmailErr) => {
+              if(getPoepleByListForEmailErr) {
+                if(getPoepleByListForEmailErr.name === "StatusMismatchError") {
+                    return getListAndSaveEmailCB(getPoepleByListForEmailErr);
+                }
+              }
+              return listsCB(getPoepleByListForEmailErr);
+            });
+        }, (asyncEachErr) => {
+          return getListAndSaveEmailCB(asyncEachErr);
+        });
       });
-    });
+    });    
   };
 
   List.remoteMethod(

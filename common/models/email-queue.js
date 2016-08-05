@@ -90,13 +90,22 @@ module.exports = function(EmailQueue) {
    * @author Aswin Raj
    */
   EmailQueue.destroyByCampaign = (campaign, destroyByCampaignCB) => {
-    campaign.emailQueues.destroyAll((emailQueueDestroyErr) => {
-      if(emailQueueDestroyErr){
-        logger.error("Error while destroying emailsQueue for campaign: ",
-        {error: emailQueueDestroyErr, stack: emailQueueDestroyErr.stack});
-        return destroyByCampaignCB(emailQueueDestroyErr);
+    EmailQueue.app.models.campaign.findById(campaign.id,
+      (campaignFindErr, campaign) => {
+      if(campaignFindErr){
+        logger.error("Error while finding campaign", {
+          input:{campaignId: campaign.id}, error: campaignFindErr,
+          stack: campaignFindErr.stack});
+        return destroyByCampaignCB(campaignFindErr);
       }
-      return destroyByCampaignCB(null, "Deleted successfully!");
+      campaign.emailQueues.destroyAll((emailQueueDestroyErr) => {
+        if(emailQueueDestroyErr){
+          logger.error("Error while destroying emailsQueue for campaign: ",
+          {error: emailQueueDestroyErr, stack: emailQueueDestroyErr.stack});
+          return destroyByCampaignCB(emailQueueDestroyErr);
+        }
+        return destroyByCampaignCB(null, "Deleted successfully!");
+      });
     });
   };
 
@@ -241,7 +250,6 @@ module.exports = function(EmailQueue) {
  * @author Ramanavel Selvaraju
  */
 EmailQueue.assembleEmails = (campaign, assembleEmailsCB) => {
-
   async.series([
     async.apply(EmailQueue.destroyByCampaign, campaign),
     async.apply(EmailQueue.app.models.campaign.updateStatusCode,

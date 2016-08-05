@@ -88,20 +88,29 @@ const assembleCampaignProcess = (campaign, assembleProcessCB) => {
  * @author Aswin Raj A
  */
 const resumeCampaignProcess = (campaign, resumeProcessCB) => {
-  const campaignScheduledDate = campaign.scheduledAt || new Date();
-  const scheduledDate = new Date(campaignScheduledDate).toUTCString();
-  let currentDate = new Date();
-  const tomorrow = new Date(currentDate.setDate(currentDate.getDate()+
-                  constants.ONE)).toUTCString();
-  if(scheduledDate < tomorrow){
-    updateForPastCampaign(campaign, (err, response) => {
-      return resumeProcessCB(err, response);
-    });
-  } else {
-    updateForFutureCampaign(campaign, (err, response) => {
-      return resumeProcessCB(err, response);
-    });
-  }
+  App.campaign.findById(campaign.id, (campaignErr, campaign) => {
+    if(campaignErr || lodash.isEmpty(campaign)) {
+      console.error("Error while getting campaign", {
+        error: campaignErr, input: campaign,
+        stack: campaignErr ? campaignErr.stack : ""
+      });
+      return resumeProcessCB(campaignErr);
+    }
+    const campaignScheduledDate = campaign.scheduledAt || new Date();
+    const scheduledDate = new Date(campaignScheduledDate).toUTCString();
+    let currentDate = new Date();
+    const tomorrow = new Date(currentDate.setDate(currentDate.getDate()+
+                    constants.ONE)).toUTCString();
+    if(scheduledDate < tomorrow){
+      updateForPastCampaign(campaign, (err, response) => {
+        return resumeProcessCB(err, response);
+      });
+    } else {
+      updateForFutureCampaign(campaign, (err, response) => {
+        return resumeProcessCB(err, response);
+      });
+    }
+  });
 };
 
 /**

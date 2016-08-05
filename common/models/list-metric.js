@@ -84,20 +84,29 @@ module.exports = function(ListMetric) {
    * @author Ramanavel Selvaraju
    */
   ListMetric.updateListMetricOnGen = (campaign, updateListMetricOnGenCB) => {
-    campaign.lists((listErr, lists) => {
-      async.each(lists, (list, cb) => {
-        async.waterfall([
-          async.apply(getListMetrics, campaign, list),
-          createListMetrics,
-          updateAssemblerMetrics
-        ], (waterfallErr) => {
-          if(waterfallErr) {
-            return cb(waterfallErr);
-          }
-          return cb(null);
+    ListMetric.app.models.campaign.findById(campaign.id,
+      (campaignfindErr, campaign) => {
+      if(campaignfindErr){
+        logger.error("Error while finding campaign", {
+          input:{campaignId: campaign.id},
+          error: campaignfindErr, stack: campaignfindErr.stack});
+          return updateListMetricOnGenCB(campaignfindErr);
+      }
+      campaign.lists((listErr, lists) => {
+        async.each(lists, (list, cb) => {
+          async.waterfall([
+            async.apply(getListMetrics, campaign, list),
+            createListMetrics,
+            updateAssemblerMetrics
+          ], (waterfallErr) => {
+            if(waterfallErr) {
+              return cb(waterfallErr);
+            }
+            return cb(null);
+          });
+        }, (asyncEachListErr) => {
+          return updateListMetricOnGenCB(asyncEachListErr);
         });
-      }, (asyncEachListErr) => {
-        return updateListMetricOnGenCB(asyncEachListErr);
       });
     });
   };
