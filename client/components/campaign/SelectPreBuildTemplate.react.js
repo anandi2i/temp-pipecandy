@@ -58,10 +58,11 @@ class SelectPreBuildTemplate extends React.Component {
     let isDisplay =
       (this.props.active === this.state.innerTabIndex ? "block" : "none");
     let blankTemplateKey = 0;
+    const {templates, activeTemplate, activeTemplateContent} = this.state;
     return (
       <div className="row" style={{display: isDisplay}}>
         {
-          this.state.templates.map(function (template, key) {
+          templates.map(function (template, key) {
             return (
               <div className="col s12 m6 l4" key={key}>
                 <div className={this.isActive(key)}
@@ -88,15 +89,17 @@ class SelectPreBuildTemplate extends React.Component {
           }, this)
         }
         {/* Email template preview modal popup starts here*/}
-        { this.state.templates.length ?
+        { templates.length ?
           <div id="previewTemplate" className="modal modal-fixed-header modal-fixed-footer">
             <i className="mdi mdi-close modal-close"></i>
             <div className="modal-header">
-              <div className="head">Add Recipient</div>
+              <div className="head">
+                {templates[activeTemplate].name}
+              </div>
             </div>
             <div className="modal-content">
               <div className="template-content gray-bg p-10">
-                <div dangerouslySetInnerHTML={{__html: this.state.activeTemplateContent}} />
+                <div dangerouslySetInnerHTML={{__html: activeTemplateContent}} />
               </div>
             </div>
             <div className="modal-footer r-btn-container">
