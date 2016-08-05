@@ -121,6 +121,9 @@ class ListView extends React.Component {
     const error = EmailListStore.getError();
     if(error) {
       displayError(error);
+      this.setState({
+        spinning: false
+      });
       return false;
     }
     const success = EmailListStore.getSuccess();
