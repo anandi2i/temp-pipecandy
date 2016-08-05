@@ -1068,8 +1068,8 @@ module.exports = function(Campaign) {
               - new Date(moment(new Date()).add(ten, "minutes"));
             const zero = 0;
             const one = 1;
-           if(!lodash.gt(diff, zero))
-            scheduledAt = new Date(moment(scheduledAt).add(one, "days").format);
+          if(!lodash.gt(diff, zero))
+          scheduledAt = new Date(moment(scheduledAt).add(one, "days").format());
           }
 
           if(campaign.isTTSEnabled)
