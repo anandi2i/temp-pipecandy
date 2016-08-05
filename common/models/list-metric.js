@@ -156,11 +156,12 @@ module.exports = function(ListMetric) {
    * @param  {[campaign]} campaign
    * @param  {[ListMetric]} metric
    * @param  {[function]} updateAssemblerMetricsCB [callback]
-   * @author Ramanavel Selvaraju
+   * @author Ramanavel Selvaraju, Naveen Kumar(modified)
    */
   const updateAssemblerMetrics = (metrics, updateAssemMetricsCB) => {
-    metrics.updateAttribute("assembled", metrics.sentEmails,
-      (err, updatedMetrics) => {
+    metrics.assembled = metrics.sentEmails;
+    metrics.errorInAssmebler = 0;
+    metrics.updateAttributes(metrics, (err, updatedMetrics) => {
         if(err) {
           logger.error({error: err, stack: err.stack,
                         input: {campaign: campaign}});
