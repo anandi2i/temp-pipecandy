@@ -2,6 +2,8 @@
 
 import logger from "../../server/log";
 import async from "async";
+import constants from "../../server/utils/constants";
+import dateUtil from "../../server/utils/dateUtil";
 import lodash from "lodash";
 import moment from "moment-timezone";
 import campaignMetricArray from "../../server/utils/campaign-metric-fields";
@@ -424,13 +426,88 @@ module.exports = function(Campaign) {
           const errorMessage = errorMessages.SERVER_ERROR;
           return callback(errorMessage);
         }
-        let rate = {
-          openRate: result.openRate,
-          clickRate: result.clickRate
-        };
-        return callback(null, rate);
+        let graphData = constructGraphData(result.openRate, result.clickRate);
+        return callback(null, graphData);
       });
     });
+  };
+
+  /**
+   * Construct Graph Data for open and click rate
+   * @param  {Object} openRate
+   * @param  {Object} clickRate
+   * @return {Object} graphData
+   * @author Syed Sulaiman M
+   */
+  const constructGraphData = (openRate, clickRate) => {
+    let rateData = [], graphData = {}, minCount = 0, maxCount = 0;
+    let startDate = null, endDate = null, startDateTmp = null,
+        endDateTmp = null;
+    if(openRate) {
+      let openRateKeys = Object.keys(openRate);
+      let openStartDate =
+        new Date(openRateKeys[openRateKeys.length-constants.ONE]);
+      let openEndDate = new Date(openRateKeys[0]);
+      startDate = openStartDate;
+      endDate = openEndDate;
+      startDateTmp = openRateKeys[openRateKeys.length-constants.ONE];
+      endDateTmp = openRateKeys[0];
+    }
+    if(clickRate) {
+      let clickRateKeys = Object.keys(clickRate);
+      let clickStartDate =
+        new Date(clickRateKeys[clickRateKeys.length-constants.ONE]);
+      let clickEndDate = new Date(clickRateKeys[0]);
+      if(startDate && startDate > clickStartDate) {
+        startDate = clickStartDate;
+        startDateTmp = clickRateKeys[clickRateKeys.length-constants.ONE];
+      }
+      if(!startDate) {
+        startDate = clickStartDate;
+        startDateTmp = clickStartDate;
+      }
+
+      if(endDate && endDate < clickEndDate) {
+        endDate = clickEndDate;
+        endDateTmp = clickRateKeys[0];
+      }
+      if(!endDate) {
+        endDate = clickEndDate;
+        endDateTmp = clickRateKeys[0];
+      }
+    }
+    if(startDate && endDate) {
+      let generatedDates = dateUtil.generateDatesWithOneDayInterval(
+          startDate, endDate);
+      lodash(generatedDates).forEach( (o) => {
+        let rateDataInst = {
+          [o]: {
+            openRate: (openRate[o]) ? openRate[o] : constants.ZERO,
+            clickRate: (clickRate[o]) ? clickRate[o] : constants.ZERO
+          }
+        };
+
+        if(minCount === constants.ZERO || minCount > rateDataInst[o].openRate)
+          minCount = rateDataInst[o].openRate;
+        if(minCount === constants.ZERO || minCount > rateDataInst[o].clickRate)
+          minCount = rateDataInst[o].clickRate;
+
+        if(maxCount < rateDataInst[o].openRate)
+          maxCount = rateDataInst[o].openRate;
+        if(maxCount < rateDataInst[o].clickRate)
+          maxCount = rateDataInst[o].clickRate;
+
+        rateData.push(rateDataInst);
+      });
+    }
+
+    graphData.minCount = minCount;
+    graphData.maxCount = maxCount;
+    graphData.graphData = rateData;
+    graphData.interval = "1D";
+    graphData.startDate = startDateTmp;
+    graphData.endDate = endDateTmp;
+    return graphData;
   };
 
   /**
@@ -1966,7 +2043,7 @@ module.exports = function(Campaign) {
    */
   const getClickedEmailLinkRate = (campaign, callback) => {
     campaign.clickedEmailLinks((error, clickedEmailLinks) => {
-      let clickedEmailLinksTmp = [], clickRate = [];
+      let clickedEmailLinksTmp = [], clickRate = {};
       lodash(clickedEmailLinks).forEach( (o) => {
         o.createdAt = new Date(
           new Date(o.createdAt).getFullYear(),
@@ -1976,18 +2053,12 @@ module.exports = function(Campaign) {
       });
       let grpdclickedEmailLinks =
           lodash.groupBy(clickedEmailLinksTmp, "createdAt");
-      const keys = lodash.keys(grpdclickedEmailLinks);
-      async.each(keys, function(key, keyCB) {
-        let clickRateInst = {
-          date: key,
-          count: grpdclickedEmailLinks[key].length
-        };
-        clickRate.push(clickRateInst);
-        keyCB(null);
-      }, (err) => {
-        clickRate = lodash.sortBy(clickRate, "date");
-        callback(null, clickRate);
+      let keys = lodash.keys(grpdclickedEmailLinks);
+      keys = lodash.sortBy(keys);
+      lodash(keys).forEach( (o) => {
+        clickRate[o] = grpdclickedEmailLinks[o].length;
       });
+      return callback(null, clickRate);
     });
   };
 
@@ -2000,7 +2071,7 @@ module.exports = function(Campaign) {
    */
   const getOpenedEmailRate = (campaign, callback) => {
     campaign.openedEmail((error, openedEmails) => {
-      let openedEmailsTmp = [], openRate = [];
+      let openedEmailsTmp = [], openRate = {};
       lodash(openedEmails).forEach( (o) => {
         o.createdAt = new Date(
           new Date(o.createdAt).getFullYear(),
@@ -2009,18 +2080,12 @@ module.exports = function(Campaign) {
         openedEmailsTmp.push(o);
       });
       let grpdOpenedEmail = lodash.groupBy(openedEmailsTmp, "createdAt");
-      const keys = lodash.keys(grpdOpenedEmail);
-      async.each(keys, function(key, keyCB) {
-        let openRateInst = {
-          date: key,
-          count: grpdOpenedEmail[key].length
-        };
-        openRate.push(openRateInst);
-        keyCB(null);
-      }, (err) => {
-        openRate = lodash.sortBy(openRate, "date");
-        callback(null, openRate);
+      let keys = lodash.keys(grpdOpenedEmail);
+      keys = lodash.sortBy(keys);
+      lodash(keys).forEach( (o) => {
+        openRate[o] = grpdOpenedEmail[o].length;
       });
+      return callback(null, openRate);
     });
   };
 
