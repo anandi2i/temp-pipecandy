@@ -42,8 +42,10 @@ class SelectEmailList extends React.Component {
     return (
       <div className="container">
         <h4> Select Email List </h4>
-        <div className="spaced" style={{display: this.state.spinning ? "block" : "none"}}>
-          <Spinner />
+        <div className="container" style={{display: this.state.spinning ? "block" : "none"}}>
+          <div className="spinner-container">
+            <Spinner />
+          </div>
         </div>
         {
           this.state.noDataBlock

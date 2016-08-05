@@ -278,7 +278,7 @@ class ListView extends React.Component {
   fileChange = (e) => {
     const file = e.target.files[0];
     const fileExt = _.last(file.name.split("."));
-    const acceptableFileTypes = ["csv", "xls", "xlsx"];
+    const acceptableFileTypes = ["csv"];
     if(!file) {
       return false;
     }
@@ -479,9 +479,6 @@ class ListView extends React.Component {
             </div>
           </div>
           {/* Add new field ends here */}
-          <div className="spaced" style={{display: this.state.spinning ? "block" : "none"}}>
-            <Spinner />
-          </div>
         </div>
         <TagMenu activeTabId={activeTabId} tabs={tabs}
           handleClick={this.handleClick} mainClass={"container"} />
@@ -521,6 +518,11 @@ class ListView extends React.Component {
           uploadCsvDetails={uploadCsvDetails}
         />
         {/* /Add Recipient Component */}
+        <div className="container" style={{display: this.state.spinning ? "block" : "none"}}>
+          <div className="spinner-container">
+            <Spinner />
+          </div>
+        </div>
       </div>
     );
   }

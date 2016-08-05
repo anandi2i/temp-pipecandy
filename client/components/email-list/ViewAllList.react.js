@@ -53,11 +53,12 @@ class ListView extends React.Component {
               <Link to="/list/create">Create Email List</Link>
             </div>
           </div>
-          <div className="spaced" style={{display: this.state.spinning ? "block" : "none"}}>
-            <Spinner />
+          <EmailListGrid results={this.state.allEmailLists} globalData={this.getGlobalData} />
+          <div className="container" style={{display: this.state.spinning ? "block" : "none"}}>
+            <div className="spinner-container">
+              <Spinner />
+            </div>
           </div>
-          <EmailListGrid results={this.state.allEmailLists}
-            globalData={this.getGlobalData} />
         </div>
       </div>
     );
