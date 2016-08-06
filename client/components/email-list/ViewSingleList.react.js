@@ -41,6 +41,7 @@ class ListView extends React.Component {
       listName: "",
       people: [],
       spinning: true,
+      uploadAnimTxt: false,
       fieldName: "",
       suggestions: [],
       metaFields: [],
@@ -79,6 +80,11 @@ class ListView extends React.Component {
     this.el.find(".modal-content").mCustomScrollbar({
       theme:"minimal-dark"
     });
+    this.el.find(".anim").textillate({
+      loop: true,
+      in: {effect: "bounce"},
+      out: {effect: "bounce"}
+    });
   }
 
   /**
@@ -95,11 +101,14 @@ class ListView extends React.Component {
     const error = EmailListStore.getError();
     const csvDetails = EmailListStore.getUploadCsvDetails();
     if(error) {
+      this.setState({
+        uploadAnimTxt: false
+      });
       displayError(error);
       return false;
     }
     this.setState({
-      spinning: false,
+      uploadAnimTxt: false,
       uploadCsvDetails: csvDetails
     }, () => {
       this.refs.csvDetails.openModal();
@@ -122,7 +131,8 @@ class ListView extends React.Component {
     if(error) {
       displayError(error);
       this.setState({
-        spinning: false
+        spinning: false,
+        uploadAnimTxt: false
       });
       return false;
     }
@@ -290,7 +300,7 @@ class ListView extends React.Component {
         listId: this.props.params.listId
       };
       this.setState({
-        spinning: true
+        uploadAnimTxt: true
       });
       EmailListActions.uploadFile(data);
     } else {
@@ -399,7 +409,7 @@ class ListView extends React.Component {
    * @return {ReactElement} markup
    */
   render() {
-    const {fieldName, suggestions, people, uploadCsvDetails,
+    const {fieldName, suggestions, people, uploadCsvDetails, uploadAnimTxt,
       fieldsName, listFields, peopleDetails, activeTabId, tabs} = this.state;
     const {listId} = this.props.params;
     const inputProps = {
@@ -479,6 +489,11 @@ class ListView extends React.Component {
             </div>
           </div>
           {/* Add new field ends here */}
+        </div>
+        <div className="anim-container container center" style={{display: uploadAnimTxt ? "block" : "none"}}>
+          {"I'm loading the new records and it might take some time."}
+          You can navigate to other pages while the list gets updated
+          <span className="anim">...</span>
         </div>
         <TagMenu activeTabId={activeTabId} tabs={tabs}
           handleClick={this.handleClick} mainClass={"container"} />

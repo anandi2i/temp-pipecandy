@@ -24,7 +24,7 @@ export const ErrorMessages = {
   "DeletePerson" : "Please select a Subscriber to Delete",
   "MinFileSize": "Select file size more the 10kb",
   "PasswordFields": "Please enter both password fields",
-  "InValidFileType": "Please upload file of type csv/xls",
+  "InValidFileType": "Please upload file of type csv",
   "SamePasswordUpdate": "Please update new different password",
   "EmptyEmailList": "Email list should not be empty",
   "SmartTagIssues": "Fix all smart tag issues",

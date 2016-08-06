@@ -21,6 +21,11 @@
       "main": [
         "dist/js/materialize.clockpicker.js"
       ]
+    },
+    "letteringjs": {
+      "main": [
+        "jquery.lettering.js"
+      ]
     }
   },
   "dependencies": {
@@ -31,6 +36,7 @@
     "materialize-clockpicker": "https://github.com/chingyawhao/materialize-clockpicker.git",
     "tinymce-mention": "^4.0.1",
     "animate.css": "^3.5.2",
-    "express-useragent": "^0.2.4"
+    "express-useragent": "^0.2.4",
+    "letteringjs": "^0.7.0"
   }
 }

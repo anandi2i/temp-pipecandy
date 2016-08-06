@@ -1826,6 +1826,15 @@ $lines-to-show: 8;
     }
   }
 }
+.anim-container {
+  border-bottom: $border-1px;
+  border-top: $border-1px;
+  margin-bottom: 10px;
+  padding: 10px;
+  span {
+    font-size: 22px;
+  }
+}
 /*********************
   Media Query Classes
 **********************/

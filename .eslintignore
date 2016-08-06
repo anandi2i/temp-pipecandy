@@ -3,6 +3,7 @@ bower_components
 public
 assets/js/common.js
 assets/js/utils.js
+assets/js/animation-text/*.js
 assets/tinymce
 assets/js/tinymce-mention/plugin.js
 assets/js/materialize.clockpicker.js
