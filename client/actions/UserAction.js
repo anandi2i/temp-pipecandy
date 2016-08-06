@@ -108,10 +108,10 @@ const UserAction = {
    * @param {object} data - Unsubscribe user details
    * @emits {Constants.UNSUBSCRIBE_CAMPAIGN}
    */
-  unsubscribe(data) {
+  unsubscribe(id) {
     AppDispatcher.handleAction({
       actionType: Constants.UNSUBSCRIBE_CAMPAIGN,
-      data: data
+      id: id
     });
   }
 };

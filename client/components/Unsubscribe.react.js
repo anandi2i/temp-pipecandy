@@ -10,12 +10,7 @@ class Unsubscribe extends React.Component {
   }
 
   componentWillMount() {
-    const params = this.props.location.query;
-    UserAction.unsubscribe({
-      people: params.people,
-      user: params.user,
-      campaign: params.campaign
-    });
+    UserAction.unsubscribe(this.props.params.id);
   }
 
   render() {

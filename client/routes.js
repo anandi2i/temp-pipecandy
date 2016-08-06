@@ -95,7 +95,7 @@ const routes = (
   <Route path="forgot-password" component={ForgotPassword} />
   <Route path="reset-password/:accessToken" component={ResetPassword} />
   <Route path="forgot-password-response" component={PasswordResponse} />
-  <Route path="unsubscribe" component={Unsubscribe} />
+  <Route path="unsubscribe/:id" component={Unsubscribe} />
 </Router>
 );
 

@@ -1,8 +1,8 @@
 /**
  * Webpack configuration for production environment
  */
+var webpack = require("webpack");
 module.exports = {
-  devtool: "#eval-source-map",
   entry: [
     "./client/app.js",
   ],
@@ -10,6 +10,11 @@ module.exports = {
     path: __dirname + "/public/assets/",
     filename: "bundle.js"
   },
+  plugins: [
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {warnings: false}
+    })
+  ],
   resolve: {
     extensions: ["", ".js", ".react.js"]
   },

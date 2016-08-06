@@ -169,7 +169,7 @@ AppDispatcher.register(function(payload) {
       });
       break;
     case Constants.UNSUBSCRIBE_CAMPAIGN:
-      UserApi.unsubscribe(action.data).then((response) => {
+      UserApi.unsubscribe(action.id).then((response) => {
         //TODO need to hadle success res
       }, (err) => {
         //TODO need to hadle err
