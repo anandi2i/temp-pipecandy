@@ -80,11 +80,6 @@ class ListView extends React.Component {
     this.el.find(".modal-content").mCustomScrollbar({
       theme:"minimal-dark"
     });
-    this.el.find(".anim").textillate({
-      loop: true,
-      in: {effect: "bounce"},
-      out: {effect: "bounce"}
-    });
   }
 
   /**
@@ -493,8 +488,7 @@ class ListView extends React.Component {
         </div>
         <div className="anim-container container center" style={{display: uploadAnimTxt ? "block" : "none"}}>
           {"I'm loading the new records and it might take some time."}
-          You can navigate to other pages while the list gets updated
-          <span className="anim">...</span>
+          You can navigate to other pages while the list gets updated...
         </div>
         <TagMenu activeTabId={activeTabId} tabs={tabs}
           handleClick={this.handleClick} mainClass={"container"} />
