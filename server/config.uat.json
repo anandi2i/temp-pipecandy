@@ -37,9 +37,9 @@
       "region": "ap-south-1"
     },
     "url": {
-      "intelligenceIn": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-uat-intelligence-in",
-      "intelligenceOut": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-uat-intelligence-out",
-      "emailAssembler": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-uat-email-assembler"
+      "intelligenceIn": "https://sqs.ap-south-1.amazonaws.com/736447789897/pc-uat-intelligence-in",
+      "intelligenceOut": "https://sqs.ap-south-1.amazonaws.com/736447789897/pc-uat-intelligence-out",
+      "emailAssembler": "https://sqs.ap-south-1.amazonaws.com/736447789897/pc-uat-email-assembler"
     }
   },
 
