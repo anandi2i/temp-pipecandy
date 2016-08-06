@@ -77,6 +77,11 @@
       "type": "hasMany",
       "model": "openedEmail",
       "foreignKey": ""
+    },
+    "clickedEmailLinks": {
+      "type": "hasMany",
+      "model": "clickedEmailLink",
+      "foreignKey": ""
     }
 
   },

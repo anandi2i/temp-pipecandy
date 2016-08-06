@@ -145,7 +145,8 @@ module.exports = function(MailResponse) {
       async.each(mailResponses, (mailResponse, mailResponseCB) => {
         var mailResponseJSON = mailResponse.toJSON();
         mailResponse.content= mailResponse.content
-          .replace(/<a class=("|')(unsubscribe)(.*?)(>)/g, "<a href='#'>");
+          .replace(/<a class=("|')(unsubscribe)(.*?)(>)/g,
+          "<a class='unsubscribe' href='#'>");
         let response = JSON.parse(JSON.stringify(mailResponse));
         response.person = {
           firstName: mailResponseJSON.person.firstName,

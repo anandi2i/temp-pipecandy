@@ -95,6 +95,46 @@ module.exports = function(FollowUpMetric) {
     });
   };
 
+  /**
+   * Creates an entry on the clicked email model to get the report of
+   * From which followUp, who, when, what link clicked
+   * @param  {[params]} reqParams [{emailLinkId, personId, campaignId, followUpId}]
+   * @param  {[function]} addMetricsCB [callback function]
+   * @return {[String]} msg [success message]
+   * @author Rahul Khandelwal
+   */
+
+  FollowUpMetric.addMetrics = (reqParams, link, addFollowUpMetricsCB) => {
+    FollowUpMetric.find({
+      where :{
+        followUpId : reqParams.followUpId
+      }
+    }, (followUpMetricsErr, followUpMetrics) => {
+      if(followUpMetricsErr){
+        reqParams.error = followUpMetricsErr;
+        logger.error("Error on updating FollowUpMetric", followUpMetricsErr);
+        return addFollowUpMetricsCB(followUpMetricErr);
+      }
+        async.each(followUpMetrics, (followUpMetric, followUpMetricsCB) => {
+          followUpMetric.updateAttribute("clicked", ++followUpMetric.clicked,
+          (followUpMetricUpdateErr, updatedFollowUpMetric) => {
+            if(followUpMetricUpdateErr){
+              reqParams.error = followUpMetricUpdateErr;
+              logger.error("Error on updating FollowUpMetric",
+              followUpMetricUpdateErr);
+              return addFollowUpMetricsCB(followUpMetricUpdateErr);
+            }
+            followUpMetricsCB(null);
+          });
+        }, (err) => {
+          if(err){
+            return addFollowUpMetricsCB(err);
+          }
+          return addFollowUpMetricsCB(null,
+             "FollowUpMetric added Successfully");
+        });
+    });
+  };
 
   /**
    * updates the already sent mails as assembeled emails count

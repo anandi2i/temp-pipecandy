@@ -37,6 +37,11 @@
       "type": "belongsTo",
       "model": "campaign",
       "foreignKey": "campaignId"
+    },
+    "followUp": {
+      "type": "belongsTo",
+      "model": "followUp",
+      "foreignKey": "followUpId"
     }
   },
   "acls": [

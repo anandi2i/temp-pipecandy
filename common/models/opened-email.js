@@ -104,7 +104,9 @@ module.exports = function(OpenedEmail) {
    * @return void
    */
   OpenedEmail.trackFollowUp = (campaignId, personId, followUpId, res, req) => {
-    if(req.headers.host === config.emailHost) {
+    const referer = req.headers.referer;
+    if(referer
+      && referer.indexOf(config.appHost) > constants.EMPTYARRAYINDEX) {
       return res.redirect("/images/1x1.png");
     }
     let clientIp =

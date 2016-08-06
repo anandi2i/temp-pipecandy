@@ -57,6 +57,7 @@ module.exports = function(EmailLink) {
    * @author Ramanavel Selvaraju
    */
   EmailLink.track = (campaignId, personId, linkId, res, req) => {
+    let followUpId= req.query.followUpId ? req.query.followUpId : null;
     let clientIp =
       req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     let clientBrowser = req.useragent.browser;
@@ -65,7 +66,8 @@ module.exports = function(EmailLink) {
       personId: personId,
       emailLinkId: linkId,
       clientIp: clientIp,
-      clientBrowser: clientBrowser
+      clientBrowser: clientBrowser,
+      followUpId: followUpId
     };
     EmailLink.findById(linkId, (linkFindErr, link) => {
       if(linkFindErr || !link) {
@@ -101,6 +103,8 @@ module.exports = function(EmailLink) {
           campaignId: reqParams.campaignId
         }, {
           personId: reqParams.personId
+        }, {
+          followUpId: reqParams.followUpId
         }]
       }
     }, (clickedLinkErr, linkMetrics) => {
@@ -133,17 +137,34 @@ module.exports = function(EmailLink) {
 
   const updateAllLinkRelatedMetrics = (reqParams,
     updateAllRelatedMetricsCB) => {
-    async.parallel({
-      linkRelated: updatelinkAndLinkMetrics.bind(null, reqParams),
-      campaignAndList: updateListAndCampaignMetrics.bind(null, reqParams)
-    }, (parallelErr, results) => {
-      if(parallelErr) {
-        logger.error("On async.parallel updateAllRelatedMetrics",
-        {reqParams: reqParams, error: parallelErr, stack: parallelErr.stack});
-        return updateAllRelatedMetricsCB(parallelErr);
+      if(reqParams.followUpId){
+        async.parallel({
+          linkRelated: updatelinkAndLinkMetrics.bind(null, reqParams),
+          followUp: EmailLink.app.models.followUpMetric.addMetrics.bind(null,
+            reqParams, "Link")
+        }, (parallelErr, results) => {
+         if(parallelErr) {
+            logger.error("On async.parallel updateAllRelatedMetrics",
+            {reqParams: reqParams, error: parallelErr, stack:
+              parallelErr.stack});
+            return updateAllRelatedMetricsCB(parallelErr);
+          }
+          return updateAllRelatedMetricsCB(null);
+        });
+      } else {
+        async.parallel({
+          linkRelated: updatelinkAndLinkMetrics.bind(null, reqParams),
+          campaignAndList: updateListAndCampaignMetrics.bind(null, reqParams)
+        }, (parallelErr, results) => {
+          if(parallelErr) {
+            logger.error("On async.parallel updateAllRelatedMetrics",
+            {reqParams: reqParams, error: parallelErr, stack:
+              parallelErr.stack});
+            return updateAllRelatedMetricsCB(parallelErr);
+          }
+          return updateAllRelatedMetricsCB(null);
+        });
       }
-      return updateAllRelatedMetricsCB(null);
-    });
   };
 
   const updatelinkAndLinkMetrics = (reqParams, updatelinkAndLinkMetricsCB) => {
