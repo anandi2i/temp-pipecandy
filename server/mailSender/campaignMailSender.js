@@ -501,15 +501,17 @@ function sendEmail(base64EncodedEmail, oauth2Client, emailQueue, mailContent,
                 });
             });
         });
+      } else {
+        return sendEmailCB(err);
       }
     } else {
       delete tempCacheUserCredentials[mailContent.userDetails.userid];
       App.emailQueue.destroyById(mailContent.mailId, function(err, data) {
         if (err) {
-          sendEmailCB(err);
+          return sendEmailCB(err);
         }
         console.log(results);
-        sendEmailCB(null, emailQueue, mailContent, results);
+        return sendEmailCB(null, emailQueue, mailContent, results);
       });
     }
   });
@@ -736,9 +738,21 @@ function updateCampaign(emailQueue, campaignMetric, followUpMetric, followUps,
     updateCampaignCB) {
   App.campaign.findById(emailQueue.campaignId, function(err, campaign) {
     let updateProperties = {
-      lastRunAt: new Date(),
-      statusCode: statusCodes.default.executingCampaign
+      lastRunAt: new Date()
     };
+    let statusArray = [statusCodes.default.campaignSent];
+    lodash.times(constants.default.EIGHT, (index) => {
+      ++index;
+      let result = "followUpStopped-" + index;
+      statusArray.push(statusCodes.default[result]);
+      result = "followUpResumed-" + index;
+      statusArray.push(statusCodes.default[result]);
+    });
+    let containsCheck = lodash.includes(statusArray, campaign.statusCode);
+    if(!containsCheck) {
+      updateProperties.statusCode = statusCodes.default.executingCampaign;
+    }
+
     if(campaignMetric) {
       if(campaignMetric.assembled ===
           (campaignMetric.sentEmails + campaignMetric.failedEmails)) {
@@ -750,9 +764,16 @@ function updateCampaign(emailQueue, campaignMetric, followUpMetric, followUps,
       }
     }
     if(followUpMetric) {
-      if(followUpMetric.assembled ===
-          (followUpMetric.sentEmails + followUpMetric.failedEmails)) {
-        updateProperties.statusCode = statusCodes.default.campaignExecuted;
+      let followUpsTmp = lodash.filter(followUps, (o) => {
+        return (o.statusCode !== statusCodes.default.followUpSent)
+          ? true : false;
+      });
+      if(followUpsTmp.length === constants.default.ONE
+          && followUpsTmp[0].id === followUpMetric.followUpId) {
+        if(followUpMetric.assembled ===
+            (followUpMetric.sentEmails + followUpMetric.failedEmails)) {
+          updateProperties.statusCode = statusCodes.default.campaignExecuted;
+        }
       }
     }
     campaign.updateAttributes(updateProperties, function(err, updatedCampaign) {

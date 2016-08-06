@@ -15,6 +15,7 @@ const constants = {
   "SYSTEM": "SYSTEM",
   "ONE": ONE,
   "ZERO": 0,
+  "EIGHT": 8,
   "MINUS_ONE": -1,
   "TIME_FORMAT": "dd/mm/yyyy HH:MM:ss.l",
   "CLASSIFICATIONS" : ["bounced", "out-of-office", "actionable",

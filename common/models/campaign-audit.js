@@ -1,4 +1,5 @@
 import lodash from "lodash";
+import logger from "../../server/log";
 import async from "async";
 
 module.exports = function(CampaignAudit) {
