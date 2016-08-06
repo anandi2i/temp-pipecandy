@@ -31,7 +31,7 @@ class PerformanceReport extends React.Component {
    */
   onStoreChange = () => {
     const openClickRate = CampaignReportStore.getOpenClickRate();
-    if(openClickRate.openRate.length) {
+    if(openClickRate.graphData.length) {
       this.setState({
         isEnable: true,
         openClickRate: openClickRate
@@ -46,23 +46,18 @@ class PerformanceReport extends React.Component {
    */
   drawGraph = () => {
     const {openClickRate} = this.state;
-    const date = new Date(openClickRate.openRate[0].date);
+    const openRateCount = [];
+    const clickRateCount = [];
+    const date = new Date(openClickRate.startDate);
     const pointInterval = 86400000;
     const pointStart =
       Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-    const openRateCount = [];
-    const clickRateCount = [];
-    if(openClickRate.openRate.length) {
-      _.each(openClickRate.openRate, (val, key) => {
-        openRateCount.push(val.count);
+    _.each(openClickRate.graphData, function(val, key) {
+      _.each(val, function(rate, k) {
+        openRateCount.push(rate.openRate);
+        clickRateCount.push(rate.clickRate);
       });
-    }
-    if(openClickRate.clickRate.length) {
-      _.each(openClickRate.clickRate, (val, key) => {
-        clickRateCount.push(val.count);
-      });
-    }
-
+    });
     /**
      * Setup Charts Properties
      *
@@ -107,7 +102,7 @@ class PerformanceReport extends React.Component {
           },
           formatter: function () {
             return Highcharts.dateFormat("%d %b %Y", this.x)
-              + "<br><b>" + this.y + "% " + this.series.name + "</b>";
+              + "<br><b>" + this.y + " " + this.series.name + "</b>";
           },
           xDateFormat: "%Y-%m-%d"
       },
@@ -125,7 +120,7 @@ class PerformanceReport extends React.Component {
       },
       series: [{
           name: "Click rates",
-          data: openRateCount,
+          data: clickRateCount,
           color: "#FF6549",
           lineColor: "#FF6549",
           lineWidth: 3,
@@ -138,7 +133,7 @@ class PerformanceReport extends React.Component {
           }
       }, {
           name: "Open rates",
-          data: clickRateCount,
+          data: openRateCount,
           color: "#FFC66D",
           lineColor: "#FFC66D",
           lineWidth: 3,
