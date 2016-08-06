@@ -58,7 +58,7 @@ class Header extends React.Component {
               </ul>
               <ul id="userDropDown" className="dropdown-content">
                 <li><Link to="/profile">Profile</Link></li>
-                <li><Link onClick={this.logout} to="/login" activeClassName="active">Logout</Link></li>
+                <li><Link onClick={this.logout} to="/signup" activeClassName="active">Logout</Link></li>
               </ul>
               <Link to="#" activeClassName="active" data-activates="main-side-nav"
                 className="side-nav-btn">
@@ -120,7 +120,7 @@ class Menu extends React.Component {
             </li>
             <div className="side-nav-drop-down hide-on-large-only">
               <li><Link to="/profile">Profile</Link></li>
-              <li><Link onClick={this.logout} to="/login" activeClassName="active">Logout</Link></li>
+              <li><Link onClick={this.logout} to="/signup" activeClassName="active">Logout</Link></li>
             </div>
             {/* side nav - end here */}
             <li>
@@ -147,7 +147,6 @@ class Menu extends React.Component {
           </span>
         :
           <span>
-            <li><Link to="/login" activeClassName="active">Login</Link></li>
             <li><Link to="/signup" activeClassName="active">Signup</Link></li>
           </span>
     );

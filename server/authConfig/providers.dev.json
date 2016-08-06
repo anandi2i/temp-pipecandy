@@ -48,7 +48,7 @@
     "authPath": "/link/google",
     "callbackPath": "http://dev.pipecandy.com/link/google/callback",
     "successRedirect": "/auth/account",
-    "failureRedirect": "/login",
+    "failureRedirect": "/signup",
     "scope": ["email", "profile"],
     "link": true,
     "failureFlash": true

@@ -10,8 +10,6 @@ import UserApi from "./API/UserApi";
 import UserAction from "./actions/UserAction";
 import UserStore from "./stores/UserStore";
 import Index from "./components/Index.react";
-import Login from "./components/Login.react";
-import Signup from "./components/Signup.react";
 import Profile from "./components/user/UserProfile.react";
 import Response from "./components/Response.react";
 import EmailVerification from "./components/EmailVerification.react";
@@ -54,11 +52,11 @@ function requireAuth(nextState, replace) {
     UserApi.getUserDetail().then((response) => {
       UserAction.setUserDetail(response.data);
     }, (err) => {
-      replace("/register");
+      replace("/signup");
     });
   } else {
     if (nextState.location.pathname !== "/email-verified") {
-      replace("/register");
+      replace("/signup");
     }
   }
   return;
@@ -89,9 +87,7 @@ const routes = (
     <Route path="profile" component={Profile} />
     <Route path="reset-password-response" component={ResetPwdResponse} />
   </Route>
-  <Route path="register" component={Index} />
-  <Route path="login" component={Login} />
-  <Route path="signup" component={Signup} />
+  <Route path="signup" component={Index} />
   <Route path="forgot-password" component={ForgotPassword} />
   <Route path="reset-password/:accessToken" component={ResetPassword} />
   <Route path="forgot-password-response" component={PasswordResponse} />

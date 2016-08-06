@@ -135,7 +135,7 @@ AppDispatcher.register(function(payload) {
         _user = "";
         isSocialAuth = false;
         _prevLocation = "/";
-        browserHistory.push("/login");
+        browserHistory.push("/signup");
       });
       break;
     case Constants.USER_UPDATE:
