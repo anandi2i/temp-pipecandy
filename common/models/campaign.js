@@ -1024,7 +1024,7 @@ module.exports = function(Campaign) {
       email.unSubscribeToken = uuid.v1();
       const url = `${serverUrl}/unsubscribe/${email.unSubscribeToken}`;
       const optText = campaign.optText ? campaign.optText : Unsubscribe;
-      bottom += `<a href="${url}">${optText}</a>`;
+      bottom += `<a class="unsubscribe" href="${url}">${optText}</a>`;
     }
     bottom += "</td></tr></tbody></table></div>";
     bottomContent += bottom;
