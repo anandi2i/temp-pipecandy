@@ -1,0 +1,38 @@
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "psqlDs": {
+    "host": "52.66.48.120",
+    "database": "pipecandy",
+    "username": "pguser",
+    "password": "pgpass",
+    "name": "psqlDs",
+    "connector": "postgresql"
+  },
+  "Email": {
+    "name": "Email",
+    "defaultForType": "mail",
+    "connector": "mail",
+    "transports": [
+      {
+        "type": "SMTP",
+        "host": "smtp.gmail.com",
+        "secure": true,
+        "port": 465,
+        "auth": {
+          "user": "pipecandi@gmail.com",
+          "pass": "pipecandy!@#"
+        }
+      }
+    ]
+  },
+  "storage": {
+    "name": "storage",
+    "connector": "loopback-component-storage",
+    "provider": "filesystem",
+    "root": "./server/storage",
+    "maxFileSize": "52428800"
+  }
+}

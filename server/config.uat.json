@@ -1,9 +1,9 @@
 {
   "restApiRoot": "/api",
   "host": "0.0.0.0",
-  "emailHost":"dev.pipecandy.com",
-  "appHost": "http://dev.pipecandy.com",
-  "redirectURL": "http://dev.pipecandy.com",
+  "emailHost":"uat.pipecandy.com",
+  "appHost": "http://uat.pipecandy.com",
+  "redirectURL": "http://uat.pipecandy.com",
   "port": 3000,
   "emailPort":"80",
   "remoting": {
@@ -32,18 +32,18 @@
 
   "queue": {
     "config": {
-      "accessKeyId": "AKIAJ53GEQAAN6LWLTUQ",
-      "secretAccessKey": "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",
-      "region": "ap-southeast-1"
+      "accessKeyId": "AKIAIBZ3SOWHAEP3UI3A",
+      "secretAccessKey": "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",
+      "region": "ap-south-1"
     },
     "url": {
-      "intelligenceIn": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-dev-intelligence-in",
-      "intelligenceOut": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-dev-intelligence-out",
-      "emailAssembler": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-dev-email-assembler"
+      "intelligenceIn": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-uat-intelligence-in",
+      "intelligenceOut": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-uat-intelligence-out",
+      "emailAssembler": "https://sqs.ap-southeast-1.amazonaws.com/736447789897/pc-uat-email-assembler"
     }
   },
 
-  "appUrl": "http://dev.pipecandy.com",
+  "appUrl": "http://uat.pipecandy.com",
   "googleCredentials": {
     "installed": {
       "client_id": "478206392598-0uq1vtkne494bdhnlb1k4fjson3shjap.apps.googleusercontent.com",
@@ -53,7 +53,7 @@
       "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
       "client_secret": "-9z-cU18aImvflghMHWaz4oW",
       "redirect_uris": [
-        "http://dev.pipecandy.com/auth/google/callback"
+        "http://uat.pipecandy.com/auth/google/callback"
       ]
     }
   }
