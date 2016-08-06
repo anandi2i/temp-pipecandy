@@ -38,9 +38,9 @@ var config = {};
 var success = 1;
 try {
   if(process.env.NODE_ENV) {
-    config = require(`../providers.${process.env.NODE_ENV}.json`);
+    config = require(`./authConfig/providers.${process.env.NODE_ENV}.json`);
   } else {
-    config = require("../providers.json");
+    config = require("./authConfig/providers.json");
   }
 } catch (err) {
   console.trace(err);

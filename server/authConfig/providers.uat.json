@@ -1,0 +1,56 @@
+{
+  "local": {
+    "provider": "local",
+    "module": "passport-local",
+    "usernameField": "username",
+    "passwordField": "password",
+    "authPath": "/auth/local",
+    "successRedirect": "/auth/account",
+    "failureRedirect": "/local",
+    "failureFlash": true,
+    "setAccessToken" : true,
+    "session" : true
+  },
+  "linkedin-login": {
+    "provider": "linkedin",
+    "module": "passport-linkedin-oauth2",
+    "callbackURL": "http://uat.pipecandy.com/auth/linkedin/callback",
+    "authPath": "/auth/linkedin",
+    "callbackPath": "/auth/linkedin/callback",
+    "successRedirect": "/auth/success",
+    "failureRedirect": "/",
+    "clientID": "75ec9tl0mysct6",
+    "clientSecret": "nZ3SBuNDzMd072wx",
+    "scope": ["r_basicprofile", "r_emailaddress"],
+    "state": true
+  },
+  "google-login": {
+    "provider": "google",
+    "module": "passport-google-oauth",
+    "strategy": "OAuth2Strategy",
+    "clientID": "478206392598-0uq1vtkne494bdhnlb1k4fjson3shjap.apps.googleusercontent.com",
+    "clientSecret": "-9z-cU18aImvflghMHWaz4oW",
+    "callbackURL": "http://uat.pipecandy.com/auth/google/callback",
+    "authPath": "/auth/google",
+    "callbackPath": "/auth/google/callback",
+    "successRedirect": "/auth/success",
+    "failureRedirect": "/",
+    "scope": ["https://mail.google.com/", "email", "profile"],
+    "failureFlash": true
+  },
+  "google-link": {
+    "provider": "google",
+    "module": "passport-google-oauth",
+    "strategy": "OAuth2Strategy",
+    "clientID": "{google-client-id-2}",
+    "clientSecret": "{google-client-secret-2}",
+    "callbackURL": "/link/google/callback",
+    "authPath": "/link/google",
+    "callbackPath": "http://uat.pipecandy.com/link/google/callback",
+    "successRedirect": "/auth/account",
+    "failureRedirect": "/login",
+    "scope": ["email", "profile"],
+    "link": true,
+    "failureFlash": true
+  }
+}
