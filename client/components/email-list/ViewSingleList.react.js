@@ -306,6 +306,7 @@ class ListView extends React.Component {
     } else {
       displayError(ErrorMessages.InValidFileType);
     }
+    e.target.value = "";
     return true;
   }
 
@@ -442,7 +443,7 @@ class ListView extends React.Component {
                   <li><Link to="/list/master-list">Build From Master</Link></li>
                 </ul>
                 <input id="fileUpload" type="file" className="hide" name="file"
-                  accept=".csv, .xls, .xlsx" onChange={this.fileChange} />
+                  accept=".csv" onChange={this.fileChange} />
                 <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" onClick={this.openDialog}>
                   <i className="left mdi mdi-upload"></i> Add From File
                 </a>
