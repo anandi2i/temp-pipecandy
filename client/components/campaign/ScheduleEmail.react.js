@@ -441,18 +441,12 @@ class ScheduleEmail extends React.Component {
   const {isOptText, isAddress, optText, address,
     displayScheduleCampaign, improveDelivery} = this.state;
   const element = this.el;
-  let addressDom = $(document.createElement("div"));
-  _.each($.parseHTML(address), (el, i) => {
-    if(el.nodeName === "P") {
-      addressDom.append($(el).css("margin", "0px"));
-    }
-  });
   let campaignDetails = {
     id: this.props.campaignId,
     isOptTextNeeded: isOptText,
     isAddressNeeded: isAddress,
     optText: optText,
-    address: addressDom.html(),
+    address: address,
     userDate: new Date().toString(),
     isTTSEnabled: improveDelivery
   };
