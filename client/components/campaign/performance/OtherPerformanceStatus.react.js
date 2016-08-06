@@ -45,7 +45,7 @@ class OtherPerformanceStatus extends React.Component {
 
   componentDidMount() {
     CampaignReportStore.addOtherStatsChangeListener(this.onStoreChange);
-    CampaignActions.getOtherStatsMetrics(this.props.campaignId || false);
+    CampaignActions.getCampaignReport(this.props.campaignId);
   }
 
   componentWillUnmount() {
@@ -56,25 +56,25 @@ class OtherPerformanceStatus extends React.Component {
     let otherStatsMetrics = CampaignReportStore.getOtherStatsMetrics();
     this.setState({
       otherStatsMetrics: [{
-          "title": "emails sent",
-          "percentage": otherStatsMetrics.sentEmails,
-          "class": ""
-        },
-        {
-          "title": "emails delivered",
-          "percentage": otherStatsMetrics.deliveredEmails,
-          "class": ""
-        },
-        {
-          "title": "warm responses",
-          "percentage": otherStatsMetrics.warmResponses,
-          "class": ""
-        },
-        {
-          "title": "followups done",
-          "percentage": otherStatsMetrics.followUpsSent,
-          "class": ""
-        }]
+        "title": "emails sent",
+        "percentage": otherStatsMetrics.sentEmails,
+        "class": ""
+      },
+      {
+        "title": "emails delivered",
+        "percentage": otherStatsMetrics.deliveredEmails,
+        "class": ""
+      },
+      {
+        "title": "warm responses",
+        "percentage": otherStatsMetrics.warmResponses,
+        "class": ""
+      },
+      {
+        "title": "followups done",
+        "percentage": otherStatsMetrics.followUpsSent,
+        "class": ""
+      }]
     });
   }
 

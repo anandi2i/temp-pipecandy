@@ -26,12 +26,6 @@ const CampaignApi = {
     return api.get(`/api/campaigns/getCurrentCampaignMetrics/${campaignId}`);
   },
   /**
-   * Get recent campaign metrics
-   */
-  getRecentCampaignMetrics() {
-    return api.get("/api/campaigns/getRecentCampaignMetrics");
-  },
-  /**
    * Save campaign templates
    */
   saveCampaignTemplates(campaign) {
@@ -53,7 +47,7 @@ const CampaignApi = {
   },
   /**
    * Get current campaign details
-   * @param  {[campaignId]} campaignId
+   * @param  {number} campaignId
    */
   getCurrentCampaignDetails(campaignId) {
     return api.get(`/api/campaigns/getCurrentCampaignDetails/${campaignId}`);
@@ -66,18 +60,12 @@ const CampaignApi = {
     return api.post("/api/campaignTemplates/wordAI", content);
   },
   /**
-   * Get other campaignMetrics details
-   * @param  {number|boolean} campaignId - check if campaign id
-   * @return {object} - campaignMetrics
+   * Get other campaign stats
+   * @param {number} campaignId
+   * @return {object} Promise
    */
-  getOtherCampaignMetrics(campaignId) {
-    let campaignReportURL;
-    if(campaignId){
-      campaignReportURL = `/api/campaigns/${campaignId}/campaignReport`;
-    } else {
-      campaignReportURL = "/api/campaigns/recentCampaignReport";
-    }
-    return api.get(campaignReportURL);
+  getCampaignReport(campaignId) {
+    return api.get(`/api/campaigns/${campaignId}/campaignReport`);
   },
   /**
    * Get the recent campaign id
@@ -92,13 +80,7 @@ const CampaignApi = {
    * @return {boolean}                   - is available
    */
   getIsExistingCampaign(campaignId) {
-    let campaignReportURL;
-    if(campaignId){
-      campaignReportURL = `/api/campaigns/${campaignId}/doesCampaignExist`;
-    } else {
-      campaignReportURL = "/api/campaigns/hasRecentCampaign";
-    }
-    return api.get(campaignReportURL);
+    return api.get(`/api/campaigns/${campaignId}/doesCampaignExist`);
   },
   /**
    * Get inbox mails

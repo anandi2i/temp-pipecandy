@@ -18,9 +18,7 @@ class PerformanceReport extends React.Component {
 
   componentDidMount() {
     CampaignReportStore.addPerformanceGraphListener(this.onStoreChange);
-    const {campaignId} = this.props;
-    let id = campaignId || CampaignReportStore.getIsExistCampaign();
-    CampaignActions.getCampaignPerformanceGraph(id);
+    CampaignActions.getCampaignPerformanceGraph(this.props.campaignId);
   }
 
   componentWillUnmount() {

@@ -66,14 +66,6 @@ const CampaignActions = {
     });
   },
   /**
-   * To get the recent campaignMetrics
-   */
-  getRecentCampaignMetrics() {
-    AppDispatcher.handleAction({
-      actionType: Constants.GET_RECENT_CAMPAIGN_METRICS
-    });
-  },
-  /**
    * To get the current campaignMetrics
    */
   getCurrentCampaignMetrics(campaignId) {
@@ -129,11 +121,12 @@ const CampaignActions = {
     });
   },
   /**
-   * To get campaign other stats metrics
+   * Get other campaign stats
+   * @param  {number} campaignId
    */
-  getOtherStatsMetrics(campaignId) {
+  getCampaignReport(campaignId) {
     AppDispatcher.handleAction({
-      actionType: Constants.GET_OTHER_STATS_METRICS,
+      actionType: Constants.CAMPAIGN_REPORT,
       id : campaignId
     });
   },

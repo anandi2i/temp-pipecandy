@@ -555,17 +555,6 @@ AppDispatcher.register(function(payload) {
         browserHistory.push("/campaign");
       });
       break;
-    case Constants.GET_RECENT_CAMPAIGN_METRICS:
-      CampaignApi.getRecentCampaignMetrics().then((response) => {
-        _campaignMetrics = response.data.recentCampaignMetrics;
-        _error = "";
-        CampaignStore.performanceStoreChange();
-      }, (err) => {
-        _campaignMetrics = [];
-        _error = HandleError.evaluateError(err);
-        CampaignStore.performanceStoreChange();
-      });
-      break;
     case Constants.GET_CURRENT_CAMPAIGN_METRICS:
       CampaignApi.getCurrentCampaignMetrics(action.campaignId)
       .then((response) => {

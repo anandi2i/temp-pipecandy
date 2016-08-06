@@ -138,8 +138,8 @@ const CampaignReportStore = _.extend({}, EventEmitter.prototype, {
 AppDispatcher.register(function(payload) {
   let action = payload.action;
   switch (action.actionType) {
-    case Constants.GET_OTHER_STATS_METRICS:
-      CampaignApi.getOtherCampaignMetrics(action.id).then((response) => {
+    case Constants.CAMPAIGN_REPORT:
+      CampaignApi.getCampaignReport(action.id).then((response) => {
         _error = "";
         _otherCampaignMetrics = response.data;
         CampaignReportStore.emitOtherStatsChange();
