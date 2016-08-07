@@ -2,8 +2,6 @@
 #dev.sh
 #author: dinesh.r@ideas2it.com
 
-export NODE_ENV="dev"
-
 #Get the branch name from user
 read -p "Which branch to pull (dev/master/demo)? " branch_name
 

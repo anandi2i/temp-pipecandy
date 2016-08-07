@@ -54,11 +54,8 @@
       "client_secret": "-9z-cU18aImvflghMHWaz4oW",
       "redirect_uris": [
         "http://uat.pipecandy.com/auth/google/callback",
-        "http://localhost/auth/google/callback",
         "http://localhost:3001/auth/google/callback",
-        "http://pipecandy.com/auth/google/callback",
-        "http://localhost:3000/auth/google/callback",
-        "http://dev.pipecandy.com/auth/google/callback"
+        "http://localhost:3000/auth/google/callback"
       ]
     }
   }
