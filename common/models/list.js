@@ -144,14 +144,23 @@ module.exports = function(List) {
    * @author Ramanavel Selvaraju
    */
   List.peopleWithFields = (ctx, list, peopleWithFieldsCB) => {
-    async.waterfall([
-      async.apply(getFieldsForList, ctx, list),
-      generatePeopleWithFields
-    ], (asyncErr, result) => {
+    let userId = ctx.req.accessToken.userId;
+    async.autoInject({
+      fields: [async.apply(getFieldsForList, userId, list)],
+      unsubscribedPersons: [async.apply(getUnsubscribedPersons, userId)],
+      peopleWithFields: (fields, unsubscribedPersons, callback) => {
+        let listWithFieldsForIds = fields[0];
+        let lists = fields[1];
+        generatePeopleWithFields(listWithFieldsForIds, lists,
+            unsubscribedPersons, (error, peopleWithField) => {
+          callback(error, peopleWithField);
+        });
+      }
+    }, (asyncErr, result) => {
       if(asyncErr){
         peopleWithFieldsCB(asyncErr);
       }
-      peopleWithFieldsCB(null, result);
+      peopleWithFieldsCB(null, result.peopleWithFields);
     });
   };
 
@@ -164,13 +173,13 @@ module.exports = function(List) {
    * @return {[listWithFields, lists]}
    * @author Aswin Raj A
    */
-  const getFieldsForList = (ctx, list, getFieldsForListCB) => {
+  const getFieldsForList = (userId, list, getFieldsForListCB) => {
     let listWithFieldsForIds = [];
     if(lodash.isEmpty(list.ids)){
       return getFieldsForListCB("No Lists selected");
     }
     List.find({
-       where: {id: {inq: list.ids}, createdBy: ctx.req.accessToken.userId}
+       where: {id: {inq: list.ids}, createdBy: userId}
      }, (ListErr, lists) => {
        if(ListErr || lodash.isEmpty(lists)) {
          const errParam = ListErr || new Error("No list for list id");
@@ -206,10 +215,10 @@ module.exports = function(List) {
    * @param  {[lists]} lists
    * @param  {[function]} generateCB
    * @return {[peopleWithFieldsForIds]}
-   * @author Aswin Raj A
+   * @author Aswin Raj A, Syed Sulaiman M(Modified)
    */
   const generatePeopleWithFields = (listWithFieldsForIds, lists,
-    generateCB) => {
+      unsubscribedPersons, generateCB) => {
     let peopleWithFieldsForIds = [];
       async.eachSeries(listWithFieldsForIds, (listWithFields, listCB) => {
       List.findById(listWithFields.id, (listFindErr, list) => {
@@ -218,17 +227,16 @@ module.exports = function(List) {
           error: listFindErr, stack: listFindErr.stack});
           generateCB(listFindErr);
         }
-        async.waterfall([
-          async.apply(getPeopleForList, list),
-          getFieldsForPeople
-        ], (asyncErr, peopleObj) => {
-          if(asyncErr){
-            return listCB(asyncErr);
-          }
-          listWithFields = JSON.parse(JSON.stringify(listWithFields));
-          listWithFields.people = peopleObj;
-          peopleWithFieldsForIds.push(listWithFields);
-          return listCB(null);
+        getPeopleForList(list, (listErr, people, list) => {
+          if(listErr) return listCB(listErr);
+          getFieldsForPeople(people, list, unsubscribedPersons,
+              (peopleErr, peopleObj) => {
+            if(peopleErr) return listCB(peopleErr);
+            listWithFields = JSON.parse(JSON.stringify(listWithFields));
+            listWithFields.people = peopleObj;
+            peopleWithFieldsForIds.push(listWithFields);
+            return listCB(null);
+          });
         });
       });
     }, (asyncErr) => {
@@ -267,10 +275,13 @@ module.exports = function(List) {
    * @return {[peopleObj]}
    * @author Aswin Raj A
    */
-  const getFieldsForPeople = (people, list, getFieldsForPeopleCB) => {
+  const getFieldsForPeople = (people, list, unsubscribedPersons,
+      getFieldsForPeopleCB) => {
     const listId = list.id;
     let peopleObj = [];
     async.eachSeries(people, (person, personCB) => {
+      let isUnsubscribed =
+        lodash.find(unsubscribedPersons, {"personId": person.id});
       List.app.models.additionalFieldValue.find({
         where: {and: [{personId: person.id}, {listId: listId}]}
       }, (fieldsFindErr, fields) => {
@@ -282,6 +293,7 @@ module.exports = function(List) {
           personCB(fieldsFindErr);
         }
         person = JSON.parse(JSON.stringify(person));
+        person.isUnsubscribed = isUnsubscribed ? true : false;
         person.fieldValues = fields;
         peopleObj.push(person);
         personCB(null);
@@ -294,6 +306,27 @@ module.exports = function(List) {
     });
   };
 
+  /**
+   * Method to get Unsubscribed Persons by UserId
+   * @param  {Number}   userId   [description]
+   * @param  {Function} callback [description]
+   * @return {[Unsubscribe]} List of Unsubscribe
+   * @author Syed Sulaiman M
+   */
+  const getUnsubscribedPersons = (userId, callback) => {
+    let userIds = [userId];
+    List.app.models.unsubscribe.getByUserIds(userIds,
+        (unsubscribeErr, unsubscribes) => {
+      if(unsubscribeErr){
+        logger.error("Error while finding Unsubscribed Persons", {
+          error: unsubscribeErr, stack: unsubscribeErr.stack,
+          input: {userIds: userIds}
+        });
+        return callback(unsubscribeErr);
+      }
+      return callback(null, unsubscribes);
+    });
+  };
 
   List.remoteMethod(
     "savePersonWithFields",
