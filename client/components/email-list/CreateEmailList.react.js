@@ -69,8 +69,7 @@ class EmailList extends React.Component {
           </div>
           <div className="create-container m-t-45">
             <h3>
-              Name your new list (or) select an existing list by typing the
-              list name to update it
+              Name your new list
             </h3>
             <div className="row list-container">
               <form id="createEmailList" onSubmit={this.onSubmit}>
