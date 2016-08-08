@@ -8,7 +8,7 @@ const validatorObj = {
   firstName: Joi.string().alphanum().required().label("first name").options({
     language: {
       any: {
-        empty: "!! Oops. Seems like you forgot to fill your first name!",
+        empty: "!! Oops. It seems like you forgot to fill your first name!",
       },
       string: {
         alphanum: "!! Hmm. That doesn\'t seem like a valid first name, "+
@@ -19,7 +19,7 @@ const validatorObj = {
   email: Joi.string().required().email().label("Email").options({
     language: {
       any: {
-        empty: "!! Oops. Seems like you forgot to fill your email!",
+        empty: "!! Oops. It seems like you forgot to fill your email!",
       },
       string: {
         email: "!! Hmm. That doesn\'t seem like a valid email address, "+
@@ -31,7 +31,7 @@ const validatorObj = {
     .label("Password").options({
     language: {
       any: {
-        empty: "!! Oops. Seems like you forgot to fill your password!",
+        empty: "!! Oops. It seems like you forgot to fill your password!",
       }
     }
   }),
@@ -39,14 +39,14 @@ const validatorObj = {
     .label("Password").options({
     language: {
       any: {
-        empty: "!! Oops. Seems like you forgot to fill your password!",
+        empty: "!! Oops. It seems like you forgot to fill your password!",
       }
     }
   }),
   lastName: Joi.string().alphanum().label("Last Name").options({
     language: {
       any: {
-        empty: "!! Oops. Seems like you forgot to fill your last name!",
+        empty: "!! Oops. It seems like you forgot to fill your last name!",
       },
       string: {
         alphanum: "!! Hmm. That doesn\'t seem like a valid last name, "+
@@ -57,7 +57,7 @@ const validatorObj = {
   campaignName: Joi.string().regex(namePattern).label("Campaign Name").options({
     language: {
       any: {
-        empty: "!! Oops. Seems like you forgot to fill your campaign name!",
+        empty: "!! Oops. It seems like you forgot to fill your campaign name!",
       },
       string: {
         regex: {
@@ -70,7 +70,7 @@ const validatorObj = {
   listName: Joi.string().regex(namePattern).label("List Name").options({
     language: {
       any: {
-        empty: "!! Oops. Seems like you forgot to fill your list name!",
+        empty: "!! Oops. It seems like you forgot to fill your list name!",
       },
       string: {
         regex: {
@@ -83,7 +83,7 @@ const validatorObj = {
   fieldName: Joi.string().regex(fieldNamePattern).label("Field Name").options({
     language: {
       any: {
-        empty: "!! Oops. Seems like you forgot to fill the field name!",
+        empty: "!! Oops. It seems like you forgot to fill the field name!",
       },
       string: {
         regex: {

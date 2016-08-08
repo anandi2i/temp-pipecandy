@@ -456,8 +456,9 @@ class ListView extends React.Component {
             </div>
             <div className="modal-footer">
               <div className="btn-container">
-                <input type="button" onClick={() => this.addField(true)} className="btn red modal-action" value="Add Another" />
                 <input type="button" onClick={() => this.addField(false)} className="btn blue modal-action" value="Add" />
+                <input type="button" onClick={() => this.addField(true)} className="btn red modal-action p-1-btn"
+                  value="Save & Add Another" />
               </div>
             </div>
           </div>
