@@ -135,7 +135,8 @@ class Menu extends React.Component {
             <li>
               <a onClick={this.openNotification}>
                 <i className="mdi mdi-bell-outline notification"></i>
-                <span className="notification-count">3</span>
+                {/*<span className="notification-count">
+                  Notification Count</span> */}
               </a>
             </li>
             {
@@ -191,61 +192,22 @@ class Notification extends React.Component {
           <div className="head">
             <span className="left">
               <i className="mdi mdi-bell"></i>
-              <span className="notify-titl">3 New Notification</ span>
+              <span className="notify-titl">Notifications (Coming Soon!)</ span>
             </span>
             <span className="right">
               <i className="mdi mdi-close" onClick={() => this.closeModal()}></i>
             </span>
           </div>
-          <div className="notify-content">
+          {/*<div className="notify-content">
             <div className="notify new">
-              <div className="title">Common Connections:</div>
-              <div className="content">
-                You had mailed John Smith, 5 days ago. He has connected with
-                Dan Harper, your connection on LinkedIn. <br/>
-                Jason Drucker of Net Media is now connected to Paul Allen whom
-                you emailed one month ago.
-              </div>
-            </div>
-            <div className="notify new">
-              <div className="title">Job Change:</div>
-              <div className="content">
-                You emailed Mike Pearson a month ago. He has just joined a new
-                job. Congratulate him.
-              </div>
-            </div>
-            <div className="notify new">
-              <div className="title">Job Postings:</div>
-              <div className="content">
-                You sent emails to Node.js users. Adcom media is on of them &
-                has 20 Node.js openings
-              </div>
+              <div className="title"></div>
+              <div className="content"></div>
             </div>
             <div className="notify old">
-              <div className="title">Common Connections:</div>
-              <div className="content">
-                You had mailed John Smith, 5 days ago. He has connected with Dan
-                Harper, your connection on LinkedIn.
-                <br/><br/>
-                Jason Drucker of Net Media is now connected to Paul Allen whom
-                you emailed one month ago.
-              </div>
+              <div className="title"></div>
+              <div className="content"></div>
             </div>
-            <div className="notify old">
-              <div className="title">Job Change:</div>
-              <div className="content">
-                You emailed Mike Pearson a month ago. He has just joined a new
-                job. Congratulate him.
-              </div>
-            </div>
-            <div className="notify old">
-              <div className="title">Job Postings:</div>
-              <div className="content">
-                You sent emails to Node.js users. Adcom media is on of them &
-                has 20 Node.js openings
-              </div>
-            </div>
-          </div>
+          </div>*/}
         </div>
       </div>
     );
