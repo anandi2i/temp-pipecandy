@@ -6,7 +6,7 @@ var striptags = require("striptags");
 var googleTokenHandler = require("../../server/utils/googleTokenHandler");
 var async = require("async");
 var lodash = require("lodash");
-var config = require("../../server/config.json");
+var app = require("../../server/server.js");
 var statusCodes = require("../../server/utils/status-codes");
 var constants = require("../../server/utils/constants");
 require("console-stamp")(console, {pattern : constants.default.TIME_FORMAT});
@@ -426,9 +426,9 @@ function encodeSubject(subject) {
  * @return void
  */
 function buildEmail(emailQueue, mailContent, buildEmailCB) {
-  var clientSecret = config.googleCredentials.installed.client_secret;
-  var clientId = config.googleCredentials.installed.client_id;
-  var redirectUrl = config.googleCredentials.installed.redirect_uris[0];
+  var clientSecret = app.get("googleCredentials").installed.client_secret;
+  var clientId = app.get("googleCredentials").installed.client_id;
+  var redirectUrl = app.get("googleCredentials").installed.redirect_uris[0];
 
   var auth = new googleAuth();
   var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);

@@ -2,10 +2,10 @@
 
 var refresh = require("passport-oauth2-refresh");
 var googleStrategy = require("passport-google-oauth2").Strategy;
-var config = require("../../server/config.json");
+var app = require("../../server/server.js");
 
-const clientSecret = config.googleCredentials.installed.client_secret;
-const clientId = config.googleCredentials.installed.client_id;
+const clientSecret = app.get("googleCredentials").installed.client_secret;
+const clientId = app.get("googleCredentials").installed.client_id;
 
 const updateAccessToken = (userIdentity, callback) => {
     let strategy = new googleStrategy({

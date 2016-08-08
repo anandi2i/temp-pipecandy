@@ -7,7 +7,7 @@ import lodash from "lodash";
 import logger from "../../server/log";
 import publicEmailProviders from "../../server/utils/public-email-providers";
 import constants from "../../server/utils/constants";
-import config from "../../server/config.json";
+import app from "../../server/server.js";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 const emptyCount = 0;
 const percent = 100;
@@ -99,8 +99,8 @@ module.exports = function(user) {
       user: user,
       fname: user.firstName,
       text: "{href}",
-      host: config.emailHost,
-      port: config.emailPort
+      host: app.get("emailHost"),
+      port: app.get("emailPort")
     };
 
     user.verify(options, function(err, response, next) {
@@ -209,7 +209,7 @@ module.exports = function(user) {
 
   //send password reset link when password reset requested
   user.on("resetPasswordRequest", function(info) {
-    var url = `http://${config.emailHost}:${config.emailPort}/#/reset-password`;
+    var url = `http://${app.get("emailHost")}:${app.get("emailPort")}/#/reset-password`;
     var html = "Click <a href='" + url + "/" +
       info.accessToken.id + "'>here</a> to reset your password";
     user.app.models.Email.send({

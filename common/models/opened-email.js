@@ -1,7 +1,7 @@
 import async from "async";
 import lodash from "lodash";
 import logger from "../../server/log";
-import config from "../../server/config.json";
+import app from "../../server/server.js";
 import constants from "../../server/utils/constants";
 
 module.exports = function(OpenedEmail) {
@@ -29,7 +29,7 @@ module.exports = function(OpenedEmail) {
   OpenedEmail.trackEmail = (campaignId, personId, res, req) => {
     const referer = req.headers.referer;
     if(referer
-      && referer.indexOf(config.appHost) > constants.EMPTYARRAYINDEX) {
+      && referer.indexOf(app.get("appHost")) > constants.EMPTYARRAYINDEX) {
       return res.redirect("/images/1x1.png");
     }
     let clientIp =
@@ -106,7 +106,7 @@ module.exports = function(OpenedEmail) {
   OpenedEmail.trackFollowUp = (campaignId, personId, followUpId, res, req) => {
     const referer = req.headers.referer;
     if(referer
-      && referer.indexOf(config.appHost) > constants.EMPTYARRAYINDEX) {
+      && referer.indexOf(app.get("appHost")) > constants.EMPTYARRAYINDEX) {
       return res.redirect("/images/1x1.png");
     }
     let clientIp =

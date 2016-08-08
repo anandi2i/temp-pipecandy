@@ -3,7 +3,7 @@
 import logger from "../../server/log";
 import lodash from "lodash";
 import async from "async";
-import config from "../../server/config.json";
+import app from "../../server/server.js";
 import constants from "../../server/utils/constants";
 
 module.exports = function(EmailLink) {
@@ -75,20 +75,20 @@ module.exports = function(EmailLink) {
         logger.error("Finding an Link Obj Error:", {linkId: linkId,
           personId:personId, error: linkFindErr,
           stack: linkFindErr.stack});
-        return res.redirect(config.redirectURL);
+        return res.redirect(app.get("redirectURL"));
       }
       // If the request is not from www.pipecandy.com alone process it, else just
       // redirect it
       const referer = req.headers.referer;
       if(referer
-        && referer.indexOf(config.appHost) > constants.EMPTYARRAYINDEX) {
+        && referer.indexOf(app.get("appHost")) > constants.EMPTYARRAYINDEX) {
         res.redirect(link.linkurl);
       } else {
         updateMetrics(reqParams, link, (updateMetricsErr) => {
           if(updateMetricsErr) {
             logger.error("Update Metrics Error:", {error: updateMetricsErr,
               stack: updateMetricsErr.stack});
-            return res.redirect(config.redirectURL);
+            return res.redirect(app.get("redirectURL"));
           }
           res.redirect(link.linkurl);
         });

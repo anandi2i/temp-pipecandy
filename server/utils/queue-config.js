@@ -1,17 +1,17 @@
-var config = require("../../server/config.json");
+var app = require("../../server/server.js");
 
 /**
  * Queue Configuration File
  * @author Syed Sulaiman M
  */
-const accessKeyId = config.queue.config.accessKeyId;
-const secretAccessKey = config.queue.config.secretAccessKey;
-const region = config.queue.config.region;
+const accessKeyId = app.get("queue").config.accessKeyId;
+const secretAccessKey = app.get("queue").config.secretAccessKey;
+const region = app.get("queue").config.region;
 
 const queueUrl = {
-  mailNLPIdentification: config.queue.url.intelligenceIn,
-  mailNLPDetermined: config.queue.url.intelligenceOut,
-  mailAssemblerQueue: config.queue.url.emailAssembler
+  mailNLPIdentification: app.get("queue").url.intelligenceIn,
+  mailNLPDetermined: app.get("queue").url.intelligenceOut,
+  mailAssemblerQueue: app.get("queue").url.emailAssembler
 };
 
 module.exports = {

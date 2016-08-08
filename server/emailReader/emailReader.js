@@ -1,12 +1,12 @@
 "use strict";
 
 var async = require("async");
-var config = require("../../server/config.json");
+var app = require("../../server/server.js");
 var constants = require("../../server/utils/constants");
 var google = require("googleapis");
 var lodash = require("lodash");
 var emailReaderHelper = require("../../server/emailReader/emailReaderHelper");
-require("console-stamp")(console, 
+require("console-stamp")(console,
   {pattern : constants.default.TIME_FORMAT});
 
 const appConfig = process.cwd() + "/server/server.js";
@@ -16,9 +16,9 @@ const gmail = google.gmail("v1");
 
 let App = dataSource.models;
 
-const clientSecret = config.googleCredentials.installed.client_secret;
-const clientId = config.googleCredentials.installed.client_id;
-const redirectUrl = config.googleCredentials.installed.redirect_uris[0];
+const clientSecret = app.get("googleCredentials").installed.client_secret;
+const clientId = app.get("googleCredentials").installed.client_id;
+const redirectUrl = app.get("googleCredentials").installed.redirect_uris[0];
 
 /**
  * Workflow initiator to Read User Mail Box

@@ -10,13 +10,13 @@ import moment from "moment-timezone";
 import campaignMetricArray from "../../server/utils/campaign-metric-fields";
 import statusCodes from "../../server/utils/status-codes";
 import queueUtil from "../../server/emailReader/mailEnqueue";
-import config from "../../server/config.json";
+import app from "../../server/server.js";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 import striptags from "striptags";
 import uuid from "node-uuid";
 
 //const systemTimeZone = moment().format("Z");
-const serverUrl = config.appUrl;
+const serverUrl = app.get("appUrl");
 
 module.exports = function(Campaign) {
 
