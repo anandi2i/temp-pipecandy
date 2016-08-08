@@ -1399,7 +1399,7 @@ module.exports = function(Campaign) {
             stack: campaignErr ? campaignErr.stack : ""
         });
         const errorMessage = errorMessages.SERVER_ERROR;
-        hasRecentCampaignCB(errorMessage);
+        return hasRecentCampaignCB(errorMessage);
       }
       if(lodash.isEmpty(campaigns)){
         return hasRecentCampaignCB(null, false);
@@ -1851,7 +1851,7 @@ module.exports = function(Campaign) {
   Campaign.campaignReport = (ctx, id, callback) => {
     let campaignReport = {
       sentEmails: 0,
-      warmResponses: 0,
+      responses: 0,
       deliveredEmails: 0,
       followUpsSent: 0
     };
@@ -1877,8 +1877,8 @@ module.exports = function(Campaign) {
           campaignReport.sentEmails = result.metric.sentEmails;
           campaignReport.deliveredEmails = result.metric.sentEmails
             - result.metric.bounced;
-          campaignReport.warmResponses = result.metric.actionable
-            + result.metric.nurture;
+          campaignReport.responses = result.metric.actionable
+            + result.metric.nurture + result.metric.negative;
           campaignReport.followUpsSent = result.followup.length;
         }
         return callback(null, campaignReport);

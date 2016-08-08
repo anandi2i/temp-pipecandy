@@ -66,8 +66,8 @@ class OtherPerformanceStatus extends React.Component {
         "class": ""
       },
       {
-        "title": "warm responses",
-        "percentage": otherStatsMetrics.warmResponses,
+        "title": "responses",
+        "percentage": otherStatsMetrics.responses,
         "class": ""
       },
       {

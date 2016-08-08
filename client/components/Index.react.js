@@ -199,7 +199,7 @@ class Index extends React.Component {
                   <div className="col s12 m3 s3">
                     <div className="other-status">
                       <div className="container">
-                        <div className="head blur-black">warm responses</div>
+                        <div className="head blur-black">responses</div>
                         <div className="value">
                           <div className="blur-black">100</div>
                         </div>
