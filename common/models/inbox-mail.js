@@ -182,6 +182,63 @@ module.exports = function(InboxMail) {
   };
 
   InboxMail.remoteMethod(
+    "inboxMailsCount", {
+      description: "Get Inbox Mails Count",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "campaignId", type: "number"}
+      ],
+      returns: {arg: "Object", type: "Object", root: true},
+      http: {verb: "get", path: "/campaign/:campaignId/inboxMailsCount"}
+    }
+  );
+  /**
+   * Method to return inbox mails count
+   * @param  {Object}   ctx
+   * @param  {Number}   campaignId
+   * @param  {Function} callback
+   * @return {[InboxMailCount]} Count of all InboxMail classes
+   * @author Naveen Kumar
+   */
+  InboxMail.inboxMailsCount = (ctx, campaignId, callback) => {
+    let responseCount = {
+      bounced: constants.ZERO,
+      outOfOffice: constants.ZERO,
+      actionable: constants.ZERO,
+      nurture: constants.ZERO,
+      negative: constants.ZERO,
+      all: constants.ZERO
+    };
+    InboxMail.find({
+      where: {
+        and: [
+          {campaignId: campaignId},
+          {isMailReceived: true}
+        ]
+      },
+    }, (inboxMailsErr, inboxMails) => {
+      if (inboxMailsErr) {
+        logger.error("Error finding InboxMail",
+          {error: inboxMailErr, stack: inboxMailErr.stack, input:
+          {campaignId:campaignId}});
+        return callback(errorMessages.SERVER_ERROR);
+      }
+      let countSplit = lodash.countBy(inboxMails, "class");
+      lodash.forOwn(countSplit, (value, key) => {
+        if (key) {
+          let className = getColumnNameFromClassification(key);
+          if(className) {
+            responseCount[className] = value;
+          }
+        }
+      });
+      responseCount.all = inboxMails.length;
+      return callback(null, responseCount);
+    });
+  };
+
+
+  InboxMail.remoteMethod(
     "updateClassification", {
       description: "Update Inbox Mails Classification",
       accepts: [

@@ -74,6 +74,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "inboxMails"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "inboxMailsCount"
     }
   ],
   "methods": {}
