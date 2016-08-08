@@ -169,7 +169,7 @@ class CampaignSentbox extends React.Component {
                 const scheduledAt = moment(sentMail.sentDate)
                   .format("MMM Do YY, h:mm a");
                 return (
-                  <div key={key} className="camp-repo-grid waves-effect animated flipInX">
+                  <div key={key} className="camp-repo-grid waves-effect">
                     <div className="row">
                       <div className="content">
                         <input type="checkbox" className="filled-in"

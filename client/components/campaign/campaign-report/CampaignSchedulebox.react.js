@@ -222,7 +222,7 @@ class CampaignSchedulebox extends React.Component {
                   .format("MMM Do YY, h:mm a");
                   const id = scheduled.id;
                 return (
-                  <div key={key} className="camp-repo-grid waves-effect animated flipInX">
+                  <div key={key} className="camp-repo-grid waves-effect">
                     <div className="row">
                       <div className="content">
                         <input type="checkbox" className="filled-in"

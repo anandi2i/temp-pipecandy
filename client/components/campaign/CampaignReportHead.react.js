@@ -45,7 +45,7 @@ class CampaignReportHead extends React.Component {
         {
           !_.isEmpty(campaignDetails)
             ?
-            <div className="row sub-nav dashboard-head animated fadeIn">
+            <div className="row sub-nav dashboard-head">
               <div className="head">{campaignDetails.campaignName}</div>
               <div className="head campaign-detail-section">
                 <ul className="separator">

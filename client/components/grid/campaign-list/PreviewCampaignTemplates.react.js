@@ -84,7 +84,7 @@ class PreviewCampaignTemplates extends React.Component {
                     ?
                       previewTemplate.templates.map((val, key) => {
                         return (
-                          <div className="template-content preview-mail-container animated flipInX" key={key}>
+                          <div className="template-content preview-mail-container" key={key}>
                             { key
                               ? <div className="col s12 head">
                                   Follow up {key}

@@ -8,6 +8,17 @@ body {
 a {
   cursor: pointer;
 }
+.top-notification {
+  position: absolute;
+  text-align: center;
+  top: 85px;
+  width: 100%;
+  .err-txt {
+    background-color: $err-bg;
+    border-radius: 3px;
+    padding: 3px 5px;
+  }
+}
 %percent {
   &::after {
     content: '%';

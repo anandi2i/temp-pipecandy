@@ -81,7 +81,7 @@ class Index extends React.Component {
         <div>
           <div>
             <div className="container">
-              <div className="row sub-nav dashboard-head animated fadeIn no-brdr">
+              <div className="row sub-nav dashboard-head no-brdr">
                 <div className="head blur-black">Funded Startups</div>
                 <div className="head campaign-detail-section">
                   <ul className="separator">

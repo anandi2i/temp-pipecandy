@@ -3,33 +3,48 @@
  * @type {object} error messages
  */
 export const ErrorMessages = {
-  "LOGIN_FAILED": "It looks like you've got it wrong. " +
-    "Could you try again, please?",
-  "ValidationError": "Oh, no! Somebody had registered already " +
-    "with that email id. If that's you try 'Forgot Password'!",
-  "InvalidCorporateEmail": "Please provide valid corporate email",
-  "InvalidPassChange": "Please enter valid password",
-  "ErrorInUpdatePass": "Error in update password",
-  "ErrorInGettingUser": "Error in getting user",
-  "LOGIN_FAILED_EMAIL_NOT_VERIFIED": "Please verify your email address",
-  "NetworkError": "The server seems to be down",
-  "MiscellaneousError": "something went wrong. could you please try again",
-  "EMAIL_NOT_FOUND": "The requested email doesn't exist",
-  "FileUploadInvalidEmail": "One or more rows doesn't have valid email Id",
+  "LOGIN_FAILED": "It looks like you've got it wrong. Could you try again," +
+    "please?",
+  "ValidationError": "Oh, no! Somebody had registered already with that email" +
+    " id. If that's you try 'Forgot Password'!",
+  "InvalidCorporateEmail": "That looks like a personal email id. Could you " +
+    "please try a work email id?",
+  "InvalidPassChange": "Oops. Your email or password is wrong!",
+  "ErrorInUpdatePass": "I’m sorry. I don’t seem to find that password!",
+  "ErrorInGettingUser": "",
+  "LOGIN_FAILED_EMAIL_NOT_VERIFIED": "I’ve just you an email confirmation. " +
+    "Click the link in it and confirm please!",
+  "NetworkError": "My bad. The server seems to be down.",
+  "MiscellaneousError": "I got confused for a moment. Could you please" +
+    " try again?",
+  "EMAIL_NOT_FOUND": "Oops. Your email or password is wrong!",
+  "FileUploadInvalidEmail": "It seems like there are some email ids " +
+    "missing for one or more recipients. Could you fix them?",
   "FileUploadInvalidHeader": "File Header is not in valid format",
-  "FileUploadFnameEmpty": "One or more rows have empty first name",
-  "ExistsCampaign": "Campaign name already exist",
-  "LIST_EXISTS": "List name already exist",
-  "CAMPAIGN_EXISTS": "Campaign name already exist",
-  "DeletePerson" : "Please select a Subscriber to Delete",
-  "MinFileSize": "Select file size more the 10kb",
-  "PasswordFields": "Please enter both password fields",
-  "InValidFileType": "Please upload file of type csv",
-  "SamePasswordUpdate": "Please update new different password",
-  "EmptyEmailList": "Email list should not be empty",
-  "SmartTagIssues": "Fix all smart tag issues",
-  "INVALID_FIELD_NAME": "Invalid Field Name",
-  "PERSON_EXISTS_IN_LIST" : "Person already exist in the current list",
+  "FileUploadFnameEmpty": "It seems like some recipients’ first names are " +
+    "missing. Could you fix them?",
+  "ExistsCampaign": "That campaign name already exists. Try another!",
+  "LIST_EXISTS": "That list name already exists. Try another!",
+  "CAMPAIGN_EXISTS": "That campaign name already exists. Try another!",
+  "DeletePerson" : "By default the delete option should be disabled and can " +
+    "be enabled only after at least one recipient is selected",
+  "MinFileSize": "Instead of specifying filesize why don’t you specify aspect" +
+    " ratio? I’ve never seen anyone giving this kind of spec for photos",
+  "PasswordFields": "Please fill in your old/new password!",
+  "InValidFileType": "Uh oh! I can accept only csv formats for now.",
+  "SamePasswordUpdate": "That password has been used in the past." +
+    " Try a new one!",
+  "EmptyEmailList": "That seems like an empty list. Add some " +
+    "recipients please!",
+  "SmartTagIssues": "when the user clicks update or update to all without " +
+    "fixing the issue) (In a hurry? You haven’t fixed the issues with " +
+    "some smart tags yet!",
+  "INVALID_FIELD_NAME": "Numeric, special char start letter not allowed) - " +
+    "(Fields names can’t start with numbers or special characters. " +
+    "House Rules!",
+  "PERSON_EXISTS_IN_LIST" : "Mail id non unique - job to bring up " +
+    "inconsistencies - same email id etc.) - ( I find this email id already " +
+    "in this list -- Skip / Overwrite",
   "INVALID_DATA": "Invalid data!"
 };
 
@@ -38,13 +53,13 @@ export const ErrorMessages = {
  * @type {object} success messages
  */
 export const SuccessMessages = {
-  "successUpdate": "Update successfully",
-  "successSubscribeUpdate": "Subscriber details updated successfully",
-  "successUpload": "The file has been uploaded successfully",
-  "successSubscribe": "Subscriber details saved successfully",
-  "successDelete": "Deleted successfully",
-  "successSelectTemplate": "has been selected",
-  "successAddAdditionalField": "Additional field added successfully"
+  "successUpdate": "Done. That’s taken care of!",
+  "successSubscribeUpdate": "Recipients’ details updated. Success!",
+  "successUpload": "The file has been uploaded. Yeehaw!",
+  "successSubscribe": "Recipient details have been saved!",
+  "successDelete": "",
+  "successSelectTemplate": "You just selected the ‘...’ template!",
+  "successAddAdditionalField": ""
 };
 
 /**
@@ -52,12 +67,12 @@ export const SuccessMessages = {
  * @type {object} alert messages
  */
 export const resultsEmpty = {
-  "allLists": "Oops! You don't seem to have any email list here. " +
-    "Do you want to add a new list?",
+  "allLists": "Dang! You don't seem to have any email list here. Do you " +
+    "want to add a new list?",
   "allListsOnSearch": "It's never easy to say 'No!' when you ask for " +
     "something, but I can't find that list!",
-  "allCampaigns": "Oops! You don't seem to have any campaigns here. " +
-    "Do you want to add a new campaign?",
+  "allCampaigns": "Dang! You don't seem to have any campaigns here. Do you " +
+    "want to add a new campaign?",
   "allCampaignsOnSearch": "I don't seem to find any campaign by that name. " +
     "Could you double-check for me, please?"
 };
