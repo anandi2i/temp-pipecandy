@@ -255,7 +255,7 @@ class Profile extends React.Component {
               </div>
             </div>
             <div className="row r-btn-container m-0">
-              <Link className="btn red p-1-btn" to="/"> Cancel </Link>
+              <Link className="btn red" to="/"> Cancel </Link>
               <input type="submit" className="btn blue" value="Save Changes" />
             </div>
           </form>

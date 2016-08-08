@@ -677,6 +677,12 @@ a {
 .r-btn-container {
   text-align: right;
   width: 100%;
+  .btn {
+    margin-right: 20px;
+    &:last-child {
+      margin-right: 0;
+    }
+  }
 }
 .add-new-field {
   color: $blue-clr;
@@ -1617,6 +1623,14 @@ $lines-to-show: 8;
     top: 7px;
   }
 }
+.modal-footer {
+  .btn-container {
+    float: right;
+    .btn {
+      margin-right: 20px;
+    }
+  }
+}
 /*********************
   Default Spacing
 **********************/
@@ -1990,7 +2004,7 @@ $lines-to-show: 8;
       text-align: center;
     }
     .email-list-action-btn {
-      .p-1-btn {
+      .btn {
         margin-bottom: 10px;
         margin-right: 0;
         width: 90%;
@@ -2017,6 +2031,15 @@ $lines-to-show: 8;
   .modal {
     &.min-modal {
       width: 90%;
+    }
+  }
+  .modal-footer {
+    .btn-container {
+      padding-left: 10%;
+      width: 100%;
+      .btn {
+        margin-right: 0;
+      }
     }
   }
   .draft-container {

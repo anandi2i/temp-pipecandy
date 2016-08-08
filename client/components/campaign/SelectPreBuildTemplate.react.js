@@ -102,9 +102,11 @@ class SelectPreBuildTemplate extends React.Component {
                 <div dangerouslySetInnerHTML={{__html: activeTemplateContent}} />
               </div>
             </div>
-            <div className="modal-footer r-btn-container">
-              <input type="button" value="Close"
-                className="btn red modal-action modal-close p-1-btn" />
+            <div className="modal-footer">
+              <div className="btn-container">
+                <input type="button" value="Close"
+                  className="btn red modal-action modal-close" />
+              </div>
             </div>
           </div>
         : null }

@@ -334,19 +334,21 @@ class CampaignIssuesPreviewPopup extends React.Component {
             </div>
           </div>
         </div>
-        <div className="modal-footer r-btn-container">
-          <input type="button"
-            className="btn red p-1-btn"
-            onClick={this.closeModal}
-            value="Cancel" />
-          <input type="button"
-            className="btn blue modal-action"
-            onClick={this.applySinglePerson}
-            value="Apply" />
-          <input type="button"
-            className="btn blue modal-action"
-            onClick={this.applyAllPerson}
-            value="Apply To All" />
+        <div className="modal-footer">
+          <div className="btn-container">
+            <input type="button"
+              className="btn red"
+              onClick={this.closeModal}
+              value="Cancel" />
+            <input type="button"
+              className="btn blue modal-action"
+              onClick={this.applySinglePerson}
+              value="Apply" />
+            <input type="button"
+              className="btn blue modal-action"
+              onClick={this.applyAllPerson}
+              value="Apply To All" />
+          </div>
         </div>
       </div>
     );

@@ -12,7 +12,6 @@ import EmailListStore from "../../stores/EmailListStore";
 import SubscriberGrid from "../grid/subscriber-list/SubscriberGrid.react";
 import Subscriber from "../grid/subscriber-list/Subscriber.react";
 import CsvFileUploade from "./CsvFileUploade.react";
-import TagMenu from "../TagMenu.react";
 import {ErrorMessages} from "../../utils/UserAlerts";
 
 /**
@@ -46,15 +45,6 @@ class ListView extends React.Component {
       suggestions: [],
       metaFields: [],
       listFields: [],
-      activeTabId: "original",
-      tabs: [{
-        id: "original",
-        name: "ORIGINAL",
-      },
-      {
-        id: "amplified",
-        name: "AMPLIFIED",
-      }],
       uploadCsvDetails: {}
     };
     this.state = this.initialStateValues;
@@ -388,25 +378,12 @@ class ListView extends React.Component {
   }
 
   /**
-   * Handle tabs navigations
-   * Call to load the Inbox mails
-   * @param {string} index
-   */
-  handleClick = (tabId) => {
-    this.setState({
-      activeTabId: tabId
-    }, () => {
-      enabledropDownBtn();
-    });
-  }
-
-  /**
    * render
    * @return {ReactElement} markup
    */
   render() {
     const {fieldName, suggestions, people, uploadCsvDetails, uploadAnimTxt,
-      fieldsName, listFields, peopleDetails, activeTabId, tabs} = this.state;
+      fieldsName, listFields, peopleDetails} = this.state;
     const {listId} = this.props.params;
     const inputProps = {
       id: "fieldName",
@@ -425,37 +402,35 @@ class ListView extends React.Component {
               <Link to="/list">Back to Email Lists</Link>
             </div>
           </div>
-          {/*TODO need to clean - for demo purpose*/}
-          { activeTabId === tabs[0].id
-            ? <div className="row r-btn-container m-lr-0 email-list-action-btn">
-                <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" data-activates="addDropDown">
-                  <i className="left mdi mdi-account-plus"></i> Add
-                  <i className="right mdi mdi-chevron-down"></i>
+          <div className="row r-btn-container m-lr-0 email-list-action-btn">
+            <a className="btn btn-dflt blue sm-icon-btn dropdown-button" data-activates="addDropDown">
+              <i className="left mdi mdi-account-plus"></i> Add
+              <i className="right mdi mdi-chevron-down"></i>
+            </a>
+            <ul id="addDropDown" className="dropdown-content">
+              <li><a onClick={this.addRecipient}>Add Recipient</a></li>
+              <li><a className="modal-trigger" href="#addField" onClick={this.getFields}>Add Field</a></li>
+              {/* Hide build from master list UI
+                <li><Link to="/list/master-list">Build From Master</Link></li>
+              */}
+            </ul>
+            <input id="fileUpload" type="file" className="hide" name="file"
+              accept=".csv" onChange={this.fileChange} />
+            <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.openDialog}>
+              <i className="left mdi mdi-upload"></i> Add From File
+            </a>
+            <a href={`/api/file/list/${this.props.params.listId}/downloadCSV`}
+              className="btn btn-dflt blue sm-icon-btn"
+              download>
+              <i className="left mdi mdi-download"></i> Sample CSV
+            </a>
+            { people && people.length ?
+                <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.deleteSubscriber}>
+                  <i className="left mdi mdi-delete"></i> Delete
                 </a>
-                <ul id="addDropDown" className="dropdown-content">
-                  <li><a onClick={this.addRecipient}>Add Recipient</a></li>
-                  <li><a className="modal-trigger" href="#addField" onClick={this.getFields}>Add Field</a></li>
-                  <li><Link to="/list/master-list">Build From Master</Link></li>
-                </ul>
-                <input id="fileUpload" type="file" className="hide" name="file"
-                  accept=".csv" onChange={this.fileChange} />
-                <a className="btn btn-dflt blue sm-icon-btn p-1-btn dropdown-button" onClick={this.openDialog}>
-                  <i className="left mdi mdi-upload"></i> Add From File
-                </a>
-                <a href={`/api/file/list/${this.props.params.listId}/downloadCSV`}
-                  className="btn btn-dflt blue sm-icon-btn p-1-btn"
-                  download>
-                  <i className="left mdi mdi-download"></i> Sample CSV
-                </a>
-                { people && people.length ?
-                    <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.deleteSubscriber}>
-                      <i className="left mdi mdi-delete"></i> Delete
-                    </a>
-                  : ""
-                }
-              </div>
-            : ""
-          }
+              : ""
+            }
+          </div>
           {/* Add new field starts here */}
           <div id="addField" className="modal modal-fixed-header mini-modal add-list-field">
             <i className="mdi mdi-close modal-close" onClick={this.clearValidations}></i>
@@ -479,9 +454,11 @@ class ListView extends React.Component {
                   }
               </div>
             </div>
-            <div className="modal-footer r-btn-container">
-              <input type="button" onClick={() => this.addField(true)} className="btn red modal-action p-1-btn" value="Add Another" />
-              <input type="button" onClick={() => this.addField(false)} className="btn blue modal-action" value="Add" />
+            <div className="modal-footer">
+              <div className="btn-container">
+                <input type="button" onClick={() => this.addField(true)} className="btn red modal-action" value="Add Another" />
+                <input type="button" onClick={() => this.addField(false)} className="btn blue modal-action" value="Add" />
+              </div>
             </div>
           </div>
           {/* Add new field ends here */}
@@ -490,19 +467,18 @@ class ListView extends React.Component {
           {"I'm loading the new records and it might take some time."}
           You can navigate to other pages while the list gets updated...
         </div>
-        <TagMenu activeTabId={activeTabId} tabs={tabs}
-          handleClick={this.handleClick} mainClass={"container"} />
-        { /*TODO need to clean - for demo purpose*/
-          activeTabId
-            ? people && people.length ?
-                <SubscriberGrid results={people}
-                  fieldsName={fieldsName}
-                  listFields={listFields}
-                  listId={listId}
-                  peopleDetails={peopleDetails}
-                  ref="subscriberGrid" />
-              :
-                !this.state.spinning ?
+        {
+          people && people.length
+            ?
+              <SubscriberGrid results={people}
+                fieldsName={fieldsName}
+                listFields={listFields}
+                listId={listId}
+                peopleDetails={peopleDetails}
+                ref="subscriberGrid" />
+            :
+              !this.state.spinning
+                ?
                   <div className="container">
                     <div className="row card">
                       <div className="col s12 center card-content">
@@ -513,7 +489,6 @@ class ListView extends React.Component {
                     </div>
                   </div>
                 : ""
-            : ""
         }
         {/* Add Recipient Component */}
         <div>

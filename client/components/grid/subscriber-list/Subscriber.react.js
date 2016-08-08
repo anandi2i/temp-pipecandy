@@ -297,12 +297,14 @@ class Subscriber extends React.Component {
           }
           </div>
         </div>
-        <div className="modal-footer r-btn-container">
-          {
-            currentState.id ? null :
-              <input type="button" onClick={() => this.onSubmit(true)} className="btn red modal-action p-1-btn" value="Add Another" />
-          }
-          <input type="button" onClick={() => this.onSubmit(false)} className="btn blue modal-action" value="OK" />
+        <div className="modal-footer">
+          <div className="btn-container">
+            {
+              currentState.id ? null :
+                <input type="button" onClick={() => this.onSubmit(true)} className="btn red modal-action" value="Add Another" />
+            }
+            <input type="button" onClick={() => this.onSubmit(false)} className="btn blue modal-action" value="OK" />
+          </div>
         </div>
       </div>
     );

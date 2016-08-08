@@ -50,7 +50,7 @@ class AlertModal extends React.Component {
               {successBtn}
             </a>
             <a onClick={() => this.closeModal()}
-              className="btn btn-dflt red sm-icon-btn p-1-btn">
+              className="btn btn-dflt red sm-icon-btn">
               {cancelBtn}
             </a>
           </div>
