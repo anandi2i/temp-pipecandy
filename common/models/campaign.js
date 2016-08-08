@@ -1108,60 +1108,85 @@ module.exports = function(Campaign) {
    */
   const prepareScheduledAt = (campaign, followup, person, email, ttsMetaMap,
     prepareScheduledAtCB) => {
-    const scheduledAtFromUser = followup ? followup.scheduledAt
-                                       : campaign.scheduledAt;
+    const scheduledAtFromUser = getScheduledAtFromUser(campaign, followup);
     ttsMetaMap.default = ttsMetaMap.default ? ttsMetaMap.default : new Date();
-    let scheduledAt = null;
-    const ttsInterval = 3;
-    try {
-      if (scheduledAtFromUser) {
-        if (person.timeZone) {
-          if (ttsMetaMap[person.timeZone]) {
-            scheduledAt = ttsMetaMap[person.timeZone];
-          } else {
-            const personZoneTime = moment(scheduledAtFromUser)
-              .tz(person.timeZone).format("YYYY-MM-DDTHH:mm:ss");
-            scheduledAt = new Date(personZoneTime + moment().format("Z"));
-            const ten = -10;
-            const diff = scheduledAt
-              - new Date(moment(new Date()).add(ten, "minutes"));
-            const zero = 0;
-            const one = 1;
-          if(!lodash.gt(diff, zero))
-          scheduledAt = new Date(moment(scheduledAt).add(one, "days").format());
-          }
+    let scheduledAt = ttsMetaMap.default;
+    let ttsType = "default";
+    if (scheduledAtFromUser) {
+      if (person.timeZone) {
+        scheduledAt = calculateZoneBasedScheduledAt(scheduledAtFromUser,
+          person, ttsMetaMap);
+      } else {
+        if(!ttsMetaMap.scheduledAtFromUser)
+          ttsMetaMap.scheduledAtFromUser = new Date(scheduledAtFromUser);
+        scheduledAt = ttsMetaMap.scheduledAtFromUser;
+      }
+      ttsType = person.timeZone ? person.timeZone : "scheduledAtFromUser";
+    }
+    calculateTTS(campaign, ttsMetaMap, scheduledAt, ttsType);
+    email.scheduledAt = scheduledAt;
+    return prepareScheduledAtCB(null, campaign, followup, person, email);
+  };
 
-          if(campaign.isTTSEnabled)
-            ttsMetaMap[person.timeZone] = new Date(
-              moment(scheduledAt).add(lodash.random(ttsInterval), "minutes"));
-        } else {
-          if(!ttsMetaMap.scheduledAtFromUser)
-            ttsMetaMap.scheduledAtFromUser = new Date(scheduledAtFromUser);
-          scheduledAt = ttsMetaMap.scheduledAtFromUser;
-          if(campaign.isTTSEnabled)
-            ttsMetaMap.scheduledAtFromUser = new Date(
-              moment(scheduledAt).add(lodash.random(ttsInterval), "minutes"));
-        }
-      }
-      if (!scheduledAt) {
-        scheduledAt = ttsMetaMap.default;
-        if(campaign.isTTSEnabled)
-        ttsMetaMap.default = new Date(
-          moment(scheduledAt).add(lodash.random(ttsInterval), "minutes"));
-      }
-      email.scheduledAt = scheduledAt;
-      prepareScheduledAtCB(null, campaign, followup, person, email);
-    } catch (prepareScheduledAtERR) {
-      logger.error({
-        error: prepareScheduledAtERR,
-        email: email,
-        stack: prepareScheduledAtERR.stack
-      });
-      email.isError = true;
-      prepareScheduledAtCB(null, campaign, followup, person, email);
+  /**
+   * checks TTS enabled and appends in TTS map
+   * @param  {[campaign]} campaign         [current campign object]
+   * @param  {JSON} ttsMetaMap
+   * @param  {Date} scheduledAt
+   * @param  {String} type                [type of timezone or defult]
+   * @author Ramanavel Selvaraju
+   */
+  const calculateTTS = (campaign, ttsMetaMap, scheduledAt, type) => {
+    if(campaign.isTTSEnabled){
+      ttsMetaMap[type] = new Date(moment(scheduledAt)
+        .add(lodash.random(constants.ttsInterval), "minutes"));
     }
   };
 
+  /**
+   * If the Scheduled At is in past it will scheduled as current time
+   * It will assume that it will generate now()
+   *
+   * @param  {[campaign]} campaign         [current campign object]
+   * @param  {[Followup]} followup         [current followup object]
+   * @param  {[Array]} additionalValues [extra field values for that person
+   * @return {[type]}          [description]
+   * @author Ramanavel Selvaraju
+   */
+  const getScheduledAtFromUser = (campaign, followup) => {
+    let scheduledAtFromUser = followup ? followup.scheduledAt
+                                       : campaign.scheduledAt;
+    if(lodash.gt((scheduledAtFromUser- new Date()), constants.ZERO)) {
+      return new Date();
+    }
+    return scheduledAtFromUser;
+  };
+
+  /**
+   * calculates zone based scheduled at and returns
+   * If the Person time is behind the current time this will
+   * schedule for next day
+   * @param  {Date} scheduledAtFromUser
+   * @param  {Person} person
+   * @return {Date}  scheduledAt
+   * @author Ramanavel Selvaraju
+   */
+  const calculateZoneBasedScheduledAt = (scheduledAtFromUser, person,
+    ttsMetaMap) => {
+    if (ttsMetaMap[person.timeZone]) {
+      return ttsMetaMap[person.timeZone];
+    }
+    const personZoneTime = moment(scheduledAtFromUser)
+      .tz(person.timeZone).format("YYYY-MM-DDTHH:mm:ss");
+    let scheduledAt = new Date(personZoneTime + moment().format("Z"));
+    const diff = scheduledAt
+      - new Date(moment(new Date()).add(constants.MINUS_TEN, "minutes"));
+    if(!lodash.gt(diff, constants.ZERO)){
+        scheduledAt =
+          new Date(moment(scheduledAt).add(constants.ONE, "days").format());
+    }
+  return scheduledAt;
+};
   /**
    * Prepares the FollowUp email subject and the content
    * Followup Subject will be the same as the previous mail which we sent
@@ -1212,6 +1237,7 @@ module.exports = function(Campaign) {
    */
   const sendToEmailQueue = (campaign, followup, person, email,
     sendToEmailQueueCB) => {
+    if(!email.subject) email.subject = "(no subject)";
     email.subject = email.subject.replace(/&nbsp;/g, " ");
     email.subject = lodash.trim(striptags(email.subject));
     email.subject = entities.decode(email.subject);

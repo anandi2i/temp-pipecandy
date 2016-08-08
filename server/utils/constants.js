@@ -5,6 +5,7 @@ const FOUR = 4;
 const FIVE = 5;
 
 const constants = {
+  "ttsInterval": 3,
   "EMPTYOBJECT" : "10",
   "EMPTYARRAY" : 0,
   "EMPTYARRAYINDEX" : -1,
@@ -17,6 +18,7 @@ const constants = {
   "ZERO": 0,
   "EIGHT": 8,
   "MINUS_ONE": -1,
+  "MINUS_TEN": -10,
   "TIME_FORMAT": "dd/mm/yyyy HH:MM:ss.l",
   "CLASSIFICATIONS" : ["bounced", "out-of-office", "actionable",
     "nurture", "negative"],

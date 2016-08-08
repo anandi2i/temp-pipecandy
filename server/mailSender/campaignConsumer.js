@@ -34,10 +34,16 @@ const app = Consumer.create({
     console.log("Recived Message : ", msgBody);
     if(msgBody.action === "assembled"){
       assembleCampaignProcess(campaign, (err, data) => {
+        if(err) {
+          console.log(err);
+        }
         return done();
       });
     } else {
       resumeCampaignProcess(campaign, (err, data) => {
+        if(err) {
+          console.log(err);
+        }
         return done();
       });
     }
