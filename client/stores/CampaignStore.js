@@ -160,6 +160,7 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     const sent = ["96", "100"];
     const resume = ["62", "66", "70", "72", "74", "76", "78", "80", "82",
       "84", "90"];
+    const progress = ["60"];
     let allCampaignList = [];
     allCampaigns.map(campaign => {
       const statusCode = campaign.statusCode.toString();
@@ -170,6 +171,8 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
         status = "Sent";
       } else if (_.contains(resume, statusCode)) {
         status = "Paused";
+      } else if (_.contains(progress, statusCode)) {
+        status = "In Progress";
       } else {
         status = "Scheduled";
       }

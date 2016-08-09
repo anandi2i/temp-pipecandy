@@ -36,7 +36,7 @@ class CustomCampaignActionComponent extends React.Component {
                 Run
               </Link>
             );
-          } else if(status === "Scheduled") {
+          } else if(status === "Scheduled" || status === "In Progress") {
             return (
               <a onClick={() => this.pauseCampaign(campaignId)}> Pause </a>
             );
