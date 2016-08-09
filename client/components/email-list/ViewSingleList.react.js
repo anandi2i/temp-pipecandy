@@ -417,12 +417,12 @@ class ListView extends React.Component {
             <input id="fileUpload" type="file" className="hide" name="file"
               accept=".csv" onChange={this.fileChange} />
             <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.openDialog}>
-              <i className="left mdi mdi-upload"></i> Add From File
+              <i className="left mdi mdi-upload"></i> Bulk Upload Recipients
             </a>
             <a href={`/api/file/list/${this.props.params.listId}/downloadCSV`}
               className="btn btn-dflt blue sm-icon-btn"
               download>
-              <i className="left mdi mdi-download"></i> Sample CSV
+              <i className="left mdi mdi-download"></i> Sample List (.csv format)
             </a>
             { people && people.length ?
                 <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.deleteSubscriber}>

@@ -70,7 +70,8 @@ const validatorObj = {
   listName: Joi.string().regex(namePattern).label("List Name").options({
     language: {
       any: {
-        empty: "!! Oops. It seems like you forgot to fill your list name!",
+        empty: "!! Oops. It seems like you forgot to fill your list name!"+
+          " Could you?",
       },
       string: {
         regex: {
