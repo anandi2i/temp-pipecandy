@@ -75,12 +75,12 @@ class SelectPreBuildTemplate extends React.Component {
                     (key === blankTemplateKey)
                     ?
                       <div className="card-action">
-                        <i className="mdi mdi-eye-off"></i> Preview
+                        <i className="mdi mdi-eye-off"></i> Pick &amp; Preview
                       </div>
                     :
                       <div className="card-action modal-trigger"
                         href="#previewTemplate">
-                        <i className="mdi mdi-eye"></i> Preview
+                        <i className="mdi mdi-eye"></i> Pick &amp; Preview
                       </div>
                   }
                 </div>
