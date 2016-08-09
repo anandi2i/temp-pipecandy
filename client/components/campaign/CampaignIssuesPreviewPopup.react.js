@@ -286,15 +286,16 @@ class CampaignIssuesPreviewPopup extends React.Component {
   }
 
   render() {
-    let peopelLength = this.state.personIssues.length;
-    let currentPerson = this.state.displayPerson;
+    let {personIssues, displayPerson, initCount, emailSubject, id} = this.state;
+    let peopelLength = personIssues.length;
+    let currentPerson = displayPerson;
     let leftStyle = {
-      color: currentPerson > this.state.initCount ? "" : "#ebebeb"
+      color: currentPerson > initCount ? "" : "#ebebeb"
     };
     let rightStyle = {
       color: currentPerson < peopelLength ? "" : "#ebebeb"
     };
-    let subjectClass = this.state.emailSubject
+    let subjectClass = emailSubject
       ? "email-issue-subject" : "empty-email-issue-subject";
     return (
       <div id="previewCampaign" className="modal modal-fixed-header modal-fixed-footer lg-modal">
@@ -302,7 +303,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
         <div className="modal-header">
           <div className="head">
             Email Preview
-            <span className="sub-head">( {this.state.personIssues.length} issues found )</span>
+            <span className="sub-head">( {peopelLength} issues found )</span>
           </div>
           <div className="preview-slider">
             <i className="mdi waves-effect mdi-chevron-left left blue-txt"
@@ -310,10 +311,11 @@ class CampaignIssuesPreviewPopup extends React.Component {
               style={leftStyle}></i>
             <span className="pagination">
               Showing
-              <input type="text" value={this.state.displayPerson}
+              <input type="text" value={displayPerson}
                 onChange={(e) => this.onChange(e, "displayPerson")}
                 onBlur={this.handleBlur} />
-              of {peopelLength}
+              of
+              <input disabled type="text" value={peopelLength} />
             </span>
             <i className="mdi waves-effect mdi-chevron-right right blue-txt"
               onClick={() => this.slider("right")}
@@ -324,11 +326,17 @@ class CampaignIssuesPreviewPopup extends React.Component {
           <div className="col s12">
             <div className="modal-content">
               <div className="template-content">
-                <div id={`previewSubContent-${this.state.id}`}
+                { peopelLength
+                  ? <div className="email-issue-to">To
+                    <span className="chip">{`<${personIssues[currentPerson - initCount].email}>`}</span>
+                    </div>
+                  : ""
+                }
+                <div id={`previewSubContent-${id}`}
                   className={subjectClass}></div>
-                <div id={`previewToolbar-${this.state.id}`}
+                <div id={`previewToolbar-${id}`}
                   className="tiny-toolbar"></div>
-                <div id={`previewMailContent-${this.state.id}`}
+                <div id={`previewMailContent-${id}`}
                   className="email-body issue-container"></div>
               </div>
             </div>
