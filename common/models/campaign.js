@@ -1384,8 +1384,6 @@ module.exports = function(Campaign) {
     });
   };
 
-
-
   Campaign.remoteMethod(
     "hasRecentCampaign",
     {
@@ -1393,7 +1391,7 @@ module.exports = function(Campaign) {
       accepts: [{
         arg: "ctx", type: "object", http: {source: "context"}
       }],
-      returns: {arg: "hasCampaign", type: "boolean"},
+      returns: {arg: "campaign", type: "campaign", root: true},
       http: {
         verb: "get", path: "/hasRecentCampaign"
       }
@@ -1403,34 +1401,33 @@ module.exports = function(Campaign) {
   /**
    * To check if there is any recent campaign for the current user
    * @param  {[ctx]}  ctx
-   * @param  {function} hasRecentCampaignCB
+   * @param  {function} callback
    * @return {[boolean]} hasRecentCampaign
-   * @author Aswin Raj A
+   * @author Aswin Raj A, Syed Sulaiman M(Modified)
    */
-  Campaign.hasRecentCampaign = (ctx, hasRecentCampaignCB) => {
+  Campaign.hasRecentCampaign = (ctx, callback) => {
+    let userId = ctx.req.accessToken.userId;
     Campaign.find({
       where: {
-        and:[
-          {"createdBy": ctx.req.accessToken.userId},
-          {"lastRunAt": {neq: null}}
-        ]
+        "createdBy": userId
       },
-      order: "lastRunAt DESC",
-      limit: 1
+      order: "lastRunAt DESC, createdAt DESC"
     }, (campaignErr, campaigns) => {
       if(campaignErr){
-        logger.error(campaignErr, {
-            user: ctx.req.accessToken.userId,
-            error: campaignErr,
-            stack: campaignErr ? campaignErr.stack : ""
+        logger.error("Error while getting recent campaign for user", {
+          error: campaignErr, stack: campaignErr.stack,
+          input: {userId: userId}
         });
-        const errorMessage = errorMessages.SERVER_ERROR;
-        return hasRecentCampaignCB(errorMessage);
+        return callback(errorMessages.SERVER_ERROR);
       }
-      if(lodash.isEmpty(campaigns)){
-        return hasRecentCampaignCB(null, false);
-      }
-      return hasRecentCampaignCB(null, campaigns[0].id);
+      if(lodash.isEmpty(campaigns)) return callback(null);
+
+      let lastRunCampaign = lodash.find(campaigns, function(o) {
+        return o.lastRunAt ? true : false;
+      });
+      if(lastRunCampaign) return callback(null, lastRunCampaign);
+
+      return callback(null, campaigns[0]);
     });
   };
 

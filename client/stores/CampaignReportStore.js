@@ -151,8 +151,8 @@ AppDispatcher.register(function(payload) {
     case Constants.HAS_RECENT_CAMPAIGN:
       CampaignApi.hasRecentCampaign().then((response) => {
         _error = "";
-        if(response.data.hasCampaign) {
-          recentCampaignId = response.data.hasCampaign;
+        if(response.data.lastRunAt) {
+          recentCampaignId = response.data.id;
         }
         CampaignReportStore.emitReportViewChange();
       }, (err) => {
