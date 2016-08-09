@@ -7,7 +7,6 @@ import AddFollowups from "./AddFollowups.react";
 import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
 import WordaiPreviewPopup from "./WordaiPreviewPopup.react";
 import PreviewMailsPopup from "./PreviewMailsPopup.react";
-import ProspectSignals from "./ProspectSignals.react";
 import CampaignStore from "../../stores/CampaignStore";
 import GridStore from "../../stores/GridStore";
 import UserStore from "../../stores/UserStore";
@@ -98,12 +97,9 @@ class ScheduleEmail extends React.Component {
       this.setState({
         emailContent: mainContent
       });
-    } else {
-      mainContent = tinymcePlaceholder("content");
     }
     const _this = this;
     setTimeout(function() {
-      tinyMCE.get("emailSubject").setContent(tinymcePlaceholder("Subject"));
       tinyMCE.get("optOutAddress").setContent(address);
       tinyMCE.get("emailContent").setContent(mainContent);
       _this.setState({
@@ -232,7 +228,7 @@ class ScheduleEmail extends React.Component {
       this.setState({
         followups: followups.concat({
           id: guid(),
-          content: tinymcePlaceholder("content"),
+          content: "",
         })
       });
     }
@@ -306,27 +302,76 @@ class ScheduleEmail extends React.Component {
   }
 
  /**
-  * Check if all missing tags are fixed by user
+  * Check if all mandatory fields are filled
   * @return {boolean}
   */
   checkEmailContentError() {
-    let followupsError = true;
-    let isValid = false;
-    this.state.followups.map((val, key) => {
-      let content = this.refs[`addFollowups${val.id}`].refs.issues;
-      if(content.props.personIssues.length){
-        followupsError = false;
-      }
-    }, this);
-    let mainEmailErr = this.refs.issues.state.personIssues.length;
-    if(!this.state.errorCount && !mainEmailErr && followupsError){
-      if(this.state.emailList.length){
-        isValid = true;
+    const {
+      emailRawText,
+      subjectRawText,
+      isOptText,
+      optText,
+      isAddress
+    } = this.state;
+    let address, isValid = false;
+    if(this.state.emailList.length){
+      if(subjectRawText) {
+        if(emailRawText) {
+          if((isOptText && optText) || !isOptText) {
+            address = tinyMCE.get("optOutAddress").getBody().textContent;
+            if((isAddress && address) || !isAddress) {
+              if(!this.refs.issues.state.personIssues.length) {
+                //Check if all mandatory fields are filled in followups
+                isValid = this.checkFollowupsFields();
+              } else {
+                displayError(ErrorMessages.SmartTagIssuesInMainEmail);
+              }
+            } else {
+              displayError(ErrorMessages.EmptyOptAddress);
+            }
+          } else {
+            displayError(ErrorMessages.EmptyOptText);
+          }
+        } else {
+          displayError(ErrorMessages.EmptyEmailContent);
+        }
       } else {
-        displayError(ErrorMessages.EmptyEmailList);
+        displayError(ErrorMessages.EMPTY_SUBJECT);
       }
     } else {
-      displayError(ErrorMessages.SmartTagIssues);
+      displayError(ErrorMessages.EmptyEmailList);
+    }
+    return isValid;
+  }
+
+  /**
+   * Check if all mandatory fields are filled in followups
+   * @return {boolean}
+   */
+  checkFollowupsFields() {
+    let followupsIssueTags = [], emptyFollowup = [], initCount = 1;
+    let isValid = false;
+    this.state.followups.map((val, key) => {
+      const content = this.refs[`addFollowups${val.id}`].refs.issues;
+      const isContent =
+        tinyMCE.get(`emailContent${val.id}`).getBody().textContent;
+      if(content.props.personIssues.length){
+        followupsIssueTags.push(key + initCount);
+      }
+      if(!isContent){
+        emptyFollowup.push(key + initCount);
+      }
+    }, this);
+    if(!emptyFollowup.length){
+      if(!followupsIssueTags.length){
+        isValid = true;
+      } else {
+        displayError(ErrorMessages.SmartTagIssuesInFollowup +
+          followupsIssueTags.join() + ".");
+      }
+    } else {
+      displayError(ErrorMessages.EmptyFollowupEmailContent +
+      emptyFollowup.join() + ".");
     }
     return isValid;
   }
@@ -679,11 +724,14 @@ class ScheduleEmail extends React.Component {
                 </div>
                 {/* email subject */}
                 <div className="row email-subject m-lr-0">
+                  <label>{"Email Subject"}</label>
                   <div id="emailSubject" className="email-body inline-tiny-mce" />
                 </div>
-                <div className="row m-lr-0">
-                  <ProspectSignals />
-                </div>
+                {/* TODO Remove this tab for the 1.0 version
+                  <div className="row m-lr-0">
+                    <ProspectSignals />
+                  </div>
+                */}
                 <div className="row email-content m-lr-0">
                   <div className="tiny-toolbar" id="mytoolbar">
                     {/*<div className="right smart-tag-container">

@@ -167,41 +167,11 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
         if($(editorDom).find("a.tinymce-placeholder").length) {
           $(editorDom).find("a.tinymce-placeholder").closest("div").remove();
         }
-      }).on("blur", (e) => {
-        if(!editor.getContent()) {
-          let content = "";
-          if(editorId === "emailSubject") {
-            content = "Subject";
-          } else if (editorId === "optOutAddress") {
-            content = null;
-          } else {
-            content = "content";
-          }
-          if(content) {
-            editor.setContent(tinymcePlaceholder(content));
-          }
-        }
       });
     }
   });
 }
 window.initTinyMCE = initTinyMCE;
-
-/**
- * Tinymce placeholder text for all editor
- * @param  {string} holder - editor type
- * @return {string}        - placeholder content
- */
-function tinymcePlaceholder(holder) {
-  let placeHolder;
-  if(holder === "content"){
-    placeHolder = "<a class='tinymce-placeholder'>Click here to edit</a>";
-  } else {
-    placeHolder = `<a class='tinymce-placeholder'>${holder}</a>`;
-  }
-  return placeHolder;
-}
-window.tinymcePlaceholder = tinymcePlaceholder;
 
 function constructSmartTags(className, tagText, id) {
   return "<span data-tag='"+tagText+"' data-id='"+id+"' data-tag-name='"+tagText+"' class='tag "+className+"' contenteditable='false'>&lt;" +

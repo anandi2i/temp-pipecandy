@@ -12,9 +12,10 @@ class TabsNav extends React.Component {
       {
         name: "Email Templates",
       },
+      /* TODO Remove this tab for the 1.0 version
       {
         name: "Pick from my earlier emails",
-      }
+      } */
     ];
 
     let li = _tabs.map((item, index) => {

@@ -34,18 +34,28 @@ export const ErrorMessages = {
   "InValidFileType": "Uh oh! I can accept only csv formats for now.",
   "SamePasswordUpdate": "That password has been used in the past." +
     " Try a new one!",
-  "EmptyEmailList": "That seems like an empty list. Add some " +
-    "recipients please!",
-  "SmartTagIssues": "when the user clicks update or update to all without " +
-    "fixing the issue) (In a hurry? You haven’t fixed the issues with " +
+  "SmartTagIssues": "In a hurry? You haven’t fixed the issues with " +
     "some smart tags yet!",
   "INVALID_FIELD_NAME": "Numeric, special char start letter not allowed) - " +
     "(Fields names can’t start with numbers or special characters. " +
     "House Rules!",
-  "PERSON_EXISTS_IN_LIST" : "Mail id non unique - job to bring up " +
-    "inconsistencies - same email id etc.) - ( I find this email id already " +
+  "PERSON_EXISTS_IN_LIST" : "I find this email id already " +
     "in this list -- Skip / Overwrite",
-  "INVALID_DATA": "Invalid data!"
+  "INVALID_DATA": "Invalid data!",
+  "SmartTagIssuesInFollowup": "It seems like some smart tags are missing in" +
+    " your follow up email(s) ",
+  "EmptyFollowupEmailContent": "Oops. You've not entered any email content" +
+    " for your follow up email(s) ",
+  "SmartTagIssuesInMainEmail": "You seem to have some issues with the smart" +
+    " tags. Could you please fix them?",
+  "EmptyOptAddress": "Could you please enter your address?",
+  "EmptyOptText": " You seem to have forgotten to give your choice of" +
+    " opt-out text.",
+  "EmptyEmailContent": "Oops. Your first email is empty!",
+  "EMPTY_SUBJECT": "There's no subject for your email. Could you " +
+    "please fix that?",
+  "EmptyEmailList": "Please select at least one email list to continue " +
+    "with the campaign."
 };
 
 /**
