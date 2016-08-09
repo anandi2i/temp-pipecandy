@@ -74,5 +74,7 @@ export const resultsEmpty = {
   "allCampaigns": "Dang! You don't seem to have any campaigns here. Do you " +
     "want to add a new campaign?",
   "allCampaignsOnSearch": "I don't seem to find any campaign by that name. " +
-    "Could you double-check for me, please?"
+    "Could you double-check for me, please?",
+  "allResponsesForInbox": "I'm as curious as you are to see the responses. " +
+    "Let's give it some more time!"
 };

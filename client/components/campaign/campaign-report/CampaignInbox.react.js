@@ -10,6 +10,7 @@ import TagMenu from "../../TagMenu.react";
 import EmailThreadView from "./EmailThreadView.react";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
+import {resultsEmpty} from "../../../utils/UserAlerts";
 
 /**
  * Display selected campaign inbox report
@@ -259,9 +260,6 @@ class CampaignInbox extends React.Component {
       threadId,
       isEmailThreadView
     } = this.state;
-    const activeTabName = _.findWhere(tabs, {
-      id: activeTabId
-    }).name.toLowerCase().capitalizeFirstLetter();
     const showEmptymsg = inboxMails.length || requestSent;
     const classifications = _.rest(tabs); //remove first object "all"
     return (
@@ -351,7 +349,7 @@ class CampaignInbox extends React.Component {
             </div>
             <div className="container center-align m-t-20"
               style={{display: showEmptymsg ? "none" : "block"}} >
-              {activeTabName} seems to be empty!
+              {resultsEmpty.allResponsesForInbox}
             </div>
           </div>
         </div>
