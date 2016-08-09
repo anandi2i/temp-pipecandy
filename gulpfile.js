@@ -13,7 +13,6 @@ var sassLint = require("gulp-sass-lint");
 var livereload = require("gulp-livereload");
 var nodemon = require("gulp-nodemon");
 var concat = require("gulp-concat");
-//var uglify = require("gulp-uglify");
 var minifier = require("gulp-uglify/minifier");
 var uglifyjs = require("uglify-js"); //ES6 support
 var cssnano = require("gulp-cssnano");
@@ -73,7 +72,7 @@ gulp.task("sass:watch", function() {
 gulp.task("bower:js", function() {
   return gulp.src(mainBowerFiles("**/*.js"))
     .pipe(concat("bower.js").on("error", util.log))
-    // .pipe(uglify().on("error", util.log))
+    .pipe(minifier({}, uglifyjs).on("error", util.log))
     .pipe(gulp.dest("./public/assets"));
 });
 
