@@ -19,15 +19,20 @@ class SubscriberGridView extends React.Component {
    */
   constructor(props) {
     super(props);
-    //TODO - Server side pagination, Now it take all persons from the eamil list
-    let visibleRowIds = [];
-    this.props.results.map(person => {
-      visibleRowIds.push(person.id);
-    });
     this.state = {
       selectedRowIds: [],
-      visibleRowIds: visibleRowIds
+      visibleRowIds: _.pluck(this.props.results, "id") || []
     };
+  }
+
+  /**
+   * Update the visible row id on grid data change
+   * @param  {object} nextProps
+   */
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      visibleRowIds: _.pluck(nextProps.results, "id")
+    });
   }
 
   /**
@@ -184,7 +189,7 @@ class SubscriberGridView extends React.Component {
     const {visibleRowIds} = this.state;
     if (isChecked) {
       this.setState({
-        selectedRowIds : visibleRowIds
+        selectedRowIds : _.clone(visibleRowIds)
       });
     } else {
       this.setState({

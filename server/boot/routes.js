@@ -16,7 +16,7 @@ module.exports = function(app) {
   app.get("/auth/success", function(req, res) {
     if(!req.accessToken) {
       logger.error("No accessToken");
-      return res.redirect("/register");
+      return res.redirect("/signup");
     }
     const milliSec = 1000;
     let redirect = () => {
@@ -33,7 +33,7 @@ module.exports = function(app) {
       if(err) {
         logger.error(`error in fetching user details for the userId::
           ${req.accessToken.userId} err:: ${err}`);
-        return res.redirect("/register");
+        return res.redirect("/signup");
       }
       let userData = user.toJSON();
       updateUserName(user, userData, (error, user) => {

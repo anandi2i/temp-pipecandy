@@ -117,7 +117,7 @@ AppDispatcher.register(function(payload) {
       _user = action.data;
       isSocialAuth = false;
       if(_.isEmpty(_user)) {
-        browserHistory.push("/register");
+        browserHistory.push("/signup");
       } else if(_user.identities[0] && _user.identities[0].profile) {
         isSocialAuth = true;
         if(!_user.firstName && _user.identities[0].profile.name) {
