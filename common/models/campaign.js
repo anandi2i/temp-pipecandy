@@ -95,7 +95,15 @@ module.exports = function(Campaign) {
       },
       Campaign.setStatus
     ], (asyncErr, result) => {
-      return saveCampaignElementsCB(asyncErr, result);
+      if(asyncErr) {
+        const errorArray = ["EMPTY_LIST", "TEMPLATE_NOT_FOUND",
+          "EMPTY_SUBJECT"];
+        if (lodash.includes(errorArray, asyncErr.name)) {
+          return saveCampaignElementsCB(asyncErr);
+        }
+        return saveCampaignElementsCB(errorMessages.SERVER_ERROR);
+      }
+      return saveCampaignElementsCB(null, result);
     });
   };
 
@@ -557,16 +565,14 @@ module.exports = function(Campaign) {
   const validateSaveCampaignTemplate = (ctx, id, reqParams,
     validateSaveCB) => {
     if(!reqParams.hasOwnProperty("listIds")){
-      let error = new Error();
-      error.message = "listIds not found in the input object";
-      error.name = "listIdsNotFound";
-      return validateSaveCB(error);
+      return validateSaveCB(errorMessages.EMPTY_LIST);
     }
     if(!reqParams.hasOwnProperty("campaignTemplates")) {
-      let error = new Error();
-      error.message = "campaignTemplates not found in the input object";
-      error.name = "campaignTemplatesNotFound";
-      return validateSaveCB(error);
+      return validateSaveCB(errorMessages.TEMPLATE_NOT_FOUND);
+    }
+    const subject = reqParams.campaignTemplates.subject;
+    if(subject.trim().length === constants.ZERO) {
+      return validateSaveCB(errorMessages.EMPTY_SUBJECT);
     }
     return validateSaveCB(null, ctx, id, reqParams);
   };

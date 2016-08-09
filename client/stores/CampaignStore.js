@@ -574,11 +574,12 @@ AppDispatcher.register(function(payload) {
       //TODO need to clean
       CampaignApi.saveCampaignTemplates(action.campaign)
       .then((response) => {
+        _error = "";
         browserHistory.push("/campaign");
         displaySuccess("Campaign saved successfully");
       }, (err) => {
-        console.log(err);
-        displayError("Problem in saving");
+          _error = HandleError.evaluateError(err);
+          CampaignStore.emitChange();
       });
       break;
     case Constants.CHECK_SPAM:
