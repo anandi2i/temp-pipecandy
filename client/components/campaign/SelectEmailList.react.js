@@ -54,7 +54,7 @@ class SelectEmailList extends React.Component {
           :
           this.state.allEmailLists.length
           ?
-            <EmailListGrid ref="emailListGrid" results={this.state.allEmailLists} />
+            <EmailListGrid module="campaignRun" ref="emailListGrid" results={this.state.allEmailLists} />
           :
             ""
         }

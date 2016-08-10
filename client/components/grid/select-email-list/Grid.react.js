@@ -18,7 +18,7 @@ class SelectEmailListGrid extends React.Component {
     };
   }
 
-  //Reset the maxpage to null  
+  //Reset the maxpage to null
   componentWillUnmount() {
     GridStore.resetMaxPage();
   }
@@ -46,6 +46,9 @@ class SelectEmailListGrid extends React.Component {
   }
 
   toggleSelectRow = (row, isChecked) => {
+    if(this.props.module === "campaignRun" && !row.membersCount) {
+      return;
+    }
     let selectedRowIds = this.state.selectedRowIds;
     if (isChecked) {
       let isFound = _.find(selectedRowIds, (id) => {
