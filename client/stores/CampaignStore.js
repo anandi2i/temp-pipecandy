@@ -22,6 +22,7 @@ let inboxMails = [];
 let scheduledMails = [];
 let sentMails = [];
 let spamScore;
+let inboxClassificationCount;
 
 // Extend Reviewer Store with EventEmitter to add eventing capabilities
 const CampaignStore = _.extend({}, EventEmitter.prototype, {
@@ -137,6 +138,26 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   //Remove move mails listener
   removeMoveMailsChangeListener(callback) {
     this.removeListener("MoveMails", callback);
+  },
+
+  emitClassificationCountChange() {
+    this.emit("emitClassificationCount");
+  },
+
+  addCountChangeListener(callback) {
+    this.on("emitClassificationCount", callback);
+  },
+
+  removeCountChangeListener(callback) {
+    this.removeListener("emitClassificationCount", callback);
+  },
+
+  /**
+   * Return inbox classification count
+   * @return {object} inboxClassificationCount
+   */
+  getResponseCount() {
+    return inboxClassificationCount;
   },
 
   getError() {
@@ -665,6 +686,16 @@ AppDispatcher.register(function(payload) {
       }, (err) => {
         _error = HandleError.evaluateError(err);
         CampaignStore.emitChange();
+      });
+      break;
+    case Constants.INBOX_CLASSIFICATION_COUNT:
+      CampaignApi.getInboxClassificationCount(action.campaignId)
+      .then((response) => {
+        inboxClassificationCount = response.data;
+        CampaignStore.emitClassificationCountChange();
+      }, (err) => {
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitClassificationCountChange();
       });
       break;
     default:

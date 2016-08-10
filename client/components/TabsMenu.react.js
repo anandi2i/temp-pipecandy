@@ -14,13 +14,13 @@ class TabsMenu extends React.Component {
   }
 
   render() {
-    const {tabs, activeTabId, mainClass} = this.props;
+    const {tabs, activeTabId, mainClass, count} = this.props;
     const li = tabs.map((tab, index) => {
       return (
         <li key={index}>
           <a onClick={() => this.handleClick(tab.id)}
             className={activeTabId === tab.id ? "active" : ""}>
-            {tab.name}
+            {tab.name} ({count[tab.countId]})
           </a>
         </li>
       );

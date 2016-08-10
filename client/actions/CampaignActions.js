@@ -216,6 +216,16 @@ const CampaignActions = {
       actionType: Constants.EMAIL_LINK_CLICKS,
       campaignId: campaignId
     });
+  },
+  /**
+   * Get response count of all inbox classifications
+   * @param  {number} campaignId
+   */
+  getInboxClassificationCount(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.INBOX_CLASSIFICATION_COUNT,
+      campaignId: campaignId
+    });
   }
 };
 

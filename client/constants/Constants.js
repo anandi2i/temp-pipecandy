@@ -43,5 +43,6 @@ export default keyMirror({
   RESUME_CAMPAIGN: null,
   CAMPAIGN_PERFORMANCE_GRAPH: null,
   HAS_RECENT_CAMPAIGN: null,
-  EMAIL_LINK_CLICKS: null
+  EMAIL_LINK_CLICKS: null,
+  INBOX_CLASSIFICATION_COUNT: null
 });

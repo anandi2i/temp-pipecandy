@@ -6,7 +6,7 @@ import _ from "underscore";
 import CampaignFooter from "./CampaignFooter.react";
 import CampaignReportHead from "../CampaignReportHead.react";
 import Spinner from "../../Spinner.react";
-import TagMenu from "../../TagMenu.react";
+import TabsMenu from "../../TabsMenu.react";
 import EmailThreadView from "./EmailThreadView.react";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
@@ -38,27 +38,34 @@ class CampaignInbox extends React.Component {
       tabs: [{
         id: "all",
         name: "ALL",
+        countId: "all"
       },
       {
         id: "actionable",
         name: "ACTIONABLE",
+        countId: "actionable"
       },
       {
         id: "out-of-office",
         name: "OUT OF OFFICE",
+        countId: "outOfOffice"
       },
       {
         id: "nurture",
         name: "NURTURE",
+        countId: "nurture"
       },
       {
         id: "negative",
         name: "NEGATIVE",
+        countId: "negative"
       },
       {
         id: "bounced",
         name: "BOUNCED",
-      }]
+        countId: "bounced"
+      }],
+      inboxClassificationCount: {}
     };
   }
 
@@ -76,6 +83,7 @@ class CampaignInbox extends React.Component {
     this.el.find("select").material_select();
     CampaignStore.addMailboxChangeListener(this.onStoreChange);
     CampaignStore.addMoveMailsChangeListener(this.moveMailsChange);
+    CampaignStore.addCountChangeListener(this.onCountChange);
     window.addEventListener("scroll", this.handleOnScroll);
     CampaignActions.getInboxMails({
       id: this.props.params.id,
@@ -83,6 +91,7 @@ class CampaignInbox extends React.Component {
       limit: limit,
       classification: this.state.activeTabId
     });
+    CampaignActions.getInboxClassificationCount(this.props.params.id);
   }
 
   /**
@@ -93,6 +102,7 @@ class CampaignInbox extends React.Component {
     this.el.find("select").material_select("destroy");
     CampaignStore.removeMailboxChangeListener(this.onStoreChange);
     CampaignStore.removeMoveMailsChangeListener(this.moveMailsChange);
+    CampaignStore.removeCountChangeListener(this.onCountChange);
     window.removeEventListener("scroll", this.handleOnScroll);
   }
 
@@ -105,6 +115,7 @@ class CampaignInbox extends React.Component {
       inboxMails: this.state.inboxMails.concat(inboxMails),
       requestSent: false
     });
+    CampaignActions.getInboxClassificationCount(this.props.params.id);
     displayError(CampaignStore.getError());
   }
 
@@ -122,7 +133,14 @@ class CampaignInbox extends React.Component {
         ),
         selectedInboxIds: []
       });
+      CampaignActions.getInboxClassificationCount(this.props.params.id);
     }
+  }
+
+  onCountChange = () => {
+    this.setState({
+      inboxClassificationCount: CampaignStore.getResponseCount()
+    });
   }
 
   /**
@@ -258,7 +276,8 @@ class CampaignInbox extends React.Component {
       activeTabId,
       tabs,
       threadId,
-      isEmailThreadView
+      isEmailThreadView,
+      inboxClassificationCount
     } = this.state;
     const showEmptymsg = inboxMails.length || requestSent;
     const classifications = _.rest(tabs); //remove first object "all"
@@ -301,8 +320,8 @@ class CampaignInbox extends React.Component {
               </div>
             </div>
           </div>
-          <TagMenu activeTabId={activeTabId} tabs={tabs}
-            handleClick={this.handleClick} mainClass={"container"} />
+          <TabsMenu activeTabId={activeTabId} tabs={tabs} mainClass={"container"}
+            handleClick={this.handleClick} count={inboxClassificationCount} />
           <div>
             <div className="container">
               {

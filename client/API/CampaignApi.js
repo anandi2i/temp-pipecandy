@@ -164,6 +164,13 @@ const CampaignApi = {
    */
   getEmailLinkClicks(campaignId) {
     return api.get(`/api/clickedEmailLinks/campaign/${campaignId}`);
+  },
+  /**
+   * Get response count of inbox classifications
+   * @param  {number} campaignId
+   */
+  getInboxClassificationCount(campaignId) {
+    return api.get(`/api/inboxMails/campaign/${campaignId}/inboxMailsCount`);
   }
 };
 
