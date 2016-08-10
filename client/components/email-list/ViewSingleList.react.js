@@ -299,7 +299,11 @@ class ListView extends React.Component {
  * Delete selected persons from Email List
  */
   deleteSubscriber = () => {
-    this.refs.subscriberGrid.refs.component.deleteSubscriber();
+    const {enableDeleteBtn} = this.state;
+    if(enableDeleteBtn) {
+      this.refs.subscriberGrid.refs.component.deleteSubscriber();
+      this.setState({enableDeleteBtn: false});
+    }
   }
 
   /**
@@ -378,12 +382,21 @@ class ListView extends React.Component {
   }
 
   /**
+   * Update the enableDelete state bases on row selection
+   * @param  {boolean} enableDeleteBtn
+   */
+  enableDelete = (enableDeleteBtn) => {
+    this.setState({enableDeleteBtn: enableDeleteBtn});
+  }
+
+  /**
    * render
    * @return {ReactElement} markup
    */
   render() {
     const {fieldName, suggestions, people, uploadCsvDetails, uploadAnimTxt,
-      fieldsName, listFields, peopleDetails} = this.state;
+      fieldsName, listFields, peopleDetails, enableDeleteBtn} = this.state;
+    const delBtn = enableDeleteBtn ? "" : "disabled";
     const {listId} = this.props.params;
     const inputProps = {
       id: "fieldName",
@@ -425,7 +438,8 @@ class ListView extends React.Component {
               <i className="left mdi mdi-download"></i> Sample List (.csv format)
             </a>
             { people && people.length ?
-                <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.deleteSubscriber}>
+                <a onClick={this.deleteSubscriber}
+                  className={`btn blue sm-icon-btn dropdown-button ${delBtn}`}>
                   <i className="left mdi mdi-delete"></i> Delete
                 </a>
               : ""
@@ -476,6 +490,7 @@ class ListView extends React.Component {
                 listFields={listFields}
                 listId={listId}
                 peopleDetails={peopleDetails}
+                enableDelete={this.enableDelete}
                 ref="subscriberGrid" />
             :
               !this.state.spinning

@@ -172,6 +172,7 @@ class SubscriberGridView extends React.Component {
       let howMany = 1;
       selectedRowIds.splice(selectedRowIds.indexOf(row.id), howMany);
     }
+    this.props.enableDelete(selectedRowIds.length ? true : false);
     this.setState({
       selectedRowIds: selectedRowIds
     });
@@ -191,10 +192,12 @@ class SubscriberGridView extends React.Component {
       this.setState({
         selectedRowIds : _.clone(visibleRowIds)
       });
+      this.props.enableDelete(true);
     } else {
       this.setState({
         selectedRowIds : []
       });
+      this.props.enableDelete(false);
     }
   }
 
