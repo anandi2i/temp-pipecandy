@@ -219,7 +219,7 @@ AppDispatcher.register(function(payload) {
         EmailListActions.getEmailListByID(action.data.listId);
         _success = "";
       }, (err)=> {
-        _error = err.data.error.message;
+        _error = HandleError.evaluateError(err);
         EmailListStore.emitChange();
         _error = "";
       });

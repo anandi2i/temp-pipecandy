@@ -55,7 +55,9 @@ export const ErrorMessages = {
   "EMPTY_SUBJECT": "There's no subject for your email. Could you " +
     "please fix that?",
   "EmptyEmailList": "Please select at least one email list to continue " +
-    "with the campaign."
+    "with the campaign.",
+  "EMPTY_CSV_UPLOAD": "It seems like you've uploaded an empty file. Try " +
+    "uploading with some recipients again!"
 };
 
 /**

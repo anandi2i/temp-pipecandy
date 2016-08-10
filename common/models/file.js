@@ -7,6 +7,7 @@ import _ from "underscore";
 import logger from "../../server/log";
 import lodash from "lodash";
 import validator from "../../server/utils/validatorUtility";
+import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 var CONTAINERS_URL = "/api/containers/";
 
 module.exports = function(File) {
@@ -94,6 +95,10 @@ module.exports = function(File) {
         return newFilename;
       }
     };
+    var csvStoragePath = "server/storage/"+ctx.req.params.container;
+    if (!fs.existsSync(csvStoragePath)){
+        fs.mkdirSync(csvStoragePath);
+    }
     async.waterfall([
       async.apply(saveFile, ctx, options, listid),
       getAllFieldsForList,
@@ -153,7 +158,7 @@ module.exports = function(File) {
       } else {
         fs.unlinkSync(filePath);
         let error = new Error();
-        error.message = "File should be in csv/excel format";
+        error.message = "File should be in csv format";
         error.name = "InvalidFile";
         logger.error("Error in removing the invalid file", error.message);
         saveFileCB(error);
@@ -231,7 +236,11 @@ module.exports = function(File) {
       streamData.push(data);
     })
     .on("end", () => {
-      getDataFromCSVCB(null, streamHeader, streamData, fieldsForList, listid);
+      if(lodash.isEmpty(streamData)){
+        return getDataFromCSVCB(errorMessages.EMPTY_CSV_UPLOAD);
+      }
+      return getDataFromCSVCB(null, streamHeader, streamData, fieldsForList,
+        listid);
     });
   };
 
@@ -258,7 +267,7 @@ module.exports = function(File) {
       if(err){
         return validateHeadersCB("There seems to be some invalid fields!");
       }
-      validateHeadersCB(null, streamData, listid);
+      return validateHeadersCB(null, streamData, listid);
     });
   };
 
