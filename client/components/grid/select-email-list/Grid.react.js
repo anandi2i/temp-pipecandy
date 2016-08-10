@@ -14,7 +14,8 @@ class SelectEmailListGrid extends React.Component {
     this.state = {
       selectedRowIds: [],
       isResultEmpty: true,
-      noDataMessage: resultsEmpty.allLists
+      noDataMessage: <div> Dang! You don't seem to have any email list here. Do
+      you want to <a href="/list/create/"> add a new list </a> ? </div>
     };
   }
 

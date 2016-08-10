@@ -75,7 +75,8 @@ class CampaignGrid extends React.Component {
     super(props);
     this.state = {
       isResultEmpty: true,
-      noDataMessage: resultsEmpty.allCampaigns
+      noDataMessage: <div> Dang! You don't seem to have any campaigns here. Do
+      you want to <a href="/campaign/create/"> add a new campaign </a> ? </div>
     };
   }
 

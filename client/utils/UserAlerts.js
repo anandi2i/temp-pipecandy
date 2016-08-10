@@ -84,12 +84,8 @@ export const SuccessMessages = {
  * @type {object} alert messages
  */
 export const resultsEmpty = {
-  "allLists": "Dang! You don't seem to have any email list here. Do you " +
-    "want to add a new list?",
   "allListsOnSearch": "It's never easy to say 'No!' when you ask for " +
     "something, but I can't find that list!",
-  "allCampaigns": "Dang! You don't seem to have any campaigns here. Do you " +
-    "want to add a new campaign?",
   "allCampaignsOnSearch": "I don't seem to find any campaign by that name. " +
     "Could you double-check for me, please?",
   "allResponsesForInbox": "I'm as curious as you are to see the responses. " +
