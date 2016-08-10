@@ -147,7 +147,11 @@ module.exports = function(Campaign) {
       let campaign = campaigns[0];
       const stoppedStatusCode = statusCodes.campaignStopped;
       const sentStatusCode = statusCodes.campaignSent;
+      const executedStatusCode = statusCodes.campaignExecuted;
       if(campaign.statusCode === stoppedStatusCode) {
+        return callback(null, campaign);
+      }
+      if(campaign.statusCode === executedStatusCode) {
         return callback(null, campaign);
       }
       let statusArray = [statusCodes["followUpResumed-1"],
