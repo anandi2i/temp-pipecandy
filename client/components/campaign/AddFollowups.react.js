@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import AlertModal from "../AlertModal.react";
 import CampaignStore from "../../stores/CampaignStore";
 import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
+import _ from "underscore";
 
 class AddFollowups extends React.Component {
   constructor(props) {
@@ -130,6 +131,7 @@ class AddFollowups extends React.Component {
   render() {
     const {followupId, id, content, peopleList} = this.props;
     let indexInc = 1;
+    const scheduleCount = 30;
     let followUpCount = id + indexInc;
     let className = this.state.clicked
       ? "mdi mdi-chevron-up"
@@ -172,21 +174,30 @@ class AddFollowups extends React.Component {
           </div>
         </div>
         <div id={"followUps" + followupId} className="col s12 m12 l10 offset-l1 draft-template">
+          <div className="row m-0 schedule-time-label">
+            <label>Follow up (if no response to previous email) after</label>
+          </div>
           <div className="row m-lr-0 schedule-time">
             <div className="col s12 m4 l3">
               <div className="input-field" id={"dayPicker" + followupId}>
                 <select>
-                  <option value="1">1 day</option>
-                  <option value="2">2 days</option>
-                  <option value="3">3 days</option>
-                  <option value="4">4 days</option>
-                  <option value="5">5 days</option>
+                  {
+                    _.range(scheduleCount).map(function(k) {
+                      let display = "days";
+                      if(++k === indexInc){
+                        display = "day";
+                      }
+                      return (
+                        <option key={k} value={k}>{k} {display}</option>
+                      );
+                    })
+                  }
                 </select>
-                <label>Send if no response after</label>
+                <label></label>
               </div>
             </div>
             <div className="col s12 m4 l3">
-              <label>Time</label>
+              <label></label>
               <input type="text" className="timepicker border-input" placeholder="00:00AM" />
             </div>
           </div>

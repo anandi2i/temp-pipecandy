@@ -597,13 +597,13 @@ class ScheduleEmail extends React.Component {
   toggleImproveDelivery = () => {
     if(this.state.improveDelivery) {
       this.setState({
-        alertMsg: SuccessMessages.successImproveDelivery,
+        alertMsg: SuccessMessages.WarningImproveDelivery,
         successBtn: "I understand",
         cancelBtn: "Cancel"
       });
     } else {
       this.setState({
-        alertMsg: SuccessMessages.WarningImproveDelivery,
+        alertMsg: SuccessMessages.successImproveDelivery,
         successBtn: "Great! Let's do that!",
         cancelBtn: "Cancel"
       });
@@ -683,6 +683,12 @@ class ScheduleEmail extends React.Component {
                 </label>
               </div>
               <a className="btn blue m-r-20" onClick={() => this.openPreviewModal("preview")}>Preview</a>
+              {
+                followups.length < followupsMaxLen
+                  ?
+                    <a className="btn blue m-r-20" onClick={this.addFollowups}>Add follow up</a>
+                  : ""
+              }
               <a className="btn blue" onClick={this.saveCampaignInfo}>Save & Send</a>
             </div>
           </div>
