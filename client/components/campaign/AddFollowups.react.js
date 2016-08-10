@@ -109,17 +109,13 @@ class AddFollowups extends React.Component {
    * Delete followup container based on id and
    * set deleteCampaignId state to null
    */
-  deleteCampaignFollowUp = () => {
-    this.props.deleteFollowUp(this.state.deleteCampaignId);
-    this.cancelDeleteCampaign();
-  }
-
-  /**
-   * Set deleteCampaignId state to null
-   */
-  cancelDeleteCampaign = () => {
+  deleteCampaignFollowUp = (isTrue) => {
     this.setState({
       deleteCampaignId: null
+    }, () => {
+      if(isTrue){
+        this.props.deleteFollowUp(this.state.deleteCampaignId);
+      }
     });
   }
 
@@ -205,7 +201,7 @@ class AddFollowups extends React.Component {
                 ?
                   <div className="row r-btn-container preview-content m-lr-0">
                     <div onClick={this.openPreviewModal} className="btn btn-dflt error-btn">
-                      {this.state.errorCount} Issues Found
+                      {this.state.errorCount} Issue(s) Found
                     </div>
                   </div>
                 :
@@ -227,8 +223,7 @@ class AddFollowups extends React.Component {
           message={"You took some effort doing this. Are you sure?"}
           successBtn={"Confirm"}
           cancelBtn={"Cancel"}
-          successCb={this.deleteCampaignFollowUp}
-          errorCb={this.cancelDeleteCampaign}/>
+          confirmCb={this.deleteCampaignFollowUp}/>
       </div>
     );
   }

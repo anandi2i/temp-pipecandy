@@ -23,19 +23,11 @@ class AlertModal extends React.Component {
   }
 
   /**
-   * Close modal popup and call props errorCb function
+   * Close modal popup and call props confirmCb function
    */
-  closeModal = () => {
+  handleClick = (isTrue) => {
     this.el.closeModal();
-    this.props.errorCb();
-  }
-
-  /**
-   * Close modal popup and call props successCb function
-   */
-  successModal = () => {
-    this.el.closeModal();
-    this.props.successCb();
+    this.props.confirmCb(isTrue);
   }
 
   render() {
@@ -45,11 +37,11 @@ class AlertModal extends React.Component {
         <div className="modal-content p-0">
           <div className="alert">
             <div className="m-b-20">{message}</div>
-            <a onClick={() => this.successModal()}
+            <a onClick={() => this.handleClick(true)}
               className="btn btn-dflt blue sm-icon-btn p-1-btn">
               {successBtn}
             </a>
-            <a onClick={() => this.closeModal()}
+            <a onClick={() => this.handleClick(false)}
               className="btn btn-dflt red sm-icon-btn">
               {cancelBtn}
             </a>

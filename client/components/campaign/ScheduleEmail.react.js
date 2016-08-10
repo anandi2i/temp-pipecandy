@@ -12,8 +12,9 @@ import GridStore from "../../stores/GridStore";
 import UserStore from "../../stores/UserStore";
 import UserAction from "../../actions/UserAction";
 import CampaignActions from "../../actions/CampaignActions";
-import {ErrorMessages} from "../../utils/UserAlerts";
+import {ErrorMessages, SuccessMessages} from "../../utils/UserAlerts";
 import Spinner from "../Spinner.react";
+import AlertModal from "../AlertModal.react";
 
 class ScheduleEmail extends React.Component {
   constructor(props) {
@@ -46,7 +47,10 @@ class ScheduleEmail extends React.Component {
       spamRating: "",
       isEditorReady: false,
       improveDelivery: true,
-      isPreview: false
+      isPreview: false,
+      alertMsg: "",
+      successBtn: "",
+      cancelBtn: ""
     };
   }
 
@@ -591,9 +595,31 @@ class ScheduleEmail extends React.Component {
    * Toggle Improve Delivery option
    */
   toggleImproveDelivery = () => {
-    this.setState({
-      improveDelivery: !this.state.improveDelivery
-    });
+    if(this.state.improveDelivery) {
+      this.setState({
+        alertMsg: SuccessMessages.successImproveDelivery,
+        successBtn: "I understand",
+        cancelBtn: "Cancel"
+      });
+    } else {
+      this.setState({
+        alertMsg: SuccessMessages.WarningImproveDelivery,
+        successBtn: "Great! Let's do that!",
+        cancelBtn: "Cancel"
+      });
+    }
+    this.refs.confirmBox.openModal();
+  }
+
+  /**
+   * Change Improve Delivery option based on user confirmation
+   */
+  changeImproveDelivery = (isTrue) => {
+    if(isTrue) {
+      this.setState({
+        improveDelivery: !this.state.improveDelivery
+      });
+    }
   }
 
   render() {
@@ -619,7 +645,10 @@ class ScheduleEmail extends React.Component {
       previewMainTemplate,
       previewFollowups,
       improveDelivery,
-      isPreview
+      isPreview,
+      cancelBtn,
+      alertMsg,
+      successBtn
     } = this.state;
     let displayAddFollowup =
       (followups.length < followupsMaxLen ? "block" : "none");
@@ -647,7 +676,7 @@ class ScheduleEmail extends React.Component {
             <div className="head">{"Let's Draft an Email"}</div>
             <div className="sub-head">
               <div className="switch">
-                <label>
+                <label className="f-s-14">
                   Improve Delivery
                   <input type="checkbox" checked={improveDelivery} onChange={() => this.toggleImproveDelivery()}/>
                   <span className="lever"></span>
@@ -781,7 +810,7 @@ class ScheduleEmail extends React.Component {
                   <div onClick={() => this.openPreviewModal("issues")}
                     style={{display: errorCount ? "inline-block": "none"}}
                     className="btn btn-dflt error-btn" >
-                    {errorCount} Issues Found
+                    {errorCount} Issue(s) Found
                   </div>
                 </div>
                 <div className="row opt-text">
@@ -861,6 +890,12 @@ class ScheduleEmail extends React.Component {
           }
           <WordaiPreviewPopup ref="wordai" />
         </div>
+        {/* Alert Box modal */}
+        <AlertModal ref="confirmBox"
+          message={alertMsg}
+          successBtn={successBtn}
+          cancelBtn={cancelBtn}
+          confirmCb={this.changeImproveDelivery}/>
       </div>
     );
   }

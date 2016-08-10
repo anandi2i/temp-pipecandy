@@ -71,7 +71,12 @@ export const SuccessMessages = {
   "successSubscribe": "Recipient details have been saved!",
   "successDelete": "",
   "successSelectTemplate": "You just selected the ‘...’ template!",
-  "successAddAdditionalField": ""
+  "successAddAdditionalField": "",
+  "successImproveDelivery": "Your emails will be delivered over a period of" +
+    " time, which is a good thing. Recommended",
+  "WarningImproveDelivery": "All your emails would be delivered at one go " +
+    "(instead of being delivered over a period of time). This might reduce" +
+    " your email deliverability rates. Not recommended."
 };
 
 /**

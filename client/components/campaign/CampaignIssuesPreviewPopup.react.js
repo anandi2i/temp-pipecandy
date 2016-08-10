@@ -303,7 +303,7 @@ class CampaignIssuesPreviewPopup extends React.Component {
         <div className="modal-header">
           <div className="head">
             Email Preview
-            <span className="sub-head">( {peopelLength} issues found )</span>
+            <span className="sub-head">( {peopelLength} issue(s) found )</span>
           </div>
           <div className="preview-slider">
             <i className="mdi waves-effect mdi-chevron-left left blue-txt"
