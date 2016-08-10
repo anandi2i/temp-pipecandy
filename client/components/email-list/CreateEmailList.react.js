@@ -96,13 +96,6 @@ class EmailList extends React.Component {
                 </div>
               </form>
             </div>
-            <div className="hint-box m-t-47">
-              A .csv file is just like an MS Excel file. If you have your list
-              in MS Excel or a similar format, open it and save it as a .csv
-              file. Please make all the changes you need to make before
-              converting to .csv format (because .csv format does not save any
-              changes you might make!)
-            </div>
           </div>
         </div>
       </div>

@@ -499,9 +499,19 @@ class ListView extends React.Component {
                     <div className="row card">
                       <div className="col s12 center card-content">
                         <p>
-                          People list seems to be empty. Could you please add ?
+                          You could add the recipients details one by one or by
+                          uploading a csv. A sample list file is available for
+                          download. We recommend using the sample list format
+                          to build you own list.
                         </p>
                       </div>
+                    </div>
+                    <div className="hint-box m-t-47">
+                      A .csv file is just like an MS Excel file. If you have
+                      your list in MS Excel or a similar format, open it and
+                      save it as a .csv file. Please make all the changes you
+                      need to make before converting to .csv format (because
+                      .csv format does not save any changes you might make!)
                     </div>
                   </div>
                 : ""
