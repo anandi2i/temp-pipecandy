@@ -57,7 +57,8 @@ export const ErrorMessages = {
   "EmptyEmailList": "Please select at least one email list to continue " +
     "with the campaign.",
   "EMPTY_CSV_UPLOAD": "It seems like you've uploaded an empty file. Try " +
-    "uploading with some recipients again!"
+    "uploading with some recipients again!",
+  "INVALID_FIELDS": "There seems to be some invalid fields in the list!"
 };
 
 /**

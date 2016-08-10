@@ -261,11 +261,11 @@ module.exports = function(File) {
       if(fieldsForList.indexOf(streamHeader) !== notFound){
         streamHeaderCB(null);
       } else{
-        validateHeadersCB("There seems to be some invalid fields!");
+        validateHeadersCB(errorMessages.INVALID_FIELDS);
       }
     }, (err) => {
       if(err){
-        return validateHeadersCB("There seems to be some invalid fields!");
+        return validateHeadersCB(errorMessages.INVALID_FIELDS);
       }
       return validateHeadersCB(null, streamData, listid);
     });
