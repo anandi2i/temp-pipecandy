@@ -24,7 +24,7 @@ export const ErrorMessages = {
   "FileUploadFnameEmpty": "It seems like some recipients’ first names are " +
     "missing. Could you fix them?",
   "ExistsCampaign": "That campaign name already exists. Try another!",
-  "LIST_EXISTS": "That list name already exists. Try another!",
+  "LIST_EXISTS": "This list name is already taken. Please try another name!",
   "CAMPAIGN_EXISTS": "That campaign name already exists. Try another!",
   "DeletePerson" : "By default the delete option should be disabled and can " +
     "be enabled only after at least one recipient is selected",
