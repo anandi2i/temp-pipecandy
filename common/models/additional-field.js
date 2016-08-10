@@ -15,9 +15,7 @@ module.exports = function(AdditionalField) {
    */
     AdditionalField.getAllDefaultFields = (listid, getAllDefaultFieldsCB) => {
     AdditionalField.find({
-      where : {
-        userId : null
-      }
+      where: {and: [{userId : null}, {isApproved: true}]}
     }, (fieldsFindErr, defaultFields) => {
       if(fieldsFindErr){
         logger.error("Error while finding default fields for the list", {
