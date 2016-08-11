@@ -71,7 +71,8 @@ export const SuccessMessages = {
   "successUpload": "The file has been uploaded. Yeehaw!",
   "successSubscribe": "Recipient details have been saved!",
   "successDelete": "",
-  "successSelectTemplate": "You just selected the ‘...’ template!",
+  "successSelectTemplate": "You just selected the ‘$selectedTemplate’" +
+    " template!",
   "successAddAdditionalField": "",
   "successImproveDelivery": "Your emails will be delivered over a period of" +
     " time, which is a good thing. Recommended",

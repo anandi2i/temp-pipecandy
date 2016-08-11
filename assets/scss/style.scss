@@ -8,17 +8,6 @@ body {
 a {
   cursor: pointer;
 }
-.top-notification {
-  position: absolute;
-  text-align: center;
-  top: 85px;
-  width: 100%;
-  .err-txt {
-    background-color: $err-bg;
-    border-radius: 3px;
-    padding: 3px 5px;
-  }
-}
 %percent {
   &::after {
     content: '%';
@@ -244,6 +233,44 @@ a {
   line-height: 20px;
   margin-bottom: 50px;
   padding: 30px;
+}
+/***********************************
+  Top Notification alert's
+************************************/
+@mixin notification-txt($bg, $brdr) {
+  background-color: $bg;
+  border: 1px solid $brdr;
+  border-radius: 3px;
+  display: inline-block;
+  padding: 3px 25px 3px 10px;
+  position: relative;
+}
+@mixin notification-close {
+  cursor: pointer;
+  float: right;
+  margin-left: 10px;
+  position: absolute;
+  right: 5px;
+  top: 7px;
+}
+.top-notification {
+  position: fixed;
+  text-align: center;
+  top: 58px;
+  width: 100%;
+  z-index: 999;
+  .err-txt {
+    @include notification-txt($err-bg, $red-clr);
+    i {
+      @include notification-close;
+    }
+  }
+  .success-txt {
+    @include notification-txt($lit-blue-bg, $green-menu-color);
+    i {
+      @include notification-close;
+    }
+  }
 }
 /***********************************
   New Google signup Page

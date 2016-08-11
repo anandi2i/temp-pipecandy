@@ -158,7 +158,8 @@ class SelectCampaignTemplate extends React.Component {
    * @param {string} templateName Name of the selected template
    */
   selectTemplate(templateName) {
-    displaySuccess(`${templateName} ${SuccessMessages.successSelectTemplate}`);
+    displaySuccess(SuccessMessages.successSelectTemplate
+      .replace("$selectedTemplate", `<strong>${templateName}</strong>`));
   }
 
   /**

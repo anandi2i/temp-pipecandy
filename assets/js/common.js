@@ -44,41 +44,51 @@ function removeToast() {
 window.removeToast = removeToast;
 
 function displayError(error) {
-  const timeToShow = 4000;
   if(error) {
-    $(".toast").remove();
-    let warningContent = $("<div>", {})
-      .append(
-        $("<img>", {
-          src: "/images/warning-icon.png",
-          alt: "Warning"
-        }))
-      .append(
-        $("<span>", {
-          text: error
-        }));
-    Materialize.toast(warningContent, timeToShow, "", removeToast);
+    var guid = Math.random()*16|0;
+    let warningContent = $("<div id='"+guid+"' class='top-notification'>", {})
+      .append($("<div class='err-txt'>", {}).append(error)
+      .append($("<i class='mdi mdi-close modal-close' onclick='closeNotification()'>", {})));
+    hideNotification(".not-txt", guid, warningContent);
   }
 }
 window.displayError = displayError;
 
 function displaySuccess(successInfo) {
-  const timeToShow = 4000;
   if(successInfo) {
-    $(".toast").remove();
-    let successContent = $("<div>", {})
-      .append(
-        $("<img>", {
-          src: "/images/success-icon.png"
-        }))
-      .append(
-        $("<span>", {
-          text: successInfo
-        }));
-    Materialize.toast(successContent, timeToShow, "", removeToast);
+    var guid = Math.random()*16|0;
+    let successContent = $("<div id='"+guid+"' class='top-notification'>", {})
+      .append($("<div class='success-txt'>", {}).append(successInfo)
+      .append($("<i class='mdi mdi-close modal-close' onclick='closeNotification()'>", {})));
+    hideNotification(".success-txt", guid, successContent);
   }
 }
 window.displaySuccess = displaySuccess;
+
+function hideNotification(hoverContainer, id, content) {
+  closeNotification();
+  $("body").append(content);
+  var $target = $("#"+id);
+  var time = 5000;
+  var timer = setTimeout(function() {
+    $target.fadeOut('500', function(){ $target.remove(); });
+  }, time);
+  function handlerIn() {
+    clearTimeout(timer);
+  }
+  function handlerOut() {
+    timer = setTimeout(function() {
+      $target.fadeOut('500', function(){ $target.remove(); });
+    }, time);
+  }
+  $(hoverContainer).hover(handlerIn, handlerOut);
+}
+window.hideNotification = hideNotification;
+
+function closeNotification() {
+  $(".top-notification").remove();
+}
+window.closeNotification = closeNotification;
 
 function enabledropDownBtn() {
   $(".dropdown-button").dropdown({
