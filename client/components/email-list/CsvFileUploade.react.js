@@ -88,12 +88,9 @@ class CsvFileUploade extends React.Component {
                     ?
                       <div className="center">
                         <div className="m-b-20">
-                          Oops!
-                          <strong> {uploadCsvDetails.invalidData.length} </strong>
-                          (out of { uploadCsvDetails.dataCount}) records have
-                            some missing fields
-                          (like first name, last name, email).
-                          Would you mind updating them?
+                          Oops! Some records {"don't"} seem to have all the data
+                          needed.<br/>
+                          Could you please fix them?
                         </div>
                         <a onClick={() => this.errorCsvList()}
                           className="btn btn-dflt blue sm-icon-btn p-1-btn">
@@ -108,9 +105,9 @@ class CsvFileUploade extends React.Component {
                     :
                       <div className="center">
                         <div className="m-b-20">
-                          Success! All the (
-                          <strong>{uploadCsvDetails.dataCount}</strong>) records got uploaded.
-                          <br/>Turn around & do a fist bump!
+                          Your list is ready. {"We've"} checked for duplicates
+                          & updates.<br/>
+                          All good!
                         </div>
                         <a onClick={this.closeModal}
                           className="btn btn-dflt blue sm-icon-btn">
