@@ -119,7 +119,7 @@ class PerformanceReport extends React.Component {
           }
       },
       series: [{
-          name: "Click rates",
+          name: "Click(s)",
           data: clickRateCount,
           color: "#FF6549",
           lineColor: "#FF6549",
@@ -132,7 +132,7 @@ class PerformanceReport extends React.Component {
               lineColor: "#FF6549"
           }
       }, {
-          name: "Open rates",
+          name: "Open(s)",
           data: openRateCount,
           color: "#FFC66D",
           lineColor: "#FFC66D",
