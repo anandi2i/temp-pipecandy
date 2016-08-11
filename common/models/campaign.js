@@ -1166,7 +1166,7 @@ module.exports = function(Campaign) {
   const getScheduledAtFromUser = (campaign, followup) => {
     let scheduledAtFromUser = followup ? followup.scheduledAt
                                        : campaign.scheduledAt;
-    if(lodash.gt((scheduledAtFromUser- new Date()), constants.ZERO)) {
+    if(lodash.lt((scheduledAtFromUser- new Date()), constants.ZERO)) {
       return new Date();
     }
     return scheduledAtFromUser;
