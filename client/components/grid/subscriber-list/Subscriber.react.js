@@ -30,7 +30,8 @@ class Subscriber extends React.Component {
       middleName: "",
       lastName: "",
       email: "",
-      listFields: []
+      listFields: [],
+      isChange: false
     };
     this.state = this.initialPersonData;
     /**
@@ -110,6 +111,7 @@ class Subscriber extends React.Component {
   setFieldValue(event, field) {
     let state = {};
     state[field] = event.target.value;
+    state.isChange = true;
     this.setState(state);
   }
 
@@ -127,6 +129,10 @@ class Subscriber extends React.Component {
    * @property {function} onValidate callback to execute after validation
    */
   onSubmit(addAnotherField) {
+    if(!this.state.isChange){
+      this.closeModal();
+      return;
+    }
     const onValidate = error => {
       if (!error) {
         this.saveOrUpdate();
