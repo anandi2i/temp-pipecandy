@@ -75,7 +75,7 @@ class ScheduleEmailView extends React.Component {
                               : ""
                           }
                         </strong>
-                        {emailContent.email}
+                        <span className="person-email">&lt;{emailContent.email}&gt;</span>
                       </span>
                       <span className="right">{scheduledAt}</span>
                     </div>

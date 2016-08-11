@@ -1142,7 +1142,7 @@ $lines-to-show: 8;
     margin-bottom: 0;
     margin-left: 0;
     margin-right: 0;
-    padding: 17px 0 7px;
+    padding: 15px 15px 7px;
   }
   label {
     float: left;
@@ -1578,6 +1578,10 @@ $lines-to-show: 8;
         }
         .collapsible-header {
           min-height: 60px;
+          padding: 0 10px;
+          .person-email {
+            margin-left: 10px;
+          }
         }
         .to-email {
           margin-top: 20px;
