@@ -1814,6 +1814,7 @@ module.exports = function(Campaign) {
       }
       if(!campaign)
         return getCurrentCampaignDetailsCB(errorMessages.INVALID_CAMPAIGN_ID);
+      currentCampaignDetailsObj.campaignId = campaign.id;
       currentCampaignDetailsObj.campaignName = campaign.name;
       currentCampaignDetailsObj.executedAt = new Date(campaign.lastRunAt);
       campaign.lists((campaignListsErr, campaignList) => {

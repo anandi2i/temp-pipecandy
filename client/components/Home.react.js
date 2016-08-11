@@ -115,7 +115,11 @@ class Home extends React.Component {
                 <div className="gray-head"> Recent campaign stats </div>
                 <div className="campaign-status">
                   <ul>
-                    <li className="blue-head"> {campaignDetails.campaignName} </li>
+                    <li className="blue-head">
+                      <Link to={`/campaign/${campaignDetails.campaignId}`}>
+                        {campaignDetails.campaignName}
+                      </Link>
+                    </li>
                     <li className="blue-txt">
                       <i className="separator">&nbsp;</i>
                       {campaignDetails.recepientCount} recipients
