@@ -1454,6 +1454,14 @@ $lines-to-show: 8;
   background-color: $lit-gray-bg;
   min-height: 36px;
   width: 100%;
+  .smart-tag-container {
+    box-sizing: border-box;
+    line-height: 2.5;
+    overflow: hidden;
+    padding-right: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .mce-panel {
     background-color: transparent;
     border: 0;
@@ -1998,6 +2006,13 @@ $lines-to-show: 8;
     .mce-panel {
       display: none !important;
     }
+    .smart-tag-container {
+      float: left;
+      margin-left: 5px !important;
+      max-width: 78%;
+      min-width: 60%;
+      position: absolute;
+    }
   }
 }
 @media only screen and (max-width: 600px) {
@@ -2144,5 +2159,23 @@ $lines-to-show: 8;
   }
   .lg-btn-dflt {
     width: 300px;
+  }
+}
+@media only screen and (min-width: 992px) and (max-width: 1125px) {
+  html {
+    font-size: 14px;
+  }
+  .smart-tag-container {
+    clear: both;
+    float: left !important;
+    min-width: 90%;
+  }
+}
+
+@media only screen and (max-width: 830px) {
+  .smart-tag-container {
+    clear: both;
+    float: left !important;
+    min-width: 80%;
   }
 }

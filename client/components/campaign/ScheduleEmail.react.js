@@ -768,12 +768,16 @@ class ScheduleEmail extends React.Component {
                   </div>
                 */}
                 <div className="row email-content m-lr-0">
-                  <div className="tiny-toolbar" id="mytoolbar">
+                  <div className="row tiny-toolbar">
+                    <div className="tiny-toolbar-sub col s12 m6 l6" id="mytoolbar">
+                    </div>
+                    <div className="right smart-tag-container col s12 m6 l6  horizontal tooltipped"
+                      data-position="top"
+                      data-tooltip="Press '#' to insert smart tags
+                      that personalize your email">
+                      Press '#' to insert smart tags that personalize your email
+                    </div>
                     {/*<div className="right smart-tag-container">
-                      <div id="insertSmartTags" className="btn btn-dflt dropdown-button sm-icon-btn" data-activates="dropdown">
-                        <i className="left mdi mdi-code-tags"></i>
-                        <span>Insert Smart Tags</span>
-                      </div>
                         <ul id="dropdown" className="dropdown-content">
                           {
                             commonSmartTags.map(function(tag, key) {
