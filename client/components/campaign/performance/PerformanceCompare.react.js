@@ -34,7 +34,7 @@ class PerformanceCompare extends React.Component {
       <div>
         <div className="container"
           style={{display: metricData.length ? "block" : "none"}}>
-          <div className="row main-head">Campaign stats</div>
+          <div className="row main-head">Key stats</div>
           <div className="row camp-chip-container">
             {
               metricData.map((list, key) => {
