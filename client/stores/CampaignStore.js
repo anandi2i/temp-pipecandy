@@ -179,9 +179,11 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   getAllCampaigns() {
     const edit = ["0"];
     const sent = ["96", "100"];
-    const resume = ["62", "66", "70", "72", "74", "76", "78", "80", "82",
+    const stopped = ["62", "70", "72", "74", "76", "78", "80", "82",
       "84", "90"];
     const progress = ["60"];
+    const resume = ["63", "71", "73", "75", "77", "79", "81", "83",
+     "85", "91"];
     let allCampaignList = [];
     allCampaigns.map(campaign => {
       const statusCode = campaign.statusCode.toString();
@@ -190,10 +192,12 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
         status = "In Draft";
       } else if (_.contains(sent, statusCode)) {
         status = "Sent";
-      } else if (_.contains(resume, statusCode)) {
+      } else if (_.contains(stopped, statusCode)) {
         status = "Paused";
       } else if (_.contains(progress, statusCode)) {
         status = "In Progress";
+      } else if (_.contains(resume, statusCode)) {
+        status = "Resumed";
       } else {
         status = "Scheduled";
       }
