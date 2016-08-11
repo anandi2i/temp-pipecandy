@@ -52,7 +52,7 @@ class Dashboard extends React.Component {
             ?
               <div>
                 {/* Dashboard head */}
-                <CampaignReportHead campaignId={recentCampaignId}/>
+                <CampaignReportHead recentCampaignId={recentCampaignId}/>
                 {/* Performance Compared Menu */}
                 <PerformanceCompare campaignId={recentCampaignId}/>
                 {/* Performance Chart */}

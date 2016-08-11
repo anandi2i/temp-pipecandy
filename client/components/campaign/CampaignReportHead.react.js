@@ -15,7 +15,7 @@ class CampaignReportHead extends React.Component {
   }
 
   componentDidMount() {
-    const {campaignId} = this.props;
+    const campaignId = this.props.campaignId || this.props.recentCampaignId;
     CampaignStore.addReportStoreListener(this.onStoreChange);
     if(!campaignId) {
       CampaignActions.getRecentCampaignDetails();
@@ -38,7 +38,7 @@ class CampaignReportHead extends React.Component {
   }
 
   render() {
-    const campaignId = this.props.campaignId;
+    const campaignId = this.props.campaignId || this.props.recentCampaignId;
     const campaignDetails = this.state.campaignDetails;
     return (
       <div className="container">
@@ -52,9 +52,21 @@ class CampaignReportHead extends React.Component {
                   <li> Sent to {campaignDetails.listCount} lists
                     <i className="mdi mdi-record"></i>
                     {campaignDetails.recepientCount} recipients
-                    <i className="mdi mdi-record"></i>
+                    {
+                      !this.props.campaignId
+                      ?
+                      <i className="mdi mdi-record"></i>
+                      : ""
+                    }                    
                   </li>
-                  <li><a>View Details Report</a></li>
+                  <li>
+                    {
+                      !this.props.campaignId
+                      ?
+                      <Link to={`/campaign/${campaignId}`} >View Details Report</Link>
+                      : ""
+                    }
+                </li>
                 </ul>
               </div>
               {
