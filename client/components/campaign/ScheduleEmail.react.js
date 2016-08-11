@@ -466,7 +466,7 @@ class ScheduleEmail extends React.Component {
     const el = followup.el;
     let followupCampaignDetails = {
       daysAfter: el.find(`#dayPicker${followup.props.followupId} input`).val()
-        .split("")[0],
+        .split(" ")[0],
       stepNo: followup.props.followUpNumber,
       time: this.convertMeridian(el.find(".timepicker").val())
     };
