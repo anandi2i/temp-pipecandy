@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from "react-router";
 import _ from "underscore";
 import Griddle from "griddle-react";
 import CustomPagerComponent from "../CustomGridPagination.react";
@@ -76,7 +77,8 @@ class CampaignGrid extends React.Component {
     this.state = {
       isResultEmpty: true,
       noDataMessage: <div> Dang! You don't seem to have any campaigns here. Do
-      you want to <a href="/campaign/create/"> add a new campaign </a> ? </div>
+      you want to <Link to="/campaign/create/"> add a new campaign </Link> ?
+      </div>
     };
   }
 

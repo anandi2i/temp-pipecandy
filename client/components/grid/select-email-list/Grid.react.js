@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from "react-router";
 import _ from "underscore";
 import Griddle from "griddle-react";
 import CustomRowComponent from "./CustomRowComponent.react";
@@ -15,7 +16,7 @@ class SelectEmailListGrid extends React.Component {
       selectedRowIds: [],
       isResultEmpty: true,
       noDataMessage: <div> Dang! You don't seem to have any email list here. Do
-      you want to <a href="/list/create/"> add a new list </a> ? </div>
+      you want to <Link to="/list/create/"> add a new list </Link> ? </div>
     };
   }
 
