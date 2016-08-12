@@ -51,11 +51,11 @@ let columnMeta = [{
     "cssClassName": "replies",
     "sortable": false
   }, {
-    "columnName": "progress",
+    "columnName": "scheduledAt",
     "order": 6,
     "locked": true,
     "visible": true,
-    "displayName": "Progress",
+    "displayName": "Scheduled",
     "sortable": false,
     "cssClassName" : ""
   }, {
@@ -123,7 +123,7 @@ class CampaignGrid extends React.Component {
             columnMetadata={columnMeta}
             columns={["id", "name", "listSentTo",
               "status", "replies",
-              "progress", "action"]}
+              "scheduledAt", "action"]}
             metadataColumns={[]}
             showPager={true}
             resultsPerPage="7"

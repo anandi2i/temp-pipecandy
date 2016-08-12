@@ -1,5 +1,6 @@
 import {EventEmitter} from "events";
 import _ from "underscore";
+import moment from "moment";
 import Constants from "../constants/Constants";
 import AppDispatcher from "../dispatcher/AppDispatcher";
 import {HandleError} from "../utils/ErrorMessageHandler";
@@ -207,8 +208,9 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
         listSentTo: campaign.listSentTo,
         status: status,
         replies: campaign.replies,
-        progress: `${campaign.progress}%`,
-        action: status
+        action: status,
+        scheduledAt: campaign.scheduledAt ? moment(campaign.scheduledAt)
+        .format("DD MMM YYYY, h:mm a") : "-"
       });
     });
     return allCampaignList;
