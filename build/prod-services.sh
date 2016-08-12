@@ -2,6 +2,8 @@
 #prod-services.sh
 #author: dinesh.r@ideas2it.com
 
+export NODE_ENV=prod
+
 #Get the branch name from user
 read -p "Which branch to pull (dev/master/demo)? " branch_name
 
@@ -27,8 +29,6 @@ echo "Installing node modules"
 npm install
 echo "Node modules has been successfully installed"
 echo "-------------------------------------------------------------------------"
-
-export NODE_ENV=prod
 
 #Start pm2
 echo "Starting the application"

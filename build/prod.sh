@@ -2,6 +2,8 @@
 #prod.sh
 #author: dinesh.r@ideas2it.com
 
+export NODE_ENV=prod
+
 #Get the branch name from user
 read -p "Which branch to pull (dev/master/demo)? " branch_name
 
@@ -37,8 +39,6 @@ echo "Installing bower components"
 bower install
 echo "Installed the bower components successfully"
 echo "-------------------------------------------------------------------------"
-
-export NODE_ENV=prod
 
 #Run automigrate if required or just autoupdate
 if [ "y" = $automigrate ]; then
