@@ -111,12 +111,11 @@ class AddFollowups extends React.Component {
    * set deleteCampaignId state to null
    */
   deleteCampaignFollowUp = (isTrue) => {
+    if(isTrue){
+      this.props.deleteFollowUp(this.state.deleteCampaignId);
+    }
     this.setState({
       deleteCampaignId: null
-    }, () => {
-      if(isTrue){
-        this.props.deleteFollowUp(this.state.deleteCampaignId);
-      }
     });
   }
 

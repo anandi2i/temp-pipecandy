@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import Spinner from "../Spinner.react";
 import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
@@ -21,12 +22,15 @@ class SelectEmailList extends React.Component {
   }
 
   componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
+    this.el.find(".tooltipped").tooltip({delay: 50});
     EmailListStore.addChangeListener(this.onEmailListChange);
     getAllEmailList();
   }
 
   componentWillUnmount() {
     EmailListStore.removeChangeListener(this.onEmailListChange);
+    removeMaterialTooltip();
   }
 
   onEmailListChange = () => {
@@ -39,9 +43,19 @@ class SelectEmailList extends React.Component {
   }
 
   render() {
+    const draftEmailIndex = 2;
     return (
       <div className="container">
-        <h4> Select Email List </h4>
+        <div className="row sub-head-container m-lr-0">
+          <div className="head col s12 m10 l10">{"Select Email List(s)"}</div>
+          <div className="col s12 m2 l2 p-0">
+            <a className="btn right arrow-btn tooltipped" data-position="left"
+              onClick={() => this.props.handleClick(draftEmailIndex)}
+              data-tooltip="Draft Email(s)">
+              <i className="mdi mdi-chevron-right"></i>
+            </a>
+          </div>
+        </div>
         <div className="container" style={{display: this.state.spinning ? "block" : "none"}}>
           <div className="spinner-container">
             <Spinner />

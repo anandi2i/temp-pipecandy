@@ -19,6 +19,11 @@ $(document).ready(function() {
   }
 });
 
+function removeMaterialTooltip() {
+  $(".material-tooltip").remove();
+};
+window.removeMaterialTooltip = removeMaterialTooltip;
+
 function enableSideNavDropDown() {
   if ($(".side-nav-btn").length && !isOpenSideNav) {
     isOpenSideNav = true;

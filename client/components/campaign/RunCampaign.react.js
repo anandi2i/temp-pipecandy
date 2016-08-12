@@ -12,7 +12,7 @@ class TabsNav extends React.Component {
     this.state={
       selectEmailList: {
         index: 1,
-        name: "Select Email Lists"
+        name: "Select Email List(s)"
       },
       selectTemplate: {
         index: 2,
@@ -154,6 +154,7 @@ class RunCampaign extends React.Component {
                 {
                   tabs.selectEmailList === activeTab
                     ? <SelectEmailList ref="selectEmailList"
+                        handleClick={this.handleClick}
                         active={activeTab} />
                     : ""
                 }

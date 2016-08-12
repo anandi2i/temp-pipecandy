@@ -73,6 +73,17 @@ textarea.materialize-textarea:focus:not([readonly]) + label {
 .red {
   background-color: $red-clr !important;
 }
+.arrow-btn{
+  background-color: $white !important;
+  border: 1px solid $dflt-btn-clr;
+  color: $dflt-txt-clr;
+  padding: 0;
+  max-width: 50px;
+  min-width: 50px;
+  i{
+    font-size: 24px;
+  }
+}
 /***********************************
           nav bar changes
 ************************************/

@@ -83,6 +83,7 @@ class ScheduleEmail extends React.Component {
     }
     CampaignStore.removeEmailListChangeListener(this.onStoreChange);
     CampaignStore.removeSpamScoreChangeListener(this.onSpamScoreChange);
+    removeMaterialTooltip();
   }
 
 /**
@@ -624,7 +625,8 @@ class ScheduleEmail extends React.Component {
   }
 
   render() {
-    let selectEmailListIndex = 1;
+    const selectEmailListIndex = 1;
+    const draftEmailIndex = 2;
     let {
       errorCount,
       isEditorReady,
@@ -674,7 +676,14 @@ class ScheduleEmail extends React.Component {
         </div>
         <div style={{display: isEditorReady ? "block" : "none"}}>
           <div className="row sub-head-container m-lr-0">
-            <div className="head">{"Let's Draft an Email"}</div>
+            <div className="head col s12 m10 l10">{"Let's Draft an Email"}</div>
+            <div className="col s12 m2 l2 p-0">
+              <a className="btn arrow-btn right tooltipped" data-position="left"
+                data-tooltip="Draft Email(s)"
+                onClick={() => this.props.handleClick(draftEmailIndex)}>
+                <i className="mdi mdi-chevron-left"></i>
+              </a>
+            </div>
             <div className="sub-head">
               <div className="switch">
                 <label className="f-s-14">

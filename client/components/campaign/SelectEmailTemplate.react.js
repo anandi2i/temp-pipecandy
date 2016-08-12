@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import SelectPreBuildTemplate from "./SelectPreBuildTemplate.react";
 import SelectCampaignTemplate from "./SelectCampaignTemplate.react";
 
@@ -45,6 +46,15 @@ class SelectEmailTemplate extends React.Component {
     };
   }
 
+  componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
+    this.el.find(".tooltipped").tooltip({delay: 50});
+  }
+
+  componentWillUnmount() {
+    removeMaterialTooltip();
+  }
+
   handleClick = (index) => {
     this.setState({
       activeTab: index
@@ -53,18 +63,27 @@ class SelectEmailTemplate extends React.Component {
 
   render() {
     const scheduleEmailIndex = 3;
+    const emailListIndex = 1;
     return (
       <div className="container">
-        <div className="row sub-head-container m-lr-0">
-          <div className="head">Start drafting your email(s)</div>
+        <div className="row sub-head-container">
+          <div className="head col s12 m10 l10">Start drafting your email(s)</div>
+          <div className="col s12 m2 l2 p-0">
+            <a className="btn arrow-btn right tooltipped"
+              data-position="left"
+              data-tooltip="Select Email List(s)"
+              onClick={() => this.props.handleClick(emailListIndex)} >
+              <i className="mdi mdi-chevron-left"></i>
+            </a>
+          </div>
+          <div className="sub-head">
+            <a className="btn blue" onClick={() => this.props.handleClick(scheduleEmailIndex)}>Save & continue</a>
+          </div>
         </div>
         <div className="row inner-tabs">
           <nav>
             <div className="nav-wrapper">
               <TabsNav handleClick={this.handleClick} active={this.state.activeTab}/>
-              <ul className="right">
-              <a className="btn blue" onClick={() => this.props.handleClick(scheduleEmailIndex)}>Save & continue</a>
-              </ul>
             </div>
           </nav>
         </div>

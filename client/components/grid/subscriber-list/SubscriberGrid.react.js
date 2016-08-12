@@ -10,7 +10,7 @@ import CustomSelectComponent from "./CustomSelectComponent.react";
 import CustomSelectAllComponent from "./CustomSelectAllComponent.react";
 import Subscriber from "./Subscriber.react";
 import EmailListActions from "../../../actions/EmailListActions";
-import CustomUnsubscribeComponent from "./CustomUnsubsCribeComponent.react";
+import CustomUnsubscribeComponent from "./CustomUnsubscribeComponent.react";
 /**
  * Render the people data for a list using react-griddle
  */
@@ -40,11 +40,11 @@ class SubscriberGridView extends React.Component {
   /**
    * Show the tooltip when user hovers on Unsubscribed email
    */
-
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
     this.el.find(".tooltipped").tooltip({delay: 50});
   }
+  
   /**
    * Delete selected persons from Email List
    */
