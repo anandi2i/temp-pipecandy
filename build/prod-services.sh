@@ -28,7 +28,7 @@ npm install
 echo "Node modules has been successfully installed"
 echo "-------------------------------------------------------------------------"
 
-export NODE_ENV=production
+export NODE_ENV=prod
 
 #Start pm2
 echo "Starting the application"

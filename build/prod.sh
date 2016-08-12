@@ -38,7 +38,7 @@ bower install
 echo "Installed the bower components successfully"
 echo "-------------------------------------------------------------------------"
 
-export NODE_ENV=production
+export NODE_ENV=prod
 
 #Run automigrate if required or just autoupdate
 if [ "y" = $automigrate ]; then
