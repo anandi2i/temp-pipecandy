@@ -659,6 +659,7 @@ module.exports = function(user) {
         campaignMetrics.campaignId = campaign.id;
         campaignMetrics.campaign = campaign.name;
         campaignMetrics.statusCode = campaign.statusCode;
+        campaignMetrics.scheduledAt = campaign.scheduledAt;
         campaignList.push(campaignMetrics);
         return campaignEachCB(null);
       });

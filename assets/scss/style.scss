@@ -1343,6 +1343,7 @@ $lines-to-show: 8;
       margin-right: 5px;
       padding: 0 10px;
       .title-wrapper {
+        cursor: pointer;
         display: inline-flex;
         .title {
           max-width: 170px;

@@ -15,6 +15,7 @@ import CampaignActions from "../../actions/CampaignActions";
 import {ErrorMessages, SuccessMessages} from "../../utils/UserAlerts";
 import Spinner from "../Spinner.react";
 import AlertModal from "../AlertModal.react";
+import {Link} from "react-router";
 
 class ScheduleEmail extends React.Component {
   constructor(props) {
@@ -739,7 +740,7 @@ class ScheduleEmail extends React.Component {
                         return (
                           <div key={key} className="chip">
                             <div className="title-wrapper">
-                              <span className="title">{list.name}</span>
+                              <Link to={`/list/${list.id}`} target="_blank" className="title">{list.name}</Link>
                             </div>
                             <span className="count">{list.peopleCount}</span>
                             <i onClick={(e) => this.deleteList(e, list.id)}
