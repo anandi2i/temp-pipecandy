@@ -128,6 +128,7 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
         middleName: people.middleName || "",
         lastName: people.lastName,
         email: people.email,
+        isUnsubscribed: people.isUnsubscribed,
         edit: ""
       };
       _.each(fieldsName, fieldName => {

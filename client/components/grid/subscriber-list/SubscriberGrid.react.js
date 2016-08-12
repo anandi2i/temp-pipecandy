@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import validation from "react-validation-mixin";
 import strategy from "joi-validation-strategy";
 import Griddle from "griddle-react";
@@ -9,6 +10,7 @@ import CustomSelectComponent from "./CustomSelectComponent.react";
 import CustomSelectAllComponent from "./CustomSelectAllComponent.react";
 import Subscriber from "./Subscriber.react";
 import EmailListActions from "../../../actions/EmailListActions";
+import CustomUnsubscribeComponent from "./CustomUnsubsCribeComponent.react";
 /**
  * Render the people data for a list using react-griddle
  */
@@ -35,6 +37,14 @@ class SubscriberGridView extends React.Component {
     });
   }
 
+  /**
+   * Show the tooltip when user hovers on Unsubscribed email
+   */
+
+  componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
+    this.el.find(".tooltipped").tooltip({delay: 50});
+  }
   /**
    * Delete selected persons from Email List
    */
@@ -126,7 +136,8 @@ class SubscriberGridView extends React.Component {
         "locked": false,
         "visible": true,
         "displayName": "e-mail",
-        "cssClassName" : "email"
+        "cssClassName" : "email",
+        "customComponent": CustomUnsubscribeComponent
       }, {
         "columnName": "edit",
         "order": genericFields + fieldsName.length + nextField,
@@ -136,6 +147,11 @@ class SubscriberGridView extends React.Component {
         "cssClassName" : "icon",
         "sortable" : false,
         "customComponent": CustomEditLinkComponent
+      }, {
+        "columnName": "isUnsubscribed",
+        "locked": true,
+        "visible": false,
+        "cssClassName" : "isunsubscribed"
       }];
     fieldsName.map((field, index) => {
       columnMeta.push({

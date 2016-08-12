@@ -731,6 +731,12 @@ a {
     padding: 0;
   }
 }
+.unsubscribe {
+  color: $red-clr;
+}
+.isunsubscribed {
+  display: none;
+}
 /*************************
   Single event handling
 **************************/
@@ -2175,7 +2181,6 @@ $lines-to-show: 8;
     min-width: 90%;
   }
 }
-
 @media only screen and (max-width: 830px) {
   .smart-tag-container {
     clear: both;
