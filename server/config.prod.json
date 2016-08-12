@@ -1,0 +1,62 @@
+{
+  "restApiRoot": "/api",
+  "host": "0.0.0.0",
+  "emailHost":"app.pipecandy.com",
+  "appHost": "http://app.pipecandy.com",
+  "redirectURL": "http://app.pipecandy.com",
+  "port": 3000,
+  "emailPort":"80",
+  "remoting": {
+    "context": {
+      "enableHttpContext": false
+    },
+    "rest": {
+      "normalizeHttpPath": false,
+      "xml": false
+    },
+    "json": {
+      "strict": false,
+      "limit": "100kb"
+    },
+    "urlencoded": {
+      "extended": true,
+      "limit": "100kb"
+    },
+    "cors": false,
+    "errorHandler": {
+      "disableStackTrace": false
+    }
+  },
+  "legacyExplorer": false,
+  "cookieSecret": "246bace2-38cb-4138-85d9-0ae8160b07c8",
+
+  "queue": {
+    "config": {
+      "accessKeyId": "AKIAIBZ3SOWHAEP3UI3A",
+      "secretAccessKey": "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",
+      "region": "ap-south-1"
+    },
+    "url": {
+      "intelligenceIn": "https://sqs.ap-south-1.amazonaws.com/736447789897/pc-app-intelligence-in",
+      "intelligenceOut": "https://sqs.ap-south-1.amazonaws.com/736447789897/pc-app-intelligence-out",
+      "emailAssembler": "https://sqs.ap-south-1.amazonaws.com/736447789897/pc-app-email-assembler"
+    }
+  },
+
+  "appUrl": "http://app.pipecandy.com",
+  "googleCredentials": {
+    "installed": {
+      "client_id": "478206392598-0uq1vtkne494bdhnlb1k4fjson3shjap.apps.googleusercontent.com",
+      "project_id": "pipecandy-1294",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://accounts.google.com/o/oauth2/token",
+      "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+      "client_secret": "-9z-cU18aImvflghMHWaz4oW",
+      "redirect_uris": [
+        "http://app.pipecandy.com/auth/google/callback",
+        "http://localhost:3001/auth/google/callback",
+        "http://localhost:3000/auth/google/callback"
+      ]
+    }
+  }
+}
