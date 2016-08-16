@@ -48,7 +48,9 @@ class CampaignListView extends React.Component {
             <Spinner />
           </div>
         </div>
-        <CampaignGrid results={allCampaignLists} />
+        <div style={{display: spinning ? "none" : "block"}}>
+          <CampaignGrid results={allCampaignLists} />
+        </div>
       </div>
     );
   }
