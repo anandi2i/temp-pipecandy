@@ -16,22 +16,25 @@ class AddFollowups extends React.Component {
       emailText: "",
       emailContent: "",
       emailRawText: "",
-      deleteCampaignId: null
+      deleteCampaignId: null,
+      days: "1"
     };
   }
 
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
-    this.el.find("select").material_select();
+    this.el.find("select").material_select(() => this.handleDayChange());
     initTimePicker(this.el.find(".timepicker"));
     enabledropDownBtnByID(`#insertSmartTags${this.props.followupId}`);
     this.initTinyMCE();
     CampaignStore.addEmailListChangeListener(this.onStoreChange);
+    this.el.find(".tooltipped").tooltip({delay: 50});
   }
 
   componentWillUnmount() {
     this.el.find("select").material_select("destroy");
     CampaignStore.removeEmailListChangeListener(this.onStoreChange);
+    this.el.find(".tooltipped").tooltip("remove");
   }
 
   onStoreChange = () => {
@@ -127,9 +130,20 @@ class AddFollowups extends React.Component {
     }
   }
 
+  /**
+   * Update the day count state
+   */
+  handleDayChange() {
+    this.setState({
+      days: this.refs.days.value
+    });
+  }
+
   render() {
     const {followupId, id, content, peopleList} = this.props;
     let indexInc = 1;
+    const {days} = this.state;
+    const dayCount = `${days} ${days === indexInc.toString() ? "day" : "days"}`;
     const scheduleCount = 30;
     let followUpCount = id + indexInc;
     let className = this.state.clicked
@@ -170,6 +184,10 @@ class AddFollowups extends React.Component {
             <i className="mdi mdi-delete-forever"
               onClick={() => this.getConfirmation(id)}>
             </i>
+            <i className="mdi mdi-clock tooltipped"
+              data-tooltip={`Will be sent in ${dayCount} after the previous
+              email if there's no response.`}>
+            </i>
           </div>
         </div>
         <div id={"followUps" + followupId} className="col s12 m12 l10 offset-l1 draft-template">
@@ -179,7 +197,7 @@ class AddFollowups extends React.Component {
           <div className="row m-lr-0 schedule-time">
             <div className="col s12 m4 l3">
               <div className="input-field" id={"dayPicker" + followupId}>
-                <select>
+                <select ref="days">
                   {
                     _.range(scheduleCount).map(function(k) {
                       let display = "days";

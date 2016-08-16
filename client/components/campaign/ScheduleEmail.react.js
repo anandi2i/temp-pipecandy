@@ -83,7 +83,7 @@ class ScheduleEmail extends React.Component {
     }
     CampaignStore.removeEmailListChangeListener(this.onStoreChange);
     CampaignStore.removeSpamScoreChangeListener(this.onSpamScoreChange);
-    removeMaterialTooltip();
+    this.el.find(".tooltipped").tooltip("remove");
   }
 
 /**
@@ -872,6 +872,11 @@ class ScheduleEmail extends React.Component {
                   />
                 {/* Popup ends here*/}
             </div>
+          </div>
+          <div className="m-b-20"
+            style={{display: followups.length ? "block" : "none"}}>
+            Follow ups automatically stop if a recipient responds to any of
+            your emails.
           </div>
           {
             followups.map(function (followUp, key) {
