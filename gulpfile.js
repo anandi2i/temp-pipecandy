@@ -27,6 +27,7 @@ var config = require("./webpack.config.dev");
 var sassLintConfig = require("./.sass-lint.config");
 var devPort = 3001;
 var isProduction = !!util.env.production;
+var babel = require("gulp-babel");
 
 /**
  * Cleans the build directory
@@ -93,6 +94,7 @@ gulp.task("bower:css", function() {
 gulp.task("js", function() {
   return gulp.src(["./assets/js/**/*"])
     .pipe(concat("main.js").on("error", util.log))
+    .pipe(babel())
     .pipe(isProduction ?
       minifier({}, uglifyjs).on("error", util.log) : util.noop())
     .pipe(gulp.dest("./public/assets"));

@@ -33,6 +33,13 @@ npm install
 echo "Node modules has been successfully installed"
 echo "-------------------------------------------------------------------------"
 
+#babelify the joi related node_modules
+#sudo npm install -g babel-cli if babel is not installed globally
+babel -d node_modules/joi/ node_modules/joi/
+babel -d node_modules/topo/ node_modules/topo/
+babel -d node_modules/hoek/lib/ node_modules/hoek/lib/
+babel -d node_modules/isemail/lib/ node_modules/isemail/lib/
+
 #Install the bower components
 echo "-------------------------------------------------------------------------"
 echo "Installing bower components"
