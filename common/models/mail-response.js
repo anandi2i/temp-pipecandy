@@ -18,12 +18,10 @@ module.exports = function(MailResponse) {
       }
     }, (mailResponseEntryErr, mailResponseEntry) => {
       if (!lodash.isEmpty(mailResponseEntry)) {
-        lodash(mailResponseEntry).forEach(mailResponse => {
-          MailResponse.destroyById(mailResponse.id);
-        });
+        return callback(mailResponseEntryErr, mailResponseEntry[0], false);
       }
       MailResponse.create(mailResponse, (error, response) => {
-        callback(error, response);
+        return callback(error, response, true);
       });
     });
   };

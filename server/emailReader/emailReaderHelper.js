@@ -61,7 +61,7 @@ function readUserMails(App, gmail, auth, param, callback) {
           if(sentMail) {
             getMessageByThreadId(gmail, auth, param.userMailId, threadId,
                   (error, response) => {
-              if(error) threadIdCB(error);
+              if(error) return threadIdCB(error);
               let messagesInThread = response.messages;
               let messagesToProcess = getMessageToBeProcessed(messagesInThread,
                   grpdMsgListByThrdId, threadId);
@@ -274,7 +274,8 @@ function updateUserCredentials(App, auth, param, callback) {
  */
 function processMailResponse(App, param, mailResponse, sentMail, callback) {
   App.MailResponse.createResponse(mailResponse,
-        (error, response) => {
+        (error, response, isNew) => {
+    if(!isNew) return callback(error);
     async.parallel([
       function(tableUpdateCB) {
         updateRelatedTables(App, param, response, sentMail, (error, response)=>{
@@ -300,7 +301,7 @@ function processMailResponse(App, param, mailResponse, sentMail, callback) {
         }
       }
     ], function(err, results) {
-      callback(err, results);
+      return callback(err, results);
     });
   });
 }
