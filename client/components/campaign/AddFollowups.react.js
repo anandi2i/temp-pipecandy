@@ -184,7 +184,7 @@ class AddFollowups extends React.Component {
             <i className="mdi mdi-delete-forever"
               onClick={() => this.getConfirmation(id)}>
             </i>
-            <i className="mdi mdi-clock tooltipped"
+            <i className="mdi mdi-clock tooltipped" data-position="top"
               data-tooltip={`Will be sent in ${dayCount} after the previous
               email if there's no response.`}>
             </i>

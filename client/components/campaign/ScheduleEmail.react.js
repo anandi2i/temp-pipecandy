@@ -873,7 +873,7 @@ class ScheduleEmail extends React.Component {
                 {/* Popup ends here*/}
             </div>
           </div>
-          <div className="m-b-20"
+          <div className="m-b-20 center"
             style={{display: followups.length ? "block" : "none"}}>
             Follow ups automatically stop if a recipient responds to any of
             your emails.

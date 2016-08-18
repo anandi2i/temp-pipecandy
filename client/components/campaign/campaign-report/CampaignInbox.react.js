@@ -126,6 +126,7 @@ class CampaignInbox extends React.Component {
   moveMailsChange = () => {
     const {activeTabId, inboxMails, selectedInboxIds} = this.state;
     this.el.find(".filled-in").attr("checked", false);
+    CampaignActions.getInboxClassificationCount(this.props.params.id);
     if(activeTabId !== "all") {
       this.setState({
         inboxMails: _.reject(inboxMails,
@@ -133,7 +134,8 @@ class CampaignInbox extends React.Component {
         ),
         selectedInboxIds: []
       });
-      CampaignActions.getInboxClassificationCount(this.props.params.id);
+    } else {
+      this.setState({selectedInboxIds: []});
     }
   }
 
