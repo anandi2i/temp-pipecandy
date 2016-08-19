@@ -117,6 +117,11 @@
       "type": "hasMany",
       "model": "inboxMail",
       "foreignKey": ""
+    },
+    "defaultTemplates": {
+      "type": "hasMany",
+      "model": "defaultTemplate",
+      "foreignKey": "createdBy"
     }
   },
   "acls": [

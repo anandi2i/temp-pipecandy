@@ -8,7 +8,7 @@ const CampaignApi = {
     return api.get(`/api/users/${getCookie("userId")}/campaignList`);
   },
   getAllEmailTemplates() {
-    return api.get("/api/defaultTemplates");
+    return api.get("/api/defaultTemplates/templates");
   },
   /**
    * To check campaign id is exists or not
