@@ -49,10 +49,10 @@ class SelectEmailList extends React.Component {
         <div className="row sub-head-container m-lr-0">
           <div className="head col s12 m10 l10">{"Select Email List(s)"}</div>
           <div className="col s12 m2 l2 p-0">
-            <a className="btn right arrow-btn tooltipped" data-position="left"
-              onClick={() => this.props.handleClick(draftEmailIndex)}
-              data-tooltip="Draft Email(s)">
-              <i className="mdi mdi-chevron-right"></i>
+            <a className="blue right arrow-btn btn"
+              onClick={() => this.props.handleClick(draftEmailIndex)}>
+              Draft Email(s)
+              <i className="mdi mdi-chevron-right right"></i>
             </a>
           </div>
         </div>

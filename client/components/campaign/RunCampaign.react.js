@@ -116,10 +116,9 @@ class RunCampaign extends React.Component {
     });
   }
 
-  setTemplateContent = () => {
+  setTemplateContent = (template) => {
     this.setState({
-      selectedTemplate: this.refs.SelectEmailTemplate
-        .refs.selectPreBuildTemplate.state.activeTemplateContent
+      selectedTemplate: template
     });
   }
 

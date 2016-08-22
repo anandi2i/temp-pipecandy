@@ -12,6 +12,7 @@ let _error = "";
 let _isExistCampaignId = false;
 let allCampaigns = [];
 let _allEmailTemplates = [];
+let _allUserTemplates = [];
 let _campaignMetrics = [];
 let _campaignDetails = {};
 let _WordIoVariations = "";
@@ -220,6 +221,10 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     return _allEmailTemplates;
   },
 
+  getAllUserTemplates() {
+    return _allUserTemplates;
+  },
+
   getSelectedEmailList() {
     return selectedEmailList;
   },
@@ -419,6 +424,17 @@ AppDispatcher.register(function(payload) {
         CampaignStore.emitChange();
       });
       break;
+    case Constants.GET_ALL_USER_TEMPLATES:
+      CampaignApi.getAllUserTemplates().then((response) => {
+        _allUserTemplates = response.data;
+        _error = "";
+        CampaignStore.emitChange();
+      }, (err) => {
+        _allUserTemplates = [];
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
+      });
+      break;
     case Constants.GET_SELECTED_EMAIL_LIST:
       let selectedList = {
         ids: action.data
@@ -604,6 +620,18 @@ AppDispatcher.register(function(payload) {
         _error = "";
         browserHistory.push("/campaign");
         displaySuccess("Campaign saved successfully");
+      }, (err) => {
+          _error = HandleError.evaluateError(err);
+          CampaignStore.emitChange();
+      });
+      break;
+    case Constants.SAVE_USER_TEMPLATE:
+      CampaignApi.saveUserTemplate(action.templateData)
+      .then((response) => {
+        _allUserTemplates.unshift(response.data);
+        _error = "";
+        displaySuccess("Template saved successfully");
+        CampaignStore.emitChange();
       }, (err) => {
           _error = HandleError.evaluateError(err);
           CampaignStore.emitChange();

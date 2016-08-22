@@ -678,10 +678,10 @@ class ScheduleEmail extends React.Component {
           <div className="row sub-head-container m-lr-0">
             <div className="head col s12 m10 l10">{"Let's Draft an Email"}</div>
             <div className="col s12 m2 l2 p-0">
-              <a className="btn arrow-btn right tooltipped" data-position="left"
-                data-tooltip="Draft Email(s)"
+              <a className="blue right arrow-btn btn"
                 onClick={() => this.props.handleClick(draftEmailIndex)}>
-                <i className="mdi mdi-chevron-left"></i>
+                Draft Email(s)
+                <i className="mdi mdi-chevron-left left"></i>
               </a>
             </div>
             <div className="sub-head">
@@ -692,11 +692,11 @@ class ScheduleEmail extends React.Component {
                   <span className="lever"></span>
                 </label>
               </div>
-              <a className="btn blue m-r-20" onClick={() => this.openPreviewModal("preview")}>Preview</a>
+              <a className="btn blue" onClick={() => this.openPreviewModal("preview")}>Preview</a>
               {
                 followups.length < followupsMaxLen
                   ?
-                    <a className="btn blue m-r-20" onClick={this.addFollowups}>Add follow up</a>
+                    <a className="btn blue" onClick={this.addFollowups}>Add follow up</a>
                   : ""
               }
               <a className="btn blue" onClick={this.saveCampaignInfo}>Save & Send</a>
@@ -809,7 +809,7 @@ class ScheduleEmail extends React.Component {
                         </ul>
                     </div> */}
                   </div>
-                  <div id="emailContent" className="email-body" />
+                  <div id="emailContent" className="email-body inline-tiny-mce" />
                 </div>
                 {/* Preview button */}
                 <div className="row r-btn-container m-lr-0">

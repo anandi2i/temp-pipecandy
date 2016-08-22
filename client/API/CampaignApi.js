@@ -10,6 +10,9 @@ const CampaignApi = {
   getAllEmailTemplates() {
     return api.get("/api/defaultTemplates/templates");
   },
+  getAllUserTemplates() {
+    return api.get("/api/defaultTemplates/myTemplates");
+  },
   /**
    * To check campaign id is exists or not
    * @param  {integer} compaignId existing of campaign id
@@ -31,6 +34,12 @@ const CampaignApi = {
   saveCampaignTemplates(campaign) {
     return api.post(`/api/campaigns/${campaign.id}/saveCampaignElements`,
       campaign.templates);
+  },
+  /**
+   * Save campaign templates
+   */
+  saveUserTemplate(templateData) {
+    return api.post("/api/defaultTemplates/saveTemplate", templateData);
   },
   /**
    * Get the spam score for given array

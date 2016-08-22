@@ -94,7 +94,14 @@ const validatorObj = {
         }
       }
     }
-  })
+  }),
+  templateName: Joi.string().required().label("Template Name").options({
+    language: {
+      any: {
+        empty: "!! Oops. It seems like you forgot to fill your template name!",
+      }
+    }
+  }),
 };
 
 module.exports = validatorObj;

@@ -82,7 +82,7 @@ class SelectCampaignTemplate extends React.Component {
   constructor(props) {
     super(props);
     this.state={
-      innerTabIndex: 1,
+      innerTabIndex: 2,
       template: {
         content: "Hi <br /><br /> You had downloaded our report on the current \
           app development economy and pricing standards. I hope the report was \

@@ -19,6 +19,11 @@ const CampaignActions = {
       actionType: Constants.GET_ALL_EMAIL_TEMPLATES
     });
   },
+  getAllUserTemplates() {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_ALL_USER_TEMPLATES
+    });
+  },
   getSelectedEmailList(emailListIds) {
     AppDispatcher.handleAction({
       actionType: Constants.GET_SELECTED_EMAIL_LIST,
@@ -82,6 +87,16 @@ const CampaignActions = {
     AppDispatcher.handleAction({
       actionType: Constants.SAVE_CAMPAIGN_TEMPLATES,
       campaign: campaignData
+    });
+  },
+  /**
+   * Save user created templates
+   * @param {templateData} template name and template content
+   */
+  saveUserTemplate(templateData) {
+    AppDispatcher.handleAction({
+      actionType: Constants.SAVE_USER_TEMPLATE,
+      templateData: templateData
     });
   },
   /**

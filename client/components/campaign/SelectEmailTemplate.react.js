@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import SelectPreBuildTemplate from "./SelectPreBuildTemplate.react";
-import SelectCampaignTemplate from "./SelectCampaignTemplate.react";
+// import SelectCampaignTemplate from "./SelectCampaignTemplate.react";
+import SelectMyTemplate from "./SelectMyTemplate.react";
 
 class TabsNav extends React.Component {
   handleClick(index) {
@@ -11,8 +12,11 @@ class TabsNav extends React.Component {
   render() {
     const _tabs = [
       {
-        name: "Email Templates",
+        name: "Email Templates"
       },
+      {
+        name: "My Templates"
+      }
       /* TODO Remove this tab for the 1.0 version
       {
         name: "Pick from my earlier emails",
@@ -68,22 +72,22 @@ class SelectEmailTemplate extends React.Component {
       <div className="container">
         <div className="row sub-head-container">
           <div className="head col s12 m10 l10">Start drafting your email(s)</div>
-          <div className="col s12 m2 l2 p-0">
-            <a className="btn arrow-btn right tooltipped"
-              data-position="left"
-              data-tooltip="Select Email List(s)"
-              onClick={() => this.props.handleClick(emailListIndex)} >
-              <i className="mdi mdi-chevron-left"></i>
-            </a>
-          </div>
+
           <div className="sub-head">
-            <a className="btn blue" onClick={() => this.props.handleClick(scheduleEmailIndex)}>Save & continue</a>
+            <a className="btn blue right"
+              onClick={() => this.props.handleClick(scheduleEmailIndex)}>
+              Save & continue
+            </a>
+            <a className="blue right arrow-btn btn"
+              onClick={() => this.props.handleClick(emailListIndex)}>
+              <i className="mdi mdi-chevron-left left"></i> Select Email List
+            </a>
           </div>
         </div>
         <div className="row inner-tabs">
           <nav>
             <div className="nav-wrapper">
-              <TabsNav handleClick={this.handleClick} active={this.state.activeTab}/>
+              <TabsNav refs="emailSelectTabs" handleClick={this.handleClick} active={this.state.activeTab}/>
             </div>
           </nav>
         </div>
@@ -91,7 +95,11 @@ class SelectEmailTemplate extends React.Component {
           setTemplateContent={this.props.setTemplateContent}
           ref="selectPreBuildTemplate"
           active={this.state.activeTab} />
-        <SelectCampaignTemplate active={this.state.activeTab} />
+        <SelectMyTemplate
+          setTemplateContent={this.props.setTemplateContent}
+          ref="SelectMyTemplate"
+          active={this.state.activeTab} />
+        {/* <SelectCampaignTemplate active={this.state.activeTab} /> */}
       </div>
     );
   }

@@ -3,14 +3,15 @@ import ReactDOM from "react-dom";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
 import {SuccessMessages} from "../../utils/UserAlerts";
+import UserTemplateForm from "../grid/campaign-list/UserTemplateForm.react";
 
-class SelectPreBuildTemplate extends React.Component {
+class SelectMyTemplate extends React.Component {
   constructor(props) {
     super(props);
-    CampaignActions.getAllEmailTemplates();
+    CampaignActions.getAllUserTemplates();
     this.state = {
       templates: [],
-      innerTabIndex: 0,
+      innerTabIndex: 1,
       activeTemplate: 0,
       activeTemplateContent: ""
     };
@@ -25,9 +26,13 @@ class SelectPreBuildTemplate extends React.Component {
     CampaignStore.removeChangeListener(this.onStoreChange);
   }
 
+  createTemplate = () => {
+    this.refs.UserTemplateForm.refs.component.openModal();
+  }
+
   onStoreChange = () => {
     this.setState({
-      templates: CampaignStore.getAllEmailTemplates()
+      templates: CampaignStore.getAllUserTemplates()
     });
     this.el.find(".modal-trigger").leanModal({
       dismissible: false
@@ -38,7 +43,7 @@ class SelectPreBuildTemplate extends React.Component {
     displayError(CampaignStore.getError());
   }
 
-  selectTemplate(key) {
+  selectUserTemplate(key) {
     this.setState((state) => ({
       activeTemplate: key,
       activeTemplateContent: this.state.templates[key].content
@@ -58,32 +63,34 @@ class SelectPreBuildTemplate extends React.Component {
   render() {
     let isDisplay =
       (this.props.active === this.state.innerTabIndex ? "block" : "none");
-    let blankTemplateKey = 0;
     const {templates, activeTemplate, activeTemplateContent} = this.state;
     return (
       <div className="row" style={{display: isDisplay}}>
+        <div className="col s12 m6 l4">
+          <a className="card-action" onClick={() => this.createTemplate()}>
+            <div className="card">
+              <div className="create-template">
+                <span>Create new template <br/>
+                  <i className="mdi mdi-plus"></i>
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
         {
           templates.map(function (template, key) {
             return (
               <div className="col s12 m6 l4" key={key}>
                 <div className={this.isActive(key)}
-                  onClick={() => this.selectTemplate(key)}>
+                  onClick={() => this.selectUserTemplate(key)}>
                   <div className="card-title">{template.name}</div>
                   <div className="card-content">
                     <div dangerouslySetInnerHTML={{__html: template.content}} />
                   </div>
-                  {
-                    (key === blankTemplateKey)
-                    ?
-                      <div className="card-action">
-                        <i className="mdi mdi-eye-off"></i> Pick &amp; Preview
-                      </div>
-                    :
-                      <a className="card-action modal-trigger"
-                        href="#previewTemplate">
-                        <i className="mdi mdi-eye"></i> Pick &amp; Preview
-                      </a>
-                  }
+                  <a className="card-action modal-trigger"
+                    href="#previewMyTemplate">
+                    <i className="mdi mdi-eye"></i> Pick &amp; Preview
+                  </a>
                 </div>
               </div>
             );
@@ -91,7 +98,7 @@ class SelectPreBuildTemplate extends React.Component {
         }
         {/* Email template preview modal popup starts here*/}
         { templates.length ?
-          <div id="previewTemplate" className="modal modal-fixed-header modal-fixed-footer">
+          <div id="previewMyTemplate" className="modal modal-fixed-header modal-fixed-footer">
             <i className="mdi mdi-close modal-close"></i>
             <div className="modal-header">
               <div className="head">
@@ -111,8 +118,9 @@ class SelectPreBuildTemplate extends React.Component {
             </div>
           </div>
         : null }
+        <UserTemplateForm ref="UserTemplateForm"/>
       </div>
     );
   }
 }
-export default SelectPreBuildTemplate;
+export default SelectMyTemplate;
