@@ -146,10 +146,12 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
   let getFocusId = id.split("#")[1];
   let toolbar = isToolbar;
   if(isToolbar) {
-    toolbar = "bold italic underline | alignleft aligncenter alignright alignjustify | link image";
+    toolbar = "bold italic underline | alignleft aligncenter alignright alignjustify | link image | fontsizeselect fontselect";
   }
   tinymce.init({
     selector: id,
+    font_formats: 'Sans Serif=arial,helvetica,sans-serif;Times New Roman=times new roman;Garamond=garamond,serif;Georgia=georgia,serif;Tahoma=tahoma,sans-serif;Trebuchet=trebuchet ms,sans-serif;',
+    fontsize_formats: "8pt 10pt 12pt 14pt",
     inline: true,
     height : 150,
     menubar: false,

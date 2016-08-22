@@ -25,7 +25,10 @@
   box-shadow: $box-shadow;
   position: absolute;
   li {
-    padding: 15px;
+    a {
+      display: block;
+      padding: 15px;
+    }
     &:hover {
       background-color: $lit-gray-bg;
     }
@@ -43,6 +46,15 @@ span#autocomplete {
   }
   #autocomplete-searchtext {
     padding: 0 4px 0 2px;
+  }
+}
+
+.mce-container-body {
+  .mce-btn button {
+    padding: 4px 4px;
+  }
+  .mce-btn-has-text[aria-label="Font Sizes"] .mce-txt {
+    width: 83px;
   }
 }
 

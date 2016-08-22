@@ -778,15 +778,14 @@ class ScheduleEmail extends React.Component {
                   </div>
                 */}
                 <div className="row email-content m-lr-0">
-                  <div className="row tiny-toolbar">
-                    <div className="tiny-toolbar-sub col s12 m6 l6" id="mytoolbar">
+                  <div className="tiny-toolbar">
+                    <div id="mytoolbar" className="toolbar-head">
                     </div>
-                    <div className="right smart-tag-container col s12 m6 l6  horizontal tooltipped"
-                      data-position="top"
+                    <label className="align-left tag-info tooltipped f-s-14" data-position="top"
                       data-tooltip="Press '#' to insert smart tags
                       that personalize your email">
-                      Press '#' to insert smart tags that personalize your email
-                    </div>
+                      Press '#' for smart tags
+                    </label>
                     {/*<div className="right smart-tag-container">
                         <ul id="dropdown" className="dropdown-content">
                           {
