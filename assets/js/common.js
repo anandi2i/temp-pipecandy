@@ -150,7 +150,7 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
   }
   tinymce.init({
     selector: id,
-    font_formats: 'Sans Serif=arial,helvetica,sans-serif;Times New Roman=times new roman;Garamond=garamond,serif;Georgia=georgia,serif;Tahoma=tahoma,sans-serif;Trebuchet=trebuchet ms,sans-serif;',
+    font_formats: 'Sans Serif=arial,helvetica,sans-serif;Times New Roman=times new roman;Garamond=garamond,serif;Georgia=georgia,serif;Tahoma=tahoma,sans-serif;Trebuchet=trebuchet ms,sans-serif;Verdana=verdana,sans-serif;',
     fontsize_formats: "8pt 10pt 12pt 14pt",
     inline: true,
     height : 150,

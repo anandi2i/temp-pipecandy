@@ -67,7 +67,7 @@ class ViewCampaign extends React.Component {
                   <LinksClicked campaignId={campaignId}/>
                 </div>
               </div>
-            : <CampaignInfoMsg displayPage="dashboard" />
+            : <CampaignInfoMsg message="noReport" />
         }
         <CampaignFooter campaignId={campaignId} activePage={"report"}/>
       </div>

@@ -63,7 +63,7 @@ class Dashboard extends React.Component {
                 <LinksClicked campaignId={recentCampaignId}/>
               </div>
             :
-              <CampaignInfoMsg displayPage="dashboard" />
+              <CampaignInfoMsg message="noCampaigns" />
         }
       </div>
     );

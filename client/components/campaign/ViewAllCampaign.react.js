@@ -4,6 +4,7 @@ import Spinner from "../Spinner.react";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
 import CampaignGrid from "../grid/campaign-list/Grid.react";
+import CampaignInfoMsg from "./performance/CampaignInfoMsg.react";
 
 class CampaignListView extends React.Component {
   constructor(props) {
@@ -34,10 +35,11 @@ class CampaignListView extends React.Component {
 
   render() {
     const {spinning, allCampaignLists} = this.state;
+    const showHead = allCampaignLists.length ? "": "hide";
     return (
       <div>
         <div className="container">
-          <div className="row sub-head-container m-lr-0">
+          <div className={`row sub-head-container m-lr-0 ${showHead}`}>
             <div className="head">All Campaigns List</div>
             <div className="sub-head">
               <Link to="/campaign/create">Create Campaign</Link>
@@ -49,7 +51,12 @@ class CampaignListView extends React.Component {
           </div>
         </div>
         <div style={{display: spinning ? "none" : "block"}}>
-          <CampaignGrid results={allCampaignLists} />
+          {
+            allCampaignLists.length ?
+              <CampaignGrid results={allCampaignLists} />
+            :
+              <CampaignInfoMsg message="noCampaigns" />
+          }
         </div>
       </div>
     );
