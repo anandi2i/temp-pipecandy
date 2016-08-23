@@ -64,6 +64,9 @@ textarea.materialize-textarea:focus:not([readonly]) + label {
     border: 2px solid $placeholder-clr;
   }
 }
+strong {
+  font-weight: bold;
+}
 /***********************************
           Color
 ************************************/

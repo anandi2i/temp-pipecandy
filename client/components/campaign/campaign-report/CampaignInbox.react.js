@@ -300,7 +300,7 @@ class CampaignInbox extends React.Component {
               </div>
               <div className="col s12 m6 l6 p-lr-0">
                 <div className="right">
-                  <a className="btn btn-dflt blue sm-icon-btn dropdown-button move-to-button"
+                  <a className="btn btn-dflt blue sm-icon-btn dropdown-button"
                     data-activates="addDropDown">
                     Move to
                     <i className="right mdi mdi-chevron-down"></i>

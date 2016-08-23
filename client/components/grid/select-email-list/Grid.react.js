@@ -13,7 +13,7 @@ class SelectEmailListGrid extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedRowIds: [],
+      selectedRowIds: GridStore.getSelectedEmailListIds() || [],
       isResultEmpty: true,
       noDataMessage: <div> Dang! You don't seem to have any email list here. Do
       you want to <Link to="/list/create/"> add a new list </Link> ? </div>

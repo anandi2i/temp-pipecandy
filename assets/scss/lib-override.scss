@@ -52,6 +52,9 @@ span#autocomplete {
 .mce-container-body {
   .mce-btn button {
     padding: 4px 4px;
+    .mce-txt {
+      font-size: 12px;
+    }
   }
   .mce-btn-has-text[aria-label="Font Sizes"] .mce-txt {
     width: 83px;
