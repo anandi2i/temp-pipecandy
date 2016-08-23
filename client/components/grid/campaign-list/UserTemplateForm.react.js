@@ -4,6 +4,7 @@ import validation from "react-validation-mixin";
 import strategy from "joi-validation-strategy";
 import CampaignActions from "../../../actions/CampaignActions";
 import validatorUtil from "../../../utils/ValidationMessages";
+import {ErrorMessages} from "../../../utils/UserAlerts.js";
 
 class UserTemplateForm extends React.Component {
   /**
@@ -23,8 +24,8 @@ class UserTemplateForm extends React.Component {
   }
 
   /**
-   * Initialize the lean modal and custom scrollbar
-   * @listens {EmailListStore} change event
+   * Initialize the lean modal and custom scrollbar when the user template form
+   * popup is loaded
    */
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
@@ -37,8 +38,22 @@ class UserTemplateForm extends React.Component {
     this.initTinyMceEditors();
   }
 
+  /**
+   * Initialize tinyMCE editor for popup in UserTemplateForm
+   */
   initTinyMceEditors = () => {
     initTinyMCE("#new-content", "#contentTools", "", "", true, this.tinyMceCb);
+  }
+
+  /**
+   * Callback after tinyMCE is loaded to get the content from the editor
+   */
+  tinyMceCb = (editor) => {
+    const content = editor.getContent();
+    this.setState({
+      templateContent: content,
+      subjectRawText: editor.getBody().textContent
+    });
   }
 
   /**
@@ -49,19 +64,24 @@ class UserTemplateForm extends React.Component {
     return this.state;
   }
 
+  /**
+   * Set the template name to the state, on template name change
+   */
   handleChange = (e) => {
     this.setState({
       templateName: e.target.value,
     });
   }
 
+  /**
+   * Validate and save the user created template
+   */
   saveNewTemplate = () => {
     const {subjectRawText, templateName, templateContent} = this.state;
     if(templateName.trim() === ""){
-      displayError("Oops. It seems like you forgot to fill your\
-        template name!");
-    } else if(subjectRawText.trim() === ""){
-      displayError("Oops. It seems like you forgot to fill your template!");
+      displayError(ErrorMessages.MISSING_TEMPLATE_NAME);
+    } else if(subjectRawText.trim() === "") {
+      displayError(ErrorMessages.MISSING_TEMPLATE_CONTENT);
     } else {
       CampaignActions.saveUserTemplate({
         name: templateName,
@@ -71,6 +91,9 @@ class UserTemplateForm extends React.Component {
     }
   }
 
+  /**
+   * Initialize scrollbar when modal is opened
+   */
   openModal = () => {
     this.el.openModal({
       dismissible: false
@@ -80,10 +103,17 @@ class UserTemplateForm extends React.Component {
     });
   }
 
+  /**
+   * Reset all the fields when the modal is closed
+   */
   closeModal = () => {
     tinyMCE.get("new-content").setContent("");
     this.el.find(".validate").removeClass("valid");
-    $("#template-name").parent().find("label").removeClass("active");
+    const emailSubject = this.el.find(".email-subject");
+    emailSubject.find("label").removeClass("active");
+    if (emailSubject.find(".warning-block").length) {
+      emailSubject.find(".warning-block").remove();
+    }
     this.setState({
       templateName: "",
       templateContent: "",
@@ -91,14 +121,9 @@ class UserTemplateForm extends React.Component {
     }, () => this.el.closeModal());
   }
 
-  tinyMceCb = (editor) => {
-    let content = editor.getContent();
-    this.setState({
-      templateContent: content,
-      subjectRawText: editor.getBody().textContent
-    });
-  }
-
+  /**
+   * Render the warning-block message after validation
+   */
   renderHelpText(el) {
     return (
       <div className="warning-block">
@@ -107,14 +132,13 @@ class UserTemplateForm extends React.Component {
     );
   }
 
-
   /**
    * render
    * @return {ReactElement} - Modal popup for Add/Edit recipient
    */
   render() {
     return (
-      <div id="newTemplate" className="modal modal-fixed-header modal-fixed-footer">
+      <div id="newTemplate" className="modal modal-fixed-header modal-fixed-footer new-template-modal">
         <i className="mdi mdi-close modal-close"></i>
         <div className="modal-header">
           <div className="head">

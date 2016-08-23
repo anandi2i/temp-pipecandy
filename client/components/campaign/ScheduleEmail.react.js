@@ -675,10 +675,10 @@ class ScheduleEmail extends React.Component {
           <Spinner />
         </div>
         <div style={{display: isEditorReady ? "block" : "none"}}>
-          <div className="row sub-head-container m-lr-0">
+          <div className="row sub-head-container run-campaign-nav-wrapper m-lr-0">
             <div className="head col s12 m10 l10">{"Let's Draft an Email"}</div>
             <div className="col s12 m2 l2 p-0">
-              <a className="blue right arrow-btn btn"
+              <a className="right arrow-btn btn"
                 onClick={() => this.props.handleClick(draftEmailIndex)}>
                 Draft Email(s)
                 <i className="mdi mdi-chevron-left left"></i>

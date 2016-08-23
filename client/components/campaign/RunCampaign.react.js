@@ -116,6 +116,10 @@ class RunCampaign extends React.Component {
     });
   }
 
+  /**
+   * Sets the selected template to the state
+   * @param {object} template - template to select
+   */
   setTemplateContent = (template) => {
     this.setState({
       selectedTemplate: template

@@ -10,6 +10,9 @@ const CampaignApi = {
   getAllEmailTemplates() {
     return api.get("/api/defaultTemplates/templates");
   },
+  /**
+   * To get all the templates created by user
+   */
   getAllUserTemplates() {
     return api.get("/api/defaultTemplates/myTemplates");
   },
@@ -36,7 +39,8 @@ const CampaignApi = {
       campaign.templates);
   },
   /**
-   * Save campaign templates
+   * Save campaign templates created by user
+   * @param {object} templateData
    */
   saveUserTemplate(templateData) {
     return api.post("/api/defaultTemplates/saveTemplate", templateData);

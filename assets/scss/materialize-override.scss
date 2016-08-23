@@ -76,14 +76,19 @@ strong {
 .red {
   background-color: $red-clr !important;
 }
-.btn.arrow-btn {
-  background-color: #FFF !important;
-  border: 1px solid #499cd0;
-  color: #499cd0;
-  padding: 0px 10px !important;
-  i {
-    margin: 0px 5px;
-    width: 15px;
+.run-campaign-nav-wrapper {
+  .arrow-btn {
+    background-color: $white;
+    border: 1px solid $dflt-btn-clr;
+    color: $dflt-btn-clr;
+    padding: 0px 10px;
+    &:hover {
+      background-color: $white;
+    }
+    i {
+      margin: 0px 5px;
+      width: 15px;
+    }
   }
 }
 /***********************************

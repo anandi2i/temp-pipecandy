@@ -39,15 +39,14 @@ class SelectPreBuildTemplate extends React.Component {
   }
 
   selectTemplate(key) {
+    const {templates} = this.state;
     this.setState((state) => ({
       activeTemplate: key,
-      activeTemplateContent: this.state.templates[key].content
-    }), () => {
-      this.props.setTemplateContent(this.state.templates[key].content);
-    });
+      activeTemplateContent: templates[key].content
+    }), () => this.props.setTemplateContent(templates[key].content));
     displaySuccess(SuccessMessages.successSelectTemplate
       .replace("$selectedTemplate", `<strong>
-      ${this.state.templates[key].name}</strong>`));
+      ${templates[key].name}</strong>`));
   }
 
   isActive(value){

@@ -19,6 +19,9 @@ const CampaignActions = {
       actionType: Constants.GET_ALL_EMAIL_TEMPLATES
     });
   },
+  /**
+   * Get all templates created by user.
+   */
   getAllUserTemplates() {
     AppDispatcher.handleAction({
       actionType: Constants.GET_ALL_USER_TEMPLATES
@@ -91,7 +94,7 @@ const CampaignActions = {
   },
   /**
    * Save user created templates
-   * @param {templateData} template name and template content
+   * @param {object} templateData - template name and template content
    */
   saveUserTemplate(templateData) {
     AppDispatcher.handleAction({

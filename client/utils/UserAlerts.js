@@ -58,7 +58,11 @@ export const ErrorMessages = {
     "with the campaign.",
   "EMPTY_CSV_UPLOAD": "It seems like you've uploaded an empty file. Try " +
     "uploading with some recipients again!",
-  "INVALID_FIELDS": "There seems to be some invalid fields in the list!"
+  "INVALID_FIELDS": "There seems to be some invalid fields in the list!",
+  "MISSING_TEMPLATE_NAME" : "Oops. It seems like you forgot to fill your" +
+    "template name!",
+  "MISSING_TEMPLATE_CONTENT" : "Oops. It seems like you forgot to fill your" +
+    "template!"
 };
 
 /**

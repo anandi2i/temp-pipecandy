@@ -46,10 +46,10 @@ class SelectEmailList extends React.Component {
     const draftEmailIndex = 2;
     return (
       <div className="container">
-        <div className="row sub-head-container m-lr-0">
+        <div className="row sub-head-container run-campaign-nav-wrapper m-lr-0">
           <div className="head col s12 m10 l10">{"Select Email List(s)"}</div>
           <div className="col s12 m2 l2 p-0">
-            <a className="blue right arrow-btn btn"
+            <a className="right arrow-btn btn"
               onClick={() => this.props.handleClick(draftEmailIndex)}>
               Draft Email(s)
               <i className="mdi mdi-chevron-right right"></i>

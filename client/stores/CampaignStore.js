@@ -221,6 +221,9 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     return _allEmailTemplates;
   },
 
+  /**
+   * To store all user created Templates
+   */
   getAllUserTemplates() {
     return _allUserTemplates;
   },

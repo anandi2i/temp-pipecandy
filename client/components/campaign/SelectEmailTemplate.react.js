@@ -70,7 +70,7 @@ class SelectEmailTemplate extends React.Component {
     const emailListIndex = 1;
     return (
       <div className="container">
-        <div className="row sub-head-container">
+        <div className="row sub-head-container run-campaign-nav-wrapper">
           <div className="head col s12 m10 l10">Start drafting your email(s)</div>
 
           <div className="sub-head">
@@ -78,7 +78,7 @@ class SelectEmailTemplate extends React.Component {
               onClick={() => this.props.handleClick(scheduleEmailIndex)}>
               Save & continue
             </a>
-            <a className="blue right arrow-btn btn"
+            <a className="right arrow-btn btn"
               onClick={() => this.props.handleClick(emailListIndex)}>
               <i className="mdi mdi-chevron-left left"></i> Select Email List
             </a>

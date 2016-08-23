@@ -17,19 +17,32 @@ class SelectMyTemplate extends React.Component {
     };
   }
 
+  /**
+   * To Initialize SelectMyTemplate DOM
+   * @listens {CampaignStore} change event
+   */
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
     CampaignStore.addChangeListener(this.onStoreChange);
   }
 
+  /**
+   * Remove the CampaignStore listener while unmounting
+   */
   componentWillUnmount() {
     CampaignStore.removeChangeListener(this.onStoreChange);
   }
 
+  /**
+   * Opens up the modal when createTemplate is clicked
+   */
   createTemplate = () => {
     this.refs.UserTemplateForm.refs.component.openModal();
   }
 
+  /**
+   * On store change, update the template list in the view
+   */
   onStoreChange = () => {
     this.setState({
       templates: CampaignStore.getAllUserTemplates()
@@ -43,29 +56,36 @@ class SelectMyTemplate extends React.Component {
     displayError(CampaignStore.getError());
   }
 
+ /**
+  * Method to select the user template based on the selected template key
+  */
   selectUserTemplate(key) {
+    const {templates} = this.state;
     this.setState((state) => ({
       activeTemplate: key,
-      activeTemplateContent: this.state.templates[key].content
+      activeTemplateContent: templates[key].content
     }), () => {
-      this.props.setTemplateContent(this.state.templates[key].content);
+      this.props.setTemplateContent(templates[key].content);
     });
     displaySuccess(SuccessMessages.successSelectTemplate
       .replace("$selectedTemplate", `<strong>
-      ${this.state.templates[key].name}</strong>`));
+      ${templates[key].name}</strong>`));
   }
 
+  /**
+   * Add or Remove active class to the template cards
+   */
   isActive(value){
-    let isActive = (value === this.state.activeTemplate) ? "active" : "";
+    const isActive = (value === this.state.activeTemplate) ? "active" : "";
     return `card template-preview ${isActive}`;
   }
 
   render() {
-    let isDisplay =
-      (this.props.active === this.state.innerTabIndex ? "block" : "none");
-    const {templates, activeTemplate, activeTemplateContent} = this.state;
+    const {templates, activeTemplate, activeTemplateContent,
+      innerTabIndex} = this.state;
+    const isDisplay = (this.props.active === innerTabIndex ? "block" : "none");
     return (
-      <div className="row" style={{display: isDisplay}}>
+      <div className="row user-templates" style={{display: isDisplay}}>
         <div className="col s12 m6 l4">
           <a className="card-action" onClick={() => this.createTemplate()}>
             <div className="card">
