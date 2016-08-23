@@ -173,6 +173,7 @@ class RunCampaign extends React.Component {
                     ? <ScheduleEmail campaignId={this.props.params.id}
                         changeSelectedList={this.changeSelectedList}
                         selectedTemplate={this.state.selectedTemplate}
+                        setTemplateContent={this.setTemplateContent}
                         handleClick={this.handleClick} />
                     : ""
                 }

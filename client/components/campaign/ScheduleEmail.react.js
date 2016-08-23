@@ -122,6 +122,7 @@ class ScheduleEmail extends React.Component {
       contentIssueTags: issueTags,
       emailRawText: editor.getBody().textContent
     }, () => {
+      this.props.setTemplateContent(content);
       let errorCount = this.getErrorCount();
       this.setState({
         errorCount: errorCount,
