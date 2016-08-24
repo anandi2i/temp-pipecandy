@@ -80,7 +80,7 @@ class SelectEmailTemplate extends React.Component {
             </a>
             <a className="right arrow-btn btn"
               onClick={() => this.props.handleClick(emailListIndex)}>
-              <i className="mdi mdi-chevron-left left"></i> Select Email List
+              <i className="mdi mdi-chevron-left left"></i> Select Email List(s)
             </a>
           </div>
         </div>

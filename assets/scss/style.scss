@@ -944,6 +944,9 @@ $lines-to-show: 8;
   .new-email-content {
     min-height: 190px;
   }
+  .tiny-toolbar {
+    margin: 0;
+  }
 }
 .template-preview {
   border: $border-1px;
@@ -1401,6 +1404,7 @@ $lines-to-show: 8;
       }
       .tag-info {
         line-height: 37px;
+        padding-right: 10px;
       }
     }
     .r-btn-container {

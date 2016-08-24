@@ -78,16 +78,22 @@ class UserTemplateForm extends React.Component {
    */
   saveNewTemplate = () => {
     const {subjectRawText, templateName, templateContent} = this.state;
-    if(templateName.trim() === ""){
-      displayError(ErrorMessages.MISSING_TEMPLATE_NAME);
-    } else if(subjectRawText.trim() === "") {
-      displayError(ErrorMessages.MISSING_TEMPLATE_CONTENT);
-    } else {
+    templateName = templateName.trim();
+    subjectRawText = subjectRawText.trim();
+    if(templateName && subjectRawText) {
       CampaignActions.saveUserTemplate({
         name: templateName,
         content: templateContent
       });
       this.closeModal();
+    } else {
+      if(!templateName && !subjectRawText){
+        displayError(ErrorMessages.EMPTY_TEMPLATE);
+      } else if(!subjectRawText) {
+        displayError(ErrorMessages.MISSING_TEMPLATE_CONTENT);
+      } else {
+        displayError(ErrorMessages.MISSING_TEMPLATE_NAME);
+      }
     }
   }
 
@@ -111,9 +117,6 @@ class UserTemplateForm extends React.Component {
     this.el.find(".validate").removeClass("valid");
     const emailSubject = this.el.find(".email-subject");
     emailSubject.find("label").removeClass("active");
-    if (emailSubject.find(".warning-block").length) {
-      emailSubject.find(".warning-block").remove();
-    }
     this.setState({
       templateName: "",
       templateContent: "",
@@ -150,13 +153,7 @@ class UserTemplateForm extends React.Component {
             <label>{"Template Name"}</label>
             <input id="template-name" type="text" className="validate"
               value={this.state.templateName}
-              onBlur={this.props.handleValidation("templateName")}
               onChange={this.handleChange} />
-              {
-                !this.props.isValid("templateName")
-                  ? this.renderHelpText("templateName")
-                  : null
-              }
           </div>
           <div className="row email-content m-lr-0">
             <label>{"Template"}</label>
