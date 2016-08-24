@@ -77,7 +77,7 @@ class UserTemplateForm extends React.Component {
    * Validate and save the user created template
    */
   saveNewTemplate = () => {
-    const {subjectRawText, templateName, templateContent} = this.state;
+    let {subjectRawText, templateName, templateContent} = this.state;
     templateName = templateName.trim();
     subjectRawText = subjectRawText.trim();
     if(templateName && subjectRawText) {
