@@ -63,7 +63,9 @@ class Dashboard extends React.Component {
                 <LinksClicked campaignId={recentCampaignId}/>
               </div>
             :
-              <CampaignInfoMsg message="noCampaigns" />
+              <div style={{display: isSpinner? "none" : "block"}}>
+                <CampaignInfoMsg message="noCampaigns" />
+              </div>
         }
       </div>
     );

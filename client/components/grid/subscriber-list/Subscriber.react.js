@@ -152,7 +152,6 @@ class Subscriber extends React.Component {
   saveOrUpdate() {
     const {id, firstName, middleName, lastName, email} = this.state;
     const {listId, listFields, peopleDetails} = this.props;
-    const initialPersonData = this.initialPersonData;
     let personDetails = {};
     if(id) {
       personDetails = _.findWhere(peopleDetails, {id:id});
@@ -205,15 +204,18 @@ class Subscriber extends React.Component {
     }
     this.props.clearValidations();
     this.el.find(".validate").removeClass("valid");
-    initialPersonData.listFields = listFields;
-    this.setState(initialPersonData);
   }
 
   /**
    * Call to close field modal and person modal
    */
   closeModal = () => {
-    this.el.closeModal();
+    this.el.closeModal({
+      complete : () => {
+        this.initialPersonData.listFields = this.props.listFields;
+        this.setState(this.initialPersonData);
+      }
+    });
   }
 
   /**

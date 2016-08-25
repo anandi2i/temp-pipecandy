@@ -67,7 +67,10 @@ class ViewCampaign extends React.Component {
                   <LinksClicked campaignId={campaignId}/>
                 </div>
               </div>
-            : <CampaignInfoMsg message="noReport" />
+            :
+              <div style={{display: isSpinner? "none" : "block"}}>
+                  <CampaignInfoMsg message="noReport" />
+              </div>
         }
         <CampaignFooter campaignId={campaignId} activePage={"report"}/>
       </div>
