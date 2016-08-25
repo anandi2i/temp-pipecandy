@@ -14,6 +14,11 @@ import app from "../../server/server.js";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 import striptags from "striptags";
 import uuid from "node-uuid";
+import google from "googleapis";
+const gmailClass = google.gmail("v1");
+import googleTokenHandler from "../../server/utils/googleTokenHandler";
+import googleAuth from "google-auth-library";
+const auth = new googleAuth();
 
 //const systemTimeZone = moment().format("Z");
 const serverUrl = app.get("appUrl");
@@ -48,6 +53,223 @@ module.exports = function(Campaign) {
       return previewCB(null, response);
     });
   };
+
+  Campaign.remoteMethod(
+    "testMail",
+    {
+      description: "API to send a test campaign",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {
+        arg: "reqParams", type: "object", required: true, http: {source: "body"}
+        }
+      ],
+      returns: {arg: "status", type: "campaign", root: true},
+      http: {
+        verb: "post", path: "/testMail"
+      }
+    }
+  );
+
+  /**
+   * API to generate a test mail for the current campaign to the mentioned
+   * email address
+   * @param  {[object]} reqParams
+   * @param  {[function]} testMailCB
+   * @return {string} status
+   * @author Aswin Raj A
+   */
+  Campaign.testMail = (ctx, reqParams, testMailCB) => {
+    const {email, subject, content} = reqParams;
+    let mailContent = {
+      userDetails : {
+        userId: ctx.req.accessToken.userId,
+      },
+      email: email,
+      subject: subject,
+      content: content
+    };
+    generateCredentials(mailContent.userDetails.userId,
+      (err, userObj) => {
+      if(err) testMailCB(err);
+      const userCredential = userObj.credentials;
+      const {accessToken, refreshToken} = userCredential;
+      if(!accessToken && !refreshToken) {
+        logger.error("Access or Refresh Token not available for User Id",
+          userId);
+        return testMailCB(errorMessages.SERVER_ERROR);
+      }
+      mailContent.fromEmail = userObj.profile.emails[0].value;
+      mailContent.userDetails.displayName = userObj.profile.displayName;
+      mailContent.credential = userCredential;
+      async.waterfall([
+        async.apply(buildEmail, mailContent),
+        sendEmail
+      ], (asyncErr, result) => {
+        if(asyncErr){
+          return testMailCB(errorMessages.SERVER_ERROR);
+        }
+        return testMailCB(null, result);
+      });
+    });
+  };
+
+  /**
+   * Method to generate credentials for the current user
+   * @param  {[number]} userId
+   * @param  {[function]} generateCredentialsCB
+   * @return {[object]} userObj
+   * @author Aswin Raj A
+   */
+  const generateCredentials = (userId, generateCredentialsCB) => {
+    Campaign.app.models.userIdentity.findByUserId(userId,
+    (err, userObj) => {
+      if(err) {
+        logger.error("Error while finding credentials", {
+          input: {userId: userId},
+          error: err, stack: err.stack});
+        return generateCredentialsCB(err);
+      }
+      return generateCredentialsCB(null, userObj[0]);
+    });
+  };
+
+  /**
+   * Method to build the email with the content provided
+   * @param  {[object]} mailContent
+   * @param  {[function]} buildEmailCB
+   * @return {objects} base64EncodedEmail, oauth2Client, mailContent
+   * @author Aswin Raj A
+   */
+  const buildEmail = (mailContent, buildEmailCB) => {
+    const googleCredentials = app.get("googleCredentials").installed;
+    const clientSecret = googleCredentials.client_secret;
+    const clientId = googleCredentials.client_id;
+    const redirectUrl = googleCredentials.redirect_uris[0];
+    let oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+    const {accessToken, refreshToken} = mailContent.credential;
+    oauth2Client.credentials.access_token = accessToken;
+    oauth2Client.credentials.refresh_token = refreshToken;
+    let emailLines = [];
+    emailLines.push(`From: ${mailContent.userDetails.displayName}
+      <${mailContent.fromEmail}>`);
+    emailLines.push(`To: <${mailContent.email}>`);
+    emailLines.push("Content-type: text/html;charset=iso-8859-1");
+    emailLines.push("MIME-Version: 1.0");
+    emailLines.push(`Subject: ${mailContent.subject}`);
+    emailLines.push("");
+    emailLines.push(mailContent.content);
+    const email = emailLines.join("\r\n").trim();
+    let base64EncodedEmail = new Buffer(email).toString("base64");
+    base64EncodedEmail = base64EncodedEmail.replace(/\+/g, "-")
+      .replace(/\//g, "_");
+    return buildEmailCB(null, base64EncodedEmail, oauth2Client, mailContent);
+  };
+
+  /**
+   * Method to send the base64EncodedEmail through gmail API
+   * @param  {[object]} base64EncodedEmail
+   * @param  {[object]} oauth2Client
+   * @param  {[object]} mailContent
+   * @param  {[function]} sendEmailCB
+   * @return {[string]} user
+   * @author Aswin Raj A
+   */
+  const sendEmail = (base64EncodedEmail, oauth2Client, mailContent,
+    sendEmailCB) => {
+    let resource = {
+      raw: base64EncodedEmail
+    };
+    gmailClass.users.messages.send({
+      auth: oauth2Client,
+      userId: mailContent.fromEmail,
+      resource: resource
+    }, function(err, results) {
+      if (err) {
+        const invalidCode = 401;
+        if (err.code === invalidCode) {
+          regenerateAccessToken(mailContent.userDetails.userId, oauth2Client,
+            (err, user) => {
+            if(err) return sendEmailCB(err);
+            const {accessToken, refreshToken} = user.credentials;
+            oauth2Client.credentials.access_token = accessToken;
+            oauth2Client.credentials.refresh_token = refreshToken;
+            sendEmail(base64EncodedEmail, oauth2Client, mailContent,
+              sendEmailCB);
+          });
+        } else {
+          return sendEmailCB(err);
+        }
+      } else {
+        return sendEmailCB(null, "Mail Sent");
+      }
+    });
+  };
+
+  /**
+   * Incase accessToken fails for the user, we need to regenerate the accessToken
+   * and update the credentials in userIdentity table
+   * @param  {[number]} userId
+   * @param  {[object]} oauth2Client
+   * @param  {[function]} regenerateAccessTokenCB
+   * @return {[object]} user
+   * @author Aswin Raj A
+   */
+  const regenerateAccessToken = (userId, oauth2Client,
+    regenerateAccessTokenCB) => {
+    async.waterfall([
+      async.apply(generateCredentials, userId),
+      updateGoogleAccessToken,
+      updateUserCredentials
+    ], (asyncErr, user) => {
+      if(asyncErr){
+        return regenerateAccessTokenCB(asyncErr);
+      }
+      return regenerateAccessTokenCB(null, user);
+    });
+  };
+
+  /**
+   * Update the google access token while regenerating the access token
+   * @param  {[object]} userIdentity
+   * @param  {[function]} updateCB
+   * @return {[object]} userIdentity
+   * @author Aswin Raj A
+   */
+  const updateGoogleAccessToken = (userIdentity, updateCB) => {
+    googleTokenHandler.updateAccessToken(userIdentity,
+      (tokenHandlerErr, userIdentity) => {
+      if(tokenHandlerErr) {
+        logger.error("Error while updating accessToken", {
+          input: {userId: userId},
+          error: tokenHandlerErr, stack: tokenHandlerErr.stack});
+        return updateCB(tokenHandlerErr);
+      }
+      return updateCB(null, userIdentity);
+    });
+  };
+
+  /**
+   * Update the generated Google accessToken in the userIdenity table
+   * @param  {[object]} userIdentity
+   * @param  {[function]} updateCB
+   * @return {[object]} user
+   * @author Aswin Raj A
+   */
+  const updateUserCredentials = (userIdentity, updateCB) => {
+    Campaign.app.models.userIdentity.updateCredentials(userIdentity,
+    (userIdentityErr, user) => {
+    if(userIdentityErr) {
+      logger.error("Error while updating credentials", {
+        input: {userId: userIdentity[0].userId},
+        error: userIdentityErr,
+        stack: userIdentityErr.stack});
+      return updateCB(userIdentityErr);
+    }
+    return updateCB(null, user);
+    });
+  };
+
 
   Campaign.remoteMethod(
     "saveCampaignElements",
