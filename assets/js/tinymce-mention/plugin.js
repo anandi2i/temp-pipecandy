@@ -1,6 +1,11 @@
+/**
+ * @see: http://stevendevooght.github.io/tinyMCE-mention/javascripts/tinymce/plugins/mention/plugin.js
+ * Made slight modification to support mention for 0th position of every line
+ */
+
 /*global tinymce, jQuery */
 
-(function (tinymce, $) {
+;(function (tinymce, $) {
     'use strict';
 
     var AutoComplete = function (ed, options) {
@@ -147,14 +152,14 @@
             }
         },
 
-        rteLostFocus: function () {
+        rteLostFocus: function (ed, e) {
             if (this.hasFocus) {
                 this.cleanUp(true);
             }
         },
 
         lookup: function () {
-            this.query = $.trim($(this.editor.getBody()).find('#autocomplete-searchtext').text()).replace('\ufeff', '');
+            this.query = $.trim($(this.editor.getBody()).find("#autocomplete-searchtext").text()).replace('\ufeff', '');
 
             if (this.$dropdown === undefined) {
                 this.show();
@@ -194,7 +199,7 @@
         },
 
         highlighter: function (text) {
-            return text.replace(new RegExp('(' + this.query.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1') + ')', 'ig'), function ($1, match) {
+            return text.replace(new RegExp('(' + this.query.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1") + ')', 'ig'), function ($1, match) {
                 return '<strong>' + match + '</strong>';
             });
         },
@@ -282,11 +287,11 @@
             this.editor.focus();
             var selection = this.editor.dom.select('span#autocomplete')[0];
             this.editor.dom.remove(selection);
-            this.editor.execCommand('mceInsertContent', false, this.insert(item));
+            this.editor.execCommand('mceInsertContent', false, this.insert(item) + '&nbsp;');
         },
 
         insert: function (item) {
-            return '<span>' + item[this.options.queryBy] + '</span>&nbsp;';
+            return '<span>' + item[this.options.queryBy] + '</span>';
         },
 
         cleanUp: function (rollback) {
@@ -337,7 +342,7 @@
 
     tinymce.create('tinymce.plugins.Mention', {
 
-        init: function (ed) {
+        init: function (ed, url) {
 
             var autoComplete,
                 autoCompleteData = ed.getParam('mentions');
@@ -351,7 +356,7 @@
                       text = ed.selection.getRng(true).startContainer.data || '',
                       charachter = text.substr(start - 1, 1);
 
-                return (!!$.trim(charachter).length) ? false : true;
+                return (!$.trim(charachter).length || !start) ? true : false;
             }
 
             ed.on('keypress', function (e) {
@@ -378,4 +383,4 @@
 
     tinymce.PluginManager.add('mention', tinymce.plugins.Mention);
 
-}(tinymce, jQuery));
+})(tinymce, jQuery);
