@@ -327,7 +327,7 @@ class ScheduleEmail extends React.Component {
           if((isOptText && optText) || !isOptText) {
             address = tinyMCE.get("optOutAddress").getBody().textContent;
             if((isAddress && address) || !isAddress) {
-              if(!this.refs.issues.state.personIssues.length) {
+              if(!this.state.errorCount) {
                 //Check if all mandatory fields are filled in followups
                 isValid = this.checkFollowupsFields();
               } else {
