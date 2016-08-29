@@ -646,7 +646,7 @@ module.exports = function(user) {
     async.eachSeries(campaigns, (campaign, campaignEachCB) => {
       async.parallel({
         listSentTo : getCampaignListCount.bind(null, campaign),
-        replies : getCampaignReplyCount.bind(null, campaign),
+        replies : getCampaignResponseCount.bind(null, campaign),
         progress : getCampaignProgress.bind(null, campaign)
       }, (parallelErr, campaignMetrics) => {
         if(parallelErr){
@@ -693,33 +693,30 @@ module.exports = function(user) {
     });
   };
 
-
   /**
    * To get the total count of response for the current campaign
    * @param  {[campaign]} campaign
-   * @param  {[function]} getReplyCountCB
+   * @param  {[function]} getResponseCountCB
    * @return {[responseCount]}
-   * @author Aswin Raj A
+   * @author Aswin Raj A, Rahul Khandelwal(modified)
    */
-  const getCampaignReplyCount = (campaign, getReplyCountCB) => {
-    if(campaign.isSent){
-      user.app.models.campaignMetric.find({
+  const getCampaignResponseCount = (campaign, getResponseCountCB) => {
+      user.app.models.inboxMail.find({
         where : {
-          campaignId : campaign.id
+          and: [
+            {campaignId: campaign.id},
+            {isMailReceived: true}
+          ]
         }
-      }, (metricFindErr, campaignMetrics) => {
-        if(metricFindErr){
-          logger.error("Error while finding campaign metric", {
-            input: {campaignId : campaign.id},
-            error: metricFindErr, stack: metricFindErr.stack
-          });
-          return getReplyCountCB(metricFindErr);
+      }, (inboxMailsErr, inboxMails) => {
+        if (inboxMailsErr) {
+          logger.error("Error while finding InboxMails",
+            {error: inboxMailErr, stack: inboxMailErr.stack, input:
+            {campaignId:campaign.id}});
+          return callback(errorMessages.SERVER_ERROR);
         }
-        return getReplyCountCB(null, campaignMetrics[0].responded);
+        return getResponseCountCB(null, inboxMails.length);
       });
-    } else {
-      return getReplyCountCB(null, emptyCount);
-    }
   };
 
   /**

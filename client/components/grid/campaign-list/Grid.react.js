@@ -48,7 +48,7 @@ let columnMeta = [{
     "order": 5,
     "locked": true,
     "visible": true,
-    "displayName": "Replies",
+    "displayName": "Responses",
     "cssClassName": "replies",
     "sortable": false
   }, {
