@@ -826,11 +826,13 @@ module.exports = function(Campaign) {
     if(!reqParams.hasOwnProperty("campaignTemplates")) {
       return validateSaveCB(errorMessages.TEMPLATE_NOT_FOUND);
     }
-    const subject = reqParams.campaignTemplates.subject;
-    if(subject.trim().length === constants.ZERO) {
+    async.eachSeries(reqParams.campaignTemplates, (template, templateCB) => {
+      const templateSubject = striptags(template.subject);
+      if(templateSubject.trim().length) return templateCB(null);
       return validateSaveCB(errorMessages.EMPTY_SUBJECT);
-    }
-    return validateSaveCB(null, ctx, id, reqParams);
+    }, (asyncErr) => {
+      return validateSaveCB(asyncErr, ctx, id, reqParams);
+    });
   };
 
   /**

@@ -397,16 +397,18 @@ class ScheduleEmail extends React.Component {
     if(this.checkEmailContentError()) {
       let mainEmailContent = {};
       if(!this.state.editorErrorCount){
+        let campaignTemplates = [];
         let template = {};
         template.subject = this.state.emailSubject;
         template.content = this.state.emailContent;
-        template.usedTagIds = CampaignStore.usedTagIds(
-          template.subject.concat(template.content)).usedTagIds;
+        template.usedTagIds = CampaignStore
+          .usedTagIds(template.subject.concat(template.content)).usedTagIds;
         template.userId = getCookie("userId");
+        campaignTemplates.push(template);
         mainEmailContent = {
           listIds: _.pluck(this.state.emailList, "id"),
           campaign: this.campaignDetails(),
-          campaignTemplates: template
+          campaignTemplates: campaignTemplates
         };
       } else {
         let mainTemplate = this.refs.issues.state;
