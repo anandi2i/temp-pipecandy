@@ -9,6 +9,7 @@ import lodash from "lodash";
 import moment from "moment-timezone";
 import campaignMetricArray from "../../server/utils/campaign-metric-fields";
 import statusCodes from "../../server/utils/status-codes";
+import validator from "../../server/utils/validatorUtility";
 import queueUtil from "../../server/emailReader/mailEnqueue";
 import app from "../../server/server.js";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
@@ -103,12 +104,11 @@ module.exports = function(Campaign) {
       mailContent.userDetails.displayName = userObj.profile.displayName;
       mailContent.credential = userCredential;
       async.waterfall([
-        async.apply(buildEmail, mailContent),
+        async.apply(validateTestMail, mailContent),
+        buildEmail,
         sendEmail
       ], (asyncErr, result) => {
-        if(asyncErr){
-          return testMailCB(errorMessages.SERVER_ERROR);
-        }
+        if(asyncErr) return testMailCB(asyncErr);
         return testMailCB(null, result);
       });
     });
@@ -135,6 +135,33 @@ module.exports = function(Campaign) {
   };
 
   /**
+   * Validate the mail content before generating the mail
+   * @param  {[object]} mailContent
+   * @param  {[function]} validateCB
+   * @return {[object]} mailContent
+   * @author Aswin Raj A
+   */
+  const validateTestMail = (mailContent, validateCB) => {
+    let {email, subject, content} = mailContent;
+    email = email && email.trim();
+    subject = subject && striptags(subject).trim();
+    content = content && striptags(content).trim();
+    if(!email) {
+      return validateCB(errorMessages.EMPTY_EMAIL);
+    } else if (!subject) {
+      return validateCB(errorMessages.EMPTY_SUBJECT);
+    } else if (!content) {
+      return validateCB(errorMessages.BLANK_TEMPLATE_CONTENT);
+    }
+    validator.validateEmail(email, (isValid) => {
+      if(isValid) {
+        return validateCB(null, mailContent);
+      }
+      return validateCB(errorMessages.INVALID_EMAIL);
+    });
+  };
+
+  /**
    * Method to build the email with the content provided
    * @param  {[object]} mailContent
    * @param  {[function]} buildEmailCB
@@ -151,12 +178,13 @@ module.exports = function(Campaign) {
     oauth2Client.credentials.access_token = accessToken;
     oauth2Client.credentials.refresh_token = refreshToken;
     let emailLines = [];
+    const subject = striptags(mailContent.subject).trim();
     emailLines.push(`From: ${mailContent.userDetails.displayName}
       <${mailContent.fromEmail}>`);
     emailLines.push(`To: <${mailContent.email}>`);
     emailLines.push("Content-type: text/html;charset=iso-8859-1");
     emailLines.push("MIME-Version: 1.0");
-    emailLines.push(`Subject: ${mailContent.subject}`);
+    emailLines.push(`Subject: ${subject}`);
     emailLines.push("");
     emailLines.push(mailContent.content);
     const email = emailLines.join("\r\n").trim();
@@ -190,7 +218,7 @@ module.exports = function(Campaign) {
         if (err.code === invalidCode) {
           regenerateAccessToken(mailContent.userDetails.userId, oauth2Client,
             (err, user) => {
-            if(err) return sendEmailCB(err);
+            if(err) return sendEmailCB(errorMessages.SERVER_ERROR);
             const {accessToken, refreshToken} = user.credentials;
             oauth2Client.credentials.access_token = accessToken;
             oauth2Client.credentials.refresh_token = refreshToken;
@@ -198,7 +226,9 @@ module.exports = function(Campaign) {
               sendEmailCB);
           });
         } else {
-          return sendEmailCB(err);
+          logger.error("Error while sending mail", {
+            error: err, stack: err.stack});
+          return sendEmailCB(errorMessages.SERVER_ERROR);
         }
       } else {
         return sendEmailCB(null, "Mail Sent");
@@ -243,7 +273,7 @@ module.exports = function(Campaign) {
         logger.error("Error while updating accessToken", {
           input: {userId: userId},
           error: tokenHandlerErr, stack: tokenHandlerErr.stack});
-        return updateCB(tokenHandlerErr);
+        return updateCB(errorMessages.INVALID_ACCESS_TOKEN);
       }
       return updateCB(null, userIdentity);
     });
