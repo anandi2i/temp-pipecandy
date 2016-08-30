@@ -2,7 +2,6 @@
 
 import moment from "moment-timezone";
 import logger from "../../server/log";
-
 /**
  * validates the person time zone from CSV
  *
@@ -28,6 +27,7 @@ const validateTimeZone = (timeZone) => {
  * @author Aswin Raj A
  */
 const validateEmail = (email, validateEmailCB) => {
+  email = email ? email : "";
   const reg = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,15}$/;
   if (reg.test(email)){
     validateEmailCB(true);
@@ -43,6 +43,7 @@ const validateEmail = (email, validateEmailCB) => {
  * @author Aswin Raj A
  */
 const validateString = (string) => {
+  string = string ? string : "";
   return string.replace(/[^a-zA-Z ]/g, "").trim();
 };
 
@@ -54,6 +55,7 @@ const validateString = (string) => {
  * @author Aswin Raj A
  */
 const validateStringWithNumber = (string) => {
+  string = string ? string : "";
   return string.replace(/[^a-zA-Z0-9 ]/g, "").trim();
 };
 
@@ -67,6 +69,7 @@ const validateStringWithNumber = (string) => {
  * @author Naveen Kumar
  */
 const validateFieldName = (string) => {
+  string = string ? string : "";
   if(string.length) {
     let stringCheck = string[0].replace(/[0-9 ]/g, "").trim();
     if(!stringCheck.length) {

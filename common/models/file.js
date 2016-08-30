@@ -314,7 +314,7 @@ module.exports = function(File) {
    */
   const amendData = (isValidEmail, newPersonObj, amendDataCB) => {
     let newPerson = JSON.parse(JSON.stringify(newPersonObj));
-    if(isValidEmail){
+    if(isValidEmail) {
       File.app.models.person.getPersonForEmail(newPerson.Email,
         (personGetErr, person) => {
         if(personGetErr)
@@ -322,15 +322,15 @@ module.exports = function(File) {
                         input: {email: newPerson.Email}});
         if(person){
           newPerson["First Name"] =
-            validator.validateString(newPerson["First Name"]).trim() !== "" ?
+            validator.validateString(newPerson["First Name"]) !== "" ?
               validator.validateString(newPerson["First Name"]) :
                 person.firstName;
           newPerson["Last Name"] =
-            validator.validateString(newPerson["Last Name"]).trim() !== "" ?
+            validator.validateString(newPerson["Last Name"]) !== "" ?
               validator.validateString(newPerson["Last Name"]) :
                 person.lastName;
           newPerson["Middle Name"] =
-            validator.validateString(newPerson["Middle Name"]).trim() !== "" ?
+            validator.validateString(newPerson["Middle Name"]) !== "" ?
               validator.validateString(newPerson["Middle Name"]) :
                 person.middleName;
           newPerson["Time Zone"] =
@@ -338,20 +338,19 @@ module.exports = function(File) {
                 newPerson["Time Zone"] : person.timeZone;
         } else {
           newPerson["First Name"] =
-            validator.validateString(newPerson["First Name"]).trim() !=="" ?
-              validator.validateString(newPerson["First Name"]) : "";
+            validator.validateString(newPerson["First Name"]) !=="" ?
+              validator.validateString(newPerson["First Name"]) : null;
           newPerson["Last Name"] =
-            validator.validateString(newPerson["Last Name"]).trim() !=="" ?
-              validator.validateString(newPerson["Last Name"]) : "";
+            validator.validateString(newPerson["Last Name"]) !=="" ?
+              validator.validateString(newPerson["Last Name"]) : null;
           newPerson["Middle Name"] =
-            validator.validateString(newPerson["Middle Name"]).trim() !=="" ?
+            validator.validateString(newPerson["Middle Name"]) !=="" ?
               validator.validateString(newPerson["Middle Name"]) : null;
           newPerson["Time Zone"] =
               validator.validateTimeZone(newPerson["Time Zone"]) ?
                 newPerson["Time Zone"] : null;
         }
-        if(newPerson["First Name"].trim() === "" ||
-          newPerson["Last Name"].trim() === ""){
+        if(!newPerson["First Name"] || newPerson["First Name"].trim() === ""){
           amendDataCB(null, {
             isValid : false,
             person : newPersonObj,
@@ -359,7 +358,7 @@ module.exports = function(File) {
         } else {
           if(newPerson["Middle Name"])
             newPerson["Middle Name"] =
-              validator.validateString(newPerson["Middle Name"]).trim();
+              validator.validateString(newPerson["Middle Name"]);
           if(newPerson.Salutation && newPerson.Salutation.trim() === "")
             newPerson.Salutation = null;
           amendDataCB(null, {
@@ -455,9 +454,21 @@ module.exports = function(File) {
     async.parallel({
       person : (parallelPersonCB) => {
         let newPersonObj = {
-          firstName : personData["First Name"],
-          lastName : personData["Last Name"],
-          middleName : personData["Middle Name"],
+          firstName : personData["First Name"]
+            ?
+            lodash.capitalize(personData["First Name"])
+            :
+            personData["First Name"],
+          lastName : personData["Last Name"]
+            ?
+            lodash.capitalize(personData["Last Name"])
+            :
+            personData["Last Name"],
+          middleName : personData["Middle Name"]
+            ?
+            lodash.capitalize(personData["Middle Name"])
+            :
+            personData["Middle Name"],
           timeZone : personData["Time Zone"],
           salutation : personData.Salutation,
           email : personData.Email.toLowerCase()

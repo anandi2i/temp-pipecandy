@@ -651,6 +651,12 @@ module.exports = function(Person) {
    * @author Aswin Raj A
    */
   Person.updatePersonWithNewData = (oldPerson, newPerson, updateDataCB) => {
+    newPerson.firstName = newPerson.firstName ?
+      lodash.capitalize(newPerson.firstName) : null;
+    newPerson.middleName = newPerson.middleName ?
+      lodash.capitalize(newPerson.middleName) : null;
+    newPerson.lastName = newPerson.lastName ?
+      lodash.capitalize(newPerson.lastName) : null;
     oldPerson.updateAttributes(newPerson, (updateErr, updatedObj) => {
       if(updateErr) {
         logger.error("Error while updating person", {

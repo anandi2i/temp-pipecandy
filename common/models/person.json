@@ -15,8 +15,7 @@
       "type": "string"
     },
     "lastName": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "salutation": {
       "type": "string"

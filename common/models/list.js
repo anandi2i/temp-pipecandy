@@ -51,7 +51,7 @@ module.exports = function(List) {
           return getListAndSaveEmailCB(asyncEachErr);
         });
       });
-    });    
+    });
   };
 
   List.remoteMethod(
@@ -406,12 +406,9 @@ module.exports = function(List) {
   const validateNames = (ctx, reqParams, id, validateNamesCB) => {
     let isValidFlag = true;
     const currentPerson = reqParams.person;
-    if(currentPerson.firstName && currentPerson.lastName) {
+    if(currentPerson.firstName) {
       isValidFlag = currentPerson.firstName.trim().length ? isValidFlag : false;
-      isValidFlag = currentPerson.lastName.trim().length ? isValidFlag : false;
       isValidFlag = validator.validateFieldName(currentPerson.firstName)
-       ? isValidFlag : false;
-      isValidFlag = validator.validateFieldName(currentPerson.lastName)
         ? isValidFlag : false;
     } else {
       isValidFlag = false;
@@ -420,6 +417,16 @@ module.exports = function(List) {
       isValidFlag = validator.validateFieldName(currentPerson.middleName)
         ? isValidFlag : false;
     }
+    if(currentPerson.lastName) {
+      isValidFlag = validator.validateFieldName(currentPerson.lastName)
+        ? isValidFlag : false;
+    }
+    currentPerson.firstName = currentPerson.firstName ?
+      lodash.capitalize(currentPerson.firstName) : null;
+    currentPerson.middleName = currentPerson.middleName ?
+      lodash.capitalize(currentPerson.middleName) : null;
+    currentPerson.lastName = currentPerson.lastName ?
+      lodash.capitalize(currentPerson.lastName) : null;
     if(!isValidFlag) {
       logger.error("Invalid Data", {
         input: reqParams.person
