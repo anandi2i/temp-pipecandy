@@ -39,7 +39,6 @@ class Subscriber extends React.Component {
      */
     this.validatorTypes = {
       firstName: validatorUtil.firstName,
-      lastName: validatorUtil.lastName,
       email: validatorUtil.email
     };
   }
@@ -183,7 +182,7 @@ class Subscriber extends React.Component {
       firstName: firstName,
       lastName: lastName,
       middleName: middleName,
-      email: email,
+      email: email.toLowerCase(),
       fieldValues: fieldValues
     };
     if(person.id) {
@@ -262,16 +261,9 @@ class Subscriber extends React.Component {
           <div className="input-field">
             <input placeholder="Last Name" id="lastName" type="text"
               onChange={(e) => this.setFieldValue(e, "lastName")}
-              onBlur={this.props.handleValidation("lastName")}
               value={currentState.lastName}
               className="validate" />
             <label htmlFor="lastName" className={currentState.lastName ? "active" : ""}>Last Name</label>
-            {
-              !this.props.isValid("lastName")
-                ? this.renderHelpText("lastName")
-                : null
-            }
-
           </div>
           <div className="input-field">
             <input placeholder="Email" id="email" type="text"

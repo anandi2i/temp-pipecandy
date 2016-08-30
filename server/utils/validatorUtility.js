@@ -28,7 +28,7 @@ const validateTimeZone = (timeZone) => {
  * @author Aswin Raj A
  */
 const validateEmail = (email, validateEmailCB) => {
-  const reg = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,15}$/;
+  const reg = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,15}$/;
   if (reg.test(email)){
     validateEmailCB(true);
   } else {

@@ -460,7 +460,7 @@ module.exports = function(File) {
           middleName : personData["Middle Name"],
           timeZone : personData["Time Zone"],
           salutation : personData.Salutation,
-          email : personData.Email
+          email : personData.Email.toLowerCase()
         };
         return parallelPersonCB(null, newPersonObj);
       },
@@ -505,9 +505,10 @@ module.exports = function(File) {
   let createOrUpdatePerson = (decoupledObj, listid, createOrUpdatePersonCB) => {
     const newPerson = decoupledObj.person;
     const newAdditionalFields = decoupledObj.additionalFields;
+    var pattern = new RegExp(newPerson.email + "$", "i");
     File.app.models.person.find({
       where : {
-        email : newPerson.email
+        email : pattern
       }
     }, (personFindErr, people) => {
       if(personFindErr){

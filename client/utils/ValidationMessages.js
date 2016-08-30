@@ -43,17 +43,6 @@ const validatorObj = {
       }
     }
   }),
-  lastName: Joi.string().alphanum().label("Last Name").options({
-    language: {
-      any: {
-        empty: "!! Oops. It seems like you forgot to fill your last name!",
-      },
-      string: {
-        alphanum: "!! Hmm. That doesn\'t seem like a valid last name, "+
-            "at least to me!"
-      }
-    }
-  }),
   campaignName: Joi.string().regex(namePattern).label("Campaign Name").options({
     language: {
       any: {
