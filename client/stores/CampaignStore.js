@@ -4,6 +4,7 @@ import moment from "moment";
 import Constants from "../constants/Constants";
 import AppDispatcher from "../dispatcher/AppDispatcher";
 import {HandleError} from "../utils/ErrorMessageHandler";
+import {SuccessMessages} from "../utils/UserAlerts";
 import CampaignApi from "../API/CampaignApi";
 import EmailListApi from "../API/EmailListApi";
 import {browserHistory} from "react-router";
@@ -390,6 +391,22 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
    */
   getSentMails() {
     return sentMails;
+  },
+  /**
+   * Get the used smart tags
+   * @param  {string} emailContent
+   * @return {object} usedTags
+   */
+  getAllUsedTags(emailContent) {
+    const htmlDom = $.parseHTML(emailContent);
+    let allUsedTags = [];
+    $(htmlDom).find(".tag").each(function(){
+      allUsedTags.push({
+        id: $(this).attr("data-id"),
+        field: $(this).attr("data-tag-name")
+      });
+    });
+    return allUsedTags;
   }
 });
 
@@ -733,6 +750,13 @@ AppDispatcher.register(function(payload) {
       }, (err) => {
         _error = HandleError.evaluateError(err);
         CampaignStore.emitClassificationCountChange();
+      });
+      break;
+    case Constants.SEND_TEST_MAIL:
+      CampaignApi.sendTestMail(action.data).then((response) => {
+        displayError(SuccessMessages.TestMail);
+      }, (err) => {
+        _error = HandleError.evaluateError(err);
       });
       break;
     default:

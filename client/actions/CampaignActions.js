@@ -244,6 +244,16 @@ const CampaignActions = {
       actionType: Constants.INBOX_CLASSIFICATION_COUNT,
       campaignId: campaignId
     });
+  },
+  /**
+   * Send test mail
+   * @param  {object} testMailData
+   */
+  sendTestMail(testMailData) {
+    AppDispatcher.handleAction({
+      actionType: Constants.SEND_TEST_MAIL,
+      data: testMailData
+    });
   }
 };
 

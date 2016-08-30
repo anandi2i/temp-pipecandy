@@ -1337,6 +1337,25 @@ $lines-to-show: 8;
   .draft-template {
     margin-top: 30px;
     padding: 0 30px;
+    .test-mail-container {
+      .send-test-mail {
+        color: $blue-clr;
+        cursor: pointer;
+      }
+      .content-wrapper {
+        color: $disabled;
+        margin-top: 20px;
+        .content {
+          border: $border-1px;
+          padding: 10px;
+          .common,
+          .un-common {
+            background-color: $lit-blue-bg;
+            color: $blue-clr;
+          }
+        }
+      }
+    }
     .left-part {
       float: left;
       margin-top: 6px;
@@ -2053,6 +2072,9 @@ $lines-to-show: 8;
       top: 0 !important;
       width: 100%;
     }
+  }
+  .send-test-mail {
+    text-align: left;
   }
 }
 @media only screen and (max-width: 500px) {

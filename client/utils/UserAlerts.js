@@ -59,11 +59,14 @@ export const ErrorMessages = {
   "EMPTY_CSV_UPLOAD": "It seems like you've uploaded an empty file. Try " +
     "uploading with some recipients again!",
   "INVALID_FIELDS": "There seems to be some invalid fields in the list!",
-  "EMPTY_TEMPLATE" : "Oops. It seems like you didn't create the template! ", 
-  "MISSING_TEMPLATE_NAME" : "Oops. It seems like you forgot to fill your " +
+  "EMPTY_TEMPLATE": "Oops. It seems like you didn't create the template! ",
+  "MISSING_TEMPLATE_NAME": "Oops. It seems like you forgot to fill your " +
     "template name!",
-  "MISSING_TEMPLATE_CONTENT" : "Oops. It seems like you forgot to fill your " +
-    "template!"
+  "MISSING_TEMPLATE_CONTENT": "Oops. It seems like you forgot to fill your " +
+    "template!",
+  "EMPTY_EMAIL": "Oops. Your to email id seems to be empty!",
+  "INVALID_EMAIL": "Oops. Your to email id seems to be invalid!",
+  "INVALID_ACCESS_TOKEN": "Ooops. Something went wrong. Please logout and login"
 };
 
 /**
@@ -83,7 +86,8 @@ export const SuccessMessages = {
     " time, which is a good thing. Recommended",
   "WarningImproveDelivery": "All your emails would be delivered at one go " +
     "(instead of being delivered over a period of time). This might reduce" +
-    " your email deliverability rates. Not recommended."
+    " your email deliverability rates. Not recommended.",
+  "TestMail": "Test mail sent successfully"
 };
 
 /**

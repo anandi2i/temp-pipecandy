@@ -7,6 +7,7 @@ import AddFollowups from "./AddFollowups.react";
 import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
 import WordaiPreviewPopup from "./WordaiPreviewPopup.react";
 import PreviewMailsPopup from "./PreviewMailsPopup.react";
+import TestMail from "./TestMail.react";
 import CampaignStore from "../../stores/CampaignStore";
 import GridStore from "../../stores/GridStore";
 import UserStore from "../../stores/UserStore";
@@ -721,11 +722,15 @@ class ScheduleEmail extends React.Component {
             <div id="mainTemplate" className="col s12 m12 l10 offset-l1 draft-template">
                 {/* email to list */}
                 <div className="row m-lr-0">
-                  <div className="col s12 p-lr-0">
+                  <div className="col s12 m6 l6 p-lr-0">
                     <input onChange={() => this.toggleSetState("displayScheduleCampaign")}
                       type="checkbox" className="filled-in"
                       id="filled-in-box" defaultChecked="" />
                     <label htmlFor="filled-in-box">Schedule campaign for later</label>
+                  </div>
+                  <div className="col s12 m6 l6 p-lr-0">
+                    <TestMail emailContent={emailContent}
+                      emailSubject={emailSubject}/>
                   </div>
                 </div>
                 <div className="row m-lr-0 schedule-time" style={{display: displaySchedule}}>

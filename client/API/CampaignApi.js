@@ -184,6 +184,13 @@ const CampaignApi = {
    */
   getInboxClassificationCount(campaignId) {
     return api.get(`/api/inboxMails/campaign/${campaignId}/inboxMailsCount`);
+  },
+  /**
+   * Send test mail
+   * @param  {object} testMailData
+   */
+  sendTestMail(testMailData) {
+    return api.post("/api/campaigns/testMail", testMailData);
   }
 };
 

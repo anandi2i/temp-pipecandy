@@ -97,7 +97,7 @@ module.exports = function(Campaign) {
       const {accessToken, refreshToken} = userCredential;
       if(!accessToken && !refreshToken) {
         logger.error("Access or Refresh Token not available for User Id",
-          userId);
+          mailContent.userDetails.userId);
         return testMailCB(errorMessages.SERVER_ERROR);
       }
       mailContent.fromEmail = userObj.profile.emails[0].value;
