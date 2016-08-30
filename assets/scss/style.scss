@@ -1996,6 +1996,12 @@ $lines-to-show: 8;
     font-size: 22px;
   }
 }
+.view-single-list-containter {
+  .person-count {
+    display: inline-block;
+    margin: 0 10px;
+  }
+}
 /*********************
   Media Query Classes
 **********************/

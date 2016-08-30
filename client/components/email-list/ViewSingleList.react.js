@@ -395,7 +395,8 @@ class ListView extends React.Component {
    */
   render() {
     const {fieldName, suggestions, people, uploadCsvDetails, uploadAnimTxt,
-      fieldsName, listFields, peopleDetails, enableDeleteBtn} = this.state;
+      fieldsName, listFields, peopleDetails, enableDeleteBtn, listName}
+      = this.state;
     const delBtn = enableDeleteBtn ? "" : "disabled";
     const {listId} = this.props.params;
     const inputProps = {
@@ -410,7 +411,12 @@ class ListView extends React.Component {
       <div>
         <div className="container view-single-list-containter">
           <div className="row sub-head-container m-lr-0">
-            <div className="head">{this.state.listName}</div>
+            <div className="head">
+              {listName}
+                  <span className="separator person-count">
+                   ({people.length} Recipients)
+                 </span>
+            </div>
             <div className="sub-head">
               <Link to="/list">Back to Email Lists</Link>
             </div>
