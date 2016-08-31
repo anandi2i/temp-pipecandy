@@ -95,8 +95,9 @@ function closeNotification() {
 }
 window.closeNotification = closeNotification;
 
-function enabledropDownBtn() {
-  $(".dropdown-button").dropdown({
+function enabledropDownBtn(element) {
+  element = element || ".dropdown-button";
+  $(element).dropdown({
     inDuration: 300,
     outDuration: 225,
     constrain_width: false,
@@ -107,19 +108,6 @@ function enabledropDownBtn() {
   });
 }
 window.enabledropDownBtn = enabledropDownBtn;
-
-function enabledropDownBtnByID(id) {
-  $(id).dropdown({
-    inDuration: 300,
-    outDuration: 225,
-    constrain_width: true,
-    hover: false,
-    gutter: 0,
-    belowOrigin: true,
-    alignment: "right"
-  });
-}
-window.enabledropDownBtnByID = enabledropDownBtnByID;
 
 function getIssueTagsInEditor(emailContent) {
   let unCommonTags = /<span[^>]+?class="tag un-common".*?>&#{0,1}[a-z0-9]+;;*?([\s\S]*?)&#{0,1}[a-z0-9]+;*?<\/span>/g;

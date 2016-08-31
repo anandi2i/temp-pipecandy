@@ -191,6 +191,13 @@ const CampaignApi = {
    */
   sendTestMail(testMailData) {
     return api.post("/api/campaigns/testMail", testMailData);
+  },
+  /**
+   * Create new run
+   * @param {number} campaignId
+   */
+  createNewRun(campaignId) {
+    return api.post(`/api/campaign/${campaignId}/newRun`);
   }
 };
 

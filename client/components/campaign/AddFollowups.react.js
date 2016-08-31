@@ -25,7 +25,6 @@ class AddFollowups extends React.Component {
     this.el = $(ReactDOM.findDOMNode(this));
     this.el.find("select").material_select(() => this.handleDayChange());
     initTimePicker(this.el.find(".timepicker"));
-    enabledropDownBtnByID(`#insertSmartTags${this.props.followupId}`);
     this.initTinyMCE();
     CampaignStore.addEmailListChangeListener(this.onStoreChange);
     this.el.find(".tooltipped").tooltip({delay: 50});

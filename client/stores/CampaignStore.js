@@ -759,6 +759,13 @@ AppDispatcher.register(function(payload) {
         _error = HandleError.evaluateError(err);
       });
       break;
+    case Constants.CREATE_NEW_RUN:
+      CampaignApi.createNewRun(action.campaignId).then((response) => {
+        browserHistory.push(`campaign/${response.data.id}/run`);
+      }, (err) => {
+        _error = HandleError.evaluateError(err);
+      });
+      break;
     default:
       return true;
   }

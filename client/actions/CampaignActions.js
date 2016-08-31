@@ -254,6 +254,16 @@ const CampaignActions = {
       actionType: Constants.SEND_TEST_MAIL,
       data: testMailData
     });
+  },
+  /**
+   * Create new run
+   * @param  {number} campaignId
+   */
+  createNewRun(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.CREATE_NEW_RUN,
+      campaignId: campaignId
+    });
   }
 };
 

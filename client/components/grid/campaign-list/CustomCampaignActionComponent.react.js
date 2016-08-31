@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import {Link} from "react-router";
 import CampaignActions from "../../../actions/CampaignActions";
 
@@ -6,6 +7,14 @@ class CustomCampaignActionComponent extends React.Component {
 
   constructor(props) {
     super(props);
+  }
+
+  /**
+   * Initialize the dropdown button
+   */
+  componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
+    enabledropDownBtn(this.el.find(".dropdown-button"));
   }
 
   /**
@@ -22,6 +31,14 @@ class CustomCampaignActionComponent extends React.Component {
    */
   resumeCampaign(campaignId) {
     CampaignActions.resumeCampaign(campaignId);
+  }
+
+  /**
+   * Call action to create new run
+   * @param  {number} campaignId
+   */
+  newRun(campaignId) {
+    CampaignActions.createNewRun(campaignId);
   }
 
   render() {
@@ -47,9 +64,23 @@ class CustomCampaignActionComponent extends React.Component {
             );
           } else if(status === "Sent") {
             return (
-              <Link to={`/campaign/${campaignId}`}>
-                View Report
-              </Link>
+              <div>
+                <a className="btn btn-dflt blue sm-icon-btn dropdown-button" data-activates="campaignOption">
+                  options
+                </a>
+                <ul id="campaignOption" className="dropdown-content">
+                  <li>
+                    <Link to={`/campaign/${campaignId}`}> View Report </Link>
+                  </li>
+                  <li>
+                    <Link onClick={() => this.newRun(campaignId)} to="/campaign">
+                      New Run
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+
             );
           }
         })()}

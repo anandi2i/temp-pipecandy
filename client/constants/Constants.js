@@ -47,5 +47,6 @@ export default keyMirror({
   HAS_RECENT_CAMPAIGN: null,
   EMAIL_LINK_CLICKS: null,
   INBOX_CLASSIFICATION_COUNT: null,
-  SEND_TEST_MAIL: null
+  SEND_TEST_MAIL: null,
+  CREATE_NEW_RUN: null
 });

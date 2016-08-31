@@ -63,7 +63,6 @@ class ScheduleEmail extends React.Component {
     CampaignStore.addSpamScoreChangeListener(this.onSpamScoreChange);
     CampaignStore.addSpamScoreChangeListener(this.onSpamScoreChange);
     CampaignActions.getSelectedEmailList(selectedEmailListIds);
-    enabledropDownBtnByID("#insertSmartTags");
     this.el.find("select").material_select();
     this.el.find(".tooltipped").tooltip({delay: 50});
     initDatePicker(this.el.find(".datepicker"));
