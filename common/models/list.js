@@ -421,6 +421,11 @@ module.exports = function(List) {
       isValidFlag = validator.validateFieldName(currentPerson.lastName)
         ? isValidFlag : false;
     }
+    if(currentPerson.email) {
+      validator.validateEmail(currentPerson.email, (isValid) => {
+        isValidFlag = isValid;
+      });
+    }
     currentPerson.firstName = currentPerson.firstName ?
       lodash.capitalize(currentPerson.firstName) : null;
     currentPerson.middleName = currentPerson.middleName ?
