@@ -26,6 +26,188 @@ const serverUrl = app.get("appUrl");
 
 module.exports = function(Campaign) {
 
+  Campaign.afterRemote("findById", function(context, data, next) {
+    let campaign = context.result;
+    const parentId = campaign.parentId ? campaign.parentId : campaign.id;
+    getRunTemplate(parentId, (err, template) => {
+      if(err) return next(errorMessages.SERVER_ERROR);
+      campaign.template = template;
+      return next();
+    });
+  });
+
+  Campaign.remoteMethod(
+    "newRun", {
+      description: "Returns all the mail templates used in the campaign",
+      accepts: [{arg: "ctx", type: "object", http: {source: "context"}},
+                {arg: "campaignId", type: "number", http: {source: "path"}}],
+      returns: {arg: "campaign", type: "object", root: true},
+      http: {verb: "put", path: "/:campaignId/newRun"}
+    }
+  );
+
+  /**
+   * API to create a new Campaign run for the parent campaign
+   * Campaign name will be generated based on the previous runs
+   * @param  {[object]} ctx
+   * @param  {[number]} campaignId
+   * @param  {[function]} newRunCb
+   * @return {[object]} runCampaign
+   * @author Aswin Raj A
+   */
+  Campaign.newRun = (ctx, campaignId, newRunCb) => {
+    async.waterfall([
+      async.apply(getCurrentCampaign, campaignId, ctx.req.accessToken.userId),
+      setReferrerCampaign,
+      (campaign, userId, parentCampaign, referrerId, passParamsCB) => {
+        getRunCampaigns(parentCampaign.id, (err, runCampaigns) => {
+          if(err) return passParamsCB(err);
+          return passParamsCB(null, campaign, runCampaigns, userId,
+            parentCampaign, referrerId);
+        });
+      },
+      createRunCampaign
+    ], (asyncErr, runCampaign) => {
+      return newRunCb(asyncErr, runCampaign);
+    });
+  };
+
+  /**
+   * Method to get the campaign for the given campaignId and for the
+   * current user
+   * @param  {[number]} campaignId
+   * @param  {[number]} userId
+   * @param  {[function]} getCampaignCB
+   * @return {[object]} campaign
+   * @author Aswin Raj A
+   */
+  const getCurrentCampaign = (campaignId, userId, getCampaignCB) => {
+    Campaign.find({
+      where: {and: [{id: campaignId}, {createdBy: userId}]}
+    }, (campaignFindErr, campaigns) => {
+      if(campaignFindErr) {
+        logger.error("Error while finding campaign", {
+          input: {campaignId: campaignId},
+          error: campaignFindErr, stack: campaignFindErr.stack});
+        return getCampaignCB(errorMessages.SERVER_ERROR);
+      }
+      if(lodash.isEmpty(campaigns)) {
+        logger.error("There is no campaign for campaignId", {
+          input: {campaignId: campaignId},
+          error: errorMessages.INVALID_CAMPAIGN_ID});
+        return getCampaignCB(errorMessages.INVALID_CAMPAIGN_ID);
+      }
+      return getCampaignCB(null, campaigns[0], userId);
+    });
+  };
+
+  /**
+   * Method to set the referrer for the current campaign if the campaign is not
+   * a parent campaign.
+   * If the current campaign is a run campaign, then the referrerId will be the
+   * current campaign's Id and parent Id will be the run campaign's parent id
+   * If the current campaign is a parent campaign, then both referrer and
+   * parent id will be the current campaigns id
+   * @param  {[type]} campaign      [description]
+   * @param  {[type]} userId        [description]
+   * @param  {[type]} getCampaignCB [description]
+   * @return {[type]}               [description]
+   * @author Aswin Raj A
+   */
+  const setReferrerCampaign = (campaign, userId, getCampaignCB) => {
+    const parentId = campaign.parentId ? campaign.parentId : campaign.id;
+    const referrerId = campaign.id;
+    getCurrentCampaign(parentId, userId, (err, parentCampaign, userId) => {
+      return getCampaignCB(err, campaign, userId, parentCampaign, referrerId);
+    });
+  };
+
+  /**
+   * Method to get all the runs for the current campaign if there are any.
+   * @param  {[object]} campaign
+   * @param  {[function]} getRunCampaignsCB
+   * @return {[object]} campaign, runCampaigns
+   * @author Aswin Raj A
+   */
+  const getRunCampaigns = (parentId, getRunCampaignsCB) => {
+    Campaign.find({
+      where: {parentId: parentId},
+      order: "createdAt DESC"
+    }, (campaignFindErr, runCampaigns) => {
+        if(campaignFindErr) {
+          logger.error("Error while finding run campaigns", {
+            input: {campaignId: parentId},
+            error: campaignFindErr, stack: campaignFindErr.stack});
+          return getRunCampaignsCB(errorMessages.SERVER_ERROR);
+        }
+        return getRunCampaignsCB(null, runCampaigns);
+    });
+  };
+
+  /**
+   * Create the new run campaign for the current campaign
+   * run campaign will be created based on the previous runs
+   * @param  {[object]} campaign
+   * @param  {[object]} runCampaigns
+   * @param  {[function]} createCampaignCB
+   * @return {[object]} campaign
+   * @author Aswin Raj A
+   */
+  const createRunCampaign = (campaign, runCampaigns, userId, parentCampaign,
+    referrerId, createCampaignCB) => {
+    const runName = `Run ${runCampaigns.length+constants.ONE}`+
+      ` - ${parentCampaign.name}`;
+    let runCampaignObj = {
+      name: runName,
+      parentId: parentCampaign.id,
+      referrerId: referrerId,
+      createdBy: userId
+    };
+    createCampaign(runCampaignObj, (err, campaign) => {
+      return createCampaignCB(err, campaign);
+    });
+  };
+
+  /**
+   * Create a new campaign with the campaign object
+   * @param  {[object]} campaignObj
+   * @param  {[function]} createCampaignCB
+   * @return {[object]} campaign
+   * @author Aswin Raj A
+   */
+  const createCampaign = (campaignObj, createCampaignCB) => {
+    Campaign.create(campaignObj, (campaignCreateErr, campaign) => {
+      if(campaignCreateErr) {
+        logger.error("Error while creating run campaign", {
+          input: {campaignId: campaign.id, runName: runName},
+          error: campaignCreateErr, stack: campaignCreateErr.stack});
+        return createCampaignCB(errorMessages.SERVER_ERROR);
+      }
+      return createCampaignCB(null, campaign);
+    });
+  };
+
+  /**
+   * Method to get the template for the current run
+   * @param  {[number]} campaignId
+   * @param  {[function]} getTemplateCB
+   * @return {[object]} template
+   * @author Aswin Raj A
+   */
+  const getRunTemplate = (campaignId, getTemplateCB) => {
+    Campaign.app.models.campaignTemplate.find({
+      where : {and: [{campaignId: campaignId}, {personId: null}]}
+    }, (templateFindErr, templates) => {
+      if(templateFindErr) {
+        logger.error("Error while finding campaign templates", {
+          input: {campaignId: campaignId},
+          error: templateFindErr, stack: templateFindErr.stack});
+        return getTemplateCB(templateFindErr);
+      }
+      return getTemplateCB(null, templates[0]);
+    });
+  };
+
   Campaign.remoteMethod(
     "previewCampaignTemplate", {
       description: "Returns all the mail templates used in the campaign",

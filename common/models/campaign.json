@@ -57,6 +57,12 @@
     "userDate": {
       "type": "string"
     },
+    "parentId": {
+      "type": "number"
+    },
+    "referrerId": {
+      "type": "number"
+    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"
@@ -254,6 +260,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "doesCampaignExist"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "newRun"
     }
   ],
   "methods": {}

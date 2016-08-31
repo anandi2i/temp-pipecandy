@@ -197,7 +197,7 @@ const CampaignApi = {
    * @param {number} campaignId
    */
   createNewRun(campaignId) {
-    return api.post(`/api/campaign/${campaignId}/newRun`);
+    return api.put(`/api/campaigns/${campaignId}/newRun`);
   }
 };
 

@@ -65,10 +65,10 @@ class CustomCampaignActionComponent extends React.Component {
           } else if(status === "Sent") {
             return (
               <div>
-                <a className="btn btn-dflt blue sm-icon-btn dropdown-button" data-activates="campaignOption">
+                <a className="btn btn-dflt blue sm-icon-btn dropdown-button" data-activates={`campaignOption${campaignId}`}>
                   options
                 </a>
-                <ul id="campaignOption" className="dropdown-content">
+                <ul id={`campaignOption${campaignId}`} className="dropdown-content">
                   <li>
                     <Link to={`/campaign/${campaignId}`}> View Report </Link>
                   </li>
