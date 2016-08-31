@@ -137,6 +137,9 @@ class Subscriber extends React.Component {
         this.saveOrUpdate();
         if(!addAnotherField) {
           this.closeModal();
+        } else {
+          this.initialPersonData.listFields = this.props.listFields;
+          this.setState(this.initialPersonData);
         }
       }
     };
