@@ -216,6 +216,10 @@
     }
   }
 }
+.failedCount {
+  color: $red-clr;
+}
+
 @media only screen and (max-width: 1176px) {
   .griddle {
     width: 100%;

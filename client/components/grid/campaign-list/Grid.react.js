@@ -1,10 +1,12 @@
 import React from "react";
 import {Link} from "react-router";
+import ReactDOM from "react-dom";
 import _ from "underscore";
 import Griddle from "griddle-react";
 import CustomPagerComponent from "../CustomGridPagination.react";
 import CustomPreviewComponent from "./CustomPreviewComponent.react";
 import CustomCampaignLinkComponent from "./CustomCampaignLinkComponent.react";
+import CustomFailedCountComponent from "./CustomFailedCountComponent";
 import CustomCampaignActionComponent from
   "./CustomCampaignActionComponent.react";
 import GridStore from "../../../stores/GridStore";
@@ -42,7 +44,8 @@ let columnMeta = [{
     "visible": true,
     "displayName": "Status",
     "sortable": false,
-    "cssClassName" : ""
+    "cssClassName" : "",
+    "customComponent": CustomFailedCountComponent
   }, {
     "columnName": "replies",
     "order": 5,
@@ -85,6 +88,11 @@ class CampaignGrid extends React.Component {
   //Reset the maxpage to null
   componentWillUnmount() {
     GridStore.resetMaxPage();
+  }
+
+  componentDidMount() {
+    this.el = $(ReactDOM.findDOMNode(this));
+    this.el.find(".tooltipped").tooltip({delay: 50});
   }
 
   getCustomGridFilterer = (results, filter) => {

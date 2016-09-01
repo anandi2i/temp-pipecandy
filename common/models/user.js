@@ -639,7 +639,7 @@ module.exports = function(user) {
    * @param  {[campaigns]} campaigns
    * @param  {[function]} generateCB
    * @return {[campaignList]}
-   * @author Aswin Raj A
+   * @author Aswin Raj A, Rahul Khandelwal(modified)
    */
   const generateCampaignMetric = (campaigns, generateCB) => {
     let campaignList = [];
@@ -647,7 +647,8 @@ module.exports = function(user) {
       async.parallel({
         listSentTo : getCampaignListCount.bind(null, campaign),
         replies : getCampaignResponseCount.bind(null, campaign),
-        progress : getCampaignProgress.bind(null, campaign)
+        progress : getCampaignProgress.bind(null, campaign),
+        failedCount : getFailedCount.bind(null, campaign)
       }, (parallelErr, campaignMetrics) => {
         if(parallelErr){
           logger.error("Error while getting campaign list metrics", {
@@ -749,6 +750,33 @@ module.exports = function(user) {
       return getProgressCB(null, emptyCount);
     }
   };
+
+  /**
+   * To get the fail count of response for the current campaign
+   * @param  {[campaign]} campaign
+   * @param  {[function]} getResponseCountCB
+   * @return {[responseCount]}
+   * @author Rahul Khandelwal
+   */
+  const getFailedCount = (campaign, getFailedCountCB) => {
+      user.app.models.campaignMetric.find({
+        where : {
+            campaignId: campaign.id
+        }
+      }, (campaignMetricErr, campaignMetric) => {
+        if (campaignMetricErr) {
+          logger.error("Error while finding campaignMetric",
+            {error: campaignMetricErr, stack: campaignMetricErr.stack, input:
+            {campaignId:campaign.id}});
+          return callback(errorMessages.SERVER_ERROR);
+        }
+        if(!lodash.isEmpty(campaignMetric)){
+          return getFailedCountCB(null, campaignMetric[0].failedEmails);
+        }
+        return getFailedCountCB(null, emptyCount);
+      });
+  };
+
 
   /**
    * Updates the updatedAt column with current Time

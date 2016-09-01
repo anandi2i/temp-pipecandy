@@ -212,7 +212,8 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
         replies: campaign.replies,
         action: status,
         scheduledAt: campaign.scheduledAt ? moment(campaign.scheduledAt)
-        .format("DD MMM YYYY, h:mm a") : "-"
+        .format("DD MMM YYYY, h:mm a") : "-",
+        failedCount: campaign.failedCount
       });
     });
     return allCampaignList;

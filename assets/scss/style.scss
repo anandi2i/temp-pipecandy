@@ -1243,6 +1243,9 @@ $lines-to-show: 8;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .expired {
+      color: $red-clr;
+    }
   }
   &:hover {
     background-color: $light-bg-clr;
