@@ -2619,6 +2619,71 @@ module.exports = function(Campaign) {
     });
   };
 
+  Campaign.remoteMethod(
+    "emailListsForCampaign",
+    {
+      description: "Get lists and person for campaign",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "id", type: "number", required: true, http: {source: "path"}}
+      ],
+      returns: {arg: "emailList", type: "object", root: true},
+      http: {verb: "get", path: "/:id/list"}
+    }
+  );
+
+  /**
+   * Get the Campaign Lists with person count for the given Campaign Id
+   * Example: Return Object
+   *  emailLists: [{listId: 1,
+   *                listName: "Stock Recepients",
+   *                recepientCount: 37}]
+   * @param  {Object} ctx Context object to get accessToken
+   * @param  {Number} id [campaign id]
+   * @param  {function} getCampaignListsCB
+   * @return {Object} List with Person
+   * @author Rahul Khandelwal
+   */
+  Campaign.emailListsForCampaign = (ctx, campaignId, getCampaignListsCB) => {
+    async.waterfall([
+      async.apply(getCampaignList, campaignId),
+      getListsRecepient
+    ], (asyncErr, emailLists) => {
+      return getCampaignListsCB(asyncErr, emailLists);
+    });
+  };
+
+  /**
+   * Get the list with recepient Count for the given Campaign Id
+   * @param  {object} lists lists for campaign
+   * @param  {function} campaignListCB
+   * @return {Object} List with Person
+   * @author Rahul Khandelwal
+   */
+  const getListsRecepient = (lists, campaignListCB) => {
+    let listsWithPerson = [];
+    async.each(lists, (list, listCallBack) => {
+      list.people((peopleListErr, peopleList) => {
+        if(peopleListErr){
+          logger.error("Error while finding people for list",
+              {input : {listId:list.id}, error: peopleListErr,
+                stack: peopleListErr ? peopleListErr.stack : ""});
+          return listCallBack(peopleListErr);
+        }
+        const listObj = {
+          listId: list.id,
+          listName: list.name,
+          recepientCount: peopleList.length
+        };
+        listsWithPerson.push(listObj);
+        return listCallBack(null);
+      });
+    }, (asyncEachErr) => {
+      return campaignListCB(asyncEachErr, listsWithPerson);
+    });
+  };
+
+
 //observers
   /**
    * Updates the updatedAt column with current Time

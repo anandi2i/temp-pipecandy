@@ -203,6 +203,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "emailListsForCampaign"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "hasRecentCampaign"
