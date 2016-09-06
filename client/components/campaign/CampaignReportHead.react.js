@@ -2,6 +2,7 @@ import React from "react";
 import {Link} from "react-router";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
+import CampaignList from "./campaign-report/CampaignList.react";
 import _ from "underscore";
 /**
  * Header part for Dashboard and Campaign report
@@ -37,6 +38,10 @@ class CampaignReportHead extends React.Component {
     }
   }
 
+  showList = () => {
+    this.refs.CampaignList.refs.component.generateCampaignList();
+  }
+
   render() {
     const campaignId = this.props.campaignId || this.props.recentCampaignId;
     const campaignDetails = this.state.campaignDetails;
@@ -49,7 +54,10 @@ class CampaignReportHead extends React.Component {
               <div className="head">{campaignDetails.campaignName}</div>
               <div className="head campaign-detail-section">
                 <ul className="separator">
-                  <li> Sent to {campaignDetails.listCount} lists
+                  <li> Sent to
+                    <span className="show-lists" onClick={() => this.showList()}>
+                       {campaignDetails.listCount} lists
+                    </span>
                     <i className="mdi mdi-record"></i>
                     {campaignDetails.recepientCount} recipients
                     {
@@ -57,7 +65,7 @@ class CampaignReportHead extends React.Component {
                       ?
                       <i className="mdi mdi-record"></i>
                       : ""
-                    }                    
+                    }
                   </li>
                   <li>
                     {
@@ -80,6 +88,7 @@ class CampaignReportHead extends React.Component {
             </div>
             : ""
         }
+        <CampaignList ref="CampaignList" campaignId={this.props.campaignId}/>
       </div>
     );
   }

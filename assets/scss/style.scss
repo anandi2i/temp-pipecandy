@@ -675,6 +675,11 @@ a {
   min-height: 50px;
   .campaign-detail-section {
     width: auto;
+    .show-lists {
+      color: $blue-clr;
+      cursor: pointer;
+      margin-left: 5px;
+    }
   }
 }
 .sub-head-container {
@@ -1558,6 +1563,24 @@ $lines-to-show: 8;
   background-color: $lit-gray-bg;
 }
 .modal {
+  &.campaign-list-modal {
+    max-width: 600px;
+    .list-name {
+      margin-bottom: 5px;
+      a {
+        display: inline-block;
+        font-size: 16px;
+        padding: 5px 0;
+        text-transform: capitalize;
+        .recepient-count {
+          color: $dflt-txt-clr;
+          font-size: 14px;
+          margin-left: 5px;
+          text-transform: lowercase;
+        }
+      }
+    }
+  }
   &.min-modal {
     top: 25% !important;
     width: 35%;

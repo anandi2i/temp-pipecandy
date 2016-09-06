@@ -10,6 +10,7 @@ import EmailListApi from "../API/EmailListApi";
 import {browserHistory} from "react-router";
 
 let _error = "";
+let _emailList = [];
 let _isExistCampaignId = false;
 let allCampaigns = [];
 let _allEmailTemplates = [];
@@ -232,6 +233,12 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
 
   getSelectedEmailList() {
     return selectedEmailList;
+  },
+  /**
+   * To store all the email list for the current campaign
+   */
+  getCampaignEmailList() {
+    return _emailList;
   },
 
   getCampaignMetrics() {
@@ -765,6 +772,15 @@ AppDispatcher.register(function(payload) {
         browserHistory.push(`campaign/${response.data.id}/run`);
       }, (err) => {
         _error = HandleError.evaluateError(err);
+      });
+      break;
+    case Constants.GET_CAMPAIGN_LISTS:
+      CampaignApi.getListForCampaign(action.campaignId).then((response) => {
+        _emailList = response.data;
+        CampaignStore.emitChange();
+      }, (err) => {
+        _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
       });
       break;
     default:

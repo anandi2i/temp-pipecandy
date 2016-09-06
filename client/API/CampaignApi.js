@@ -198,6 +198,12 @@ const CampaignApi = {
    */
   createNewRun(campaignId) {
     return api.put(`/api/campaigns/${campaignId}/newRun`);
+  },
+  /**
+   * To get all the email list used for the current campaign
+   */
+  getListForCampaign(campaignId) {
+    return api.get(`/api/campaigns/${campaignId}/list`);
   }
 };
 

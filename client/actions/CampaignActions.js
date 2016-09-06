@@ -34,6 +34,16 @@ const CampaignActions = {
     });
   },
   /**
+   * To get all the email list used for the current campaign Id
+   * and the number of persons in each list
+   */
+  getCampaignEmailList(campaignId) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_CAMPAIGN_LISTS,
+      campaignId: campaignId
+    });
+  },
+  /**
    * Get the inbox mails for a campaign
    * @param  {object} data The data includes campaign id, start, limit
    */
