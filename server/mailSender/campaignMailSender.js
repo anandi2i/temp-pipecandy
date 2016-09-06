@@ -523,20 +523,24 @@ function sendEmail(base64EncodedEmail, oauth2Client, emailQueue, mailContent,
  * @param  {Object} mailContent
  * @param  {Object} sentMailResp
  * @param  {Function} updateRelatedTablesCB
- * @author Syed Sulaiman M
+ * @author Syed Sulaiman M, Rahul Khandelwal(modified)
  */
 function updateRelatedTables(emailQueue, mailContent, sentMailResp,
       updateRelatedTablesCB) {
+  const isSent = true;
   async.parallel({
     audit: createAudit.bind(null, emailQueue, mailContent, sentMailResp),
     campaignMetric:
-        updateCampaignMetric.bind(null, emailQueue, mailContent, sentMailResp),
+        updateCampaignMetric.bind(null, emailQueue, mailContent,
+          sentMailResp, isSent),
     listMetric:
-        updateListMetric.bind(null, emailQueue, mailContent, sentMailResp),
+        updateListMetric.bind(null, emailQueue, mailContent,
+           sentMailResp, isSent),
     sentMailBox:
         updateSentMailBox.bind(null, emailQueue, mailContent, sentMailResp),
     followUpMetric:
-        updateFollowUpMetric.bind(null, emailQueue, mailContent, sentMailResp),
+        updateFollowUpMetric.bind(null, emailQueue, mailContent,
+          sentMailResp, isSent),
     followUps:
         App.followUp.getFollowUpsCampaignId.bind(null, emailQueue.campaignId)
   }, function(err, results) {
@@ -588,11 +592,12 @@ function createAudit(emailQueue, mailContent, sentMailResp, createAuditCB) {
  * @param  {Object} emailQueue     Email Queue Object
  * @param  {Object} mailContent    Sent Mail Content
  * @param  {Object} sentMailResp   Sent Mail Response
+ * @param  {Boolean} isSent   Sent or Failed
  * @param  {Function} updateMetricCB callback function
- * @author Syed Sulaiman M
+ * @author Syed Sulaiman M, Rahul Khandelwal(modified)
  */
 function updateCampaignMetric(emailQueue, mailContent, sentMailResp,
-  updateMetricCB) {
+   isSent, updateMetricCB) {
   if(emailQueue.followUpId) return updateMetricCB(null);
   let campaignMetricInst = {};
   campaignMetricInst.sentEmails = 1;
@@ -607,7 +612,11 @@ function updateCampaignMetric(emailQueue, mailContent, sentMailResp,
     }
     if (!lodash.isEmpty(campaignMetric)) {
       campaignMetricInst = campaignMetric[0];
-      campaignMetricInst.sentEmails = ++campaignMetric[0].sentEmails;
+      if (isSent) {
+        campaignMetricInst.sentEmails = ++campaignMetric[0].sentEmails;
+      } else {
+        campaignMetricInst.failedEmails = ++campaignMetric[0].failedEmails;
+      }
     }
     App.campaignMetric.upsert(campaignMetricInst, function(err, response) {
       if (err) {
@@ -624,10 +633,10 @@ function updateCampaignMetric(emailQueue, mailContent, sentMailResp,
  * @param  {Object} mailContent    Sent Mail Content
  * @param  {Object} sentMailResp   Sent Mail Response
  * @param  {Function} updateMetricCB callback function
- * @author Syed Sulaiman M
+ * @author Syed Sulaiman M, Rahul Khandelwal(modified)
  */
 function updateFollowUpMetric(emailQueue, mailContent, sentMailResp,
-    updateMetricCB) {
+  isSent, updateMetricCB) {
   if(!emailQueue.followUpId) return updateMetricCB(null);
   let followUpMetricInst = {};
   followUpMetricInst.sentEmails = 1;
@@ -643,7 +652,11 @@ function updateFollowUpMetric(emailQueue, mailContent, sentMailResp,
     }
     if (!lodash.isEmpty(followUpMetric)) {
       followUpMetricInst = followUpMetric[0];
-      followUpMetricInst.sentEmails = ++followUpMetric[0].sentEmails;
+      if (isSent) {
+        followUpMetricInst.sentEmails = ++followUpMetric[0].sentEmails;
+      } else {
+        followUpMetricInst.failedEmails = ++followUpMetric[0].failedEmails;
+      }
     }
     App.followUpMetric.upsert(followUpMetricInst, function(err, response) {
       if (err) {
@@ -660,10 +673,10 @@ function updateFollowUpMetric(emailQueue, mailContent, sentMailResp,
  * @param  {Object} mailContent    Sent Mail Content
  * @param  {Object} sentMailResp   Sent Mail Response
  * @param  {Function} updateMetricCB callback function
- * @author Syed Sulaiman M
+ * @author Syed Sulaiman M, Rahul Khandelwal(modified)
  */
 function updateListMetric(emailQueue, mailContent, sentMailResp,
-      updateMetricCB) {
+  isSent, updateMetricCB) {
   if(emailQueue.followUpId) return updateMetricCB(null);
   App.campaign.getCampaignListForPerson(emailQueue.campaignId,
       emailQueue.personId, function(err, lists) {
@@ -677,7 +690,11 @@ function updateListMetric(emailQueue, mailContent, sentMailResp,
         listMetricInst.campaignId = emailQueue.campaignId;
         if(listMetric) {
           listMetricInst = listMetric;
-          listMetricInst.sentEmails = ++listMetric.sentEmails;
+          if (isSent) {
+            listMetricInst.sentEmails = ++listMetric.sentEmails;
+          } else {
+            listMetricInst.failedEmails = ++listMetric.failedEmails;
+          }
         }
         updatedLists.push(listMetricInst);
         App.listMetric.upsert(listMetricInst, function(err, response) {
@@ -813,165 +830,40 @@ function updateFollowUp(emailQueue, campaignMetric, followUpMetric,
 /**
  * Method to Update Failed Count in Metrics
  * @param  {Function} filterEmailCB callback function
- * @author Syed Sulaiman M
+ * @author Syed Sulaiman M, Rahul Khandelwal(modified)
  */
 function updateFailedMetricCount(queuedMails, emailQueue, callback) {
   const filteredOutEmailQs = lodash.differenceBy(queuedMails, emailQueue, "id");
-  async.parallel({
-    campaignMetric:
-        updateCampaignMetricFailedCount.bind(null, filteredOutEmailQs),
-    listMetric:
-        updateListMetricFailedCount.bind(null, filteredOutEmailQs),
-    followUpMetric:
-        updateFollowUpMetricFailedCount.bind(null, filteredOutEmailQs),
-  }, function(err, results) {
-    if (err) {
-      console.error("Error while Updating related tables: " + err);
-    }
-    callback(null, emailQueue);
-  });
-}
-
-/**
- * Update Campaign Metric for sent mail
- * @param  {Object} filteredOutEmailQs     Email Queue Object
- * @param  {Object} mailContent    Sent Mail Content
- * @param  {Object} sentMailResp   Sent Mail Response
- * @param  {Function} updateMetricCB callback function
- * @author Syed Sulaiman M
- */
-function updateCampaignMetricFailedCount(filteredOutEmailQs, callback) {
-
-  let campaignMails = lodash.filter(filteredOutEmailQs, (o) => {
-    return (!o.followUpId) ? true : false;
-  });
-  let grpdEmailQueueByCamp = lodash.groupBy(campaignMails, "campaignId");
-  let campaignIds = lodash.keys(grpdEmailQueueByCamp);
-  campaignIds = lodash.filter(campaignIds, (o) => { return (o !== null); });
-
-  if(lodash.isEmpty(campaignIds)) return callback(null);
-  let campaignMetrics = [];
-  async.each(campaignMails, (campaignMail, campaignMailCB) => {
-    let campaignMetricInst = {};
-    campaignMetricInst.failedEmails = 1;
-    campaignMetricInst.campaignId = campaignMail.campaignId;
-    App.campaignMetric.find({
-      where: {
-        campaignId: campaignMail.campaignId
+  if(lodash.isEmpty(filteredOutEmailQs)) return callback(null, emailQueue);
+  const isSent = false;
+  async.each(filteredOutEmailQs, (filteredOutEmail, filteredOutEmailCB) => {
+    async.parallel({
+      campaignMetric:
+          updateCampaignMetric.bind(null, filteredOutEmail, null, null, isSent),
+      listMetric:
+          updateListMetric.bind(null, filteredOutEmail, null, null, isSent),
+      followUpMetric:
+          updateFollowUpMetric.bind(null, filteredOutEmail, null, null, isSent),
+      followUps:
+          App.followUp.getFollowUpsCampaignId.bind(null,
+            filteredOutEmail.campaignId)
+    }, function(err, results) {
+      if (err) {
+        console.error("Error while Updating related tables: " + err);
       }
-    }, (campaignMetricErr, campaignMetric) => {
-      if (campaignMetricErr) {
-        console.error("Error in updating Campaign Metric", campaignMetricErr);
-      }
-      if (!lodash.isEmpty(campaignMetric)) {
-        campaignMetricInst = campaignMetric[0];
-        campaignMetricInst.failedEmails = ++campaignMetric[0].failedEmails;
-      }
-      App.campaignMetric.upsert(campaignMetricInst, function(err, response) {
-        if (err) console.error("Error in updating Campaign Metric", err);
-        campaignMetrics.push(response);
-        campaignMailCB(null, response);
+      async.parallel({
+        campaign: async.apply(updateCampaign,
+            filteredOutEmail, results.campaignMetric, results.followUpMetric,
+            results.followUps),
+        followUp: async.apply(updateFollowUp,
+            filteredOutEmail, results.campaignMetric, results.followUpMetric)
+      }, function(err, results) {
+        if (err) console.error("Error while Updating related tables: " + err);
+        filteredOutEmailCB(null);
       });
     });
-  }, function(err) {
-    if (err) console.error("Error in updating List Metric", err);
-    callback(null, campaignMetrics);
-  });
-}
-
-/**
- * Update Campaign Metric for Failed Count
- * @param  {Object} filteredOutEmailQs     Email Queue Object
- * @param  {Object} mailContent    Sent Mail Content
- * @param  {Object} sentMailResp   Sent Mail Response
- * @param  {Function} updateMetricCB callback function
- * @author Syed Sulaiman M
- */
-function updateFollowUpMetricFailedCount(filteredOutEmailQs, callback) {
-
-  let followUpMails = lodash.filter(filteredOutEmailQs, (o) => {
-    return (o.followUpId) ? true : false;
-  });
-  let grpdEmailQueueByFollowUp = lodash.groupBy(followUpMails, "followUpId");
-  let followUpIds = lodash.keys(grpdEmailQueueByFollowUp);
-  followUpIds = lodash.filter(followUpIds, (o) => { return (o !== null); });
-
-  if(lodash.isEmpty(followUpIds)) return callback(null);
-  let followUpMetrics = [];
-  async.each(followUpMails, (followUpMail, followUpMailCB) => {
-    let followUpMetricInst = {};
-    followUpMetricInst.failedEmails = 1;
-    followUpMetricInst.followUpId = followUpMail.followUpId;
-    followUpMetricInst.campaignId = followUpMail.campaignId;
-    App.followUpMetric.find({
-      where: {
-        followUpId: followUpMail.followUpId
-      }
-    }, (followUpMetricErr, followUpMetric) => {
-      if (followUpMetricErr) {
-        console.error("Error in updating FollowUp Metric", followUpMetricErr);
-      }
-      if (!lodash.isEmpty(followUpMetric)) {
-        followUpMetricInst = followUpMetric[0];
-        followUpMetricInst.failedEmails = ++followUpMetric[0].failedEmails;
-      }
-      App.followUpMetric.upsert(followUpMetricInst, function(err, response) {
-        if (err) console.error("Error in updating FollowUp Metric", err);
-        followUpMetrics.push(response);
-        followUpMailCB(null);
-      });
-    });
-  }, function(err) {
-    if (err) console.error("Error in updating List Metric", err);
-    callback(null, followUpMetrics);
-  });
-}
-
-/**
- * Update List Metric for Failed Count
- * @param  {Object} filteredOutEmailQs     Email Queue Object
- * @param  {Object} mailContent    Sent Mail Content
- * @param  {Object} sentMailResp   Sent Mail Response
- * @param  {Function} updateMetricCB callback function
- * @author Syed Sulaiman M
- */
-function updateListMetricFailedCount(filteredOutEmailQs, callback) {
-
-  let campaignMails = lodash.filter(filteredOutEmailQs, (o) => {
-    return (!o.followUpId) ? true : false;
-  });
-
-  if(lodash.isEmpty(campaignMails)) return callback(null);
-
-  let updatedLists = [];
-  async.each(campaignMails, (campaignMail, campaignMailCB) => {
-    App.campaign.getCampaignListForPerson(campaignMail.campaignId,
-        campaignMail.personId, function(err, lists) {
-      async.each(lists, (list, listCB) => {
-        App.listMetric.findByListIdAndCampaignId(
-            list.id, campaignMail.campaignId, (err, listMetric) => {
-          let listMetricInst = {};
-          listMetricInst.failedEmails = 1;
-          listMetricInst.listId = list.id;
-          listMetricInst.campaignId = campaignMail.campaignId;
-          if(listMetric) {
-            listMetricInst = listMetric;
-            listMetricInst.failedEmails = ++listMetric.failedEmails;
-          }
-          updatedLists.push(listMetricInst);
-          App.listMetric.upsert(listMetricInst, function(err, response) {
-            if (err) console.error("Error in updating List Metric", err);
-            listCB(null, response);
-          });
-        });
-      }, function(err) {
-        if (err) console.error("Error in updating List Metric", err);
-        campaignMailCB(null);
-      });
-    });
-  }, function(err) {
-    if (err) console.error("Error in updating List Metric", err);
-    callback(null, updatedLists);
+  }, (asyncErr) => {
+    return callback(asyncErr, emailQueue);
   });
 }
 
