@@ -360,7 +360,9 @@ module.exports = function(Campaign) {
     oauth2Client.credentials.access_token = accessToken;
     oauth2Client.credentials.refresh_token = refreshToken;
     let emailLines = [];
-    const subject = striptags(mailContent.subject).trim();
+    let subject = striptags(mailContent.subject).trim();
+    const encSubject = new Buffer(subject).toString("base64");
+    subject = "=?utf-8?B?" + encSubject + "?=";
     emailLines.push(`From: ${mailContent.userDetails.displayName}
       <${mailContent.fromEmail}>`);
     emailLines.push(`To: <${mailContent.email}>`);
