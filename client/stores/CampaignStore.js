@@ -758,6 +758,7 @@ AppDispatcher.register(function(payload) {
       }, (err) => {
         _error = HandleError.evaluateError(err);
         CampaignStore.emitClassificationCountChange();
+        _error = "";
       });
       break;
     case Constants.SEND_TEST_MAIL:
@@ -765,6 +766,8 @@ AppDispatcher.register(function(payload) {
         displayError(SuccessMessages.TestMail);
       }, (err) => {
         _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
+        _error = "";
       });
       break;
     case Constants.CREATE_NEW_RUN:
@@ -772,6 +775,8 @@ AppDispatcher.register(function(payload) {
         browserHistory.push(`campaign/${response.data.id}/run`);
       }, (err) => {
         _error = HandleError.evaluateError(err);
+        CampaignStore.emitChange();
+        _error = "";
       });
       break;
     case Constants.GET_CAMPAIGN_LISTS:
