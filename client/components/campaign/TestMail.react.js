@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import _ from "underscore";
 import validation from "react-validation-mixin";
 import strategy from "joi-validation-strategy";
 import validatorUtil from "../../utils/ValidationMessages";
@@ -52,7 +53,11 @@ class TestMail extends React.Component {
   componentWillReceiveProps(nextProps) {
     const subjectTags = CampaignStore.getAllUsedTags(nextProps.emailSubject);
     const bodyTags = CampaignStore.getAllUsedTags(nextProps.emailContent);
-    const allTags = subjectTags.concat(bodyTags);
+    let allTags = subjectTags.concat(bodyTags);
+  //http://stackoverflow.com/questions/9923890/removing-duplicate-objects-with-underscore-for-javascript
+    allTags = _.uniq(allTags, (tag, id) => {
+      return tag.id;
+    });
     const setFields = {
       allTags: allTags
     };
