@@ -144,8 +144,10 @@ class TestMail extends React.Component {
    * Validate Email and subject content
    */
   validateEmail() {
-    const {emailContent, emailSubject} = this.props;
-    if(!emailContent.trim()) {
+    const {emailContent, emailSubject, errorCount} = this.props;
+    if(errorCount){
+      displayError(ErrorMessages.SmartTagIssuesInMainEmail);
+    } else if(!emailContent.trim()) {
       displayError(ErrorMessages.EmptyEmailContent);
     } else if (!emailSubject.trim()) {
       displayError(ErrorMessages.EMPTY_SUBJECT);

@@ -739,7 +739,8 @@ class ScheduleEmail extends React.Component {
                   </div>
                   <div className="col s12 m6 l6 p-lr-0">
                     <TestMail emailContent={emailContent}
-                      emailSubject={emailSubject}/>
+                      emailSubject={emailSubject}
+                      errorCount={errorCount}/>
                   </div>
                 </div>
                 <div className="row m-lr-0 schedule-time" style={{display: displaySchedule}}>
