@@ -65,7 +65,7 @@ export const ErrorMessages = {
   "MISSING_TEMPLATE_CONTENT": "Oops. It seems like you forgot to fill your " +
     "template!",
   "EMPTY_EMAIL": "Oops. Your to email id seems to be empty!",
-  "INVALID_EMAIL": "Oops. Your to email id seems to be invalid!",
+  "INVALID_EMAIL": "Oops! That doesn't seem like a right email id!",
   "INVALID_ACCESS_TOKEN": "Ooops. Something went wrong. Please logout and login"
 };
 
@@ -87,7 +87,8 @@ export const SuccessMessages = {
   "WarningImproveDelivery": "All your emails would be delivered at one go " +
     "(instead of being delivered over a period of time). This might reduce" +
     " your email deliverability rates. Not recommended.",
-  "TestMail": "Test mail sent successfully"
+  "TestMail": "Test mail sent successfully",
+  "successCampaign": "Your campaign is on its way!"
 };
 
 /**

@@ -647,7 +647,7 @@ AppDispatcher.register(function(payload) {
       .then((response) => {
         _error = "";
         browserHistory.push("/campaign");
-        displaySuccess("Campaign saved successfully");
+        displaySuccess(SuccessMessages.successCampaign);
       }, (err) => {
           _error = HandleError.evaluateError(err);
           CampaignStore.emitChange();
