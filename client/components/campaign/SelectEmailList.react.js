@@ -44,16 +44,26 @@ class SelectEmailList extends React.Component {
 
   render() {
     const draftEmailIndex = 2;
+    const scheduleEmailIndex = 3;
+    const {isParent, handleClick} = this.props;
     return (
       <div className="container">
         <div className="row sub-head-container run-campaign-nav-wrapper m-lr-0">
           <div className="head col s12 m10 l10">{"Select Email List(s)"}</div>
           <div className="col s12 m2 l2 p-0">
-            <a className="right arrow-btn btn"
-              onClick={() => this.props.handleClick(draftEmailIndex)}>
-              Draft Email(s)
-              <i className="mdi mdi-chevron-right right"></i>
-            </a>
+            {
+              isParent
+                ? <a className="right arrow-btn btn"
+                    onClick={() => handleClick(draftEmailIndex)}>
+                    Draft Email(s)
+                    <i className="mdi mdi-chevron-right right"></i>
+                  </a>
+                : <a className="btn blue right"
+                    onClick={() => handleClick(scheduleEmailIndex)}>
+                    Save & continue
+                  </a>
+            }
+
           </div>
         </div>
         <div className="container" style={{display: this.state.spinning ? "block" : "none"}}>

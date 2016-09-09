@@ -9,7 +9,7 @@ import GridStore from "../../stores/GridStore";
 class TabsNav extends React.Component {
   constructor(props) {
     super(props);
-    this.state={
+    this.state = {
       selectEmailList: {
         index: 1,
         name: "Select Email List(s)"
@@ -25,48 +25,40 @@ class TabsNav extends React.Component {
     };
   }
 
-  handleClick(index) {
-    this.props.handleClick(index);
-  }
-
   /**
    * render
    * @return {ReactElement} markup
    */
   render() {
-    let activePointer = "active position";
-    let activeTab = "active tabs";
-    let emailListIndex = this.state.selectEmailList.index;
-    let templateIndex = this.state.selectTemplate.index;
-    let scheduleIndex = this.state.ScheduleEmail.index;
-    let isEmailList = (this.props.active === emailListIndex);
-    let isTemplate = (this.props.active === templateIndex);
-    let isSchedule = (this.props.active === scheduleIndex);
+    const {selectEmailList, selectTemplate, ScheduleEmail} = this.state;
+    const {active, isParent, handleClick} = this.props;
+    const isEmailList = (active === selectEmailList.index) ? "active" : "";
+    const isTemplate = (active === selectTemplate.index) ? "active" : "";
+    const isSchedule = (active === ScheduleEmail.index) ? "active" : "";
+    const isParentCampaign = isParent ? "" : "disabled";
     return (
       <div className="tab-container">
         <div className="new-tabs container">
-          <div className={isEmailList ? activePointer : "position"}>
-            {emailListIndex}
+          <div className={`position ${isEmailList}`}>
+            {selectEmailList.index}
           </div>
-          <div className={isEmailList ? activeTab : "tabs"}
-            onClick={() => this.handleClick(emailListIndex)}>
-            {this.state.selectEmailList.name}
+          <div className={`tabs ${isEmailList}`}
+            onClick={() => handleClick(selectEmailList.index)}>
+            {selectEmailList.name}
           </div>
-          <div className={isTemplate ? activePointer : "position"}
-            style={{left:"33.2%"}}>
-            {templateIndex}
+          <div className={`position ${isTemplate}`} style={{left:"33.2%"}}>
+            {selectTemplate.index}
           </div>
-          <div className={isTemplate ? activeTab : "tabs"}
-            onClick={() => this.handleClick(templateIndex)}>
-            {this.state.selectTemplate.name}
+          <div className={`tabs ${isTemplate} ${isParentCampaign}`}
+            onClick={() => handleClick(selectTemplate.index)}>
+            {selectTemplate.name}
           </div>
-          <div className={isSchedule ? activePointer : "position"}
-            style={{left:"66.5%"}}>
-            {scheduleIndex}
+          <div className={`position ${isSchedule}`} style={{left:"66.5%"}}>
+            {ScheduleEmail.index}
           </div>
-          <div className={isSchedule ? activeTab : "tabs"}
-            onClick={() => this.handleClick(scheduleIndex)}>
-            {this.state.ScheduleEmail.name}
+          <div className={`tabs ${isSchedule}`}
+            onClick={() => handleClick(ScheduleEmail.index)}>
+            {ScheduleEmail.name}
           </div>
         </div>
       </div>
@@ -81,8 +73,9 @@ class RunCampaign extends React.Component {
     this.state = {
       activeTab: 1,
       selectedTemplate: "",
+      subject: "",
       selectedListIds: {},
-      isExistId: false,
+      isExist: false,
       tabs: {
         selectEmailList: 1,
         selectTemplate: 2,
@@ -92,12 +85,12 @@ class RunCampaign extends React.Component {
   }
 
   /**
-   * To check campaign id is exists or not
+   * Get the campaign detail
    * add change listener
    */
   componentDidMount() {
     if (this.props.params && this.props.params.id) {
-      CampaignActions.isExistCampaign(this.props.params.id);
+      CampaignActions.getCampaign(this.props.params.id);
     }
     CampaignStore.addChangeListener(this.onStoreChange);
   }
@@ -110,6 +103,11 @@ class RunCampaign extends React.Component {
     CampaignStore.removeChangeListener(this.onStoreChange);
   }
 
+  /**
+   * Navigate between tabs
+   * Navigation to draft emails is restricted if the campaign is not parent
+   * @param {number} index
+   */
   handleClick = (index) => {
     this.setState({
       activeTab: index
@@ -127,9 +125,12 @@ class RunCampaign extends React.Component {
   }
 
   onStoreChange = () => {
-    let isExistId = CampaignStore.isExistCampaign();
+    let campaignData = CampaignStore.getCampaignData();
     this.setState({
-      isExistId: isExistId
+      isParent: campaignData.parentId ? false : true,
+      isExist: campaignData.id ? true : false,
+      selectedTemplate: campaignData.template.content || "",
+      subject: campaignData.template.subject || "",
     });
     displayError(CampaignStore.getError());
   }
@@ -145,20 +146,21 @@ class RunCampaign extends React.Component {
    * @return {ReactElement} markup
    */
   render() {
-    const {tabs, activeTab} = this.state;
+    const {tabs, activeTab, isParent, isExist, selectedTemplate,
+      subject} = this.state;
     return (
       <div>
        {
-         this.state.isExistId
+         isExist
            ?
              <div>
                 <TabsNav handleClick={this.handleClick}
-                  active={activeTab} />
+                  active={activeTab} isParent={isParent} />
                 {
                   tabs.selectEmailList === activeTab
                     ? <SelectEmailList ref="selectEmailList"
                         handleClick={this.handleClick}
-                        active={activeTab} />
+                        active={activeTab} isParent={isParent} />
                     : ""
                 }
                 {
@@ -172,7 +174,8 @@ class RunCampaign extends React.Component {
                   tabs.createCampaign === activeTab
                     ? <ScheduleEmail campaignId={this.props.params.id}
                         changeSelectedList={this.changeSelectedList}
-                        selectedTemplate={this.state.selectedTemplate}
+                        selectedTemplate={selectedTemplate}
+                        subject={subject} isParent={isParent}
                         setTemplateContent={this.setTemplateContent}
                         handleClick={this.handleClick} />
                     : ""

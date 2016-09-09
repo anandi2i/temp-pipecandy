@@ -74,12 +74,12 @@ const CampaignActions = {
     });
   },
   /**
-   * To check campaign id is exists or not
-   * @param  {integer} compaignId existing of campaign id
+   * To get campaign details
+   * @param {number} campaignId
    */
-  isExistCampaign(campaignId) {
+  getCampaign(campaignId) {
     AppDispatcher.handleAction({
-      actionType: Constants.CHECK_EXISTING_CAMPAIGN,
+      actionType: Constants.GET_CAMPAIGN,
       campaignId: campaignId
     });
   },

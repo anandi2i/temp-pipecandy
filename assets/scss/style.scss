@@ -835,7 +835,6 @@ a {
   margin-left: 5%;
   width: 90%;
   .new-tabs {
-    cursor: pointer;
     display: flex;
     margin: auto;
     padding-bottom: 20px;
@@ -845,6 +844,7 @@ a {
       border: 1px solid $pinck-clr;
       border-right: 0;
       color: $pinck-clr;
+      cursor: pointer;
       display: inline;
       font-size: 12px;
       font-weight: 700;
@@ -858,6 +858,15 @@ a {
       text-transform: uppercase;
       white-space: nowrap;
       width: 100%;
+      &.disabled {
+        cursor: default;
+        opacity: .5;
+        pointer-events: none;
+        &:hover {
+          background-color: transparent;
+          color: $pinck-clr;
+        }
+      }
       &.active {
         background-color: $pinck-clr-drk;
         color: $white;
@@ -1425,9 +1434,6 @@ $lines-to-show: 8;
         min-height: 250px;
         outline: none;
         padding: 10px;
-        p {
-          margin: 0;
-        }
       }
       .tag-info {
         line-height: 37px;
@@ -1505,9 +1511,6 @@ $lines-to-show: 8;
   .un-common {
     background-color: $lit-blue-bg;
     color: $blue-clr;
-  }
-  p {
-    margin: 0;
   }
 }
 .tiny-toolbar {

@@ -93,21 +93,23 @@ class ScheduleEmail extends React.Component {
  */
   initTinyMceEditors = () => {
     const {getAllTags, address} = this.state;
+    const {selectedTemplate, subject} = this.props;
     initTinyMCE("#emailSubject", "", "", getAllTags, false, this.tinyMceSubCb);
     initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", getAllTags, true,
       this.tinyMceCb);
-    let mainContent = this.props.selectedTemplate;
     const tinyMceDelayTime = 2000;
     //TODO need to remove setTimeout
-    if(mainContent){
+    if(selectedTemplate){
       this.setState({
-        emailContent: mainContent
+        emailContent: selectedTemplate,
+        subject: subject
       });
     }
     const _this = this;
     setTimeout(function() {
       tinyMCE.get("optOutAddress").setContent(address);
-      tinyMCE.get("emailContent").setContent(mainContent);
+      tinyMCE.get("emailContent").setContent(selectedTemplate);
+      tinyMCE.get("emailSubject").setContent(subject);
       _this.setState({
         isEditorReady: true
       });
@@ -671,7 +673,7 @@ class ScheduleEmail extends React.Component {
     // } else if (spamRating === "CAREFUL") {
     //   spamClass = "spam-result careful";
     // }
-
+    const {isParent, handleClick} = this.props;
     return (
       <div className="container">
         <div className="spinner-container" style={{display: isEditorReady ? "none" : "block"}}>
@@ -679,13 +681,21 @@ class ScheduleEmail extends React.Component {
         </div>
         <div style={{display: isEditorReady ? "block" : "none"}}>
           <div className="row sub-head-container run-campaign-nav-wrapper m-lr-0">
-            <div className="head col s12 m10 l10">{"Let's Draft an Email"}</div>
-            <div className="col s12 m2 l2 p-0">
-              <a className="right arrow-btn btn"
-                onClick={() => this.props.handleClick(draftEmailIndex)}>
-                Draft Email(s)
-                <i className="mdi mdi-chevron-left left"></i>
-              </a>
+            <div className="head col s12 m8 l8">{"Let's Draft an Email"}</div>
+            <div className="col s12 m4 l4 p-0">
+              {
+                isParent
+                  ? <a className="right arrow-btn btn"
+                      onClick={() => handleClick(draftEmailIndex)}>
+                      Draft Email(s)
+                      <i className="mdi mdi-chevron-left left"></i>
+                    </a>
+                  : <a className="right arrow-btn btn"
+                      onClick={() => handleClick(selectEmailListIndex)}>
+                      <i className="mdi mdi-chevron-left left"></i>
+                      Select Email List(s)
+                    </a>
+              }
             </div>
             <div className="sub-head">
               <div className="switch">
@@ -769,7 +779,7 @@ class ScheduleEmail extends React.Component {
                   <div className="right-part"
                      style={{display: emailList.length ?
                      "none" : "block"}}>
-                     <span className="error-chip" onClick={ () => this.props.handleClick(selectEmailListIndex)}>
+                     <span className="error-chip" onClick={ () => handleClick(selectEmailListIndex)}>
                        Select your email list
                      </span>
                   </div>

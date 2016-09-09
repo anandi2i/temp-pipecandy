@@ -11,7 +11,7 @@ import {browserHistory} from "react-router";
 
 let _error = "";
 let _emailList = [];
-let _isExistCampaignId = false;
+let campaignData = {};
 let allCampaigns = [];
 let _allEmailTemplates = [];
 let _allUserTemplates = [];
@@ -169,11 +169,11 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
   },
 
   /**
-   * Check existing campaign id
-   * @return {boolean} true or false
+   * Get the campaign data
+   * @return {object} campaignData
    */
-  isExistCampaign() {
-    return _isExistCampaignId;
+  getCampaignData() {
+    return campaignData;
   },
 
   /**
@@ -616,11 +616,11 @@ AppDispatcher.register(function(payload) {
         CampaignStore.emitMailboxChange();
       });
       break;
-    case Constants.CHECK_EXISTING_CAMPAIGN:
+    case Constants.GET_CAMPAIGN:
       CampaignApi.getCampaign(action.campaignId).then((response) => {
-        _isExistCampaignId = response.data.exists;
+        campaignData = response.data;
         CampaignStore.emitChange();
-        if (response.data.exists) {
+        if(response.data) {
           browserHistory.push(`/campaign/${action.campaignId}/run`);
         } else {
           browserHistory.push("/campaign");

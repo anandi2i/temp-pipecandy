@@ -17,12 +17,12 @@ const CampaignApi = {
     return api.get("/api/defaultTemplates/myTemplates");
   },
   /**
-   * To check campaign id is exists or not
-   * @param  {integer} compaignId existing of campaign id
-   * @return {boolean}  true or false
+   * Get campaign detail for given campaign id
+   * @param {number} campaignId 
+   * @return {object} Promise
    */
-  getCampaign(compaignId) {
-    return api.get(`/api/campaigns/${compaignId}/exists`);
+  getCampaign(campaignId) {
+    return api.get(`/api/campaigns/${campaignId}`);
   },
   /**
    * Get the campaign metrics for the current campaign
