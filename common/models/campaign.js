@@ -1885,9 +1885,8 @@ module.exports = function(Campaign) {
     "doesCampaignExist",
     {
       description: "To check if there is any campaign for the campaign id",
-      accepts: [{
-        arg: "campaignId", type: "any"
-      }],
+      accepts: [{arg: "ctx", type: "object", http: {source: "context"}},
+                {arg: "campaignId", type: "any"}],
       returns: {arg: "hasCampaign", type: "boolean"},
       http: {
         verb: "get", path: "/:campaignId/doesCampaignExist"
@@ -1900,14 +1899,15 @@ module.exports = function(Campaign) {
    * @param  {[campaignId]}  campaignId
    * @param  {function} doesCampaignExistCB
    * @return {[boolean]} doesCampaignExist
-   * @author Aswin Raj A
+   * @author Aswin Raj A, Rahul Khandelwal(modified)
    */
-  Campaign.doesCampaignExist = (campaignId, doesCampaignExistCB) => {
+  Campaign.doesCampaignExist = (ctx, campaignId, doesCampaignExistCB) => {
     Campaign.find({
       where: {
         and:[
           {"id": campaignId},
-          {"lastRunAt": {neq: null}}
+          {"lastRunAt": {neq: null}},
+          {"createdBy": ctx.req.accessToken.userId}
         ]
       }
     }, (campaignErr, campaigns) => {

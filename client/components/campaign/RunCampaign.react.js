@@ -129,8 +129,9 @@ class RunCampaign extends React.Component {
     this.setState({
       isParent: campaignData.parentId ? false : true,
       isExist: campaignData.id ? true : false,
-      selectedTemplate: campaignData.template.content || "",
-      subject: campaignData.template.subject || "",
+      selectedTemplate: campaignData.template ?
+      campaignData.template.content : "",
+      subject: campaignData.template ? campaignData.template.subject : "",
     });
     displayError(CampaignStore.getError());
   }
