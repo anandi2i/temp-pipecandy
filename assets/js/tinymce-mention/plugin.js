@@ -287,7 +287,9 @@
             this.editor.focus();
             var selection = this.editor.dom.select('span#autocomplete')[0];
             this.editor.dom.remove(selection);
-            this.editor.execCommand('mceInsertContent', false, this.insert(item) + '&nbsp;');
+            this.editor.execCommand('mceInsertContent', false, this.insert(item));
+            // Removed '&nbsp;' to remove the empty space after smart-tag is inserted.
+            // this.editor.execCommand('mceInsertContent', false, this.insert(item) + '&nbsp;');
         },
 
         insert: function (item) {
