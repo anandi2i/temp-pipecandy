@@ -212,10 +212,10 @@ class AddFollowups extends React.Component {
                 <label></label>
               </div>
             </div>
-            <div className="col s12 m4 l3">
+            {/*<div className="col s12 m4 l3">
               <label></label>
               <input type="text" className="timepicker border-input" placeholder="00:00AM" />
-            </div>
+            </div>*/}
           </div>
             <div className="row email-content m-lr-0">
               <div className="tiny-toolbar" id={"mytoolbar" + followupId} />

@@ -164,6 +164,7 @@ FollowUp.getFolloUpsToSent = (callback) => {
 const calculateNextFollowupdate = (scheduledDate, followUp, campaign,
   calculateNextFollowupdateCB) => {
   const systemTimeZone = moment().format("Z");
+  // const followUpTime = followUp.time;
   try {
     const one = 1;
     scheduledDate = scheduledDate ? scheduledDate : new Date();
@@ -177,10 +178,12 @@ const calculateNextFollowupdate = (scheduledDate, followUp, campaign,
     const five = 5;
     const userTimeZone = campaign.userDate ?
       campaign.userDate.split(" ")[five] : systemTimeZone;
-    const newFollowupDate = new Date(dateString + " " + followUp.time +
+    const campaignTime = scheduledDate.getHours()+":"+
+      scheduledDate.getMinutes()+":00";
+    const newFollowupDate = new Date(dateString + " " + campaignTime +
     " " + userTimeZone);
 
-    calculateNextFollowupdateCB(null, followUp, newFollowupDate);
+    return calculateNextFollowupdateCB(null, followUp, newFollowupDate);
   } catch (err) {
     logger.error("FollowUp date calculation error", {error: err,
       stack: err.stack});
