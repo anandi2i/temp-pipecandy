@@ -16,7 +16,8 @@ const validatorObj = {
       }
     }
   }),
-  email: Joi.string().required().email().label("Email").options({
+  email: Joi.string().email({minDomainAtoms: 2}).required().label("Email")
+  .options({
     language: {
       any: {
         empty: "!! Oops. It seems like you forgot to fill your email!",
