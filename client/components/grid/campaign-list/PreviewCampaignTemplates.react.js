@@ -9,7 +9,8 @@ class PreviewCampaignTemplates extends React.Component {
   constructor(props) {
     super(props);
     this.state = ({
-      previewTemplate: {}
+      previewTemplate: {},
+      spinner: true
     });
   }
 
@@ -52,17 +53,16 @@ class PreviewCampaignTemplates extends React.Component {
   onStoreChange = () => {
     const previewTemplate = EmailListStore.getCampaignTemplatePreview();
     this.setState({
-      previewTemplate: previewTemplate
+      previewTemplate: previewTemplate,
+      spinner: false
     });
   }
 
   render() {
-    const {previewTemplate} = this.state;
-    let modalHeight;
+    const {previewTemplate, spinner} = this.state;
     const templateLength =
       previewTemplate.templates && previewTemplate.templates.length;
-    previewTemplate && templateLength
-      ? modalHeight = "80%" : modalHeight = "300px";
+    const modalHeight = templateLength ? "80%" : "300px";
     return (
       <div className="modal modal-fixed-header lg-modal campaign-preview-tem" style={{height:modalHeight}}>
         <i className="mdi mdi-close" onClick={this.closeModal}></i>
@@ -76,38 +76,36 @@ class PreviewCampaignTemplates extends React.Component {
           </div>
         </div>
         <div className="preview-modal-content">
-          <div className="modal-content">
+          <div className="modal-content" style={{display: spinner ? "none": "block"}}>
             {
-              previewTemplate
-                ?
-                  templateLength
-                    ?
-                      previewTemplate.templates.map((val, key) => {
-                        return (
-                          <div className="template-content preview-mail-container" key={key}>
-                            { key
-                              ? <div className="col s12 head">
-                                  Follow up {key}
-                                </div>
-                              : <div>
-                                  <div className="col s12 head">Subject</div>
-                                  <div dangerouslySetInnerHTML={{__html: val.subject}}
-                                    className="col s12 content"/>
-                                </div>
-                            }
-                            <div dangerouslySetInnerHTML={{__html: val.content}}
-                              className="col s12 mail-content content" />
-                          </div>
-                        );
-                      })
-                    : <CampaignInfoMsg
-                        closeModal={this.closeModal}
-                        changModalHeight={this.changModalHeight}
-                        id={this.props.id}/>
-                  : <div className="spinner-container">
-                      <Spinner />
-                    </div>
+              templateLength
+                ? previewTemplate.templates.map((val, key) => {
+                    return (
+                      <div className="template-content preview-mail-container" key={key}>
+                        { key
+                          ? <div className="col s12 head">
+                              Follow up {key}
+                            </div>
+                          : <div>
+                              <div className="col s12 head">Subject</div>
+                              <div dangerouslySetInnerHTML={{__html: val.subject}}
+                                className="col s12 content"/>
+                            </div>
+                        }
+                        <div dangerouslySetInnerHTML={{__html: val.content}}
+                          className="col s12 mail-content content" />
+                      </div>
+                    );
+                  })
+                : <CampaignInfoMsg
+                    closeModal={this.closeModal}
+                    changModalHeight={this.changModalHeight}
+                    id={this.props.id}/>
             }
+          </div>
+          <div style={{display: spinner ? "block": "none"}}
+            className="spinner-container">
+            <Spinner />
           </div>
         </div>
       </div>
