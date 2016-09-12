@@ -470,6 +470,8 @@ AppDispatcher.register(function(payload) {
       EmailListApi.getSelectedList(selectedList).then((response) => {
         let emailList = [];
         let smartTags = [];
+        let allFieldNames = [];
+        let allFieldIds = [];
         fieldIds = [];
         let commonSmartTags = [];
         let unCommonSmartTags = [];
@@ -485,83 +487,145 @@ AppDispatcher.register(function(payload) {
           });
           let getFields = list.fields;
           _.each(list.people, (person) => {
-            // To get duplicate Email Ids
-            if(_.contains(allEmailList, person.email)) {
-              duplicateEmailList.push(person.email);
-            } else {
-              allEmailList.push(person.email);
-            }
             let fieldName = [];
             let personFields = [];
             let newField = [];
             let newtag = {};
-            if(person.firstName) {
-              fieldName.push("First Name");
-              newtag = {
-                "field": "First Name",
-                "value": person.firstName,
-                "id": 1
+            // To get duplicate Email Ids
+            if(_.contains(allEmailList, person.email)) {
+              duplicateEmailList.push(person.email);
+              // If duplicate email Id then modifiy existing person
+              const existingPerson = _.find(allPeopleList, (people) => {
+                return people.email === person.email;
+              });
+              const fieldsList = _.indexBy(getFields, "id");
+              _.each(person.fieldValues, field => {
+                // add new fields to existing person if exists
+                if(!_.contains(existingPerson.fieldNames,
+                  fieldsList[field.fieldId].name)){
+                  fieldName.push(fieldsList[field.fieldId].name);
+                  newtag = {
+                    "field": fieldsList[field.fieldId].name,
+                    "value": field.value,
+                    "id": field.fieldId
+                  };
+                  personFields.push(newtag);
+                  newField.push(_.omit(newtag, "value"));
+                } else {
+                  // Check for updated values for duplicate fields
+                  const existingField = _.findWhere(existingPerson.fieldValues,
+                    {fieldId : field.fieldId});
+                  if(existingField &&
+                    existingField.updatedAt < field.updatedAt) {
+                      existingField.value = field.value;
+                      const existingPersonField =
+                      _.findWhere(existingPerson.personFields,
+                        {id : field.fieldId});
+                      if(existingPersonField){
+                          existingPersonField.value = field.value;
+                      }
+                  }
+                }
+              });
+              // Add new tags to the existing array
+              const existingTags = _.findWhere(allFieldNames,
+                {id : person.email});
+              existingTags.value = existingTags.value.concat(fieldName);
+              // Add new fieldIds to existing field IDs
+              const existingFieldId = _.findWhere(allFieldIds,
+                {id : person.email});
+              existingFieldId.value = existingFieldId.value.concat(newField);
+              // Add new Fields to existing person
+              existingPerson.personFields =
+              _.union(existingPerson.personFields, personFields);
+              existingPerson.fieldNames =
+              _.union(existingPerson.fieldNames, fieldName);
+            } else {
+              allEmailList.push(person.email);
+              if(person.firstName) {
+                fieldName.push("First Name");
+                newtag = {
+                  "field": "First Name",
+                  "value": person.firstName,
+                  "id": 1
+                };
+                personFields.push(newtag);
+                newField.push(_.omit(newtag, "value"));
+              }
+              if(person.middleName) {
+                fieldName.push("Middle Name");
+                newtag = {
+                  "field": "Middle Name",
+                  "value": person.middleName,
+                  "id": 2
+                };
+                personFields.push(newtag);
+                newField.push(_.omit(newtag, "value"));
+              }
+              if(person.lastName) {
+                fieldName.push("Last Name");
+                newtag = {
+                  "field": "Last Name",
+                  "value": person.lastName,
+                  "id": 3
+                };
+                personFields.push(newtag);
+                newField.push(_.omit(newtag, "value"));
+              }
+              if(person.email) {
+                fieldName.push("Email");
+                newtag = {
+                  "field": "Email",
+                  "value": person.email,
+                  "id": 4
+                };
+                personFields.push(newtag);
+                newField.push(_.omit(newtag, "value"));
+              }
+              if(person.salutation) {
+                fieldName.push("Salutation");
+                newtag = {
+                  "field": "Salutation",
+                  "value": person.salutation,
+                  "id": 5
+                };
+                personFields.push(newtag);
+                newField.push(_.omit(newtag, "value"));
+              }
+              const fieldsList = _.indexBy(getFields, "id");
+              _.each(person.fieldValues, field => {
+                fieldName.push(fieldsList[field.fieldId].name);
+                newtag = {
+                  "field": fieldsList[field.fieldId].name,
+                  "value": field.value,
+                  "id": field.fieldId
+                };
+                personFields.push(newtag);
+                newField.push(_.omit(newtag, "value"));
+              });
+              const personFieldName = {
+                id : person.email,
+                value : fieldName
               };
-              personFields.push(newtag);
-              newField.push(_.omit(newtag, "value"));
+              const personFieldId = {
+                id : person.email,
+                value : newField
+              };
+              allFieldNames.push(personFieldName);
+              allFieldIds.push(personFieldId);
+              person.personFields = personFields;
+              person.fieldNames = fieldName;
+              allPeopleList.push(person);
             }
-            if(person.middleName) {
-              fieldName.push("Middle Name");
-              newtag = {
-                "field": "Middle Name",
-                "value": person.middleName,
-                "id": 2
-              };
-              personFields.push(newtag);
-              newField.push(_.omit(newtag, "value"));
-            }
-            if(person.lastName) {
-              fieldName.push("Last Name");
-              newtag = {
-                "field": "Last Name",
-                "value": person.lastName,
-                "id": 3
-              };
-              personFields.push(newtag);
-              newField.push(_.omit(newtag, "value"));
-            }
-            if(person.email) {
-              fieldName.push("Email");
-              newtag = {
-                "field": "Email",
-                "value": person.email,
-                "id": 4
-              };
-              personFields.push(newtag);
-              newField.push(_.omit(newtag, "value"));
-            }
-            if(person.salutation) {
-              fieldName.push("Salutation");
-              newtag = {
-                "field": "Salutation",
-                "value": person.salutation,
-                "id": 5
-              };
-              personFields.push(newtag);
-              newField.push(_.omit(newtag, "value"));
-            }
-            const fieldsList = _.indexBy(getFields, "id");
-            _.each(person.fieldValues, field => {
-              fieldName.push(fieldsList[field.fieldId].name);
-              newtag = {
-                "field": fieldsList[field.fieldId].name,
-                "value": field.value,
-                "id": field.fieldId
-              };
-              personFields.push(newtag);
-              newField.push(_.omit(newtag, "value"));
-            });
-            smartTags.push(fieldName);
-            fieldIds.push(newField);
-            person.personFields = personFields;
-            person.fieldNames = fieldName;
-            allPeopleList.push(person);
           });
+        });
+        // Put all field name arrays in smartTags array
+        _.each(allFieldNames, (field) => {
+          smartTags.push(field.value);
+        });
+        // Put all fieldIds arrays to field ID Array
+        _.each(allFieldIds, (fieldId) => {
+          fieldIds.push(fieldId.value);
         });
         //http://stackoverflow.com/questions/16229479/how-to-perform-union-or-intersection-on-an-array-of-arrays-with-underscore-js
         commonSmartTags = _.intersection.apply(_, smartTags);
