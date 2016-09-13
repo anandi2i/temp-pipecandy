@@ -1360,6 +1360,7 @@ $lines-to-show: 8;
         cursor: pointer;
       }
       .content-wrapper {
+        border-bottom: $border-1px;
         color: $disabled;
         margin-top: 20px;
         .content {
