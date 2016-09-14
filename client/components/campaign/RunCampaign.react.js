@@ -125,14 +125,16 @@ class RunCampaign extends React.Component {
   }
 
   onStoreChange = () => {
-    let campaignData = CampaignStore.getCampaignData();
-    this.setState({
+    const campaignData = CampaignStore.getCampaignData();
+    const state = {
       isParent: campaignData.parentId ? false : true,
-      isExist: campaignData.id ? true : false,
-      selectedTemplate: campaignData.template ?
-      campaignData.template.content : "",
-      subject: campaignData.template ? campaignData.template.subject : "",
-    });
+      isExist: campaignData.id ? true : false
+    };
+    if(campaignData.template && campaignData.parentId) {
+      state.selectedTemplate = campaignData.template.content || "";
+      state.subject = campaignData.template.subject || "";
+    }
+    this.setState(state);
     displayError(CampaignStore.getError());
   }
 
