@@ -75,10 +75,10 @@ export const ErrorMessages = {
  */
 export const SuccessMessages = {
   "successUpdate": "Done. That’s taken care of!",
-  "successSubscribeUpdate": "Recipients’ details updated. Success!",
+  "successSubscribeUpdate": "Got it. We've updated the details!",
   "successUpload": "The file has been uploaded. Yeehaw!",
   "successSubscribe": "Recipient details have been saved!",
-  "successDelete": "",
+  "successDelete": "Alright. We've removed the recipients from this list!",
   "successSelectTemplate": "You just selected the ‘$selectedTemplate’" +
     " template!",
   "successAddAdditionalField": "",

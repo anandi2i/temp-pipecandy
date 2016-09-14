@@ -172,6 +172,14 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
         if($(editorDom).find("a.tinymce-placeholder").length) {
           $(editorDom).find("a.tinymce-placeholder").closest("div").remove();
         }
+      }).on("keyUp", (e) => {
+        //Cursor focuses at end when the editor has only tag
+        if(e.keyCode == 8) {
+          const text = editor.selection.getRng(true).startContainer.data || '';
+          if(text.length === 0) {
+            editor.execCommand('mceInsertContent', false, '&#8203;');
+          }
+        }
       });
     }
   });
