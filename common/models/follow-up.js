@@ -110,17 +110,19 @@ FollowUp.prepareScheduledAt = (campaignId, prepareScheduledAtCB) => {
   FollowUp.getCampaignAndFollowUps(campaignId, (err, followUps, campaign) => {
     if(err) return prepareScheduledAtCB(err);
     let previousScheduledDate = null;
+    let previousScheduledTime = null;
     async.eachSeries(followUps, (followUp, followUpCB) => {
       if(!previousScheduledDate) previousScheduledDate = campaign.scheduledAt;
       async.waterfall([
-        async.apply(calculateNextFollowupdate, previousScheduledDate, followUp,
-          campaign),
+        async.apply(calculateNextFollowupdate, previousScheduledDate,
+          previousScheduledTime, followUp, campaign),
         updateFollowUp
-      ], (asyncErr, newFollowupDate) => {
+      ], (asyncErr, newFollowupDate, newFollowupTime) => {
         if(asyncErr){
           return followUpCB(asyncErr);
         }
         previousScheduledDate = newFollowupDate;
+        previousScheduledTime = newFollowupTime;
         return followUpCB(null);
       });
     }, (asyncErr) => {
@@ -161,29 +163,32 @@ FollowUp.getFolloUpsToSent = (callback) => {
  * @return {[nextFolloupDate]}
  * @author Aswin Raj A
  */
-const calculateNextFollowupdate = (scheduledDate, followUp, campaign,
-  calculateNextFollowupdateCB) => {
+const calculateNextFollowupdate = (scheduledDate, scheduledTime, followUp,
+  campaign, calculateNextFollowupdateCB) => {
   const systemTimeZone = moment().format("Z");
   // const followUpTime = followUp.time;
   try {
-    const one = 1;
-    scheduledDate = scheduledDate ? scheduledDate : new Date();
+    const ZERO = 0;
+    const ONE = 1;
+    const FIVE = 5;
+    const newTime = `${new Date().getHours()}:${new Date().getMinutes()}`;
+    scheduledDate = scheduledDate || new Date();
+    scheduledTime = scheduledTime || newTime;
     const formatedDate = new Date(scheduledDate);
     const newDate = moment([formatedDate.getFullYear(),
       formatedDate.getMonth(), formatedDate.getDate()])
                 .add(followUp.daysAfter, "days").format("YYYY-MM-DDTHH:mm:ss");
     const newformatedDate = new Date(newDate);
-    const dateString = (newformatedDate.getMonth()+one) + " " +
-    newformatedDate.getDate() + " " + newformatedDate.getFullYear();
-    const five = 5;
+    const dateString = (newformatedDate.getMonth()+ONE) + " " +
+    	newformatedDate.getDate() + " " + newformatedDate.getFullYear();
     const userTimeZone = campaign.userDate ?
-      campaign.userDate.split(" ")[five] : systemTimeZone;
-    const campaignTime = scheduledDate.getHours()+":"+
-      scheduledDate.getMinutes()+":00";
-    const newFollowupDate = new Date(dateString + " " + campaignTime +
+      campaign.userDate.split(" ")[FIVE] : systemTimeZone;
+    const newFollowupDate = new Date(dateString + " " + scheduledTime +
     " " + userTimeZone);
-
-    return calculateNextFollowupdateCB(null, followUp, newFollowupDate);
+    newFollowupDate.setHours(scheduledTime.split(":")[ZERO]);
+    newFollowupDate.setMinutes(scheduledTime.split(":")[ONE]);
+    return calculateNextFollowupdateCB(null, followUp, newFollowupDate,
+      scheduledTime);
   } catch (err) {
     logger.error("FollowUp date calculation error", {error: err,
       stack: err.stack});
@@ -199,15 +204,20 @@ const calculateNextFollowupdate = (scheduledDate, followUp, campaign,
  * @param  {[function]} updateFollowUpCB
  * @author Aswin Raj A
  */
-const updateFollowUp = (followUp, followUpScheduledDate, updateFollowUpCB) => {
-  followUp.updateAttribute("scheduledAt", followUpScheduledDate,
+const updateFollowUp = (followUp, followUpScheduledDate, followUpScheduledTime,
+  updateFollowUpCB) => {
+  const followUpObj = {
+    "scheduledAt" : followUpScheduledDate,
+    "time" : followUpScheduledTime
+  };
+  followUp.updateAttributes(followUpObj,
     (followUpUpdateErr, updatedFollowup) => {
       if(followUpUpdateErr){
         logger.error("Error while updating followUps",
         {error: followUpUpdateErr, stack: followUpUpdateErr.stack});
         return updateFollowUpCB(followUpUpdateErr);
       }
-      updateFollowUpCB(null, followUpScheduledDate);
+      updateFollowUpCB(null, followUpScheduledDate, followUpScheduledTime);
   });
 };
 
@@ -542,14 +552,16 @@ const createCampaignTemplate = (createdFollowUp, campaign,
    */
   FollowUp.scheduleFollowUps = (followUps, campaign, scheduleCB) => {
     let oldScheduledDate = null;
+    let oldScheduledTime = null;
     async.eachSeries(followUps, (followUp, followUpCB) => {
       async.waterfall([
-        async.apply(calculateNextFollowupdate, oldScheduledDate, followUp,
-          campaign),
+        async.apply(calculateNextFollowupdate, oldScheduledDate,
+          oldScheduledTime, followUp, campaign),
         updateFollowUp
-      ], (asyncErr, prevFollowUpDate) => {
+      ], (asyncErr, prevFollowUpDate, scheduledTime) => {
         if(asyncErr) return followUpCB(asyncErr);
         oldScheduledDate = prevFollowUpDate;
+        oldScheduledTime = scheduledTime;
         return followUpCB(null);
       });
     }, (eachSeriesErr) => {
