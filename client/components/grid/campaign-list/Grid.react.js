@@ -69,7 +69,7 @@ let columnMeta = [{
     "visible": true,
     "displayName": "Actions",
     "sortable": false,
-    "cssClassName" : "",
+    "cssClassName" : "center",
     "customComponent": CustomCampaignActionComponent
   }];
 

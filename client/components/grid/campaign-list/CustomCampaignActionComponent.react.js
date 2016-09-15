@@ -45,7 +45,7 @@ class CustomCampaignActionComponent extends React.Component {
     const status = this.props.data;
     const campaignId = this.props.rowData.id;
     return (
-      <div className="campaign-action">
+      <div className="campaign-action center">
         {(() => {
           if(status === "In Draft") {
             return (
@@ -53,36 +53,43 @@ class CustomCampaignActionComponent extends React.Component {
                 Run
               </Link>
             );
-          } else if(status === "Scheduled" || status === "In Progress"
-              || status === "Resumed") {
-            return (
-              <a onClick={() => this.pauseCampaign(campaignId)}> Pause </a>
-            );
-          } else if(status === "Paused") {
-            return (
-              <a onClick={() => this.resumeCampaign(campaignId)}> Resume </a>
-            );
-          } else if(status === "Sent") {
-            return (
-              <div>
-                <a className="btn btn-dflt blue sm-icon-btn dropdown-button" data-activates={`campaignOption${campaignId}`}>
-                  options
-                </a>
-                <ul id={`campaignOption${campaignId}`} className="dropdown-content">
-                  <li>
-                    <Link to={`/campaign/${campaignId}`}> View Report </Link>
-                  </li>
-                  <li>
-                    <Link onClick={() => this.newRun(campaignId)} to="/campaign">
-                      New Run
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-
-            );
           }
+          return (
+            <div>
+              <a className="btn btn-dflt blue sm-icon-btn dropdown-button" data-activates={`campaignOption${campaignId}`}>
+                options
+              </a>
+              <ul id={`campaignOption${campaignId}`} className="dropdown-content">
+                {(() => {
+                  if(status === "Scheduled" || status === "In Progress"
+                      || status === "Resumed") {
+                    return (
+                      <li>
+                        <a onClick={() => this.pauseCampaign(campaignId)}> Pause </a>
+                      </li>
+                    );
+                  } else if(status === "Paused") {
+                    return (
+                      <li>
+                        <a onClick={() => this.resumeCampaign(campaignId)}> Resume </a>
+                      </li>
+                    );
+                  } else if(status === "Sent") {
+                    return (
+                      <li>
+                        <Link to={`/campaign/${campaignId}`}> View Report </Link>
+                      </li>
+                    );
+                  }
+                })()}
+                <li>
+                  <Link onClick={() => this.newRun(campaignId)} to="/campaign">
+                    New Run
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          );
         })()}
       </div>
     );
