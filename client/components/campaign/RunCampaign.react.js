@@ -124,6 +124,16 @@ class RunCampaign extends React.Component {
     });
   }
 
+  /**
+   * Set the subject from schedule mail on unmount
+   * @param  {String} subject
+   */
+  setSubject = (subject) => {
+    this.setState({
+      subject: subject
+    });
+  }
+
   onStoreChange = () => {
     const campaignData = CampaignStore.getCampaignData();
     const state = {
@@ -177,8 +187,8 @@ class RunCampaign extends React.Component {
                   tabs.createCampaign === activeTab
                     ? <ScheduleEmail campaignId={this.props.params.id}
                         changeSelectedList={this.changeSelectedList}
-                        selectedTemplate={selectedTemplate}
-                        subject={subject} isParent={isParent}
+                        selectedTemplate={selectedTemplate} subject={subject}
+                        isParent={isParent} setSubject={this.setSubject}
                         setTemplateContent={this.setTemplateContent}
                         handleClick={this.handleClick} />
                     : ""
