@@ -28,7 +28,7 @@ module.exports = function(Campaign) {
 
   Campaign.afterRemote("findById", function(context, data, next) {
     let campaign = context.result;
-    const parentId = campaign.parentId ? campaign.parentId : campaign.id;
+    const parentId = campaign.referrerId ? campaign.referrerId : campaign.id;
     getRunTemplate(parentId, (err, template) => {
       if(err) return next(errorMessages.SERVER_ERROR);
       campaign.template = template;
