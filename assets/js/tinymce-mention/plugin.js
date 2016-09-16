@@ -358,7 +358,7 @@
                       text = ed.selection.getRng(true).startContainer.data || '',
                       charachter = text.substr(start - 1, 1);
 
-                return (!$.trim(charachter).length || !start) ? true : false;
+                return (!$.trim(charachter).replace(/\u200B/g,'').length || !start) ? true : false;
             }
 
             ed.on('keypress', function (e) {

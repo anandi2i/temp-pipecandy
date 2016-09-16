@@ -72,8 +72,10 @@ class ScheduleEmail extends React.Component {
 
   componentWillUnmount() {
     this.el.find("select").material_select("destroy");
-    this.props.setTemplateContent(tinymce.get("emailContent").getContent());
-    this.props.setSubject(tinymce.get("emailSubject").getContent());
+    this.props.setTemplateContent(
+      tinymce.get("emailContent").getContent(),
+      tinymce.get("emailSubject").getContent()
+    );
     if(tinymce.get("emailSubject")) {
       tinyMCE.execCommand("mceRemoveEditor", true, "emailSubject");
     }

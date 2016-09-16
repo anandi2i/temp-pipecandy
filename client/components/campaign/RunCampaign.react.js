@@ -116,21 +116,13 @@ class RunCampaign extends React.Component {
 
   /**
    * Sets the selected template to the state
-   * @param {object} template - template to select
+   * @param {string} template
+   * @param {string} subject
    */
-  setTemplateContent = (template) => {
+  setTemplateContent = (template, subject) => {
     this.setState({
-      selectedTemplate: template
-    });
-  }
-
-  /**
-   * Set the subject from schedule mail on unmount
-   * @param  {String} subject
-   */
-  setSubject = (subject) => {
-    this.setState({
-      subject: subject
+      selectedTemplate: template || "",
+      subject: subject || ""
     });
   }
 
@@ -187,8 +179,8 @@ class RunCampaign extends React.Component {
                   tabs.createCampaign === activeTab
                     ? <ScheduleEmail campaignId={this.props.params.id}
                         changeSelectedList={this.changeSelectedList}
-                        selectedTemplate={selectedTemplate} subject={subject}
-                        isParent={isParent} setSubject={this.setSubject}
+                        selectedTemplate={selectedTemplate}
+                        subject={subject} isParent={isParent}
                         setTemplateContent={this.setTemplateContent}
                         handleClick={this.handleClick} />
                     : ""
