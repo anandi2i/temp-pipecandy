@@ -106,7 +106,7 @@ const resumeCampaignProcess = (campaign, resumeProcessCB) => {
     const scheduledDate = new Date(campaignScheduledDate).toUTCString();
     let currentDate = new Date();
     const tomorrow = new Date(currentDate.setDate(currentDate.getDate()+
-                    constants.ONE)).toUTCString();
+                    constants.default.ONE)).toUTCString();
     if(scheduledDate < tomorrow){
       updateForPastCampaign(campaign, (err, response) => {
         return resumeProcessCB(err, response);
