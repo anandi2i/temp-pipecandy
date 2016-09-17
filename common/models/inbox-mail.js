@@ -3,6 +3,7 @@
 import async from "async";
 import constants from "../../server/utils/constants";
 import lodash from "lodash";
+import _ from "underscore";
 import logger from "../../server/log";
 import {errorMessage as errorMessages} from "../../server/utils/error-messages";
 
@@ -620,6 +621,80 @@ module.exports = function(InboxMail) {
       columnName = "negative";
     }
     return columnName;
+  };
+
+
+  /**
+   * Method to get the first response from the prospect
+   * @param  {[number]} campaignId
+   * @param  {[number]} userId
+   * @param  {[function]} getResponseCB
+   * @return {[object]} inboxMails
+   * @author Aswin Raj A
+   */
+  InboxMail.getResponseFromProspect = (campaignId, userId, getResponseCB) => {
+    async.waterfall([
+      async.apply(getResponseForCampaign, campaignId, userId),
+      getProspectwiseFirstResponse
+    ], (asyncErr, inboxMails) => {
+      return getResponseCB(asyncErr, inboxMails);
+    });
+  };
+
+  /**
+   * To get the all the response for the current campaign
+   * @param  {[number]} campaignId
+   * @param  {[number]} userId
+   * @param  {[function]} getResponseCB
+   * @return {[object]} inboxMails
+   * @author Aswin Raj A
+   */
+  const getResponseForCampaign = (campaignId, userId, getResponseCB) => {
+    const queryObj = {
+      where: {userId: userId, campaignId: campaignId},
+      order: ["personId ASC", "createdAt ASC"]
+    };
+    queryInboxMail(queryObj, (queryErr, inboxMails) => {
+      return getResponseCB(queryErr, inboxMails);
+    });
+  };
+
+  /**
+   * To get the prospect wise first response
+   * @param  {[object]} inboxMails
+   * @param  {[object]} getResponseCB
+   * @return {[array]} responseArr
+   * @author Aswin Raj A
+   */
+  const getProspectwiseFirstResponse = (inboxMails, getResponseCB) => {
+    const uniqueProspectResponse = lodash.uniqBy(inboxMails, "personId");
+    const uniqueProspectIds = _.pluck(uniqueProspectResponse, "personId");
+    let responseArr = [];
+    async.eachSeries(uniqueProspectIds, (personId, personCB) => {
+      const prospectResponse = lodash.filter(inboxMails, {"personId":personId});
+      responseArr.push(prospectResponse[0]);
+      return personCB(null);
+    }, (asyncErr) => {
+      return getResponseCB(asyncErr, responseArr);
+    });
+  };
+
+  /**
+   * Generic method to query inboxMails table
+   * @param  {[object]} queryObj
+   * @param  {[function]} queryInboxMailCB
+   * @return {[array]} inboxMails
+   * @author Aswin Raj A
+   */
+  const queryInboxMail = (queryObj, queryInboxMailCB) => {
+    InboxMail.find(queryObj, (inboxMailsErr, inboxMails) => {
+      if(inboxMailsErr) {
+        logger.error("Error while finding inbox mails", {
+          input:queryObj, error: inboxMailsErr, stack: inboxMailsErr.stack});
+        return queryInboxMailCB(inboxMailsErr);
+      }
+      return queryInboxMailCB(null, inboxMails);
+    });
   };
 
   /**

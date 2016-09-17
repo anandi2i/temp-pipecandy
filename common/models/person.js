@@ -670,6 +670,47 @@ module.exports = function(Person) {
     });
   };
 
+  /**
+   * To get the person details for the current personId (for mail response download)
+   * @param  {[number]} personId
+   * @param  {[function]} getPersonCB
+   * @return {[object]} personDetails
+   * @author Aswin Raj A
+   */
+  Person.getPersonDetailsForId = (personId, getPersonCB) => {
+    let personDetails = {};
+    Person.findById(personId, (personFindErr, person) => {
+      if(personFindErr) {
+        logger.error("Error while finding person", {
+          input: {personId: personId}, error: personFindErr,
+          stack: personFindErr.stack});
+        return getPersonCB(personFindErr);
+      }
+      personDetails.name = person.name;
+      personDetails.email = person.email;
+      Person.app.models.prospect.findById(person.prospectId,
+        (prospectFindErr, prospect) => {
+        if(prospectFindErr) {
+          logger.error("Error while finding person", {
+            input: {personId: personId}, error: personFindErr,
+            stack: personFindErr.stack});
+          return getPersonCB(prospectFindErr);
+        }
+        Person.app.models.company.findById(prospect.companyId,
+          (companyFindErr, company) => {
+          if(companyFindErr) {
+            logger.error("Error while finding company", {
+              input:{companyId: prospect.companyId},
+              error: companyFindErr, stack: companyFindErr.stack});
+            return getPersonCB(companyFindErr);
+          }
+          personDetails.company = company.name;
+          return getPersonCB(null, personDetails);
+        });
+      });
+    });
+  };
+
   // Person.observe("after save", function(ctx, next) {
   //   let person = ctx.instance;
   //   let personAddtionalData = [];

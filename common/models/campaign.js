@@ -2686,6 +2686,77 @@ module.exports = function(Campaign) {
   };
 
 
+  Campaign.remoteMethod(
+    "downloadResponse", {
+      description: "Downloads first response for each persons",
+      accepts: [
+        {arg: "ctx", type: "object", http: {source: "context"}},
+        {arg: "campaignId", type: "number"},
+      ],
+      returns: {arg: "response", type: "object"},
+      http: {verb: "get", path: "/:campaignId/downloadResponse"}
+    }
+  );
+
+  /**
+   * To download the first response from a prospect
+   * @param  {[object]} ctx
+   * @param  {[number]} campaignId
+   * @param  {[function]} downloadCB
+   * @return {[array]} responseData
+   * @author Aswin Raj A
+   */
+  Campaign.downloadResponse = (ctx, campaignId, downloadCB) => {
+    const {userId} = ctx.req.accessToken;
+    async.waterfall([
+      async.apply(Campaign.app.models.inboxMail.getResponseFromProspect,
+        campaignId, userId),
+      (prospectResponse, passParamsCB) => {
+        getCurrentCampaign(campaignId, userId, (campaignErr, campaign,
+          userId) => {
+          passParamsCB(campaignErr, prospectResponse, campaign);
+        });
+      },
+      constructResponseData
+    ], (asyncErr, responseData) => {
+      if(asyncErr) return downloadCB(errorMessages.SERVER_ERROR);
+      return downloadCB(null, responseData);
+    });
+  };
+
+  /**
+   * Object construction for mail response for a prospect
+   * @param  {[object]} prospectResponses
+   * @param  {[object]} campaign
+   * @param  {[function]} responseCB
+   * @return {[array]} responseData
+   * @author Aswin Raj A
+   */
+  const constructResponseData = (prospectResponses, campaign, responseCB) => {
+    let responseData = [];
+    async.eachSeries(prospectResponses, (response, responseCB) => {
+      Campaign.app.models.person.getPersonDetailsForId(response.personId,
+        (responseErr, personDetail) => {
+        if(responseErr) return responseCB(responseErr);
+        const responseDate = `${response.createdAt.getDate()}-`+
+        `${response.createdAt.getMonth()+constants.ONE}-`+
+        `${response.createdAt.getFullYear()}`;
+        const responseObj = {
+          "email": personDetail.email,
+          "name": personDetail.name,
+          "domain": personDetail.company,
+          "campaignName": campaign.name,
+          "responsedate":responseDate,
+          "content": response.content
+        };
+        responseData.push(responseObj);
+        return responseCB(null);
+      });
+    }, (asyncErr) => {
+      return responseCB(asyncErr, responseData);
+    });
+  };
+
 //observers
   /**
    * Updates the updatedAt column with current Time
