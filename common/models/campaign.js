@@ -20,6 +20,7 @@ const gmailClass = google.gmail("v1");
 import googleTokenHandler from "../../server/utils/googleTokenHandler";
 import googleAuth from "google-auth-library";
 const auth = new googleAuth();
+import csv from "fast-csv";
 
 //const systemTimeZone = moment().format("Z");
 const serverUrl = app.get("appUrl");
@@ -2692,6 +2693,7 @@ module.exports = function(Campaign) {
       accepts: [
         {arg: "ctx", type: "object", http: {source: "context"}},
         {arg: "campaignId", type: "number"},
+        {arg: "res", type: "object", "http": {source: "res"}}
       ],
       returns: {arg: "response", type: "object"},
       http: {verb: "get", path: "/:campaignId/downloadResponse"}
@@ -2706,7 +2708,7 @@ module.exports = function(Campaign) {
    * @return {[array]} responseData
    * @author Aswin Raj A
    */
-  Campaign.downloadResponse = (ctx, campaignId, downloadCB) => {
+  Campaign.downloadResponse = (ctx, campaignId, res, downloadCB) => {
     const {userId} = ctx.req.accessToken;
     async.waterfall([
       async.apply(Campaign.app.models.inboxMail.getResponseFromProspect,
@@ -2717,10 +2719,12 @@ module.exports = function(Campaign) {
           passParamsCB(campaignErr, prospectResponse, campaign);
         });
       },
-      constructResponseData
-    ], (asyncErr, responseData) => {
+      constructResponseData,
+      generateCSV
+    ], (asyncErr, response, campaignName) => {
       if(asyncErr) return downloadCB(errorMessages.SERVER_ERROR);
-      return downloadCB(null, responseData);
+      res.set("Content-Disposition", `attachment;filename=${campaignName}.csv`);
+      res.send(response);
     });
   };
 
@@ -2753,7 +2757,26 @@ module.exports = function(Campaign) {
         return responseCB(null);
       });
     }, (asyncErr) => {
-      return responseCB(asyncErr, responseData);
+      return responseCB(asyncErr, responseData, campaign.name);
+    });
+  };
+
+  /**
+   * Generate csv with additional fields
+   * @param  {array} inboxResponse
+   * @param  {string} campaignName
+   * @return {function} generateCSVCB The callback function
+   * @author Dinesh Ramasamy<dinesh.r@ideas2it.com>
+   */
+  let generateCSV = (inboxResponse, campaignName, generateCSVCB) => {
+    let buffers = [];
+    csv.write(inboxResponse, {headers: true})
+     .on("data", function(data) {
+       buffers.push(data);
+     })
+    .on("finish", function() {
+      const buffer = Buffer.concat(buffers);
+      generateCSVCB(null, buffer, campaignName);
     });
   };
 

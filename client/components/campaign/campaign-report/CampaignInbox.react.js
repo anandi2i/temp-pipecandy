@@ -283,11 +283,12 @@ class CampaignInbox extends React.Component {
     } = this.state;
     const showEmptymsg = inboxMails.length || requestSent;
     const classifications = _.rest(tabs); //remove first object "all"
+    const campaignId = this.props.params.id;
     return (
       <div>
         <div className="m-b-120">
           {/* Dashboard head */}
-          <CampaignReportHead campaignId={this.props.params.id}/>
+          <CampaignReportHead campaignId={campaignId}/>
           <div className="container">
             <div className="row row-container">
               <div className="col s12 m6 l6 filter-container p-lr-0">
@@ -318,6 +319,14 @@ class CampaignInbox extends React.Component {
                       })
                     }
                   </ul>
+                  {
+                    inboxMails.length
+                    ? <a className="btn btn-dflt blue sm-icon-btn m-l-20"
+                      href={`/api/campaigns/${campaignId}/downloadResponse`}>
+                        Download Response
+                      </a>
+                    : null
+                  }
                 </div>
               </div>
             </div>
@@ -382,7 +391,7 @@ class CampaignInbox extends React.Component {
               closeCallback={this.closeCallback}/>
           : ""
         }
-        <CampaignFooter campaignId={this.props.params.id} activePage={"inbox"}/>
+        <CampaignFooter campaignId={campaignId} activePage={"inbox"}/>
       </div>
     );
   }
