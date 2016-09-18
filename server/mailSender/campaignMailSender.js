@@ -757,7 +757,8 @@ function updateCampaign(emailQueue, campaignMetric, followUpMetric, followUps,
     let updateProperties = {
       lastRunAt: new Date()
     };
-    let statusArray = [statusCodes.default.campaignSent];
+    let statusArray = [statusCodes.default.campaignSent,
+      statusCodes.default.campaignStopped];
     lodash.times(constants.default.EIGHT, (index) => {
       ++index;
       let result = "followUpStopped-" + index;

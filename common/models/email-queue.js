@@ -330,7 +330,10 @@ module.exports = function(EmailQueue) {
   const statusByCampaignMetric = (updateProperties,
     campaignMetric, followUps, statusByCampaignMetricCB) => {
     if(campaignMetric) {
-      if(campaignMetric.assembled ===
+      if(campaignMetric.assembled === campaignMetric.failedEmails) {
+        updateProperties.isSent = false;
+        updateProperties.statusCode = statusCodes.campaignStopped;
+      } else if(campaignMetric.assembled ===
           (campaignMetric.sentEmails + campaignMetric.failedEmails)) {
         updateProperties.isSent = true;
         let campStatus = statusCodes.campaignSent;
@@ -573,13 +576,22 @@ module.exports = function(EmailQueue) {
       },
       limit: 100
     }, (queuedMailsErr, queuedMails) => {
+      if(queuedMailsErr) {
+        logger.error("Error while finding emailQueue", {
+          error: queuedMailsErr, stack: queuedMailsErr.stack});
+      }
       return callback(queuedMailsErr, queuedMails);
     });
   };
 
   EmailQueue.updateInst = (emailQueue, emailQueueUpdateElements, callback) => {
     emailQueue.updateAttributes(emailQueueUpdateElements,
-          (updateErr, updatedInst) => {
+      (updateErr, updatedInst) => {
+      if(updateErr) {
+        logger.error("Error while updating emailQueue", {
+          input:{queueObj: emailQueueUpdateElements},
+          error: updateErr, stack: updateErr.stack});
+      }
       return callback(updateErr, updatedInst);
     });
   };
