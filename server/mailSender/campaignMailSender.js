@@ -351,7 +351,7 @@ function filterFollowUpByStatus(emailQueue, followUps, grpdEmailQueueByFollowUp,
 
   let emailsStopped = lodash.flatMap(followUpsNotToRun, function(o) {
     let isStatusStopped =
-      (o.statusCode === statusCodes.default.campaignStopped);
+      (o.statusCode === statusCodes.default.followUpStopped);
     return isStatusStopped ? grpdEmailQueueByFollowUp[o.id] : null;
   });
   emailsStopped = lodash.filter(emailsStopped, function(o) {
