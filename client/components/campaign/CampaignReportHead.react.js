@@ -39,7 +39,7 @@ class CampaignReportHead extends React.Component {
   }
 
   showList = () => {
-    this.refs.CampaignList.refs.component.generateCampaignList();
+    this.refs.CampaignList.generateCampaignList();
   }
 
   render() {

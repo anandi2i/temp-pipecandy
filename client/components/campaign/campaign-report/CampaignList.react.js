@@ -1,7 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import validation from "react-validation-mixin";
-import strategy from "joi-validation-strategy";
 import CampaignActions from "../../../actions/CampaignActions";
 import CampaignStore from "../../../stores/CampaignStore";
 import {Link} from "react-router";
@@ -14,7 +12,7 @@ class CampaignList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      lists: [],
+      lists: []
     };
   }
 
@@ -35,7 +33,6 @@ class CampaignList extends React.Component {
    * details page
    */
   componentWillUnmount() {
-    this.closeModal();
     CampaignStore.removeChangeListener(this.onStoreChange);
   }
 
@@ -111,4 +108,4 @@ class CampaignList extends React.Component {
   }
 }
 
-export default validation(strategy)(CampaignList);
+export default CampaignList;
