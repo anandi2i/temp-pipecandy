@@ -686,7 +686,7 @@ module.exports = function(Person) {
           stack: personFindErr.stack});
         return getPersonCB(personFindErr);
       }
-      personDetails.name = person.name;
+      personDetails.name = person.firstName;
       personDetails.email = person.email;
       Person.app.models.prospect.findById(person.prospectId,
         (prospectFindErr, prospect) => {
