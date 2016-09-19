@@ -330,10 +330,7 @@ module.exports = function(EmailQueue) {
   const statusByCampaignMetric = (updateProperties,
     campaignMetric, followUps, statusByCampaignMetricCB) => {
     if(campaignMetric) {
-      if(campaignMetric.assembled === campaignMetric.failedEmails) {
-        updateProperties.isSent = false;
-        updateProperties.statusCode = statusCodes.campaignStopped;
-      } else if(campaignMetric.assembled ===
+      if(campaignMetric.assembled ===
           (campaignMetric.sentEmails + campaignMetric.failedEmails)) {
         updateProperties.isSent = true;
         let campStatus = statusCodes.campaignSent;

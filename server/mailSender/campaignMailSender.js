@@ -615,7 +615,10 @@ function updateCampaignMetric(emailQueue, mailContent, sentMailResp,
       if (isSent) {
         campaignMetricInst.sentEmails = ++campaignMetric[0].sentEmails;
       } else {
-        campaignMetricInst.failedEmails = ++campaignMetric[0].failedEmails;
+        if(emailQueue.isStopped &&
+          emailQueue.stoppedBy !== constants.default.USER){
+          campaignMetricInst.failedEmails = ++campaignMetric[0].failedEmails;
+        }
       }
     }
     App.campaignMetric.upsert(campaignMetricInst, function(err, response) {
@@ -655,7 +658,10 @@ function updateFollowUpMetric(emailQueue, mailContent, sentMailResp,
       if (isSent) {
         followUpMetricInst.sentEmails = ++followUpMetric[0].sentEmails;
       } else {
-        followUpMetricInst.failedEmails = ++followUpMetric[0].failedEmails;
+        if(emailQueue.isStopped &&
+          emailQueue.stoppedBy !== constants.default.USER){
+          followUpMetricInst.failedEmails = ++followUpMetric[0].failedEmails;
+        }
       }
     }
     App.followUpMetric.upsert(followUpMetricInst, function(err, response) {
@@ -693,7 +699,10 @@ function updateListMetric(emailQueue, mailContent, sentMailResp,
           if (isSent) {
             listMetricInst.sentEmails = ++listMetric.sentEmails;
           } else {
-            listMetricInst.failedEmails = ++listMetric.failedEmails;
+            if(emailQueue.isStopped &&
+              emailQueue.stoppedBy !== constants.default.USER){
+              listMetricInst.failedEmails = ++listMetric.failedEmails;
+            }
           }
         }
         updatedLists.push(listMetricInst);
