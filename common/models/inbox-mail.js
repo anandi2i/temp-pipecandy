@@ -651,7 +651,13 @@ module.exports = function(InboxMail) {
    */
   const getResponseForCampaign = (campaignId, userId, getResponseCB) => {
     const queryObj = {
-      where: {userId: userId, campaignId: campaignId},
+      where:{
+        and: [
+        {userId: userId},
+        {campaignId: campaignId},
+        {isMailReceived: "TRUE"}
+      ]
+    },
       order: ["personId ASC", "createdAt ASC"]
     };
     queryInboxMail(queryObj, (queryErr, inboxMails) => {
