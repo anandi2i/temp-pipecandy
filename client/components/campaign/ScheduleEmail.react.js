@@ -47,7 +47,7 @@ class ScheduleEmail extends React.Component {
       isOptText: true,
       isAddress: true,
       spamRating: "",
-      isEditorReady: false,
+      isSpinner: true,
       improveDelivery: true,
       isPreview: false,
       alertMsg: "",
@@ -67,7 +67,6 @@ class ScheduleEmail extends React.Component {
     this.el.find(".tooltipped").tooltip({delay: 50});
     initDatePicker(this.el.find(".datepicker"));
     initTimePicker(this.el.find(".timepicker"));
-    initTinyMCE("#optOutAddress", "", "", "", false, this.tinyMceAddressCb);
   }
 
   componentWillUnmount() {
@@ -98,26 +97,18 @@ class ScheduleEmail extends React.Component {
   initTinyMceEditors = () => {
     const {getAllTags, address} = this.state;
     const {selectedTemplate, subject} = this.props;
-    initTinyMCE("#emailSubject", "", "", getAllTags, false, this.tinyMceSubCb);
+    initTinyMCE("#optOutAddress", "", "", "", false, this.tinyMceAddressCb,
+      address);
+    initTinyMCE("#emailSubject", "", "", getAllTags, false, this.tinyMceSubCb,
+      subject);
     initTinyMCE("#emailContent", "#mytoolbar", "#dropdown", getAllTags, true,
-      this.tinyMceCb);
-    const tinyMceDelayTime = 2000;
-    //TODO need to remove setTimeout
+      this.tinyMceCb, selectedTemplate);
     if(selectedTemplate){
       this.setState({
         emailContent: selectedTemplate,
         subject: subject
       });
     }
-    const _this = this;
-    setTimeout(function() {
-      tinyMCE.get("optOutAddress").setContent(address);
-      tinyMCE.get("emailContent").setContent(selectedTemplate);
-      tinyMCE.get("emailSubject").setContent(subject);
-      _this.setState({
-        isEditorReady: true
-      });
-    }, tinyMceDelayTime);
   }
 
   tinyMceCb = (editor) => {
@@ -179,7 +170,8 @@ class ScheduleEmail extends React.Component {
       allFields: selectedEmailList.allFields || [],
       user: user,
       optText: user.optText || "",
-      address: user.address || ""
+      address: user.address || "",
+      isSpinner: false
     }, () => {
       let allTags = {
         commonSmartTags: this.state.commonSmartTags,
@@ -637,7 +629,7 @@ class ScheduleEmail extends React.Component {
     const draftEmailIndex = 2;
     let {
       errorCount,
-      isEditorReady,
+      isSpinner,
       followups,
       followupsMaxLen,
       displayScheduleCampaign,
@@ -679,10 +671,10 @@ class ScheduleEmail extends React.Component {
     const {isParent, handleClick} = this.props;
     return (
       <div className="container">
-        <div className="spinner-container" style={{display: isEditorReady ? "none" : "block"}}>
+        <div className="spinner-container" style={{display: isSpinner ? "block" : "none"}}>
           <Spinner />
         </div>
-        <div style={{display: isEditorReady ? "block" : "none"}}>
+        <div style={{display: isSpinner ? "none" : "block"}}>
           <div className="row sub-head-container run-campaign-nav-wrapper m-lr-0">
             <div className="head col s12 m8 l8">{"Let's Draft an Email"}</div>
             <div className="col s12 m4 l4 p-0">

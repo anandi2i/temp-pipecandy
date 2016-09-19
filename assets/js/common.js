@@ -130,7 +130,7 @@ window.getIssueTagsInEditor = getIssueTagsInEditor;
  * @param  {object} allTags - it contains all smart-tag objects by insert #mention
  * @param  {function} changeCb - callback function after insert tags in to the editor
  */
-function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
+function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb, content) {
   let getFocusId = id.split("#")[1];
   let toolbar = isToolbar;
   if(isToolbar) {
@@ -163,9 +163,12 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb) {
         return constructSmartTags(item.classname, item.name, item.id);
       }
     },
-    setup : (editor) => {
+    setup: (editor) => {
       const editorId = editor.getElement().id;
-      editor.on("change", (e) => {
+      editor.on("init", () => {
+        editor.setContent(content || "");
+        changeCb(editor);
+      }).on("change", (e) => {
         changeCb(editor);
       }).on("focus", (e) => {
         const editorDom =  document.getElementById(editorId);
