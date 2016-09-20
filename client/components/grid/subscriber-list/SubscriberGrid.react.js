@@ -10,6 +10,7 @@ import CustomSelectComponent from "./CustomSelectComponent.react";
 import CustomSelectAllComponent from "./CustomSelectAllComponent.react";
 import Subscriber from "./Subscriber.react";
 import EmailListActions from "../../../actions/EmailListActions";
+import EmailListStore from "../../../stores/EmailListStore";
 import CustomUnsubscribeComponent from "./CustomUnsubscribeComponent.react";
 /**
  * Render the people data for a list using react-griddle
@@ -23,7 +24,8 @@ class SubscriberGridView extends React.Component {
     super(props);
     this.state = {
       selectedRowIds: [],
-      visibleRowIds: _.pluck(this.props.results, "id") || []
+      visibleRowIds: _.pluck(this.props.results, "id") || [],
+      isSpinner: false
     };
   }
 
@@ -43,8 +45,36 @@ class SubscriberGridView extends React.Component {
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
     this.el.find(".tooltipped").tooltip({delay: 50});
+    EmailListStore.addChangeListener(this.onStoreChange);
   }
-  
+
+  /**
+   * clean up event listener
+   */
+  componentWillUnmount() {
+    EmailListStore.removeChangeListener(this.onStoreChange);
+  }
+
+  /**
+   * Stop spinner on store change
+   */
+  onStoreChange = () => {
+    this.setState({
+      isSpinner: false
+    })
+  }
+
+  /**
+   * Update state of spinner
+   * @param {Boolean} isSpinner
+   */
+  spinner = (isSpinner) => {
+    this.setState({
+      isSpinner: isSpinner
+    })
+    this.props.spinner(isSpinner);
+  }
+
   /**
    * Delete selected persons from Email List
    */
@@ -259,41 +289,47 @@ class SubscriberGridView extends React.Component {
    */
   render() {
     const {listId, listFields, peopleDetails, results} = this.props;
+    const {isSpinner} = this.state;
     return (
       <div className="row subscriber-list" id="subscriberList">
         <div className="container">
-          <Griddle
-            results={results}
-            tableClassName="responsive-table"
-            useGriddleStyles={false}
-            columnMetadata={this.getColumnMeta()}
-            selectedRowIds={this.state.selectedRowIds}
-            globalData={this.getGlobalData}
-            onRowClick={this.handleRowClick}
-            metadataColumns={["id"]}
-            isMultipleSelection={false}
-            uniqueIdentifier="id"
-            showPager={true}
-            resultsPerPage="10"
-            useCustomPagerComponent={true}
-            customPagerComponent={CustomPagerComponent}
-            showFilter={true}
-            filterPlaceholderText="SEARCH BY NAME OR EMAIL"
-            sortDefaultComponent={
-              <span className="mdi mdi-arrow-up"></span>
-            }
-            sortAscendingComponent={
-              <span className="mdi mdi-arrow-up active"></span>
-            }
-            sortDescendingComponent={
-              <span className="mdi mdi-arrow-down active"></span>
-            } />
+          {
+            !isSpinner
+              ? <Griddle
+                results={results}
+                tableClassName="responsive-table"
+                useGriddleStyles={false}
+                columnMetadata={this.getColumnMeta()}
+                selectedRowIds={this.state.selectedRowIds}
+                globalData={this.getGlobalData}
+                onRowClick={this.handleRowClick}
+                metadataColumns={["id"]}
+                isMultipleSelection={false}
+                uniqueIdentifier="id"
+                showPager={true}
+                resultsPerPage="10"
+                useCustomPagerComponent={true}
+                customPagerComponent={CustomPagerComponent}
+                showFilter={true}
+                filterPlaceholderText="SEARCH BY NAME OR EMAIL"
+                sortDefaultComponent={
+                  <span className="mdi mdi-arrow-up"></span>
+                }
+                sortAscendingComponent={
+                  <span className="mdi mdi-arrow-up active"></span>
+                }
+                sortDescendingComponent={
+                  <span className="mdi mdi-arrow-down active"></span>
+                } />
+              : null
+          }
         </div>
         {/* Edit recipient component*/}
         <div>
           <Subscriber listId={listId}
             listFields={listFields}
             peopleDetails={peopleDetails}
+            spinner={this.spinner}
             ref="subscriber" />
         </div>
         {/* /Edit recipient component*/}

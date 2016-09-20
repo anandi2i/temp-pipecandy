@@ -105,6 +105,16 @@ class ListView extends React.Component {
   }
 
   /**
+   * Update state of spinner
+   * @param  {Boolean} isSpinner
+   */
+  spinner = (isSpinner) => {
+    this.setState({
+      spinning: isSpinner
+    })
+  }
+
+  /**
    * Update the state varaiables on store change
    * @property {String} error Error message
    * @property {String} success Success message
@@ -497,6 +507,7 @@ class ListView extends React.Component {
                 listId={listId}
                 peopleDetails={peopleDetails}
                 enableDelete={this.enableDelete}
+                spinner={this.spinner}
                 ref="subscriberGrid" />
             :
               !this.state.spinning

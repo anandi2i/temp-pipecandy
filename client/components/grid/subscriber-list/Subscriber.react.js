@@ -204,6 +204,7 @@ class Subscriber extends React.Component {
         }
       });
     }
+    this.props.spinner(true);
     this.props.clearValidations();
     this.el.find(".validate").removeClass("valid");
   }
