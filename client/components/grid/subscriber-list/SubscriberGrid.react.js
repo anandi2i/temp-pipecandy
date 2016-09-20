@@ -61,7 +61,7 @@ class SubscriberGridView extends React.Component {
   onStoreChange = () => {
     this.setState({
       isSpinner: false
-    })
+    });
   }
 
   /**
@@ -71,7 +71,7 @@ class SubscriberGridView extends React.Component {
   spinner = (isSpinner) => {
     this.setState({
       isSpinner: isSpinner
-    })
+    });
     this.props.spinner(isSpinner);
   }
 

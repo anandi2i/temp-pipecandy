@@ -52,7 +52,8 @@ class ScheduleEmail extends React.Component {
       isPreview: false,
       alertMsg: "",
       successBtn: "",
-      cancelBtn: ""
+      cancelBtn: "",
+      isWeekendFollowUpDisabled: true
     };
   }
 
@@ -489,8 +490,8 @@ class ScheduleEmail extends React.Component {
  * @return {object} - main email informations
  */
  campaignDetails() {
-  const {isOptText, isAddress, optText, address,
-    displayScheduleCampaign, improveDelivery} = this.state;
+  const {isOptText, isAddress, optText, address, displayScheduleCampaign,
+    improveDelivery, isWeekendFollowUpDisabled} = this.state;
   const element = this.el;
   let campaignDetails = {
     id: this.props.campaignId,
@@ -499,7 +500,8 @@ class ScheduleEmail extends React.Component {
     optText: optText,
     address: address,
     userDate: new Date().toString(),
-    isTTSEnabled: improveDelivery
+    isTTSEnabled: improveDelivery,
+    weekendFollowUps: isWeekendFollowUpDisabled
   };
   if(displayScheduleCampaign) {
     //campaignDetails.scheduledDate = element.find(".datepicker").val();
@@ -885,7 +887,15 @@ class ScheduleEmail extends React.Component {
                 {/* Popup ends here*/}
             </div>
           </div>
-          <div className="m-b-20 center"
+          <div className="left" style={{display: followups.length ? "block" : "none"}}>
+            <input type="checkbox" className="filled-in" id="weekendFollowupCheck"
+              defaultChecked="checked"
+              onChange={() => this.toggleSetState("isWeekendFollowUpDisabled")}
+              />
+            <label htmlFor="weekendFollowupCheck">Avoid weekend follow ups
+              (Fri 8:00 PM - Mon 8:00 AM)</label>
+          </div>
+          <div className="m-b-20 right-align"
             style={{display: followups.length ? "block" : "none"}}>
             Follow ups automatically stop if a recipient responds to any of
             your emails.

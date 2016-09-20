@@ -4,7 +4,9 @@ import async from "async";
 import lodash from "lodash";
 import logger from "../../server/log";
 import moment from "moment-timezone";
+import momentBusinessDays from "moment-business-days";
 import statusCodes from "../../server/utils/status-codes";
+import constants from "../../server/utils/constants";
 
 module.exports = function(FollowUp) {
 
@@ -168,25 +170,42 @@ const calculateNextFollowupdate = (scheduledDate, scheduledTime, followUp,
   const systemTimeZone = moment().format("Z");
   // const followUpTime = followUp.time;
   try {
-    const ZERO = 0;
-    const ONE = 1;
-    const FIVE = 5;
     const newTime = `${new Date().getHours()}:${new Date().getMinutes()}`;
     scheduledDate = scheduledDate || new Date();
     scheduledTime = scheduledTime || newTime;
     const formatedDate = new Date(scheduledDate);
-    const newDate = moment([formatedDate.getFullYear(),
-      formatedDate.getMonth(), formatedDate.getDate()])
+    let newDate;
+    if(campaign.weekendFollowUps) {
+      const nextFollowUpDate = momentBusinessDays(formatedDate)
+      .businessAdd(followUp.daysAfter)._d;
+      newDate = moment([nextFollowUpDate.getFullYear(),
+        nextFollowUpDate.getMonth(), nextFollowUpDate.getDate()])
+        .format("YYYY-MM-DDTHH:mm:ss");
+    } else {
+      newDate = moment([formatedDate.getFullYear(),
+        formatedDate.getMonth(), formatedDate.getDate()])
                 .add(followUp.daysAfter, "days").format("YYYY-MM-DDTHH:mm:ss");
+    }
+    const nextDate = new Date(newDate);
+    if((nextDate.getDay() === constants.FIVE &&
+    scheduledTime.split(":")[0] >= constants.TWENTY)
+    || (nextDate.getDay() === constants.ONE &&
+    scheduledTime.split(":")[0] <= constants.SEVEN)) {
+      const nextFollowUpDate = momentBusinessDays(nextDate)
+      .businessAdd(constants.ONE)._d;
+      newDate = moment([nextFollowUpDate.getFullYear(),
+        nextFollowUpDate.getMonth(), nextFollowUpDate.getDate()])
+        .format("YYYY-MM-DDTHH:mm:ss");
+    }
     const newformatedDate = new Date(newDate);
-    const dateString = (newformatedDate.getMonth()+ONE) + " " +
+    const dateString = (newformatedDate.getMonth()+constants.ONE) + " " +
     	newformatedDate.getDate() + " " + newformatedDate.getFullYear();
     const userTimeZone = campaign.userDate ?
-      campaign.userDate.split(" ")[FIVE] : systemTimeZone;
+      campaign.userDate.split(" ")[5] : systemTimeZone;
     const newFollowupDate = new Date(dateString + " " + scheduledTime +
     " " + userTimeZone);
-    newFollowupDate.setHours(scheduledTime.split(":")[ZERO]);
-    newFollowupDate.setMinutes(scheduledTime.split(":")[ONE]);
+    newFollowupDate.setHours(scheduledTime.split(":")[0]);
+    newFollowupDate.setMinutes(scheduledTime.split(":")[1]);
     return calculateNextFollowupdateCB(null, followUp, newFollowupDate,
       scheduledTime);
   } catch (err) {

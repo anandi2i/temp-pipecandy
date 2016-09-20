@@ -1,8 +1,12 @@
+const ZERO = 0;
 const ONE = 1;
 const TWO = 2;
 const THREE = 3;
 const FOUR = 4;
 const FIVE = 5;
+const SEVEN = 7;
+const TWENTY = 20;
+const EIGHT = 8;
 
 const constants = {
   "ttsInterval": 3,
@@ -15,8 +19,10 @@ const constants = {
   "USER": "USER",
   "SYSTEM": "SYSTEM",
   "ONE": ONE,
-  "ZERO": 0,
-  "EIGHT": 8,
+  "ZERO": ZERO,
+  "SEVEN": SEVEN,
+  "EIGHT": EIGHT,
+  "TWENTY": TWENTY,
   "MINUS_ONE": -1,
   "MINUS_TEN": -10,
   "TIME_FORMAT": "dd/mm/yyyy HH:MM:ss.l",

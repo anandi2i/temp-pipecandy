@@ -69,6 +69,10 @@
     },
     "updatedAt": {
       "type": "date"
+    },
+    "weekendFollowUps": {
+      "type": "boolean",
+      "default": false
     }
   },
   "validations": [],

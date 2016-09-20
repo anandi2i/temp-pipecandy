@@ -111,7 +111,7 @@ class ListView extends React.Component {
   spinner = (isSpinner) => {
     this.setState({
       spinning: isSpinner
-    })
+    });
   }
 
   /**

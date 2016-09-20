@@ -1055,23 +1055,23 @@ module.exports = function(Campaign) {
    * @param  {[reqParams]} reqParams
    * @param  {[function]} updateCampaignCB
    * @return {[updatedCampaign, reqParams]}
+   * @author Rahul Khandelwal (modified)
    */
   const updateCampaign = (campaign, reqParams, updateCampaignCB) => {
-
+    const {address, optText, isAddressNeeded, isOptTextNeeded, userDate,
+      isTTSEnabled, weekendFollowUps, scheduledAt} = reqParams.campaign;
     const campaignUpdateElements = {
-      "address" : reqParams.campaign.address,
-      "optText" : reqParams.campaign.optText,
-      "isAddressNeeded": reqParams.campaign.isAddressNeeded,
-      "isOptTextNeeded": reqParams.campaign.isOptTextNeeded,
+      "address" : address,
+      "optText" : optText,
+      "isAddressNeeded": isAddressNeeded,
+      "isOptTextNeeded": isOptTextNeeded,
       "statusCode": statusCodes.updated,
-      "userDate": reqParams.campaign.userDate,
-      "isTTSEnabled" : false
+      "userDate": userDate,
+      "isTTSEnabled" : isTTSEnabled || false,
+      "weekendFollowUps": weekendFollowUps || false
     };
-    if(reqParams.campaign.isTTSEnabled) {
-      campaignUpdateElements.isTTSEnabled = reqParams.campaign.isTTSEnabled;
-    }
-    if(reqParams.campaign.scheduledAt) {
-      campaignUpdateElements.scheduledAt = reqParams.campaign.scheduledAt;
+    if(scheduledAt) {
+      campaignUpdateElements.scheduledAt = scheduledAt;
     }
     campaign.updateAttributes(campaignUpdateElements,
       (campaignUpdateErr, updatedCampaign) => {
