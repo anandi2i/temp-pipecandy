@@ -60,6 +60,33 @@ module.exports = function(CampaignTemplate) {
   };
 
   /**
+   * Public method to get the campagin template for the current followup
+   * @param  {[number]} followUpId
+   * @param  {[function]} getTemplateCB
+   * @return {[object]} template
+   * @author Aswin Raj A
+   */
+  CampaignTemplate.getFollowUpTemplate = (followUpId, getTemplateCB) => {
+      CampaignTemplate.find({
+        where: {
+          and: [
+          {followUpId: followUpId},
+          {personId: null},
+          {missingTagIds: null}
+          ]
+        }
+      }, (campaignTemplatesErr, templates) => {
+      if(campaignTemplatesErr) {
+        logger.error("Error while finding campaign template", {
+          input: {followUpId: followUpId},
+          error: campaignTemplatesErr, stack: campaignTemplatesErr.stack});
+        return getTemplateCB(campaignTemplatesErr);
+      }
+      return getTemplateCB(null, templates[0]);
+    });
+  };
+
+  /**
    * prepares the api model for preview methods
    * @param  {[Campaign]} campaign
    * @param  {[CampaignTemplate]} templates

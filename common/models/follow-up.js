@@ -534,6 +534,77 @@ const createCampaignTemplate = (createdFollowUp, campaign,
   };
 
   /**
+   * Method to get all followUps with corresponding common tempaltes
+   * @param  {[number]} campaignId
+   * @param  {[function]} getTemplateCB
+   * @return {[object]} followUps with template
+   * @author Aswin Raj A
+   */
+  FollowUp.getFollowUpsWithTemplate = (campaignId, getTemplateCB) => {
+    async.waterfall([
+      async.apply(FollowUp.getFollowUpsForCampaign, campaignId),
+      getCommonTemplatesForAllFollowUps
+    ], (asyncErr, followUps) => {
+      return getTemplateCB(asyncErr, followUps);
+    });
+  };
+
+  /**
+   * Public method to get all followUps for the current campaign
+   * @param  {[number]} campaignId
+   * @param  {[function]} getFolloupsCB
+   * @return {[array]} followUps
+   * @author Aswin Raj A
+   */
+  FollowUp.getFollowUpsForCampaign = (campaignId, getFolloupsCB) => {
+    FollowUp.find({
+      where : {
+        campaignId: campaignId
+      },
+      order: "stepNo ASC",
+    }, (followUpsFindErr, followUps) => {
+      if(followUpsFindErr){
+        logger.error("Error while finding followUps", {
+          input: {campaignId: campaignId},
+          error: followUpsFindErr, stack: followUpsFindErr
+        });
+        return getFolloupsCB(followUpsFindErr);
+      }
+      return getFolloupsCB(null, followUps);
+    });
+  };
+
+  /**
+   * Method to get commonTemplate for each followUps for the current campaign
+   * @param  {[array]} followUps
+   * @param  {[function]} getTemplateCB
+   * @return {[array]} followUpsWithTemplate
+   * @author Aswin Raj A
+   */
+  const getCommonTemplatesForAllFollowUps = (followUps, getTemplateCB) => {
+    let followUpsWithTemplate = [];
+    if(lodash.isEmpty(followUps)) {
+      followUpsWithTemplate = [];
+      return getTemplateCB(null, followUpsWithTemplate);
+    }
+    async.eachSeries(followUps, (followUp, followUpCB) => {
+      let followUpObj = {
+        daysAfter: followUp.daysAfter,
+        stepNo: followUp.stepNo
+      };
+      FollowUp.app.models.campaignTemplate.getFollowUpTemplate(followUp.id,
+          (followUpTemplateErr, followUpTemplate) => {
+        if(followUpTemplateErr) return followUpCB(followUpTemplateErr);
+        followUpObj.content = followUpTemplate.content;
+        followUpsWithTemplate.push(followUpObj);
+        return followUpCB(null);
+      });
+    }, (asyncErr) => {
+      return getTemplateCB(asyncErr, followUpsWithTemplate);
+    });
+  };
+
+  /**
    * Get Stopped followUps for the current campaign id
    * @param  {[campaignId]} campaignId
    * @param  {[function]} getFolloupsCB

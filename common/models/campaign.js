@@ -30,9 +30,14 @@ module.exports = function(Campaign) {
   Campaign.afterRemote("findById", function(context, data, next) {
     let campaign = context.result;
     const parentId = campaign.referrerId ? campaign.referrerId : campaign.id;
-    getRunTemplate(parentId, (err, template) => {
-      if(err) return next(errorMessages.SERVER_ERROR);
-      campaign.template = template;
+    async.parallel({
+      campaign: getRunTemplate.bind(null, parentId),
+      followups: Campaign.app.models.followUp.getFollowUpsWithTemplate
+        .bind(null, parentId)
+    }, (parallelErr, templates) => {
+      campaign.template = templates.campaign || {};
+      campaign.followups = templates.followups || [];
+      if(parallelErr) return next(errorMessages.SERVER_ERROR);
       return next();
     });
   });
@@ -197,7 +202,14 @@ module.exports = function(Campaign) {
    */
   const getRunTemplate = (campaignId, getTemplateCB) => {
     Campaign.app.models.campaignTemplate.find({
-      where : {and: [{campaignId: campaignId}, {personId: null}]}
+      where : {
+        and: [
+          {campaignId: campaignId},
+          {personId: null},
+          {missingTagIds: null},
+          {followUpId: null}
+        ]
+      }
     }, (templateFindErr, templates) => {
       if(templateFindErr) {
         logger.error("Error while finding campaign templates", {
