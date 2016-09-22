@@ -43,10 +43,13 @@ class SelectPreBuildTemplate extends React.Component {
     this.setState((state) => ({
       activeTemplate: key,
       activeTemplateContent: templates[key].content
-    }), () => this.props.setTemplateContent(templates[key].content));
+    }), () => this.props.setTemplate(
+      templates[key].content, "", templates[key].followups)
+    );
     displaySuccess(SuccessMessages.successSelectTemplate
       .replace("$selectedTemplate", `<strong>
-      ${templates[key].name}</strong>`));
+      ${templates[key].name}</strong>`)
+    );
   }
 
   isActive(value){
@@ -57,12 +60,13 @@ class SelectPreBuildTemplate extends React.Component {
   render() {
     let isDisplay =
       (this.props.active === this.state.innerTabIndex ? "block" : "none");
-    let blankTemplateKey = 0;
+    const blankTemplateKey = 0;
     const {templates, activeTemplate, activeTemplateContent} = this.state;
+    const index = 1;
     return (
       <div className="row" style={{display: isDisplay}}>
         {
-          templates.map(function (template, key) {
+          templates.map((template, key) => {
             return (
               <div className="col s12 m6 l4" key={key}>
                 <div className={this.isActive(key)}
@@ -70,6 +74,21 @@ class SelectPreBuildTemplate extends React.Component {
                   <div className="card-title">{template.name}</div>
                   <div className="card-content">
                     <div dangerouslySetInnerHTML={{__html: template.content}} />
+                    {
+                      template.followups && template.followups.map(
+                        (followup, key) => {
+                          return (
+                            <div className="follow-up-container" key={key}>
+                              <div className="follow-up-title" >
+                                Follow Up {key + index}:
+                              </div>
+                              <div className="follow-up-content m-b-20"
+                              dangerouslySetInnerHTML={{__html: followup.content
+                              }} />
+                            </div>
+                        );
+                      })
+                    }
                   </div>
                   {
                     (key === blankTemplateKey)
@@ -90,7 +109,8 @@ class SelectPreBuildTemplate extends React.Component {
         }
         {/* Email template preview modal popup starts here*/}
         { templates.length ?
-          <div id="previewTemplate" className="modal modal-fixed-header modal-fixed-footer">
+          <div id="previewTemplate"
+            className="modal modal-fixed-header modal-fixed-footer">
             <i className="mdi mdi-close modal-close"></i>
             <div className="modal-header">
               <div className="head">
@@ -99,7 +119,22 @@ class SelectPreBuildTemplate extends React.Component {
             </div>
             <div className="modal-content">
               <div className="template-content gray-bg p-10">
-                <div dangerouslySetInnerHTML={{__html: activeTemplateContent}} />
+                <div dangerouslySetInnerHTML={{__html: activeTemplateContent}}/>
+                { templates.followups &&
+                  templates[activeTemplate].followups.map(
+                    (followup, key) => {
+                      return (
+                        <div className="follow-up-container" key={key}>
+                          <div className="follow-up-title">
+                            Follow Up {key + index}:
+                          </div>
+                          <div className="follow-up-content m-b-20"
+                            dangerouslySetInnerHTML={{__html: followup.content}}
+                          />
+                        </div>
+                    );
+                  })
+                }
               </div>
             </div>
             <div className="modal-footer">

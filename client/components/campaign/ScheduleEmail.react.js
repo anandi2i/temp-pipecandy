@@ -72,7 +72,7 @@ class ScheduleEmail extends React.Component {
 
   componentWillUnmount() {
     this.el.find("select").material_select("destroy");
-    this.props.setTemplateContent(
+    this.props.setTemplate(
       tinymce.get("emailContent").getContent(),
       tinymce.get("emailSubject").getContent()
     );
@@ -97,7 +97,7 @@ class ScheduleEmail extends React.Component {
  */
   initTinyMceEditors = () => {
     const {getAllTags, address} = this.state;
-    const {selectedTemplate, subject} = this.props;
+    const {selectedTemplate, subject, selectedTemplateFollowups} = this.props;
     initTinyMCE("#optOutAddress", "", "", "", false, this.tinyMceAddressCb,
       address);
     initTinyMCE("#emailSubject", "", "", getAllTags, false, this.tinyMceSubCb,
@@ -107,7 +107,8 @@ class ScheduleEmail extends React.Component {
     if(selectedTemplate){
       this.setState({
         emailContent: selectedTemplate,
-        subject: subject
+        subject: subject,
+        followups: selectedTemplateFollowups || []
       });
     }
   }

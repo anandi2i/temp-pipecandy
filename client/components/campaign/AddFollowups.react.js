@@ -41,7 +41,7 @@ class AddFollowups extends React.Component {
   }
 
   initTinyMCE() {
-    let followupId = this.props.followupId;
+    const {followupId, content} = this.props;
     let emailContentId = `#emailContent${followupId}`;
     let mytoolbar = `#mytoolbar${followupId}`;
     let smartTagDrpDwnId = `#dropdown${followupId}`;
@@ -49,7 +49,7 @@ class AddFollowups extends React.Component {
       tinyMCE.execCommand("mceRemoveEditor", true, `emailContent${followupId}`);
     }
     initTinyMCE(emailContentId, mytoolbar, smartTagDrpDwnId,
-      this.props.getAllTags, true, this.tinyMceCb);
+      this.props.getAllTags, true, this.tinyMceCb, content);
   }
 
   tinyMceCb = (editor) => {

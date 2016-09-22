@@ -65,7 +65,7 @@ class SelectMyTemplate extends React.Component {
       activeTemplate: key,
       activeTemplateContent: templates[key].content
     }), () => {
-      this.props.setTemplateContent(templates[key].content);
+      this.props.setTemplate(templates[key].content);
     });
     displaySuccess(SuccessMessages.successSelectTemplate
       .replace("$selectedTemplate", `<strong>

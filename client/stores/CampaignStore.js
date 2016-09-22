@@ -683,6 +683,7 @@ AppDispatcher.register(function(payload) {
     case Constants.GET_CAMPAIGN:
       CampaignApi.getCampaign(action.campaignId).then((response) => {
         campaignData = response.data;
+        campaignData.followups.map(followup => followup.id = guid());
         CampaignStore.emitChange();
         if(response.data) {
           browserHistory.push(`/campaign/${action.campaignId}/run`);

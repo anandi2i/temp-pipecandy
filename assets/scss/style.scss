@@ -996,6 +996,13 @@ $lines-to-show: 8;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .follow-up-container {
+    .follow-up-title {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  }
   .card-action {
     background-color: $lit-blue-bg;
     border-bottom-left-radius: 3px;
@@ -1748,6 +1755,14 @@ $lines-to-show: 8;
         }
         p {
           margin: 0;
+        }
+      }
+      .follow-up-container {
+        .follow-up-title {
+          font-size: 15px;
+          font-weight: bold;
+          margin-bottom: 25px;
+          margin-top: 25px;
         }
       }
     }

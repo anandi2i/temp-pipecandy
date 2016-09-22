@@ -119,10 +119,11 @@ class RunCampaign extends React.Component {
    * @param {string} template
    * @param {string} subject
    */
-  setTemplateContent = (template, subject) => {
+  setTemplate = (template, subject, followups) => {
     this.setState({
       selectedTemplate: template || "",
-      subject: subject || ""
+      subject: subject || "",
+      selectedTemplateFollowups: followups || []
     });
   }
 
@@ -134,6 +135,7 @@ class RunCampaign extends React.Component {
     };
     if(campaignData.template && campaignData.parentId) {
       state.selectedTemplate = campaignData.template.content || "";
+      state.selectedTemplateFollowups = campaignData.followups || [];
       state.subject = campaignData.template.subject || "";
     }
     this.setState(state);
@@ -151,8 +153,8 @@ class RunCampaign extends React.Component {
    * @return {ReactElement} markup
    */
   render() {
-    const {tabs, activeTab, isParent, isExist, selectedTemplate,
-      subject} = this.state;
+    const {tabs, activeTab, isParent, isExist, selectedTemplate, subject,
+		selectedTemplateFollowups} = this.state;
     return (
       <div>
        {
@@ -171,7 +173,7 @@ class RunCampaign extends React.Component {
                 {
                   tabs.selectTemplate === activeTab
                     ? <SelectEmailTemplate ref="SelectEmailTemplate"
-                        setTemplateContent={this.setTemplateContent}
+                        setTemplate={this.setTemplate}
                         handleClick={this.handleClick} />
                     : ""
                 }
@@ -180,8 +182,9 @@ class RunCampaign extends React.Component {
                     ? <ScheduleEmail campaignId={this.props.params.id}
                         changeSelectedList={this.changeSelectedList}
                         selectedTemplate={selectedTemplate}
+                        selectedTemplateFollowups={selectedTemplateFollowups}
                         subject={subject} isParent={isParent}
-                        setTemplateContent={this.setTemplateContent}
+                        setTemplate={this.setTemplate}
                         handleClick={this.handleClick} />
                     : ""
                 }
