@@ -23,6 +23,7 @@ const constants = {
   "SEVEN": SEVEN,
   "EIGHT": EIGHT,
   "TWENTY": TWENTY,
+  "FIVE": FIVE,
   "MINUS_ONE": -1,
   "MINUS_TEN": -10,
   "TIME_FORMAT": "dd/mm/yyyy HH:MM:ss.l",

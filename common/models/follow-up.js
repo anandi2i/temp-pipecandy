@@ -170,9 +170,8 @@ const calculateNextFollowupdate = (scheduledDate, scheduledTime, followUp,
   const systemTimeZone = moment().format("Z");
   // const followUpTime = followUp.time;
   try {
-    const newTime = `${new Date().getHours()}:${new Date().getMinutes()}`;
     scheduledDate = scheduledDate || new Date();
-    scheduledTime = scheduledTime || newTime;
+    scheduledTime = `${scheduledDate.getHours()}:${scheduledDate.getMinutes()}`;
     const formatedDate = new Date(scheduledDate);
     let newDate;
     if(campaign.weekendFollowUps) {
@@ -187,10 +186,10 @@ const calculateNextFollowupdate = (scheduledDate, scheduledTime, followUp,
                 .add(followUp.daysAfter, "days").format("YYYY-MM-DDTHH:mm:ss");
     }
     const nextDate = new Date(newDate);
-    if((nextDate.getDay() === constants.FIVE &&
+    if(campaign.weekendFollowUps && ((nextDate.getDay() === constants.FIVE &&
     scheduledTime.split(":")[0] >= constants.TWENTY)
     || (nextDate.getDay() === constants.ONE &&
-    scheduledTime.split(":")[0] <= constants.SEVEN)) {
+    scheduledTime.split(":")[0] <= constants.SEVEN))) {
       const nextFollowUpDate = momentBusinessDays(nextDate)
       .businessAdd(constants.ONE)._d;
       newDate = moment([nextFollowUpDate.getFullYear(),
