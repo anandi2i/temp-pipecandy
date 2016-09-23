@@ -317,6 +317,26 @@ const CampaignStore = _.extend({}, EventEmitter.prototype, {
     return $(steDom).html();
   },
 
+/*
+ * Change class of exisiting smart tags from content if smart tag
+   is not present in common smart tags
+ * @param  {string} contentText
+ * @param  {object} commonSmartTags
+ * @return {string} contentText
+*/
+  parseContent(content, commonSmartTags) {
+    let html = $("<div/>").html(content);
+    $(html).find("span.tag").each(function(){
+      $(this).removeClass("common un-common");
+      if(commonSmartTags.includes($(this).attr("data-tag"))){
+        $(this).addClass("common");
+      } else {
+        $(this).addClass("un-common");
+      }
+    });
+    return html.html();
+  },
+
 /**
  * Find additional field ID's from given string
  * @param  {string} contentText

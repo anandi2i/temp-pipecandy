@@ -143,9 +143,7 @@ class RunCampaign extends React.Component {
   }
 
   changeSelectedList = (selectedRows) => {
-    this.refs.selectEmailList.refs.emailListGrid.setState({
-      selectedRowIds: selectedRows
-    });
+      GridStore.saveSelectedEmailListIds(selectedRows);
   }
 
   /**

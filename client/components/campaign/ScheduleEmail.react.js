@@ -69,25 +69,51 @@ class ScheduleEmail extends React.Component {
     initTimePicker(this.el.find(".timepicker"));
   }
 
+ /*
+  * Create folloup objects and save with campaign subject and content
+ */
   componentWillUnmount() {
-    this.el.find("select").material_select("destroy");
+    let followups = [];
+    this.state.followups.map(followup => {
+      let followupObj = this.refs[`addFollowups${followup.id}`];
+      const el = followupObj.el;
+      let followupDetails = {
+        daysAfter:
+        el.find(`#dayPicker${followupObj.props.followupId} input`).val()
+          .split(" ")[0],
+        stepNo: followupObj.props.followUpNumber,
+        time: this.convertMeridian(el.find(".timepicker").val()),
+        id: followupObj.props.followupId,
+        content: followupObj.state.emailContent
+      };
+      followups.push(followupDetails);
+    });
     this.props.setTemplate(
       tinymce.get("emailContent").getContent(),
-      tinymce.get("emailSubject").getContent()
+      tinymce.get("emailSubject").getContent(),
+      followups
     );
-    if(tinymce.get("emailSubject")) {
-      tinyMCE.execCommand("mceRemoveEditor", true, "emailSubject");
-    }
-    if(tinymce.get("optOutAddress")) {
-      tinyMCE.execCommand("mceRemoveEditor", true, "optOutAddress");
-    }
-    if(tinymce.get("emailContent")) {
-      tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
-    }
+    this.el.find("select").material_select("destroy");
+    this.clearTinyMCE();
     CampaignStore.removeEmailListChangeListener(this.onStoreChange);
     CampaignStore.removeSpamScoreChangeListener(this.onSpamScoreChange);
     this.el.find(".tooltipped").tooltip("remove");
   }
+
+ /*
+  * Remove editor from tinyMCE
+ */
+ clearTinyMCE() {
+   if(tinymce.get("emailSubject")) {
+     tinyMCE.execCommand("mceRemoveEditor", true, "emailSubject");
+   }
+   if(tinymce.get("optOutAddress")) {
+     tinyMCE.execCommand("mceRemoveEditor", true, "optOutAddress");
+   }
+   if(tinymce.get("emailContent")) {
+     tinyMCE.execCommand("mceRemoveEditor", true, "emailContent");
+   }
+ }
 
 /**
  * Call init tinyMCE editor
@@ -95,8 +121,12 @@ class ScheduleEmail extends React.Component {
  * @param  {object} allTags - It contains collection of unique smart-tags based on selected list
  */
   initTinyMceEditors = () => {
-    const {getAllTags, address} = this.state;
-    const {selectedTemplate, subject, selectedTemplateFollowups} = this.props;
+    this.clearTinyMCE();
+    let {getAllTags, address, commonSmartTags} = this.state;
+    let {selectedTemplate, subject, selectedTemplateFollowups} = this.props;
+     selectedTemplate =
+     CampaignStore.parseContent(selectedTemplate, commonSmartTags);
+     subject = CampaignStore.parseContent(subject, commonSmartTags);
     initTinyMCE("#optOutAddress", "", "", "", false, this.tinyMceAddressCb,
       address);
     initTinyMCE("#emailSubject", "", "", getAllTags, false, this.tinyMceSubCb,
@@ -272,11 +302,15 @@ class ScheduleEmail extends React.Component {
 
   openPreviewModal(preview) {
     if(preview === "issues") {
-      this.setState({
-        personIssues: this.getPersonIssues()
-      }, () => {
-        this.refs.issues.openModal();
-      });
+      if(this.state.emailList.length){
+        this.setState({
+          personIssues: this.getPersonIssues()
+        }, () => {
+          this.refs.issues.openModal();
+        });
+      } else {
+        displayError(ErrorMessages.EmptyEmailList);
+      }
     } else {
       // Check if all missing tags are fixed
       if(this.checkEmailContentError()) {
@@ -571,6 +605,26 @@ class ScheduleEmail extends React.Component {
       .reject(list => (list.id === listId))
       .pluck("id")
       .value();
+    let followups = [];
+    this.state.followups.map(followup => {
+      let followupObj = this.refs[`addFollowups${followup.id}`];
+      const el = followupObj.el;
+      let followupDetails = {
+        daysAfter:
+        el.find(`#dayPicker${followupObj.props.followupId} input`).val()
+          .split(" ")[0],
+        stepNo: followupObj.props.followUpNumber,
+        time: this.convertMeridian(el.find(".timepicker").val()),
+        id: followupObj.props.followupId,
+        content: followupObj.state.emailContent
+      };
+      followups.push(followupDetails);
+    });
+    this.props.setTemplate(
+      tinymce.get("emailContent").getContent() || "",
+      tinymce.get("emailSubject").getContent() || "",
+      followups || []
+    );
     CampaignActions.getSelectedEmailList(filteredEmailList);
     this.props.changeSelectedList(filteredEmailList);
   }
@@ -653,7 +707,8 @@ class ScheduleEmail extends React.Component {
       isPreview,
       cancelBtn,
       alertMsg,
-      successBtn
+      successBtn,
+      commonSmartTags
     } = this.state;
     let displayAddFollowup =
       (followups.length < followupsMaxLen ? "block" : "none");
@@ -907,6 +962,7 @@ class ScheduleEmail extends React.Component {
                 <AddFollowups followupId={followUp.id}
                   content={followUp.content}
                   getAllTags={getAllTags}
+                  commonSmartTags={commonSmartTags}
                   deleteFollowUp={this.deleteFollowUp}
                   peopleList={getAllPeopleList}
                   id={key} key={followUp.id}

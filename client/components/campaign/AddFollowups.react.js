@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import AlertModal from "../AlertModal.react";
 import CampaignStore from "../../stores/CampaignStore";
 import CampaignIssuesPreviewPopup from "./CampaignIssuesPreviewPopup.react";
+import {ErrorMessages} from "../../utils/UserAlerts";
 import _ from "underscore";
 
 class AddFollowups extends React.Component {
@@ -41,10 +42,11 @@ class AddFollowups extends React.Component {
   }
 
   initTinyMCE() {
-    const {followupId, content} = this.props;
+    let {followupId, content, commonSmartTags} = this.props;
     let emailContentId = `#emailContent${followupId}`;
     let mytoolbar = `#mytoolbar${followupId}`;
     let smartTagDrpDwnId = `#dropdown${followupId}`;
+    content = CampaignStore.parseContent(content, commonSmartTags);
     if(tinymce.get(`emailContent${followupId}`)) {
       tinyMCE.execCommand("mceRemoveEditor", true, `emailContent${followupId}`);
     }
@@ -91,9 +93,13 @@ class AddFollowups extends React.Component {
       .getContent();
     let issueTags = getIssueTagsInEditor(content);
     let personIssues = CampaignStore.getIssuesPeopleList(issueTags);
-    this.setState({
-      personIssues: personIssues
-    }, () => this.refs.issues.openModal());
+    if(this.props.peopleList.length){
+      this.setState({
+        personIssues: personIssues
+      }, () => this.refs.issues.openModal());
+    } else {
+      displayError(ErrorMessages.EmptyEmailList);
+    }
   }
 
   /**
