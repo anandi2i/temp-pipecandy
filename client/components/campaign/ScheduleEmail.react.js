@@ -62,7 +62,6 @@ class ScheduleEmail extends React.Component {
     const selectedEmailListIds = GridStore.getSelectedEmailListIds();
     CampaignStore.addEmailListChangeListener(this.onStoreChange);
     CampaignStore.addSpamScoreChangeListener(this.onSpamScoreChange);
-    CampaignStore.addSpamScoreChangeListener(this.onSpamScoreChange);
     CampaignActions.getSelectedEmailList(selectedEmailListIds);
     this.el.find("select").material_select();
     this.el.find(".tooltipped").tooltip({delay: 50});

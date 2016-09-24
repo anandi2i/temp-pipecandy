@@ -8,11 +8,8 @@
 This guide was prepared on a machine with the following configuration:
 
 * Ubuntu 14.04
-* Ruby 1.9.3  
-  To convert sass to css install the gem saas:  
-    gem install sass
-* Nodejs(Recommended v4.4.4 or v6.2.0)  
-* Postgresql 9.3.12  
+* Nodejs(Recommended v4.5.0 or v6.6.0)  
+* Postgresql 9.5  
   Create the postgres user and grant access to the database:  
   1. CREATE USER pguser WITH PASSWORD 'pgpass';
   2. CREATE DATABASE pipecandy;

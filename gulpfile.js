@@ -36,6 +36,9 @@ gulp.task("clean", function(cb) {
   del.sync("./public/assets", cb);
 });
 
+/**
+ * Sass linter on pre-commit
+ */
 gulp.task("sassLint", function () {
   return gulp.src("./assets/scss/**/style.s+(a|c)ss")
     .pipe(sassLint({
@@ -90,7 +93,6 @@ gulp.task("bower:css", function() {
 /**
  * Bundle the common js files
  */
-
 gulp.task("js", function() {
   return gulp.src(["./assets/js/**/*"])
     .pipe(concat("main.js").on("error", util.log))

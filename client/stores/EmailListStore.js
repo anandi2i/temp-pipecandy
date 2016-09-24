@@ -248,7 +248,7 @@ AppDispatcher.register(function(payload) {
         const index = _.findIndex(_getEmailList[0].people,
           {id:response.data.id});
         _getEmailList[0].people[index] = response.data;
-        //EmailListStore.emitChange();
+        EmailListStore.emitChange();
         EmailListActions.getEmailListByID(action.data.listId);
         _success = "";
       }, (err)=> {
