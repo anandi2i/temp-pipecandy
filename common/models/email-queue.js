@@ -135,7 +135,8 @@ module.exports = function(EmailQueue) {
      }
      if (!lodash.isEmpty(campaignMetric)) {
        campaignMetricInst = campaignMetric[0];
-       campaignMetricInst.failedEmails = --campaignMetric[0].failedEmails;
+       if(emailQueue.isStopped === constants.SYSTEM)
+         campaignMetricInst.failedEmails = --campaignMetric[0].failedEmails;
        campaignMetricInst.assembled = --campaignMetric[0].assembled;
      }
      EmailQueue.app.models.campaignMetric.upsert(campaignMetricInst,
@@ -178,6 +179,7 @@ module.exports = function(EmailQueue) {
        }
        if (!lodash.isEmpty(followUpMetric)) {
          followUpMetricInst = followUpMetric[0];
+        if(emailQueue.isStopped === constants.SYSTEM)
          followUpMetricInst.failedEmails = --followUpMetric[0].failedEmails;
          followUpMetricInst.assembled = --followUpMetric[0].assembled;
        }
@@ -219,6 +221,7 @@ module.exports = function(EmailQueue) {
            };
            if(listMetric) {
              listMetricInst = listMetric;
+            if(emailQueue.isStopped === constants.SYSTEM)
              listMetricInst.failedEmails = --listMetric.failedEmails;
              listMetricInst.assembled = --listMetric.assembled;
            }
@@ -304,7 +307,8 @@ module.exports = function(EmailQueue) {
      * @author Rahul Khandelwal
     */
   const statusByCampaign = (updateProperties, campaign, statusByCampaignCB) => {
-    let statusArray = [statusCodes.campaignSent];
+    let statusArray = [statusCodes.campaignSent,
+      statusCodes.campaignStopped];
     lodash.times(constants.EIGHT, (index) => {
       ++index;
       let result = "followUpStopped-" + index;
