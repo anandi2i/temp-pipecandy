@@ -538,6 +538,7 @@ class ListView extends React.Component {
           <Subscriber listId={listId}
             listFields={listFields}
             peopleDetails={peopleDetails}
+            spinner={this.spinner}
             ref="subscriber" />
         </div>
         <CsvFileUploade

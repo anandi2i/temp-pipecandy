@@ -158,12 +158,12 @@ FollowUp.getFolloUpsToSent = (callback) => {
 /**
  * Calculate the next followUp date
  * get the scheduledDate and add the number of days to it and append the time to it
- * convert the datetime to system timezone using moment
+ * If folloup is schedule in between Fri 8PM to Mon 8AM then schedule it for next business day
  * @param  {[scheduledDate]} scheduledDate
  * @param  {[followUp]} followUp
  * @param  {[function]} calculateNextFollowupdateCB
  * @return {[nextFolloupDate]}
- * @author Aswin Raj A
+ * @author Aswin Raj A, Rahul Khandelwal(modified)
  */
 const calculateNextFollowupdate = (scheduledDate, scheduledTime, followUp,
   campaign, calculateNextFollowupdateCB) => {
@@ -197,12 +197,10 @@ const calculateNextFollowupdate = (scheduledDate, scheduledTime, followUp,
         .format("YYYY-MM-DDTHH:mm:ss");
     }
     const newformatedDate = new Date(newDate);
-    const dateString = (newformatedDate.getMonth()+constants.ONE) + " " +
-    	newformatedDate.getDate() + " " + newformatedDate.getFullYear();
-    const userTimeZone = campaign.userDate ?
-      campaign.userDate.split(" ")[5] : systemTimeZone;
+    const dateString = `${newformatedDate.getMonth()+constants.ONE}` +
+     ` ${newformatedDate.getDate()} ${newformatedDate.getFullYear()}`;
     const newFollowupDate = new Date(dateString + " " + scheduledTime +
-    " " + userTimeZone);
+    " " + systemTimeZone);
     newFollowupDate.setHours(scheduledTime.split(":")[0]);
     newFollowupDate.setMinutes(scheduledTime.split(":")[1]);
     return calculateNextFollowupdateCB(null, followUp, newFollowupDate,
