@@ -24,6 +24,12 @@
     },
     "updatedAt": {
       "type": "date"
+    },
+    "stepNo": {
+      "type": "number"
+    },
+    "parentId": {
+      "type": "number"
     }
   },
   "validations": [],
