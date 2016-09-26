@@ -65,7 +65,8 @@ class SelectMyTemplate extends React.Component {
       activeTemplate: key,
       activeTemplateContent: templates[key].content
     }), () => {
-      this.props.setTemplate(templates[key].content);
+      this.props.setTemplate(templates[key].content, "",
+        templates[key].followUps);
     });
     displaySuccess(SuccessMessages.successSelectTemplate
       .replace("$selectedTemplate", `<strong>
@@ -83,6 +84,7 @@ class SelectMyTemplate extends React.Component {
   render() {
     const {templates, activeTemplate, activeTemplateContent,
       innerTabIndex} = this.state;
+    const index = 1;
     const isDisplay = (this.props.active === innerTabIndex ? "block" : "none");
     return (
       <div className="row user-templates" style={{display: isDisplay}}>
@@ -106,6 +108,21 @@ class SelectMyTemplate extends React.Component {
                   <div className="card-title">{template.name}</div>
                   <div className="card-content">
                     <div dangerouslySetInnerHTML={{__html: template.content}} />
+                    {
+                      template.followUps.map(
+                        (followUp, key) => {
+                          return (
+                            <div className="follow-up-container" key={key}>
+                              <div className="follow-up-title" >
+                                Follow Up {key + index}:
+                              </div>
+                              <div className="follow-up-content m-b-20"
+                              dangerouslySetInnerHTML={{__html: followUp.content
+                              }} />
+                            </div>
+                          );
+                      })
+                    }
                   </div>
                   <a className="card-action modal-trigger"
                     href="#previewMyTemplate">
@@ -128,6 +145,21 @@ class SelectMyTemplate extends React.Component {
             <div className="modal-content">
               <div className="template-content gray-bg p-10">
                 <div dangerouslySetInnerHTML={{__html: activeTemplateContent}} />
+                {
+                  templates[activeTemplate].followUps.map(
+                    (followUp, key) => {
+                      return (
+                        <div className="follow-up-container" key={key}>
+                          <div className="follow-up-title">
+                            Follow Up {key + index}:
+                          </div>
+                          <div className="follow-up-content m-b-20"
+                            dangerouslySetInnerHTML={{__html: followUp.content}}
+                          />
+                        </div>
+                      );
+                  })
+                }
               </div>
             </div>
             <div className="modal-footer">

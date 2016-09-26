@@ -84,6 +84,19 @@ const validatorObj = {
         }
       }
     }
+  }),
+  templateName: Joi.string().regex(namePattern).label("Template Name").options({
+    language: {
+      any: {
+        empty: "!! Oops. It seems like you forgot to fill the template name!",
+      },
+      string: {
+        regex: {
+          base:"!! Hmm. That doesn\'t seem like a valid template name, "+
+            "at least to me!",
+        }
+      }
+    }
   })
 };
 

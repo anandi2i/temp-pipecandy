@@ -666,6 +666,9 @@ a {
         line-height: 36px;
       }
     }
+    .save-template-container {
+      display: initial;
+    }
   }
 }
 .sub-nav {
@@ -2200,6 +2203,7 @@ $lines-to-show: 8;
   .modal-footer {
     .btn-container {
       padding-left: 10%;
+      padding-right: 10%;
       width: 100%;
       .btn {
         margin-right: 0;

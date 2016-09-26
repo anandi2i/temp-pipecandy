@@ -17,6 +17,7 @@ import {ErrorMessages, SuccessMessages} from "../../utils/UserAlerts";
 import Spinner from "../Spinner.react";
 import AlertModal from "../AlertModal.react";
 import {Link} from "react-router";
+import SaveTemplate from "./SaveTemplate.react";
 
 class ScheduleEmail extends React.Component {
   constructor(props) {
@@ -354,8 +355,8 @@ class ScheduleEmail extends React.Component {
     } = this.state;
     let address, isValid = false;
     if(this.state.emailList.length){
-      if(subjectRawText) {
-        if(emailRawText) {
+      if(subjectRawText.replace(/\u200B/g, "")) {
+        if(emailRawText.replace(/\u200B/g, "")) {
           if((isOptText && optText) || !isOptText) {
             address = tinyMCE.get("optOutAddress").getBody().textContent;
             if((isAddress && address) || !isAddress) {
@@ -680,6 +681,25 @@ class ScheduleEmail extends React.Component {
     }
   }
 
+  /**
+   * Save Template Name By User.
+   * @param {[string]} name template's name
+   */
+  setTemplateName = (name) => {
+    const template = {
+      name: name,
+      content: this.state.emailContent,
+      followUps: []
+    };
+    this.followupsDetails().map((followup) => {
+      template.followUps.push({
+        stepNo: "1",
+        content: followup.campaignTemplates.content
+      });
+    });
+    CampaignActions.saveUserTemplate(template);
+  }
+
   render() {
     const selectEmailListIndex = 1;
     const draftEmailIndex = 2;
@@ -708,7 +728,8 @@ class ScheduleEmail extends React.Component {
       cancelBtn,
       alertMsg,
       successBtn,
-      commonSmartTags
+      commonSmartTags,
+      emailRawText
     } = this.state;
     let displayAddFollowup =
       (followups.length < followupsMaxLen ? "block" : "none");
@@ -764,7 +785,9 @@ class ScheduleEmail extends React.Component {
                     <a className="btn blue" onClick={this.addFollowups}>Add follow up</a>
                   : ""
               }
-              <a className="btn blue" onClick={this.saveCampaignInfo}>Save & Send</a>
+              <SaveTemplate emailRawText={emailRawText}
+                setTemplateName={this.setTemplateName}/>
+              <a className="btn blue" onClick={this.saveCampaignInfo}>Send</a>
             </div>
           </div>
           {/* Draft Email starts here*/}
