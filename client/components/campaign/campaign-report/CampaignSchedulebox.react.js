@@ -221,8 +221,8 @@ class CampaignSchedulebox extends React.Component {
                 const scheduledAt = moment(scheduled.scheduledAt)
                   .format("MMM Do YY, h:mm a");
                   const id = scheduled.id;
-                const currentDate = moment(Date.now())
-                .format("MMM Do YY, h:mm a");
+                const currentDate = new Date();
+                const scheduledDate = new Date(scheduled.scheduledAt);
                 return (
                   <div key={key} className="camp-repo-grid waves-effect">
                     <div className="row">
@@ -242,7 +242,7 @@ class CampaignSchedulebox extends React.Component {
                             </div>
                           </div>
                           <div className={`data-info col s4 m3 l3 rit-txt date
-                               ${scheduledAt < currentDate
+                               ${scheduledDate < currentDate
                                   ? "expired": ""}`}>
                             {scheduledAt}
                           </div>
