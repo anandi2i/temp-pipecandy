@@ -284,6 +284,7 @@ class CampaignInbox extends React.Component {
     const showEmptymsg = inboxMails.length || requestSent;
     const classifications = _.rest(tabs); //remove first object "all"
     const campaignId = this.props.params.id;
+    const enableDropDown = inboxMails.length ? "" : "disabled disable-ptr";
     return (
       <div>
         <div className="m-b-120">
@@ -301,7 +302,8 @@ class CampaignInbox extends React.Component {
               </div>
               <div className="col s12 m6 l6 p-lr-0">
                 <div className="right">
-                  <a className="btn btn-dflt blue sm-icon-btn dropdown-button"
+                  <a className={`btn btn-dflt blue sm-icon-btn dropdown-button
+                    ${enableDropDown}`}
                     data-activates="addDropDown">
                     Move to
                     <i className="right mdi mdi-chevron-down"></i>

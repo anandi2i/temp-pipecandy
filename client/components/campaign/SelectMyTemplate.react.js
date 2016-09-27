@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 import CampaignActions from "../../actions/CampaignActions";
 import CampaignStore from "../../stores/CampaignStore";
 import {SuccessMessages} from "../../utils/UserAlerts";
-import UserTemplateForm from "../grid/campaign-list/UserTemplateForm.react";
 
 class SelectMyTemplate extends React.Component {
   constructor(props) {
@@ -31,13 +30,6 @@ class SelectMyTemplate extends React.Component {
    */
   componentWillUnmount() {
     CampaignStore.removeChangeListener(this.onStoreChange);
-  }
-
-  /**
-   * Opens up the modal when createTemplate is clicked
-   */
-  createTemplate = () => {
-    this.refs.UserTemplateForm.refs.component.openModal();
   }
 
   /**
@@ -88,17 +80,6 @@ class SelectMyTemplate extends React.Component {
     const isDisplay = (this.props.active === innerTabIndex ? "block" : "none");
     return (
       <div className="row user-templates" style={{display: isDisplay}}>
-        <div className="col s12 m6 l4">
-          <a className="card-action" onClick={() => this.createTemplate()}>
-            <div className="card">
-              <div className="create-template">
-                <span>Create new template <br/>
-                  <i className="mdi mdi-plus"></i>
-                </span>
-              </div>
-            </div>
-          </a>
-        </div>
         {
           templates.map(function (template, key) {
             return (
@@ -170,7 +151,6 @@ class SelectMyTemplate extends React.Component {
             </div>
           </div>
         : null }
-        <UserTemplateForm ref="UserTemplateForm"/>
       </div>
     );
   }

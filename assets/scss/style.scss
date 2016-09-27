@@ -13,6 +13,11 @@ a {
     content: '%';
   }
 }
+%disable-ptr {
+  cursor: default;
+  opacity: .5;
+  pointer-events: none;
+}
 .main-head {
   float: left;
   font-size: 22px;
@@ -465,6 +470,9 @@ a {
     }
   }
 }
+.disable-ptr {
+  @extend %disable-ptr;
+}
 .lg-btn-dflt {
   font-size: 18px;
   font-weight: 400;
@@ -865,9 +873,7 @@ a {
       white-space: nowrap;
       width: 100%;
       &.disabled {
-        cursor: default;
-        opacity: .5;
-        pointer-events: none;
+        @extend %disable-ptr;
         &:hover {
           background-color: transparent;
           color: $pinck-clr;

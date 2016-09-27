@@ -188,6 +188,7 @@ class CampaignSchedulebox extends React.Component {
     } = this.state;
     const campaignId = this.props.params.id;
     const showEmptymsg = scheduledMails.length || requestSent;
+    const enableDeleteBtn = scheduledMails.length ? "" : "disabled disable-ptr";
     return (
       <div>
         <div className="m-b-120">
@@ -205,7 +206,7 @@ class CampaignSchedulebox extends React.Component {
               </div>
               <div className="col s12 m6 l6 p-lr-0">
                 <div className="right">
-                  <a className="btn btn-dflt blue sm-icon-btn dropdown-button"
+                  <a className={`btn btn-dflt blue sm-icon-btn dropdown-button ${enableDeleteBtn}`}
                     onClick={() => this.deleteScheduled()}>
                     <i className="left mdi mdi-delete"></i> Delete
                   </a>
