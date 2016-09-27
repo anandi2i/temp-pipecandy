@@ -129,6 +129,8 @@ class Subscriber extends React.Component {
    */
   onSubmit(addAnotherField) {
     if(!this.state.isChange){
+      $("label").removeClass("active");
+      this.clearValidations();
       this.closeModal();
       return;
     }

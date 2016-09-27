@@ -73,7 +73,7 @@ class SaveTemplate extends React.Component {
    * @param {string} templateName
    */
   setTemplateName(templateName) {
-    if(templateName.replace(/\u200B/g, "")) {
+    if(templateName.replace(/\u200B/g, "").trim()) {
       this.props.setTemplateName(templateName);
       $("#saveTemplateModal").closeModal();
     } else {
