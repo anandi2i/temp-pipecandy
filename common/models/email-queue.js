@@ -513,7 +513,7 @@ module.exports = function(EmailQueue) {
       where: {
         campaignId: campaignId
       },
-      order: "createdAt DESC",
+      order: "scheduledAt ASC",
       limit: limit,
       skip: start
     }, (emailQueuesErr, emailQueues) => {
