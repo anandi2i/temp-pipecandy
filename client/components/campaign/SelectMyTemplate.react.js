@@ -90,7 +90,7 @@ class SelectMyTemplate extends React.Component {
                   <div className="card-content">
                     <div dangerouslySetInnerHTML={{__html: template.content}} />
                     {
-                      template.followUps.map(
+                      template.followUps ? template.followUps.map(
                         (followUp, key) => {
                           return (
                             <div className="follow-up-container" key={key}>
@@ -102,7 +102,7 @@ class SelectMyTemplate extends React.Component {
                               }} />
                             </div>
                           );
-                      })
+                      }) : null
                     }
                   </div>
                   <a className="card-action modal-trigger"
@@ -127,7 +127,8 @@ class SelectMyTemplate extends React.Component {
               <div className="template-content gray-bg p-10">
                 <div dangerouslySetInnerHTML={{__html: activeTemplateContent}} />
                 {
-                  templates[activeTemplate].followUps.map(
+                  templates[activeTemplate].followUps ?
+                    templates[activeTemplate].followUps.map(
                     (followUp, key) => {
                       return (
                         <div className="follow-up-container" key={key}>
@@ -139,7 +140,7 @@ class SelectMyTemplate extends React.Component {
                           />
                         </div>
                       );
-                  })
+                  }) : null
                 }
               </div>
             </div>

@@ -65,8 +65,25 @@ class SaveTemplate extends React.Component {
     }
   }
 
+  setTemplateName(templateName) {
+    if(templateName.replace(/\u200B/g, "")) {
+      this.props.setTemplateName(templateName);
+      $("#saveTemplateModal").closeModal();
+    } else {
+      displayError(ErrorMessages.MISSING_TEMPLATE_NAME);
+    }
+    this.setState({templateName: ""});
+    this.props.clearValidations();
+  }
+
+  closeTemplateModal() {
+    this.setState({templateName: ""});
+    this.props.clearValidations();
+  }
+
   render() {
     const {templateName} = this.state;
+    const validate = templateName ? "validate" : "";
     return (
       <div className="save-template-container">
         <a onClick={() => this.getTemplateName()} className="btn blue">Save</a>
@@ -82,7 +99,7 @@ class SaveTemplate extends React.Component {
                 <input id="templateName" type="text"
                   onChange={(e) => this.handleChange(e, "templateName")}
                   onBlur={this.props.handleValidation("templateName")}
-                  value={templateName} className="validate"/>
+                  value={templateName} className={`${validate}`}/>
                 <label htmlFor="templateName"
                   className={templateName ? "active" : ""}>
                   Template Name
@@ -96,12 +113,11 @@ class SaveTemplate extends React.Component {
           </div>
           <div className="modal-footer">
             <div className="btn-container">
-              <input type="button" className="btn blue modal-close modal-action"
-              value="Save" onClick={
-                () => this.props.setTemplateName(templateName)} />
+              <input type="button" className="btn blue modal-action"
+              value="Save" onClick={() => this.setTemplateName(templateName)} />
               <input type="button" value="Close"
                 className="btn red modal-close modal-action p-1-btn"
-                onClick={() => this.props.clearValidations}/>
+                onClick={() => this.closeTemplateModal()}/>
             </div>
           </div>
         </div>
