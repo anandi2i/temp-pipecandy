@@ -103,6 +103,9 @@
           }
         }
       }
+      th, td {
+        padding-left: 20px;
+      }
       .footer-container {
         position: absolute;
         border: 0px none !important;
@@ -127,7 +130,7 @@
       }
     }
     .grid-checkbox-column {
-      width: 70px;
+      width: 35px;
       padding-top: 5px;
     }
     .email-list {
