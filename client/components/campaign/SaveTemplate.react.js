@@ -56,6 +56,9 @@ class SaveTemplate extends React.Component {
     this.setState(state);
   }
 
+  /**
+   * Get template name from user
+   */
   getTemplateName() {
     const {emailRawText} = this.props;
     if(emailRawText.replace(/\u200B/g, "")){
@@ -65,6 +68,10 @@ class SaveTemplate extends React.Component {
     }
   }
 
+  /**
+   * Save template name by user
+   * @param {string} templateName
+   */
   setTemplateName(templateName) {
     if(templateName.replace(/\u200B/g, "")) {
       this.props.setTemplateName(templateName);
@@ -76,6 +83,9 @@ class SaveTemplate extends React.Component {
     this.props.clearValidations();
   }
 
+  /**
+   * Close Template modal by user
+   */
   closeTemplateModal() {
     this.setState({templateName: ""});
     this.props.clearValidations();

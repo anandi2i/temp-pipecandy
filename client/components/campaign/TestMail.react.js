@@ -167,11 +167,10 @@ class TestMail extends React.Component {
     const {emailContent, emailSubject} = this.props;
     const {allTags, email} = this.state;
     return (
-      <div className="test-mail-container right-align">
-        <span className="send-test-mail"
-          onClick={() => this.validateEmail()}>
-          Send a test email
-        </span>
+      <div className="test-mail-container">
+        <div className="right-align">
+          <span className="send-test-mail" onClick={() => this.validateEmail()}>Send a test email</span>
+        </div>
         <div id="testMail" className="modal modal-fixed-header modal-fixed-footer lg-modal">
           <a className="modal-action modal-close" to="#!">
             <i className="mdi mdi-close" ></i>
