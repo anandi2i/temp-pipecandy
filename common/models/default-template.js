@@ -62,31 +62,88 @@ module.exports = function(DefaultTemplate) {
       createdBy: userId
     };
     let followUps = templateJSON.followUps || [];
+    async.waterfall([
+      async.apply(checkForDuplicateTemplateName, myTemplate, followUps),
+      createMyTemplate,
+      createFollowUpTemplates
+    ], (asyncErr, savedTemplate) => {
+      return callback(asyncErr, savedTemplate);
+    });
+  };
+
+  /**
+   * To check if there are any template with same name
+   * @param  {[object]} myTemplate
+   * @param  {[object]} followUps
+   * @param  {[function]} templateCB
+   * @return {[myTemplate, followUps]}
+   * @author Aswin Raj A
+   */
+  const checkForDuplicateTemplateName = (myTemplate, followUps, templateCB) => {
+    DefaultTemplate.find({where: {name: myTemplate.name}},
+      (templateFindErr, templates) => {
+      if(templateFindErr) {
+        logger.error("Error while finding template", {
+          input: {name: myTemplate.name}, error: templateFindErr,
+          stack: templateFindErr.stack});
+        return templateCB(errorMessages.SERVER_ERROR);
+      }
+      if(!lodash.isEmpty(templates)) {
+        return templateCB(errorMessages.TEMPLATE_NAME_EXISTS);
+      }
+      return templateCB(null, myTemplate, followUps);
+    });
+  };
+
+  /**
+   * Method to save the created template
+   * @param  {[object]} myTemplate
+   * @param  {[object]} followUps
+   * @param  {[function]} createTemplateCB
+   * @return {[defaultTemplate, followUps]}
+   * @author Aswin Raj A
+   */
+  const createMyTemplate = (myTemplate, followUps, createTemplateCB) => {
     DefaultTemplate.create(myTemplate, (error, defaultTemplate) => {
       if(error) {
-        logger.error({error: error, stack: error.stack});
-        return callback(errorMessages.SERVER_ERROR);
+        logger.error("Error while creating my templates", {
+          input: {myTemplate}, error: error, stack: error.stack});
+        return createTemplateCB(errorMessages.SERVER_ERROR);
       }
-      if(lodash.isEmpty(followUps)) return callback(null, defaultTemplate);
-      const followUpObj = followUps.map((followUp) => {
-        followUp.name = templateJSON.name;
-        followUp.createdBy = userId;
-        followUp.parentId = defaultTemplate.id;
-        return followUp;
-      });
-      DefaultTemplate.create(followUpObj, (createErr, followUps) => {
-        if(createErr) {
-          logger.error("Error while creating my followup templates",
-          {error: createErr, stack: createErr.stack});
-          return callback(errorMessages.SERVER_ERROR);
-        }
-        const savedTemplate = {
-          name: defaultTemplate.name,
-          content: defaultTemplate.content,
-          followUps: followUps
-        };
-        return callback(null, savedTemplate);
-      });
+      return createTemplateCB(null, defaultTemplate, followUps);
+    });
+  };
+
+  /**
+   * Create followUps for the main template
+   * @param  {[onject]} defaultTemplate
+   * @param  {[onject]} followUps
+   * @param  {[function]} createTemplateCB
+   * @return {[savedTemplate]}
+   * @author Aswin Raj A
+   */
+  const createFollowUpTemplates = (defaultTemplate, followUps,
+    createTemplateCB) => {
+    if(lodash.isEmpty(followUps))
+      return createTemplateCB(null, defaultTemplate);
+    const followUpObj = followUps.map((followUp) => {
+      followUp.name = defaultTemplate.name;
+      followUp.createdBy = defaultTemplate.createdBy;
+      followUp.parentId = defaultTemplate.id;
+      return followUp;
+    });
+    DefaultTemplate.create(followUpObj, (createErr, followUps) => {
+      if(createErr) {
+        logger.error("Error while creating my followup templates",
+        {error: createErr, stack: createErr.stack});
+        return createTemplateCB(errorMessages.SERVER_ERROR);
+      }
+      const savedTemplate = {
+        name: defaultTemplate.name,
+        content: defaultTemplate.content,
+        followUps: followUps
+      };
+      return createTemplateCB(null, savedTemplate);
     });
   };
 

@@ -71,7 +71,12 @@ LIST_EXISTS.message = "List name already exists";
 const CAMPAIGN_EXISTS = new Error();
 CAMPAIGN_EXISTS.status = 400;
 CAMPAIGN_EXISTS.name = "CAMPAIGN_EXISTS";
-CAMPAIGN_EXISTS.message = "List name already exists";
+CAMPAIGN_EXISTS.message = "Campaign name already exists";
+
+const TEMPLATE_NAME_EXISTS = new Error();
+TEMPLATE_NAME_EXISTS.status = 400;
+TEMPLATE_NAME_EXISTS.name = "TEMPLATE_NAME_EXISTS";
+TEMPLATE_NAME_EXISTS.message = "Template name already exists";
 
 const INVALID_LIST_ID = new Error();
 INVALID_LIST_ID.status = 400;
@@ -184,7 +189,8 @@ const errorMessage = {
   INVALID_TEMPLATE_ID: INVALID_TEMPLATE_ID,
   EMPTY_EMAIL: EMPTY_EMAIL,
   INVALID_EMAIL: INVALID_EMAIL,
-  INVALID_ACCESS_TOKEN: INVALID_ACCESS_TOKEN
+  INVALID_ACCESS_TOKEN: INVALID_ACCESS_TOKEN,
+  TEMPLATE_NAME_EXISTS: TEMPLATE_NAME_EXISTS
 };
 
 module.exports = {

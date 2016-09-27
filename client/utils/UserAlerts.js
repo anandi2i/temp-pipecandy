@@ -66,6 +66,7 @@ export const ErrorMessages = {
     "template!",
   "EMPTY_EMAIL": "Oops. Your to email id seems to be empty!",
   "INVALID_EMAIL": "Oops! That doesn't seem like a right email id!",
+  "TEMPLATE_NAME_EXISTS": "That template name already exists. Try another!",
   "INVALID_ACCESS_TOKEN": "Ooops. Something went wrong. Please logout and login"
 };
 
