@@ -579,6 +579,7 @@ function createAudit(emailQueue, mailContent, sentMailResp, createAuditCB) {
   campaignAuditInst.userId = emailQueue.userId;
   campaignAuditInst.personId = emailQueue.personId;
   campaignAuditInst.campaignId = emailQueue.campaignId;
+  campaignAuditInst.followUpId = emailQueue.followUpId;
   campaignAuditInst.unSubscribeToken = emailQueue.unSubscribeToken;
   campaignAuditInst.mailId = sentMailResp.id;
   campaignAuditInst.threadId = sentMailResp.threadId;

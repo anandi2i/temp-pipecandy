@@ -795,7 +795,8 @@ module.exports = function(Campaign) {
   const resumeFollowUps = (campaign, callback) => {
     async.waterfall([
       async.apply(getStoppedFollowUpsForCampaign, campaign),
-      scheduleFollowUps
+      scheduleFollowUps,
+      assemblePastFollowups
     ], (asyncErr, followUps) => {
       if(asyncErr) return callback(asyncErr);
       if(followUps.length === constants.EMPTYARRAY) {
@@ -876,6 +877,31 @@ module.exports = function(Campaign) {
         });
       });
     }
+  };
+
+  /**
+   * Method to Assemble Generated Past FollowUps for a Campaign
+   * @param {[FollowUp]} List of Updated FollowUps
+   * @param  {Function} callback
+   * @author Rahul Khandelwal
+   */
+  const assemblePastFollowups = (followUps, callback) => {
+    if(lodash.isEmpty(followUps)) return callback(null, []);
+    let generatedFollowUps = lodash.filter(followUps, (o) => {
+      return o.isFollowUpGenerated;
+    });
+    async.eachSeries(generatedFollowUps, (followUp, followUpCB) => {
+      Campaign.app.models.followUp.assembleEmails(followUp,
+        (emailErr, result) => {
+        if(emailErr) {
+          logger.error("Error while assembleEmails", emailErr);
+          return followUpCB(emailErr);
+        }
+        return followUpCB(null);
+      });
+    }, (asyncErr) => {
+      return callback(asyncErr, followUps);
+    });
   };
 
   Campaign.remoteMethod(
