@@ -50,6 +50,7 @@
         thead > tr > th, tbody > tr > td {
           height: 65px;
           border-bottom: $border-1px;
+          padding-left: 20px;
           &.name {
             min-width: 130px;
           }
@@ -59,6 +60,9 @@
           &.icon {
             text-align: center;
             min-width: 60px;
+          }
+          &.select {
+            width: 60px;
           }
         }
         thead > tr {
@@ -102,9 +106,6 @@
             text-align: center;
           }
         }
-      }
-      th, td {
-        padding-left: 20px;
       }
       .footer-container {
         position: absolute;
@@ -241,6 +242,9 @@
           > thead {
             > tr {
               > th {
+                &.select {
+                  width: initial;
+                }
                 &:first-child {
                   border-right: 0 none;
                 }
