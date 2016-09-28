@@ -394,7 +394,8 @@ class ScheduleEmail extends React.Component {
     this.state.followups.map((val, key) => {
       const content = this.refs[`addFollowups${val.id}`].refs.issues;
       const isContent =
-        tinyMCE.get(`emailContent${val.id}`).getBody().textContent;
+        tinyMCE.get(`emailContent${val.id}`).getBody()
+        .textContent.trim().replace(/\u200B/g, "");
       if(content.props.personIssues.length){
         followupsIssueTags.push(key + initCount);
       }
