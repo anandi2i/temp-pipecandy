@@ -4,6 +4,7 @@ import validation from "react-validation-mixin";
 import strategy from "joi-validation-strategy";
 import validatorUtil from "../../utils/ValidationMessages";
 import {ErrorMessages} from "../../utils/UserAlerts";
+import CampaignStore from "../../stores/CampaignStore";
 
 class SaveTemplate extends React.Component {
   constructor(props) {
@@ -22,6 +23,19 @@ class SaveTemplate extends React.Component {
     $(".modal-trigger").leanModal({
       dismissible: false
     });
+    CampaignStore.addChangeListener(this.onStoreChange);
+  }
+
+  /**
+   * remove change listener
+   */
+  componentWillUnmount() {
+    CampaignStore.removeChangeListener(this.onStoreChange());
+  }
+
+  onStoreChange = () => {
+    CampaignStore.getError() ? displayError(CampaignStore.getError())
+      : $("#saveTemplateModal").closeModal();
   }
 
   /**
@@ -31,6 +45,7 @@ class SaveTemplate extends React.Component {
   getValidatorData() {
     return this.state;
   }
+
   /**
    * Render the validation message if any
    * @param {String} el The field name
@@ -75,7 +90,6 @@ class SaveTemplate extends React.Component {
   setTemplateName(templateName) {
     if(templateName.replace(/\u200B/g, "").trim()) {
       this.props.setTemplateName(templateName);
-      $("#saveTemplateModal").closeModal();
     } else {
       displayError(ErrorMessages.MISSING_TEMPLATE_NAME);
     }
@@ -99,7 +113,8 @@ class SaveTemplate extends React.Component {
         <a onClick={() => this.getTemplateName()} className="btn blue">Save</a>
         <div id="saveTemplateModal" className="modal modal-fixed-header mini-modal">
           <div className="modal-action modal-close" id="closeBtn">
-            <i className="mdi mdi-close" onClick={() => this.props.clearValidations}></i>
+            <i className="mdi mdi-close" onClick={
+              () => this.closeTemplateModal()}></i>
           </div>
           <div className="modal-header">
             <div className="head">Save Template</div>
@@ -126,7 +141,7 @@ class SaveTemplate extends React.Component {
               <input type="button" className="btn blue modal-action"
               value="Save" onClick={() => this.setTemplateName(templateName)} />
               <input type="button" value="Close"
-                className="btn red modal-close modal-action p-1-btn"
+                className="btn red modal-action modal-close p-1-btn"
                 onClick={() => this.closeTemplateModal()}/>
             </div>
           </div>
