@@ -30,7 +30,7 @@ class SaveTemplate extends React.Component {
    * remove change listener
    */
   componentWillUnmount() {
-    CampaignStore.removeChangeListener(this.onStoreChange());
+    CampaignStore.removeChangeListener(this.onStoreChange);
   }
 
   onStoreChange = () => {

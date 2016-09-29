@@ -134,7 +134,7 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb, cont
   let getFocusId = id.split("#")[1];
   let toolbar = isToolbar;
   if(isToolbar) {
-    toolbar = "bold italic underline | alignleft aligncenter alignright alignjustify | link image | fontsizeselect fontselect";
+    toolbar = "bold italic underline | alignleft aligncenter alignright alignjustify | link | fontsizeselect fontselect";
   }
   tinymce.init({
     selector: id,
