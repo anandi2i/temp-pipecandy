@@ -502,7 +502,7 @@ module.exports = function(EmailQueue) {
    * @param  {Integer}   limit
    * @param  {Function} callback
    * @return {[Object]} list of Campaign Audit
-   * @author Syed Sulaiman M
+   * @author Syed Sulaiman M, Rahul Khandelwal(modified)
    */
   EmailQueue.scheduledMails = (ctx, campaignId, start, limit, callback) => {
     let errorMessage = validateMailRequest(campaignId, start, limit);
@@ -521,6 +521,8 @@ module.exports = function(EmailQueue) {
       async.each(emailQueues, (emailQueue, emailQueueCB) => {
         emailQueue.person((personErr, person) => {
           let response = JSON.parse(JSON.stringify(emailQueue));
+          response.content = response.content
+          .replace(/<a class=("|')(unsubscribe)(.*?)(>)/g, "<a href='#'>");
           response.person = {
             firstName: person.firstName,
             middleName: person.middleName,
