@@ -5,6 +5,7 @@ import validation from "react-validation-mixin";
 import strategy from "joi-validation-strategy";
 import validatorUtil from "../../../utils/ValidationMessages";
 import EmailListActions from "../../../actions/EmailListActions";
+import {ErrorMessages} from "../../../utils/UserAlerts.js";
 
 class Subscriber extends React.Component {
   /**
@@ -129,9 +130,8 @@ class Subscriber extends React.Component {
    */
   onSubmit(addAnotherField) {
     if(!this.state.isChange){
-      $("label").removeClass("active");
       this.clearValidations();
-      this.closeModal();
+      displayError(ErrorMessages.ADD_RECIPIENT_FNAME_EMPTY);
       return;
     }
     const onValidate = error => {
@@ -227,6 +227,7 @@ class Subscriber extends React.Component {
    * Clear the validation when popup close
    */
   clearValidations = () => {
+    $("label").removeClass("active");
     this.props.clearValidations();
   }
 
@@ -250,7 +251,9 @@ class Subscriber extends React.Component {
               onBlur={this.props.handleValidation("firstName")}
               value={currentState.firstName}
               className="validate" />
-            <label htmlFor="firstName" className={currentState.firstName ? "active" : ""}>First Name</label>
+            <label htmlFor="firstName" className={
+              currentState.firstName.replace(/\u200B/g, "") ? "active" : ""} >
+            First Name</label>
             {
               !this.props.isValid("firstName")
                 ? this.renderHelpText("firstName")
