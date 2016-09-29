@@ -94,7 +94,7 @@ class CampaignList extends React.Component {
             lists.map((list, key) => {
               return (
                 <div className="list-name" key={key}>
-                  <Link to={`/list/${list.listId}`}>
+                  <Link to={`/list/${list.listId}`} target="_blank">
                     {list.listName}
                     <span className="recepient-count">({list.recepientCount} recepients)</span>
                   </Link>
