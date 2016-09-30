@@ -373,9 +373,10 @@ module.exports = function(Campaign) {
     oauth2Client.credentials.access_token = accessToken;
     oauth2Client.credentials.refresh_token = refreshToken;
     let emailLines = [];
-    let subject = striptags(mailContent.subject).trim();
-    const encSubject = new Buffer(subject).toString("base64");
-    subject = "=?utf-8?B?" + encSubject + "?=";
+    let subject = striptags(mailContent.subject).trim() || "(no subject)";
+    subject = subject.replace(/&nbsp;/g, " ");
+    subject = lodash.trim(striptags(subject));
+    subject = entities.decode(subject);
     emailLines.push(`From: ${mailContent.userDetails.displayName}
       <${mailContent.fromEmail}>`);
     emailLines.push(`To: <${mailContent.email}>`);
