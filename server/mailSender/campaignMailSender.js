@@ -415,10 +415,10 @@ function mailSender(emailQueue, mailContent, mailSenderCB) {
  * @return {String}   Encode Email Subject
  * @author Syed Sulaiman M
  */
-function encodeSubject(subject) {
+/*function encodeSubject(subject) {
   let encSubject = new Buffer(subject).toString("base64");
   return "=?utf-8?B?" + encSubject + "?=";
-}
+}*/
 
 /**
  * Build the mail with the credentials and the mail content
@@ -444,7 +444,8 @@ function buildEmail(emailQueue, mailContent, buildEmailCB) {
   emailLines.push("To: <" + mailContent.personEmail + ">");
   emailLines.push("Content-type: text/html;charset=iso-8859-1");
   emailLines.push("MIME-Version: 1.0");
-  emailLines.push("Subject: " + encodeSubject(mailContent.mailSubject));
+  // emailLines.push("Subject: " + encodeSubject(mailContent.mailSubject));
+  emailLines.push("Subject: " + mailContent.mailSubject);
   emailLines.push("");
   emailLines.push(mailContent.contents);
 
