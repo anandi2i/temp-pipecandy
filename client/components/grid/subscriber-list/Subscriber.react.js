@@ -129,8 +129,7 @@ class Subscriber extends React.Component {
    * @property {function} onValidate callback to execute after validation
    */
   onSubmit(addAnotherField) {
-    if(!this.state.isChange){
-      this.clearValidations();
+    if(!this.state.id && !this.state.isChange) {
       displayError(ErrorMessages.ADD_RECIPIENT_FNAME_EMPTY);
       return;
     }
@@ -140,6 +139,7 @@ class Subscriber extends React.Component {
         if(!addAnotherField) {
           this.closeModal();
         } else {
+          this.el.find("label.active").removeClass("active");
           this.initialPersonData.listFields = this.props.listFields;
           this.setState(this.initialPersonData);
         }
@@ -227,8 +227,8 @@ class Subscriber extends React.Component {
    * Clear the validation when popup close
    */
   clearValidations = () => {
-    $("label").removeClass("active");
     this.props.clearValidations();
+    this.props.closeRecipient();
   }
 
   /**
@@ -252,7 +252,7 @@ class Subscriber extends React.Component {
               value={currentState.firstName}
               className="validate" />
             <label htmlFor="firstName" className={
-              currentState.firstName.replace(/\u200B/g, "") ? "active" : ""} >
+              currentState.firstName ? "active" : ""} >
             First Name</label>
             {
               !this.props.isValid("firstName")

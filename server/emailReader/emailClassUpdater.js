@@ -4,7 +4,7 @@ var Consumer = require("sqs-consumer");
 var AWS = require("aws-sdk");
 var async = require("async");
 var constants = require("../../server/utils/constants");
-require("console-stamp")(console, 
+require("console-stamp")(console,
   {pattern : constants.default.TIME_FORMAT});
 
 const appConfig = process.cwd() + "/server/server.js";

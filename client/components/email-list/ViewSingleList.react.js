@@ -45,7 +45,8 @@ class ListView extends React.Component {
       suggestions: [],
       metaFields: [],
       listFields: [],
-      uploadCsvDetails: {}
+      uploadCsvDetails: {},
+      isAddRecipient: false
     };
     this.state = this.initialStateValues;
     this.validatorTypes = {
@@ -381,7 +382,15 @@ class ListView extends React.Component {
    * Open add recipient modal
    */
   addRecipient = () => {
-    this.refs.subscriber.refs.component.openModal();
+    this.setState({isAddRecipient: true},
+      () => {this.refs.subscriber.refs.component.openModal();});
+  }
+
+  /**
+   * Close add recipient modal
+   */
+  closeRecipient = () => {
+    this.setState({isAddRecipient: false});
   }
 
   /**
@@ -404,9 +413,19 @@ class ListView extends React.Component {
    * @return {ReactElement} markup
    */
   render() {
-    const {fieldName, suggestions, people, uploadCsvDetails, uploadAnimTxt,
-      fieldsName, listFields, peopleDetails, enableDeleteBtn, listName}
-      = this.state;
+    const {
+           fieldName,
+           suggestions,
+           people,
+           fieldsName,
+           listFields,
+           peopleDetails,
+           enableDeleteBtn,
+           listName,
+           uploadAnimTxt,
+           uploadCsvDetails,
+           isAddRecipient
+         } = this.state;
     const delBtn = enableDeleteBtn ? "" : "disabled";
     const {listId} = this.props.params;
     const inputProps = {
@@ -535,11 +554,16 @@ class ListView extends React.Component {
         }
         {/* Add Recipient Component */}
         <div>
-          <Subscriber listId={listId}
-            listFields={listFields}
-            peopleDetails={peopleDetails}
-            spinner={this.spinner}
-            ref="subscriber" />
+        {
+          isAddRecipient ?
+            <Subscriber listId={listId}
+              listFields={listFields}
+              peopleDetails={peopleDetails}
+              spinner={this.spinner}
+              closeRecipient={this.closeRecipient}
+              ref="subscriber" />
+              : null
+          }
         </div>
         <CsvFileUploade
           ref="csvDetails"
