@@ -88,7 +88,7 @@ class CampaignReportHead extends React.Component {
             </div>
             : ""
         }
-        <CampaignList ref="CampaignList" campaignId={this.props.campaignId}/>
+        <CampaignList ref="CampaignList" campaignId={campaignId}/>
       </div>
     );
   }
