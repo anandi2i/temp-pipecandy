@@ -518,7 +518,7 @@ module.exports = function(EmailQueue) {
       skip: start
     }, (emailQueuesErr, emailQueues) => {
       let responses = [];
-      async.each(emailQueues, (emailQueue, emailQueueCB) => {
+      async.eachSeries(emailQueues, (emailQueue, emailQueueCB) => {
         emailQueue.person((personErr, person) => {
           let response = JSON.parse(JSON.stringify(emailQueue));
           response.content = response.content
