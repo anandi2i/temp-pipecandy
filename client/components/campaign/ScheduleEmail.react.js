@@ -89,6 +89,10 @@ class ScheduleEmail extends React.Component {
       };
       followups.push(followupDetails);
     });
+    const {optText, address, user} = this.state;
+    if(user.optText !== optText || user.address !== address){
+      this.props.setOptTextAndAdress(optText, address);
+    }
     this.props.setTemplate(
       tinymce.get("emailContent").getContent(),
       tinymce.get("emailSubject").getContent(),
@@ -194,6 +198,7 @@ class ScheduleEmail extends React.Component {
   onStoreChange = () => {
     let selectedEmailList = CampaignStore.getSelectedEmailList();
     let user = UserStore.getUser();
+    const {optText, address} = this.props;
     this.setState({
       emailList: selectedEmailList.emailList || [],
       commonSmartTags: selectedEmailList.commonSmartTags || [],
@@ -201,8 +206,8 @@ class ScheduleEmail extends React.Component {
       getAllPeopleList: selectedEmailList.peopleList || [],
       allFields: selectedEmailList.allFields || [],
       user: user,
-      optText: user.optText || "",
-      address: user.address || "",
+      optText: optText || user.optText,
+      address: address || user.address,
       isSpinner: false
     }, () => {
       let allTags = {

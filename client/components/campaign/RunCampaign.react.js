@@ -80,7 +80,9 @@ class RunCampaign extends React.Component {
         selectEmailList: 1,
         selectTemplate: 2,
         createCampaign: 3
-      }
+      },
+      optText: "",
+      address: "",
     };
   }
 
@@ -127,6 +129,18 @@ class RunCampaign extends React.Component {
     });
   }
 
+  /**
+   * Sets the optText and address to the state
+   * @param {string} optText
+   * @param {string} address
+   */
+  setOptTextAndAdress = (optText, address) => {
+    this.setState({
+      optText: optText || "",
+      address: address || ""
+    });
+  }
+
   onStoreChange = () => {
     const campaignData = CampaignStore.getCampaignData();
     const state = {
@@ -152,7 +166,7 @@ class RunCampaign extends React.Component {
    */
   render() {
     const {tabs, activeTab, isParent, isExist, selectedTemplate, subject,
-		selectedTemplateFollowups} = this.state;
+		selectedTemplateFollowups, optText, address} = this.state;
     return (
       <div>
        {
@@ -182,7 +196,9 @@ class RunCampaign extends React.Component {
                         selectedTemplate={selectedTemplate}
                         selectedTemplateFollowups={selectedTemplateFollowups}
                         subject={subject} isParent={isParent}
+                        optText={optText} address={address}
                         setTemplate={this.setTemplate}
+                        setOptTextAndAdress={this.setOptTextAndAdress}
                         handleClick={this.handleClick} />
                     : ""
                 }
