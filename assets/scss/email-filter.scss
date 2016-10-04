@@ -1,0 +1,125 @@
+.button-icon-align {
+  display: inline-flex;
+  padding: 0 10px;
+  vertical-align: top;
+}
+.create-email-list-filter {
+  float: right;
+  font-size: 13px;
+  margin: 4px 10px;
+}
+.cancel-button {
+  background-color: $red-clr;
+  &:hover {
+    background-color: $red-clr;
+  }
+}
+.outline-red-button {
+  background-color: $white;
+  border: 1px solid $red-clr;
+  color: $red-clr;
+  &:hover {
+    background-color: $white;
+  }
+}
+.email-filter-left-pane {
+  .card {
+    min-height: 190px;
+  }
+}
+.email-list-filter-preview {
+  .card {
+    min-height: 210px;
+  }
+  .card-title {
+    background-color: $lit-blue-bg;
+    color: $blue-clr;
+  }
+  .template-preview {
+    border:1px solid $blue-clr;
+  }
+  .card-content {
+    min-height: 150px;
+  }
+}
+.template-preview {
+  &:hover {
+    box-shadow: 0 0 1px 1px $white;
+  }
+}
+
+.add-filter {
+  border:1px solid $blue-clr;
+  .card-title {
+    background-color: $lit-blue-bg;
+    color: $blue-clr;
+  }
+}
+.premium-filter {
+  border:1px solid $pinck-clr-lit;
+  .card-title {
+    background-color: $pinck-clr-lit;
+    color: $pinck-clr-drk;
+  }
+}
+.fill-blue {
+  color : $blue-clr;
+}
+.fill-pink {
+  color : $pinck-clr-drk;
+}
+.chips {
+  border-bottom: 2px solid $chip-border-clr;
+}
+.chip {
+  background-color: $blue-clr;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  margin-right: 5px;
+  padding: 0 10px;
+  color: $white;
+}
+.chips .input {
+  margin: 0;
+  height: 30px;
+}
+.chips.focus {
+  border-bottom: 2px solid $chip-border-clr;
+  box-shadow: 0 0 0 0 $chip-border-clr;
+}
+.chips .chip.selected {
+  background-color: $blue-clr;
+  box-shadow: 1px 3px 5px $chip-border-clr;;
+}
+#subscriberfilter {
+  max-height: 80%;
+  width: 80%;
+  .modal-content {
+    padding: 0 24px;
+  }
+  .no-of-employees {
+    font-size: 18px;
+    text-align: center;
+    font-weight: 500;
+    padding: 5px;
+    background-color: $lit-blue-bg;
+  }
+}
+
+.noUi-connect {
+  background-color: $blue-clr;
+}
+.noUi-horizontal .noUi-handle {
+  background-color: $blue-clr;
+}
+.noUi-target .range-label {
+  background-color: $blue-clr;
+  span {
+    display: none;
+  }
+}
+.email-filter-close {
+  border-radius: 2px;
+  cursor: pointer;
+  float: right;
+}

@@ -751,6 +751,9 @@ a {
 /*************************
   Single event handling
 **************************/
+.cursor-pointer {
+  cursor: pointer;
+}
 .m-t-47 {
   margin-top: 47px;
 }
@@ -768,6 +771,9 @@ a {
 }
 .m-t-10 {
   margin-top: 10px;
+}
+.m-t-15 {
+  margin-top: 15px;
 }
 .m-b-20 {
   margin-bottom: 20px;
@@ -812,6 +818,9 @@ a {
 }
 .p-10 {
   padding: 10px !important;
+}
+.p-20 {
+  padding: 20px;
 }
 .full-w {
   width: 100%;
@@ -2223,6 +2232,9 @@ $lines-to-show: 8;
   }
   .btn {
     width: 90%;
+  }
+  .btn-large {
+    width: 100% !important;
   }
   .create-container {
     .list-container {

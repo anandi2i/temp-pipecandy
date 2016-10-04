@@ -11,6 +11,7 @@ import EmailListActions from "../../actions/EmailListActions";
 import EmailListStore from "../../stores/EmailListStore";
 import SubscriberGrid from "../grid/subscriber-list/SubscriberGrid.react";
 import Subscriber from "../grid/subscriber-list/Subscriber.react";
+import SubscriberFilter from "../grid/subscriber-list/SubscriberFilter.react";
 import CsvFileUploade from "./CsvFileUploade.react";
 import {ErrorMessages} from "../../utils/UserAlerts";
 
@@ -397,6 +398,13 @@ class ListView extends React.Component {
   }
 
   /**
+   * Open Email Filter modal
+   */
+  addFilter = () => {
+    this.refs.subscriberfilter.refs.component.openModal();
+  }
+
+  /**
    * Clear validation when add field popup closed
    */
   clearValidations = () => {
@@ -454,26 +462,30 @@ class ListView extends React.Component {
             </div>
           </div>
           <div className="row r-btn-container m-lr-0 email-list-action-btn">
-            <a className="btn btn-dflt blue sm-icon-btn dropdown-button" data-activates="addDropDown">
+            <a className="btn btn-dflt blue sm-icon-btn dropdown-button"
+            data-activates="addDropDown">
               <i className="left mdi mdi-account-plus"></i> Add
               <i className="right mdi mdi-chevron-down"></i>
             </a>
             <ul id="addDropDown" className="dropdown-content">
               <li><a onClick={this.addRecipient}>Add Recipient</a></li>
-              <li><a className="modal-trigger" href="#addField" onClick={this.getFields}>Add Field</a></li>
+              <li><a className="modal-trigger" href="#addField"
+              onClick={this.getFields}>Add Field</a></li>
               {/* Hide build from master list UI
                 <li><Link to="/list/master-list">Build From Master</Link></li>
               */}
             </ul>
             <input id="fileUpload" type="file" className="hide" name="file"
               accept=".csv" onChange={this.fileChange} />
-            <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.openDialog}>
+            <a className="btn btn-dflt blue sm-icon-btn dropdown-button"
+            onClick={this.openDialog}>
               <i className="left mdi mdi-upload"></i> Bulk Upload Recipients
             </a>
             <a href={`/api/file/list/${this.props.params.listId}/downloadCSV`}
               className="btn btn-dflt blue sm-icon-btn"
               download>
-              <i className="left mdi mdi-download"></i> Sample List (.csv format)
+              <i className="left mdi mdi-download"></i>
+               Sample List (.csv format)
             </a>
             { people && people.length ?
                 <a onClick={this.deleteSubscriber}
@@ -484,8 +496,10 @@ class ListView extends React.Component {
             }
           </div>
           {/* Add new field starts here */}
-          <div id="addField" className="modal modal-fixed-header mini-modal add-list-field">
-            <i className="mdi mdi-close modal-close" onClick={this.clearValidations}></i>
+          <div id="addField"
+          className="modal modal-fixed-header mini-modal add-list-field">
+            <i className="mdi mdi-close modal-close"
+            onClick={this.clearValidations}></i>
             <div className="modal-header">
               <div className="head">Add Field</div>
             </div>
@@ -508,15 +522,18 @@ class ListView extends React.Component {
             </div>
             <div className="modal-footer">
               <div className="btn-container">
-                <input type="button" onClick={() => this.addField(false)} className="btn blue modal-action" value="Add" />
-                <input type="button" onClick={() => this.addField(true)} className="btn red modal-action p-1-btn"
+                <input type="button" onClick={() => this.addField(false)}
+                className="btn blue modal-action" value="Add" />
+                <input type="button" onClick={() => this.addField(true)}
+                className="btn red modal-action p-1-btn"
                   value="Save & Add Another" />
               </div>
             </div>
           </div>
           {/* Add new field ends here */}
         </div>
-        <div className="anim-container container center" style={{display: uploadAnimTxt ? "block" : "none"}}>
+        <div className="anim-container container center" style={{display:
+          uploadAnimTxt ? "block" : "none"}}>
           {"I'm loading the new records and it might take some time."}
           You can navigate to other pages while the list gets updated...
         </div>
@@ -552,6 +569,91 @@ class ListView extends React.Component {
                       need to make before converting to .csv format (because
                       .csv format does not save any changes you might make!)
                     </div>
+
+					{/* Filter options */}
+                    <h3>
+                      Select list creation method:
+                    </h3>
+                    <div className="row list-container">
+                      <div><br/></div>
+                      <div className="col s12 m4 l4">
+                        <a className="btn blue btn-large s12 m4 l4 full-w">
+                          <i className="material-icons button-icon-align">
+                          cloud_upload</i>Upload a list
+                        </a>
+                        <div className="card template-preview active m-t-20">
+                          <div className="card-content">
+                            <div><a><strong>What is an Uploaded List ?</strong>
+                            </a>
+                            </div>
+                            <div><br/></div>
+                            <div>
+                      Lorem Ipsum is simply dummy text of the printing and types
+                      etting industry. Lorem Ipsum has been the industrys
+                      standard dummy text ever since the 1500s, when an unknown
+                       printer took a galley of type and scrambled it to make
+                       a type specimen book. It has survived not only five
+                        centuries, but also the leap into electronic
+                        typesetting,
+                       remaining essentially unchanged. It was popularised in
+                       the 1960s with the r
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="col s12 m4 l4">
+                        <a className="btn blue btn-large s12 m4 l4 full-w"
+                        onClick={this.addFilter}>
+                          <i className="material-icons button-icon-align">
+                          filter_list</i>Build list using Filters
+                        </a>
+                        <div className="card template-preview active m-t-20">
+                          <div className="card-content">
+                            <div><a><strong>What is a Filtered List ?</strong>
+                            </a></div>
+                            <div><br/></div>
+                            <div>
+                      Lorem Ipsum is simply dummy text of the printing and
+                      typesetting industry. Lorem Ipsum has been the industrys
+                      standard dummy text ever since the 1500s, when an unknown
+                      printer took a galley of type and scrambled it to make a
+                      type specimen book. It has survived not only five
+                      centuries, but also the leap into electronic typesetting,
+                      remaining essentially unchanged. It was popularised
+                      in the 1960s with the r
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="col s12 m4 l4">
+                        <a className="btn blue btn-large s12 m4 l4 full-w">
+                          <i className="material-icons button-icon-align">
+                          language
+                          </i>Build a Seed List
+                        </a>
+                        <div className="card template-preview active m-t-20">
+                          <div className="card-content">
+                            <div><a><strong>What is a Seed List ?</strong></a>
+                            </div>
+                            <div><br/></div>
+                            <div>
+                      Lorem Ipsum is simply dummy text of the printing and
+                      typesetting industry. Lorem Ipsum has been the industrys
+                      standard dummy textever since the 1500s, when an unknown
+                      printer took a galley of type and scrambled it to make a
+                      type specimen book. It has survived not only five
+                      centuries, but also the leap into electronic typesetting,
+                      remaining essentially unchanged. It was popularised in the
+                      1960s with the r
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+   			          {/* Filter options End */}
+
+                    </div>
                   </div>
                 : ""
         }
@@ -568,13 +670,18 @@ class ListView extends React.Component {
               : null
           }
         </div>
+        {/* Add Email Filter Component */}
+        <div>
+          <SubscriberFilter ref="subscriberfilter" />
+        </div>
         <CsvFileUploade
           ref="csvDetails"
           closeCallback={this.closeCallback}
           uploadCsvDetails={uploadCsvDetails}
         />
         {/* /Add Recipient Component */}
-        <div className="container" style={{display: this.state.spinning ? "block" : "none"}}>
+        <div className="container"
+        style={{display: this.state.spinning ? "block" : "none"}}>
           <div className="spinner-container">
             <Spinner />
           </div>
