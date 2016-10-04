@@ -16,7 +16,6 @@ class Profile extends React.Component {
     super(props);
     this.validatorTypes = {
       "firstName": validatorUtil.firstName,
-      "lastName": validatorUtil.lastName,
       "oldPassword": validatorUtil.newPassword,
       "newPassword": validatorUtil.newPassword
     };
