@@ -28,6 +28,9 @@
     "stepNo": {
       "type": "number"
     },
+    "daysAfter": {
+      "type": "number"
+    },
     "parentId": {
       "type": "number"
     }

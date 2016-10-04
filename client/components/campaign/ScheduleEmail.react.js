@@ -694,8 +694,9 @@ class ScheduleEmail extends React.Component {
     };
     this.followupsDetails().map((followup) => {
       template.followUps.push({
-        stepNo: "1",
-        content: followup.campaignTemplates.content
+        stepNo: followup.followUp.stepNo,
+        content: followup.campaignTemplates.content,
+        daysAfter: followup.followUp.daysAfter
       });
     });
     CampaignActions.saveUserTemplate(template);
