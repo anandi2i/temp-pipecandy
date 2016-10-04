@@ -313,7 +313,10 @@ class ListView extends React.Component {
     const {enableDeleteBtn} = this.state;
     if(enableDeleteBtn) {
       this.refs.subscriberGrid.refs.component.deleteSubscriber();
-      this.setState({enableDeleteBtn: false});
+      this.setState({
+        enableDeleteBtn: false,
+        people: []
+      });
     }
   }
 

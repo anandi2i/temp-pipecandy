@@ -25,7 +25,9 @@ class SubscriberGridView extends React.Component {
     this.state = {
       selectedRowIds: [],
       visibleRowIds: _.pluck(this.props.results, "id") || [],
-      isSpinner: false
+      isSpinner: false,
+      noDataMessage: <div className="center-align"> There is no
+      data to display </div>
     };
   }
 
@@ -89,6 +91,7 @@ class SubscriberGridView extends React.Component {
       this.setState({
         selectedRowIds: []
       });
+      this.props.spinner(true);
     } else {
       displayError(ErrorMessages.DeletePerson);
     }
@@ -312,6 +315,7 @@ class SubscriberGridView extends React.Component {
                 customPagerComponent={CustomPagerComponent}
                 showFilter={true}
                 filterPlaceholderText="SEARCH BY NAME OR EMAIL"
+                noDataMessage={this.state.noDataMessage}
                 sortDefaultComponent={
                   <span className="mdi mdi-arrow-up"></span>
                 }
