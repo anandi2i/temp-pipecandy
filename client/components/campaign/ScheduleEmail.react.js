@@ -991,6 +991,7 @@ class ScheduleEmail extends React.Component {
               return (
                 <AddFollowups followupId={followUp.id}
                   content={followUp.content}
+                  daysAfter={followUp.daysAfter}
                   getAllTags={getAllTags}
                   commonSmartTags={commonSmartTags}
                   deleteFollowUp={this.deleteFollowUp}

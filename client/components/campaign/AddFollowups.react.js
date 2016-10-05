@@ -145,7 +145,7 @@ class AddFollowups extends React.Component {
   }
 
   render() {
-    const {followupId, id, content, peopleList} = this.props;
+    const {followupId, id, content, peopleList, daysAfter} = this.props;
     let indexInc = 1;
     const {days} = this.state;
     const dayCount = `${days} ${days === indexInc.toString() ? "day" : "days"}`;
@@ -202,7 +202,8 @@ class AddFollowups extends React.Component {
           <div className="row m-lr-0 schedule-time">
             <div className="col s12 m4 l3">
               <div className="input-field" id={"dayPicker" + followupId}>
-                <select ref="days">
+                <select ref="days"
+                  defaultValue={(parseInt(daysAfter) || parseInt(days))}>
                   {
                     _.range(scheduleCount).map(function(k) {
                       let display = "days";
