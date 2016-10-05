@@ -183,9 +183,12 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb, cont
             editor.execCommand('mceInsertContent', false, '&#8203;');
           }
         }
-      }).on("keyDown", (e) => {
         var evtobj = window.event? event : e;
         if (evtobj.keyCode == 90 && evtobj.ctrlKey) {
+          const text = editor.selection.getRng(true).startContainer.data || '';
+          if(text.length === 0) {
+            editor.execCommand('mceInsertContent', false, '&#8203;');
+          }
           changeCb(editor);
         }
       });
