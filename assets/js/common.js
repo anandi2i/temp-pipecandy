@@ -183,6 +183,11 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb, cont
             editor.execCommand('mceInsertContent', false, '&#8203;');
           }
         }
+      }).on("keyDown", (e) => {
+        var evtobj = window.event? event : e;
+        if (evtobj.keyCode == 90 && evtobj.ctrlKey) {
+          changeCb(editor);
+        }
       });
     }
   });
