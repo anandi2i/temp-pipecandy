@@ -377,6 +377,8 @@ module.exports = function(Campaign) {
     subject = subject.replace(/&nbsp;/g, " ");
     subject = lodash.trim(striptags(subject));
     subject = entities.decode(subject);
+    const encSubject = new Buffer(subject).toString("base64");
+    subject = "=?utf-8?B?" + encSubject + "?=";
     emailLines.push(`From: ${mailContent.userDetails.displayName}
       <${mailContent.fromEmail}>`);
     emailLines.push(`To: <${mailContent.email}>`);

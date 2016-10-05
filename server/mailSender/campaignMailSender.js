@@ -9,6 +9,7 @@ var lodash = require("lodash");
 var app = require("../../server/server.js");
 var statusCodes = require("../../server/utils/status-codes");
 var constants = require("../../server/utils/constants");
+var Entities = require("html-entities").XmlEntities;
 require("console-stamp")(console, {pattern : constants.default.TIME_FORMAT});
 
 var gmailClass = google.gmail("v1");
@@ -439,13 +440,20 @@ function buildEmail(emailQueue, mailContent, buildEmailCB) {
     mailContent.userDetails.credential.refreshToken;
 
   var emailLines = [];
+  let subject = striptags(mailContent.mailSubject).trim();
+  subject = subject.replace(/&nbsp;/g, " ");
+  subject = lodash.trim(striptags(subject));
+  var entities = new Entities();
+  subject = entities.decode(subject);
+  var encSubject = new Buffer(subject).toString("base64");
+  subject = "=?utf-8?B?" + encSubject + "?=";
   emailLines.push("From: " + mailContent.userDetails.name + " <" +
     mailContent.userDetails.email.value + ">");
   emailLines.push("To: <" + mailContent.personEmail + ">");
   emailLines.push("Content-type: text/html;charset=iso-8859-1");
   emailLines.push("MIME-Version: 1.0");
   // emailLines.push("Subject: " + encodeSubject(mailContent.mailSubject));
-  emailLines.push("Subject: " + mailContent.mailSubject);
+  emailLines.push("Subject: " + subject);
   emailLines.push("");
   emailLines.push(mailContent.contents);
 
