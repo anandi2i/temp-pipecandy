@@ -736,7 +736,8 @@ class ScheduleEmail extends React.Component {
       alertMsg,
       successBtn,
       commonSmartTags,
-      emailRawText
+      emailRawText,
+      subjectRawText
     } = this.state;
     let displayAddFollowup =
       (followups.length < followupsMaxLen ? "block" : "none");
@@ -822,7 +823,9 @@ class ScheduleEmail extends React.Component {
                   <div className="col s12 m6 l6 p-lr-0">
                     <TestMail emailContent={emailContent}
                       emailSubject={emailSubject}
-                      errorCount={errorCount}/>
+                      errorCount={errorCount}
+                      emailRawText={emailRawText}
+                      subjectRawText={subjectRawText}/>
                   </div>
                 </div>
                 <div className="row m-lr-0 schedule-time" style={{display: displaySchedule}}>

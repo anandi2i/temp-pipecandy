@@ -39,7 +39,9 @@ class TestMail extends React.Component {
       email: ""
     };
     this.state.allTags.map((tag) => {
-      setFields[`tag_${tag.id}`] = "";
+      if(this.state[`tag_${tag.id}`]){
+        setFields[`tag_${tag.id}`] = "";
+      }
     });
     this.setState(setFields);
     this.props.clearValidations();
@@ -63,8 +65,10 @@ class TestMail extends React.Component {
     };
     let validatorTypes = this.validatorTypes;
     allTags.map((tag) => {
-      setFields[`tag_${tag.id}`] = this.state[`tag_${tag.id}`] || "";
-      validatorTypes[`tag_${tag.id}`] = validatorUtil.fieldName;
+      if(this.state[`tag_${tag.id}`]){
+        setFields[`tag_${tag.id}`] = this.state[`tag_${tag.id}`];
+        validatorTypes[`tag_${tag.id}`] = validatorUtil.fieldName;
+      }
     });
     this.setState(setFields);
   }
@@ -144,13 +148,13 @@ class TestMail extends React.Component {
    * Validate Email and subject content
    */
   validateEmail() {
-    const {emailContent, emailSubject, errorCount} = this.props;
+    const {errorCount, emailRawText, subjectRawText} = this.props;
     if(errorCount){
       displayError(ErrorMessages.SmartTagIssuesInMainEmail);
-    } else if(!emailContent.trim()) {
-      displayError(ErrorMessages.EmptyEmailContent);
-    } else if (!emailSubject.trim()) {
+    } else if (!subjectRawText.replace(/\u200B/g, "")) {
       displayError(ErrorMessages.EMPTY_SUBJECT);
+    } else if(!emailRawText.replace(/\u200B/g, "")) {
+      displayError(ErrorMessages.EmptyEmailContent);
     } else {
       this.el.find("#testMail").openModal({
         dismissible: false,
