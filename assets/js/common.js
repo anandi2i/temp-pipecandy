@@ -176,19 +176,10 @@ function initTinyMCE(id, toolBar, dropdownId, allTags, isToolbar, changeCb, cont
           $(editorDom).find("a.tinymce-placeholder").closest("div").remove();
         }
       }).on("keyUp", (e) => {
-        //Cursor focuses at end when the editor has only tag
-        if(e.keyCode == 8) {
-          const text = editor.selection.getRng(true).startContainer.data || '';
-          if(text.length === 0) {
-            editor.execCommand('mceInsertContent', false, '&#8203;');
-          }
-        }
+        // When user press ctrl+z (undo) or ctrl + y (redo) operation,
+        //  it fires callback method to get the content
         var evtobj = window.event? event : e;
-        if (evtobj.keyCode == 90 && evtobj.ctrlKey) {
-          const text = editor.selection.getRng(true).startContainer.data || '';
-          if(text.length === 0) {
-            editor.execCommand('mceInsertContent', false, '&#8203;');
-          }
+        if ((evtobj.keyCode == 90 || evtobj.keyCode == 89) && evtobj.ctrlKey) {
           changeCb(editor);
         }
       });
