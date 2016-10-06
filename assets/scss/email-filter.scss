@@ -1,3 +1,8 @@
+.email-list-types {
+  .card {
+    min-height: 190px;
+  }
+}
 .button-icon-align {
   display: inline-flex;
   padding: 0 10px;
@@ -92,8 +97,7 @@
   box-shadow: 1px 3px 5px $chip-border-clr;;
 }
 #subscriberfilter {
-  max-height: 80%;
-  width: 80%;
+  width: 70%;
   .modal-content {
     padding: 0 24px;
   }

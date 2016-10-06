@@ -20,6 +20,12 @@ const EmailListActions = {
       data: id
     });
   },
+  getEmailListByFilter(filter) {
+    AppDispatcher.handleAction({
+      actionType: Constants.GET_LIST_BY_FILTER,
+      data: filter
+    });
+  },
   uploadFile(data){
     AppDispatcher.handleAction({
       actionType: Constants.FILE_UPLOAD,

@@ -329,6 +329,94 @@ module.exports = function(List) {
   };
 
   List.remoteMethod(
+    "createMultiplePersonWithFields",
+    {
+      description: "Saves multiple person object with additional fields",
+      accepts: [
+        {
+          arg: "ctx", type: "object",
+          http: {source: "context"}
+        },
+        {
+          arg: "id", type: "number", required: true,
+          http: {source: "path"}
+        },
+        {
+          arg: "reqParams", type: "object", required: true,
+          http: {source: "body"}
+        }
+      ],
+      returns: {arg: "person", type: "person", root: true},
+      //returns: {arg: "personList",type: "array",root: true},
+      http: {verb: "post", path: "/:id/createMultiplePersonWithFields"}
+    }
+  );
+
+  /**
+   * Saves person array of object with related field values and associates with
+   *  list
+   * Exmaple of a reqParam
+   * {"personList": [{"firstName": "Test FN",
+   *    "middleName": "Test MN",
+   *    "lastName": "Test LN",
+   *    "email": "test@ideas2it.com"
+   *  }, {
+   *    "firstName": "Test2",
+   *    "middleName": "2",
+   *    "lastName": "4",
+   *    "email": "Test2@ideas2it.com"
+   *  }],
+   *}
+   *
+   * @param  {[Context]} ctx [Context Object to get accessToken]
+   * @param  {[number]} id [listId]
+   * @param  {[Object]} reqParam [Exmaple of an reqParam shown above]
+   * @param  {[function]} createMultiplePersonWithFieldsCB [description]
+   * @return {[person]} [Persisted List of person with fields and values]
+   * @author Anand N G(Modified)
+   */
+  List.createMultiplePersonWithFields = (ctx, id, reqParams,
+    createMultiplePersonWithFieldsCB) => {
+    logger.info("----createMultiplePersonWithFields-----------");
+    async.waterfall([
+      /* @todo - Validate and insert
+       * duplicate emails are inserting in bulk upload - check it
+       */
+      async.apply(createMultiplePerson, ctx, reqParams, id)
+    ], (asyncErr, savedMultiplePersonList) => {
+      if(asyncErr){
+        logger.error(asyncErr);
+        createMultiplePersonWithFieldsCB(asyncErr);
+      }
+      createMultiplePersonWithFieldsCB(null, savedMultiplePersonList);
+    });
+  };
+
+  /**
+   * Create multiple person list
+   * @param  {[ctx]} ctx
+   * @param  {[reqParams]} reqParams
+   * @param  {[listId]} listId
+   * @param  {[function]} createMultiplePersonCB
+   * @return {[person]} [Persisted person with fields and values]
+   * @author Anand N G
+   */
+  let createMultiplePerson = (ctx, reqParams, listId,
+    createMultiplePersonCB) => {
+    logger.info("---createMultiplePerson-----");
+    List.app.models.person.createNewPersonForList(ctx, reqParams.personList,
+      listId, (createErr, personList) => {
+      if(createErr) {
+        logger.error(createErr);
+        createMultiplePersonCB(createErr);
+      }
+      logger.info("personList--------------final", personList);
+      let res = {listId : listId, personList: personList};
+      createMultiplePersonCB(null, res);
+    });
+  };
+
+  List.remoteMethod(
     "savePersonWithFields",
     {
       description: "Saves person object with additional fields",
@@ -700,7 +788,8 @@ module.exports = function(List) {
 
   /**
    * Updates a Person and Associated Field Values
-   * @param  {[Object]}   params Contains Details of Person, Fields to be updated
+   * @param  {[Object]}   params Contains Details of Person, Fields to be
+   * updated
    * @param  {Function} callback
    * @author Syed Sulaiman M, Aswin Raj A(Modified)
    */
@@ -822,7 +911,8 @@ module.exports = function(List) {
    * Updates Field Values
    * @param  {[Object]}   list
    * @param  {[Object]}   person
-   * @param  {[Object]}   params Contains Details of Person, Fields to be updated
+   * @param  {[Object]}   params Contains Details of Person, Fields to be
+   * updated
    * @param  {Function} callback
    * @author Syed Sulaiman M, Aswin Raj A(Modified)
    */

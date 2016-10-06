@@ -475,12 +475,23 @@ class ListView extends React.Component {
                 <li><Link to="/list/master-list">Build From Master</Link></li>
               */}
             </ul>
+            { /*people && people.length ?
+                <a className={`btn blue sm-icon-btn `} onClick={this.addFilter}>
+                  <i className="material-icons button-icon-align">
+                  filter_list</i>
+                  Modify Filters
+                </a>
+              : ""
+            */}
             <input id="fileUpload" type="file" className="hide" name="file"
               accept=".csv" onChange={this.fileChange} />
-            <a className="btn btn-dflt blue sm-icon-btn dropdown-button"
-            onClick={this.openDialog}>
-              <i className="left mdi mdi-upload"></i> Bulk Upload Recipients
-            </a>
+            { people && people.length ?
+              <a className={'btn btn-dflt blue sm-icon-btn dropdown-button'}
+              onClick={this.openDialog}>
+                <i className="left mdi mdi-upload"></i> Bulk Upload Recipients
+              </a>
+              : ""
+            }
             <a href={`/api/file/list/${this.props.params.listId}/downloadCSV`}
               className="btn btn-dflt blue sm-icon-btn"
               download>
@@ -562,41 +573,31 @@ class ListView extends React.Component {
                         </p>
                       </div>
                     </div>
-                    <div className="hint-box m-t-47">
-                      A .csv file is just like an MS Excel file. If you have
-                      your list in MS Excel or a similar format, open it and
-                      save it as a .csv file. Please make all the changes you
-                      need to make before converting to .csv format (because
-                      .csv format does not save any changes you might make!)
-                    </div>
 
 					{/* Filter options */}
                     <h3>
                       Select list creation method:
                     </h3>
-                    <div className="row list-container">
+                    <div className="row list-container email-list-types">
                       <div><br/></div>
                       <div className="col s12 m4 l4">
-                        <a className="btn blue btn-large s12 m4 l4 full-w">
+                        <a className="btn blue btn-large s12 m4 l4 full-w"
+                        onClick={this.openDialog}>
                           <i className="material-icons button-icon-align">
                           cloud_upload</i>Upload a list
                         </a>
-                        <div className="card template-preview active m-t-20">
+                        <div className="card template-preview m-t-20">
                           <div className="card-content">
                             <div><a><strong>What is an Uploaded List ?</strong>
                             </a>
                             </div>
                             <div><br/></div>
                             <div>
-                      Lorem Ipsum is simply dummy text of the printing and types
-                      etting industry. Lorem Ipsum has been the industrys
-                      standard dummy text ever since the 1500s, when an unknown
-                       printer took a galley of type and scrambled it to make
-                       a type specimen book. It has survived not only five
-                        centuries, but also the leap into electronic
-                        typesetting,
-                       remaining essentially unchanged. It was popularised in
-                       the 1960s with the r
+                        A .csv file is just like an MS Excel file. If you have
+                        your list in MS Excel or a similar format, open it and
+                        save it as a .csv file. Please make all the changes you
+                        need to make before converting to .csv format (because
+                        .csv format does not save any changes you might make!)
                             </div>
                           </div>
                         </div>
@@ -608,7 +609,7 @@ class ListView extends React.Component {
                           <i className="material-icons button-icon-align">
                           filter_list</i>Build list using Filters
                         </a>
-                        <div className="card template-preview active m-t-20">
+                        <div className="card template-preview m-t-20">
                           <div className="card-content">
                             <div><a><strong>What is a Filtered List ?</strong>
                             </a></div>
@@ -633,7 +634,7 @@ class ListView extends React.Component {
                           language
                           </i>Build a Seed List
                         </a>
-                        <div className="card template-preview active m-t-20">
+                        <div className="card template-preview m-t-20">
                           <div className="card-content">
                             <div><a><strong>What is a Seed List ?</strong></a>
                             </div>
@@ -672,7 +673,7 @@ class ListView extends React.Component {
         </div>
         {/* Add Email Filter Component */}
         <div>
-          <SubscriberFilter ref="subscriberfilter" />
+          <SubscriberFilter ref="subscriberfilter" listId={listId}/>
         </div>
         <CsvFileUploade
           ref="csvDetails"

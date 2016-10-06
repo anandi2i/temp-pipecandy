@@ -211,6 +211,58 @@ AppDispatcher.register(function(payload) {
         _error = "";
       });
       break;
+    case Constants.GET_LIST_BY_FILTER:
+      //let filters = {"data":[action.data]};
+      let response = [{
+            "firstName": "Special",
+            "middleName": "seperated",
+            "lastName": "Jai",
+            "email": "special@ra.com",
+            "fieldValues": []
+        }, {
+            "firstName": "Yuvaraj",
+            "middleName": "change",
+            "lastName": "Singh",
+            "salutation": "Mr",
+            "email": "yuvi@d.com",
+            "fieldValues": []
+        }, {
+            "firstName": "Harbajan",
+            "middleName": "",
+            "lastName": "Singh",
+            "salutation": "Mr",
+            "email": "bajji@b.com",
+            "fieldValues": []
+        }];
+
+      action.data.personList = response;
+      console.log("filter before bulk inset---", action);
+      /* Call bulk inset api */
+      EmailListApi.createMultiplePerson(action.data).then((response) => {
+        console.log("response after db hit------", response, _getEmailList);
+        console.log("_getEmailList", _getEmailList);
+        let personList = response.data.personList, zero = 0;
+         //Remove if same email id exists in grid
+        if(_getEmailList[0].people.length && personList.length) {
+          _.each(personList, function(person) {
+            if(_.findIndex(_getEmailList[0].people, {email : person.email})
+            >= zero ) {
+              _getEmailList[0].people.push(person);
+            }
+          });
+        } else {
+          _getEmailList[0].people = personList;
+        }
+        browserHistory.push("/list/"+response.data.listId);
+         _success = SuccessMessages.successSubscribe;
+         EmailListStore.emitChange();
+         _success = "";
+      }, (err)=> {
+        _error = HandleError.evaluateError(err);
+        EmailListStore.emitChange();
+        _error = "";
+      });
+      break;
     case Constants.FILE_UPLOAD:
       EmailListApi.uploadFile(action.data).then((response) => {
         _csvListDetails = response.data;

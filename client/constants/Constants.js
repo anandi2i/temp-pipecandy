@@ -5,6 +5,7 @@ export default keyMirror({
   ALL_EMAIL_LIST: null,
   CREATE_NEW_LIST: null,
   GET_LIST_BY_ID: null,
+  GET_LIST_BY_FILTER:null,
   LOGIN: null,
   LOGOUT: null,
   SET_USER_DETAIL: null,

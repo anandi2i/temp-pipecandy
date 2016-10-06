@@ -15,6 +15,9 @@ const EmailListApi = {
   getSelectedList(data) {
     return api.post("/api/lists/peopleWithFields", data);
   },
+  getSelectedListByFilter(data) {
+    return api.post("/api/lists/peopleByFilter", data);
+  },
   uploadFile(data) {
     return api.post(`/api/file/upload?listid=${data.listId}`, data.fileObj);
   },
@@ -27,6 +30,15 @@ const EmailListApi = {
     return api.post(`/api/lists/${data.listId}/savePersonWithFields`,
       data.person);
   },
+  /**
+   * Api to create multiple person in a list
+   * @return {object} Promise
+   */
+  createMultiplePerson(data) {
+    return api.post(`/api/lists/${data.listId}/createMultiplePersonWithFields`,
+      data);
+  },
+
   /**
    * Update person with additional fields
    *

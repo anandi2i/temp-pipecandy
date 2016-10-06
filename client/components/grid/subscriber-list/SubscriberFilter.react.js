@@ -107,7 +107,6 @@ class SubscriberFilter extends React.Component {
   }
 
   /**
-   * render
    * @return {ReactElement} - Modal popup for Add/Edit recipient
    */
   render() {
