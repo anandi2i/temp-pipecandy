@@ -1,0 +1,87 @@
+{
+  "name": "searchfacet",
+  "plural": "searchfacets",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "linkedin_url": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "no_of_employees": {
+      "type": "string"
+    },
+    "sector": {
+      "type": "string"
+    },
+    "company_type": {
+      "type": "string"
+    },
+    "headquarters": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "founded": {
+      "type": "string"
+    },
+    "specialties": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "wtech_names": {
+      "type": "string"
+    },
+    "first_funding_at": {
+      "type": "string"
+    },
+    "last_funding_at": {
+      "type": "string"
+    },
+    "funding_rounds": {
+      "type": "string"
+    },
+    "funding_amount": {
+      "type": "number"
+    },
+    "last_funded_at": {
+      "type": "string"
+    },
+    "funding_level": {
+      "type": "string"
+    },
+    "funding_round_code": {
+      "type": "string"
+    },
+    "last_raised_amount_usd": {
+      "type": "number"
+    },
+    "valuation": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -10,6 +10,7 @@
     "sassLint": "gulp sassLint",
     "automigrate": "node server/migrations/automigrate.js",
     "autoupdate": "node server/migrations/autoupdate.js",
+    "loadsearchfacet": "node server/migrations/loadsearchfacet.js",
     "campaignEnqueue": "node server/mailSender/campaignEnqueue.js",
     "initEmailReader": "node server/emailReader/initEmailReader.js",
     "campaignConsumer": "node server/mailSender/campaignConsumer.js",

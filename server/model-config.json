@@ -171,5 +171,9 @@
   "requestAudit": {
     "dataSource": "psqlDs",
     "public": true
+  },
+  "searchfacet": {
+    "dataSource": "psqlDs",
+    "public": true
   }
 }
