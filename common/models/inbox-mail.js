@@ -267,7 +267,7 @@ module.exports = function(InboxMail) {
       return callback(errorMessage);
     }
     let updatedInboxMails = [];
-    async.each(inboxIds, (id, inboxCB) => {
+    async.eachSeries(inboxIds, (id, inboxCB) => {
       InboxMail.findById(id, (inboxMailErr, inboxMail) => {
         if(inboxMailErr) {
           logger.error("Error finding InboxMail",
