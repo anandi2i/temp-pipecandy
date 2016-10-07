@@ -790,6 +790,12 @@ a {
 .m-l-20 {
   margin-left: 20px;
 }
+.m-l-40 {
+  margin-left: 40px;
+}
+.m-5 {
+  margin: 5px;
+}
 .m-0 {
   margin: 0 !important;
 }
@@ -803,6 +809,10 @@ a {
 .blue-txt {
   color: $blue-clr;
 }
+.blue-light-bg {
+  background-color: $lit-blue-bg;
+}
+
 .p-1-btn {
   margin-right: 20px;
 }

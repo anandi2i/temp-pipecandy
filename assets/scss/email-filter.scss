@@ -127,3 +127,12 @@
   cursor: pointer;
   float: right;
 }
+.funding-status{
+  background-color: $lit-blue-bg;
+  color: $blue-clr;
+  border: 1px solid $blue-clr;
+  border-radius: 4px;
+  &:hover {
+    background-color: $lit-blue-bg;
+  }
+}

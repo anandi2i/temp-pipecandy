@@ -5,7 +5,6 @@ export default keyMirror({
   ALL_EMAIL_LIST: null,
   CREATE_NEW_LIST: null,
   GET_LIST_BY_ID: null,
-  GET_LIST_BY_FILTER:null,
   LOGIN: null,
   LOGOUT: null,
   SET_USER_DETAIL: null,
@@ -50,5 +49,6 @@ export default keyMirror({
   INBOX_CLASSIFICATION_COUNT: null,
   SEND_TEST_MAIL: null,
   CREATE_NEW_RUN: null,
-  GET_CAMPAIGN_LISTS: null
+  GET_CAMPAIGN_LISTS: null,
+  GET_LIST_BY_FILTER: null
 });

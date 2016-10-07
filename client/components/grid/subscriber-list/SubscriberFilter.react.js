@@ -2,6 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom";
 import validation from "react-validation-mixin";
 import strategy from "joi-validation-strategy";
+import EmailListActions from "../../../actions/EmailListActions";
+import {ThirdPartyHandler} from "../../../utils/ThirdPartyHandler";
+import SearchFilterComponent from "./email-filter-list/SearchFilterComponent";
+import MultiSelectComponent from "./email-filter-list/MultiSelectComponent";
+
 
 class SubscriberFilter extends React.Component {
   /**
@@ -10,11 +15,14 @@ class SubscriberFilter extends React.Component {
    */
   constructor(props) {
     super(props);
+    /*
+     * noOfEmployees & location - Initial values
+     */
     this.state = {
       emailfilters: {
         noOfEmployees: {
-          start: 130,
-          end: 1000
+          start: 1,
+          end: 1150
         }, location:[{
           tag: "Delhi"},
           {tag: "San Francisco"
@@ -22,58 +30,92 @@ class SubscriberFilter extends React.Component {
           tag: "CEO"},
           {tag: "CIO"
         }]
+      },
+      location: {
+        name: "LOCATION",
+        content: "You can type multiple"+
+        "locations seperated by a comma,"+
+        "such as 'San Franciso, New York'."
+      },
+      designation: {
+        name: "DESIGNATIONS",
+        content:"You can type multiple"+
+        "designations seperated by a"+
+        "comma,such as 'CEO, Product Manager'."
+      },
+      fundStatus: {
+        name: "FUNDING STATUS",
+        content: "Please select appropriate funding status(es) for the company"
+        +"you're searching for.",
+        list : [
+          {name: "Seed"},
+          {name: "Series A"},
+          {name: "Series B"},
+          {name: "Series C"},
+          {name: "Acquired"}
+        ]
       }
     };
   }
 
   /**
-   * Initialize the lean modal and custom scrollbar
+   * Initialize the lean modal and custom scrollbar and other third party
    */
   componentDidMount() {
     this.el = $(ReactDOM.findDOMNode(this));
-    this.el.find(".modal-content").mCustomScrollbar({
-      theme:"minimal-dark"
-    });
-
-
-    this.el.find(".email-filter-locations-initial").material_chip({
-      data: this.state.emailfilters.location
-    });
-    this.el.find(".email-filter-designation-initial").material_chip({
-      data: this.state.emailfilters.designation
-    });
-
-    var slider = this.el.find(".filter-no-of-employees")[0];
-    noUiSlider.create(slider, {
-     start: ["130", "1000"],
-     connect: true,
-     tooltips: true,
-     step: "1",
-     range: {
-       "min": "1",
-       "max": "1150"
-     }
-    });
-    var self = this;
-    slider.noUiSlider.on("update", function( values, handle ){
-      var range = parseInt(values[handle]);
-      if(handle) {
-        self.setState({emailfilters: {
-          noOfEmployees: {
-            start: self.state.emailfilters.noOfEmployees.start,
-            end: range
-          }
-        }});
-      } else {
-        self.setState({emailfilters: {
-          noOfEmployees: {
-            start: range,
-            end: self.state.emailfilters.noOfEmployees.end
-          }
-        }});
-      }
-    });
+    this.initThirdPartyHandler(this.el);
   }
+
+  /**
+   * To intitalize slim scroll and other thrid party plugins
+   * @param  {Object} el - Current mounted DOM
+   */
+  initThirdPartyHandler = (el) => {
+    ThirdPartyHandler.intitalize_slim_scroll(el, ".modal-content");
+    ThirdPartyHandler.intialize_material_chip(el,
+      ".email-filter-locations-initial", this.state.emailfilters.location);
+    ThirdPartyHandler.intialize_material_chip(el,
+      ".email-filter-designation-initial", this.state.emailfilters.designation);
+
+    let sliderProp = {
+      start: ["1", "1150"],
+      connect: true,
+      tooltips: true,
+      step: 1,
+      range: {
+        "min": 1,
+        "max": 1150
+      }
+    };
+    ThirdPartyHandler.intialize_material_ui_slier(el,
+      ".filter-no-of-employees", sliderProp);
+    ThirdPartyHandler.triggerUpdateEvent_ui_slider(el,
+      ".filter-no-of-employees", this.sliderUpdateCB);
+  }
+
+  /**
+   * Callback to handle and update range slider
+   * @param  {String} value - The range value 130 to 1150
+   * @param  {String} handle - 0 or 1 - The left or right slider
+   */
+  sliderUpdateCB = (values, handle) => {
+    var range = parseInt(values[handle]);
+    if(handle) {
+      this.setState({emailfilters: {
+        noOfEmployees: {
+          start: this.state.emailfilters.noOfEmployees.start,
+          end: range
+        }
+      }});
+    } else {
+      this.setState({emailfilters: {
+        noOfEmployees: {
+          start: range,
+          end: this.state.emailfilters.noOfEmployees.end
+        }
+      }});
+    }
+  };
 
   /**
    * Open modal for Add or Edit recipient
@@ -102,8 +144,16 @@ class SubscriberFilter extends React.Component {
   }
 
   closeFilters = (filterType) => {
-    console.log("---");
     this.el.find("."+filterType).remove();
+  }
+
+  getFilterResults = () => {
+    let data = {
+      listId: this.props.listId,
+      filter: this.state
+    };
+    EmailListActions.getEmailListByFilter(data);
+    this.closeModal();
   }
 
   /**
@@ -122,11 +172,9 @@ class SubscriberFilter extends React.Component {
         className="btn s12 m4 l4 m-4-10 create-email-list-filter cancel-button"
               onClick={this.closeModal}>
           CANCEL</a>
-              <a className="btn blue s12 m4 l4 m-4-10 create-email-list-filter">
+              <a className="btn blue s12 m4 l4 m-4-10 create-email-list-filter"
+              onClick={this.getFilterResults}>
               SHOW RESULTS</a>
-              <a
-  className="btn s12 m4 l4 m-4-10 create-email-list-filter outline-red-button">
-          12764 leads found</a>
             </div>
             {/*End */}
           </div>
@@ -134,7 +182,7 @@ class SubscriberFilter extends React.Component {
         <div className="modal-content">
           {/* Filter Container */}
           <div className="section row">
-            <div className="col s12 m4 l4">
+            <div className="col s12 m12 l4">
               <div className="email-filter-left-pane">
                 <div className="card template-preview add-filter">
                   <div className="card-title">ADD FILTERS</div>
@@ -176,33 +224,14 @@ class SubscriberFilter extends React.Component {
               </div>
             </div>
             {/* Filter values */}
-            <div className="col s12 m8 l8 email-list-filter-preview">
+            <div className="col s12 m12 l8 email-list-filter-preview">
               <div>
-                <div className="card template-preview location">
-                  <div className="card-title">LOCATION
-                    <i className="material-icons fill-blue email-filter-close"
-                    onClick={() => this.closeFilters("location")}>
-                    close</i>
-                  </div>
-                  <div className="col s12  m-t-15 card-content">
-                    <div className="chips email-filter-locations-initial"></div>
-                      You can type multiple locations seperated by a comma, such
-                       as "San Franciso, New York".
-                  </div>
-                </div>
-                <div className="card template-preview designation">
-                  <div className="card-title">DESIGNATIONS
-                    <i className="material-icons fill-blue email-filter-close"
-                    onClick={() => this.closeFilters("designation")}>
-                    close</i>
-                  </div>
-                  <div className="col s12 card-content">
-                    <div className="chips email-filter-designation-initial">
-                    </div>
-                    You can type multiple designations seperated by a comma,
-                    such as "CEO, Product Manager".
-                  </div>
-                </div>
+
+                <SearchFilterComponent listId={this.props.listId}
+                data={this.state.location}/>
+                <SearchFilterComponent listId={this.props.listId}
+                data={this.state.designation}/>
+
 
                 <div className="card template-preview noofemployees">
                   <div className="card-title">NUMBER OF EMPLOYEES
@@ -219,6 +248,10 @@ class SubscriberFilter extends React.Component {
                     <div className="filter-no-of-employees m-t-45"></div>
                   </div>
                 </div>
+
+                <MultiSelectComponent listId={this.props.listId}
+                data={this.state.fundStatus}/>
+
 
               </div>
             </div>

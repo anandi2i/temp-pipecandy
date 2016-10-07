@@ -24,6 +24,7 @@ const EmailListStore = _.extend({}, EventEmitter.prototype, {
   // Emit Change event
   emitPersonUpdate() {
     this.emit("changeUpdates");
+
   },
 
   // Emit Change event
