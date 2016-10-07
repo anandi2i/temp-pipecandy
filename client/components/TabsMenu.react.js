@@ -20,7 +20,7 @@ class TabsMenu extends React.Component {
         <li key={index}>
           <a onClick={() => this.handleClick(tab.id)}
             className={activeTabId === tab.id ? "active" : ""}>
-            {tab.name} ({count[tab.countId]})
+            {tab.name} {count ? `(${count[tab.countId]})` : ""}
           </a>
         </li>
       );

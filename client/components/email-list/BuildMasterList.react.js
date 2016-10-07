@@ -1,12 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import _ from "underscore";
-import {Link} from "react-router";
+// import {Link} from "react-router";
 import Spinner from "../Spinner.react";
 
 class BuildMasterList extends React.Component {
   constructor(props) {
-    console.log("segdrg");
     /**
      * Initial state values
      * @property {array} emailContent
@@ -164,12 +163,6 @@ class BuildMasterList extends React.Component {
     return (
       <div>
         <div className="container view-single-list-containter">
-          <div className="row sub-head-container m-lr-0">
-            <div className="head">Build From Master</div>
-            <div className="sub-head">
-              <Link to="/list">Back to Email Lists</Link>
-            </div>
-          </div>
           <div className="master-list-filter row">
             <div className="col s3">
               <div className="input-field">

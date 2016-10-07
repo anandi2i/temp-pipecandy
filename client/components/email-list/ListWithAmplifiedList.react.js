@@ -13,6 +13,8 @@ import SubscriberGrid from "../grid/subscriber-list/SubscriberGrid.react";
 import Subscriber from "../grid/subscriber-list/Subscriber.react";
 import CsvFileUploade from "./CsvFileUploade.react";
 import {ErrorMessages} from "../../utils/UserAlerts";
+import TabsMenu from "../TabsMenu.react";
+import BuildMasterList from "./BuildMasterList.react";
 
 /**
  * ListView component to render single list data
@@ -46,7 +48,16 @@ class ListView extends React.Component {
       metaFields: [],
       listFields: [],
       uploadCsvDetails: {},
-      isAddRecipient: false
+      isAddRecipient: false,
+      activeTabId: "all",
+      tabs: [{
+        id: "all",
+        name: "ALL"
+      },
+      {
+        id: "amplified",
+        name: "AMPLIFIED LIST"
+      }],
     };
     this.state = this.initialStateValues;
     this.validatorTypes = {
@@ -411,6 +422,12 @@ class ListView extends React.Component {
     this.setState({enableDeleteBtn: enableDeleteBtn});
   }
 
+  handleClick = (tabId) => {
+    this.setState({
+      activeTabId: tabId
+    });
+  }
+
   /**
    * render
    * @return {ReactElement} markup
@@ -427,7 +444,9 @@ class ListView extends React.Component {
            listName,
            uploadAnimTxt,
            uploadCsvDetails,
-           isAddRecipient
+           isAddRecipient,
+           activeTabId,
+           tabs
          } = this.state;
     const delBtn = enableDeleteBtn ? "" : "disabled";
     const {listId} = this.props.params;
@@ -453,36 +472,49 @@ class ListView extends React.Component {
               <Link to="/list">Back to Email Lists</Link>
             </div>
           </div>
-          <div className="row r-btn-container m-lr-0 email-list-action-btn">
-            <a className="btn btn-dflt blue sm-icon-btn dropdown-button" data-activates="addDropDown">
-              <i className="left mdi mdi-account-plus"></i> Add
-              <i className="right mdi mdi-chevron-down"></i>
-            </a>
-            <ul id="addDropDown" className="dropdown-content">
-              <li><a onClick={this.addRecipient}>Add Recipient</a></li>
-              <li><a className="modal-trigger" href="#addField" onClick={this.getFields}>Add Field</a></li>
-              {/* Hide build from master list UI
-                <li><Link to="/list/master-list">Build From Master</Link></li>
-              */}
-            </ul>
-            <input id="fileUpload" type="file" className="hide" name="file"
-              accept=".csv" onChange={this.fileChange} />
-            <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.openDialog}>
-              <i className="left mdi mdi-upload"></i> Bulk Upload Recipients
-            </a>
-            <a href={`/api/file/list/${this.props.params.listId}/downloadCSV`}
-              className="btn btn-dflt blue sm-icon-btn"
-              download>
-              <i className="left mdi mdi-download"></i> Sample List (.csv format)
-            </a>
-            { people && people.length ?
-                <a onClick={this.deleteSubscriber}
-                  className={`btn blue sm-icon-btn dropdown-button ${delBtn}`}>
-                  <i className="left mdi mdi-delete"></i> Delete
+          <TabsMenu
+            activeTabId={activeTabId}
+            tabs={tabs}
+            handleClick={this.handleClick} />
+            {
+              activeTabId === "all"
+              ?
+              <div className="row r-btn-container m-lr-0 email-list-action-btn">
+                <a className="btn btn-dflt blue sm-icon-btn dropdown-button" data-activates="addDropDown">
+                  <i className="left mdi mdi-account-plus"></i> Add
+                  <i className="right mdi mdi-chevron-down"></i>
                 </a>
-              : ""
+                <ul id="addDropDown" className="dropdown-content">
+                  <li><a onClick={this.addRecipient}>Add Recipient</a></li>
+                  <li><a className="modal-trigger" href="#addField" onClick={this.getFields}>Add Field</a></li>
+                  {/* Hide build from master list UI
+                    <li><Link to="/list/master-list">Build From Master</Link></li>
+                  */}
+                </ul>
+                <input id="fileUpload" type="file" className="hide" name="file"
+                  accept=".csv" onChange={this.fileChange} />
+                <a className="btn btn-dflt blue sm-icon-btn dropdown-button" onClick={this.openDialog}>
+                  <i className="left mdi mdi-upload"></i> Bulk Upload Recipients
+                </a>
+                <a href={`/api/file/list/${this.props.params.listId}/downloadCSV`}
+                  className="btn btn-dflt blue sm-icon-btn"
+                  download>
+                  <i className="left mdi mdi-download"></i> Sample List (.csv format)
+                </a>
+                {
+                  people && people.length
+                  ?
+                  <a onClick={this.deleteSubscriber}
+                  className={`btn blue sm-icon-btn dropdown-button ${delBtn}`}>
+                    <i className="left mdi mdi-delete"></i> Delete
+                  </a>
+                  : ""
+                }
+              </div>
+              :
+              ""
             }
-          </div>
+
           {/* Add new field starts here */}
           <div id="addField" className="modal modal-fixed-header mini-modal add-list-field">
             <i className="mdi mdi-close modal-close" onClick={this.clearValidations}></i>
@@ -521,6 +553,8 @@ class ListView extends React.Component {
           You can navigate to other pages while the list gets updated...
         </div>
         {
+          activeTabId === "all"
+          ?
           people && people.length
             ?
               <SubscriberGrid results={people}
@@ -554,6 +588,12 @@ class ListView extends React.Component {
                     </div>
                   </div>
                 : ""
+          :
+          <BuildMasterList listId={listId}
+            listFields={listFields}
+            peopleDetails={peopleDetails}
+            spinner={this.spinner}
+            />
         }
         {/* Add Recipient Component */}
         <div>

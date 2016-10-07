@@ -22,6 +22,7 @@ import ResetPwdResponse from "./components/user/ResetPasswordResponse.react";
 import CreateEmailList from "./components/email-list/CreateEmailList.react";
 import ViewAllList from "./components/email-list/ViewAllList.react";
 import ViewSingleList from "./components/email-list/ViewSingleList.react";
+import AmplifiedList from "./components/email-list/ListWithAmplifiedList.react";
 import BuildMasterList from "./components/email-list/BuildMasterList.react";
 
 //Campaign
@@ -69,8 +70,13 @@ const routes = (
     <Route path="list">
       <IndexRoute component={ViewAllList} />
       <Route path="create" component={CreateEmailList} />
-      <Route path="master-list" component={BuildMasterList} />
       <Route path=":listId" component={ViewSingleList} />
+      /**
+       * TODO master-list and AmplifiedList are for Demo purposes
+       * Need to be removed
+       */
+      <Route path="master-list" component={BuildMasterList} />
+      <Route path=":listId/AmplifiedList" component={AmplifiedList} />
     </Route>
     <Route path="campaign">
       <IndexRoute component={ViewALLCampaign} />

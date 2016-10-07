@@ -665,7 +665,6 @@ a {
   }
   .sub-head {
     float: right;
-    margin-top: 10px;
     a {
       line-height: 42px;
       margin-left: 15px;
@@ -739,9 +738,6 @@ a {
   }
 }
 .master-list-filter {
-  border-bottom: $border-1px;
-  border-top: $border-1px;
-  padding: 20px 0;
   .input-field {
     padding: 0;
   }

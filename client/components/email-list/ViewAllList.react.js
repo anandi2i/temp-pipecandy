@@ -48,8 +48,8 @@ class ListView extends React.Component {
       <div>
         <div className="container">
           <div className="row sub-head-container m-lr-0">
-            <div className="head">All Email Lists</div>
-            <div className="sub-head">
+            <div className="col m6 head">All Email Lists</div>
+            <div className="col m6 sub-head right-align">
               <Link to="/list/create">Create Email List</Link>
             </div>
           </div>
